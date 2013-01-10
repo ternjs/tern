@@ -63,20 +63,20 @@ isSubset.prototype.newType = function(type) { this.other.addType(type); };
 
 function propIsSubset(prop, other) { this.other = other; this.prop = prop; }
 propIsSubset.prototype.newType = function(type) {
-  if (type instanceof Obj)
+  if (type.ensureProp)
     type.ensureProp(this.prop).addC(new isSubset(other));
 };
 
 function propHasSubset(prop, other) { this.other = other; this.prop = prop; }
 propHasSubset.prototype.newType = function(type) {
-  if (type instanceof Obj)
+  if (type.ensureProp)
     this.other.addC(new isSubset(type.ensureProp(this.prop)));
 };
 
 // FIXME retval avals could be reused
 function isCallee(args, retval) { this.args = args; this.retval = retval; }
 isCallee.prototype.newType = function(type) {
-  if (!(type instanceof Fn)) return;
+  if (!type.args) return;
   for (var i = 0, e = Math.min(this.args.length, type.args.length); i < e; ++i)
     this.args[i].addC(new isSubset(type.args[i]));
   type.retval.addC(new isSubset(this.retval));
