@@ -34,7 +34,7 @@ function Prim(name) {
 }
 add(Prim.prototype, {
   toString: function() { return this.name; },
-  addC: function(c) { c.addType(this); }
+  addC: function(c) { c.newType(this); }
 });
 
 var _num = exports._num = new Prim("number");

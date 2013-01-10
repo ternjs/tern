@@ -130,7 +130,7 @@ var inferExprVisitor = {
       var elt = node.elements[i];
       if (elt) eltval.addC(new isSubset(runInfer(elt, scope, c)));
     }
-    return new AVal(new Obj({"<i>": eltval}));
+    return new Obj({"<i>": eltval});
   },
   ObjectExpression: function(node, scope, c) {
     var props = {};
@@ -138,7 +138,7 @@ var inferExprVisitor = {
       var p = node.properties[i];
       props[p.key.name] = runInfer(p.value, scope, c);
     }
-    return new AVal(new Obj(props));
+    return new Obj(props);
   },
   FunctionExpression: function(node, scope, c) {
     var inner = node.body.scope;
@@ -156,17 +156,17 @@ var inferExprVisitor = {
   },
   UnaryExpression: function(node, scope, c) {
     runInfer(node.argument, scope, c);
-    return new AVal(unopResultType(node.operator));
+    return unopResultType(node.operator);
   },
   UpdateExpression: function(node, scope, c) {
     runInfer(node.argument, scope, c);
-    return new AVal(aval._num);
+    return aval._num;
   },
   BinaryExpression: function(node, scope, c) {
     runInfer(node.left, scope, c);
     runInfer(node.right, scope, c);
     // FIXME handle + more precisely
-    return new AVal(binopResultType(node.operator));
+    return binopResultType(node.operator);
   },
   AssignmentExpression: function(node, scope, c) {
     var rhs = runInfer(node.right, scope, c), out;
@@ -224,7 +224,7 @@ var inferExprVisitor = {
     return new AVal();
   },
   Literal: function(node) {
-    return new AVal(literalType(node.value));
+    return new literalType(node.value);
   }
 };
 
