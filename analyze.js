@@ -6,7 +6,7 @@ var AVal = aval.AVal, Obj = aval.Obj, Fn = aval.Fn;
 
 function Var(node) {
   this.node = node;
-  this.aval = new AVal();
+  this.aval = new AVal;
 }
 function Scope(prev) {
   this.vars = Object.create(null);
@@ -32,7 +32,8 @@ var scopeGatherer = walk.make({
       inner.vars[param.name] = v;
       argvals.push(v.aval);
     }
-    var retval = inner.retval = new AVal();
+    inner.retval = new AVal;
+    inner.self = new AVal;
     if (node.id) {
       var decl = node.type == "FunctionDeclaration";
       (decl ? scope : inner).vars[node.id.name] = new Var(node.id);
@@ -64,7 +65,7 @@ isSubset.prototype.newType = function(type) { this.other.addType(type); };
 function propIsSubset(prop, other) { this.other = other; this.prop = prop; }
 propIsSubset.prototype.newType = function(type) {
   if (type.ensureProp)
-    type.ensureProp(this.prop).addC(new isSubset(other));
+    type.ensureProp(this.prop).addC(new isSubset(this.other));
 };
 
 function propHasSubset(prop, other) { this.other = other; this.prop = prop; }
@@ -74,11 +75,12 @@ propHasSubset.prototype.newType = function(type) {
 };
 
 // FIXME retval avals could be reused
-function isCallee(args, retval) { this.args = args; this.retval = retval; }
+function isCallee(self, args, retval) { this.self = self; this.args = args; this.retval = retval; }
 isCallee.prototype.newType = function(type) {
   if (!type.args) return;
   for (var i = 0, e = Math.min(this.args.length, type.args.length); i < e; ++i)
     this.args[i].addC(new isSubset(type.args[i]));
+  if (this.self) this.self.addC(new isSubset(type.self));
   type.retval.addC(new isSubset(this.retval));
 };
 
@@ -86,7 +88,6 @@ function assignVar(name, scope, aval) {
   var found = lookup(name, scope);
   if (!found) found = topScope(scope).vars[name] = new Var();
   aval.addC(new isSubset(found.aval));
-  return found.aval;
 }
 
 function propName(node, scope, c) {
@@ -122,10 +123,10 @@ function literalType(val) {
   }
 }
 
-
+// FIXME cache retval and prop avals
 var inferExprVisitor = {
   ArrayExpression: function(node, scope, c) {
-    var eltval = new AVal();
+    var eltval = new AVal;
     for (var i = 0; i < node.elements.length; ++i) {
       var elt = node.elements[i];
       if (elt) eltval.addC(new isSubset(runInfer(elt, scope, c)));
@@ -142,7 +143,7 @@ var inferExprVisitor = {
   },
   FunctionExpression: function(node, scope, c) {
     var inner = node.body.scope;
-    var aval = new AVal(new Fn(inner.argvals, inner.retval));
+    var aval = new AVal(new Fn(inner.self, inner.argvals, inner.retval));
     if (node.id)
       assignVar(node.id.name, node.body.scope, aval);
     c(node.body, scope, "ScopeBody");
@@ -169,49 +170,58 @@ var inferExprVisitor = {
     return binopResultType(node.operator);
   },
   AssignmentExpression: function(node, scope, c) {
-    var rhs = runInfer(node.right, scope, c), out;
-    if (node.left.type == "Identifier") {
-      out = assignVar(node.left.name, scope, rhs);
-    } else { // MemberExpression
-      out = new AVal();
-      out.addC(new isSubset(rhs));
-      var obj = runInfer(node.left.object, scope, c);
-      if (!obj) console.log(node.left.object);
-      obj.addC(new propHasSubset(propName(node.left.property, scope, c), out));
-    }
+    var rhs = runInfer(node.right, scope, c);
     // FIXME handle +
-    if (node.operator != "=") out.addType(aval._num);
-    return out;
+    if (node.operator != "=") rhs = aval._num;
+
+    if (node.left.type == "MemberExpression") {
+      var obj = runInfer(node.left.object, scope, c);
+      obj.addC(new propHasSubset(propName(node.left.property, scope, c), rhs));
+    } else { // Identifier
+      assignVar(node.left.name, scope, rhs);
+    }
+    return rhs;
   },
   LogicalExpression: function(node, scope, c) {
-    var aval = new AVal();
+    var aval = new AVal;
     aval.addC(new isSubset(runInfer(node.left, scope, c)));
     aval.addC(new isSubset(runInfer(node.right, scope, c)));
     return aval;
   },
   ConditionalExpression: function(node, scope, c) {
     runInfer(node.test, scope, c);
-    var aval = new AVal();
+    var aval = new AVal;
     aval.addC(new isSubset(runInfer(node.consequent, scope, c)));
     aval.addC(new isSubset(runInfer(node.alternate, scope, c)));
     return aval;
   },
   NewExpression: function(node, scope, c) {
-    // FIXME
-    return this.CallExpression(node, scope, c);
+    return this.CallExpression(node, scope, c, true);
   },
-  CallExpression:function(node, scope, c) {
-    var callee = runInfer(node.callee, scope, c), args = [];
+  CallExpression:function(node, scope, c, isNew) {
+    var callee, self, args = [];
+    if (isNew) {
+      callee = runInfer(node.callee, scope, c);
+      self = new AVal;
+      callee.addC(new propIsSubset("prototype", self));
+    } else if (node.callee.type == "MemberExpression") {
+      self = runInfer(node.callee.object, scope, c);
+      callee = new AVal;
+      self.addC(new propIsSubset(propName(node.callee.property, scope, c), callee));
+    } else {
+      callee = runInfer(node.callee, scope, c)
+    }
     if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
       args.push(runInfer(node.arguments[i], scope, c));
-    var retval = new AVal();
-    callee.addC(new isCallee(args, retval));
+    var retval = new AVal;
+    callee.addC(new isCallee(self, args, retval));
+    if (isNew) self.addC(new isSubset(retval));
     return retval;
   },
   MemberExpression: function(node, scope, c) {
     var obj = runInfer(node.object, scope, c);
-    var result = new AVal();
-    result.addC(new propIsSubset(propName(node.property, scope, c), result));
+    var result = new AVal;
+    obj.addC(new propIsSubset(propName(node.property, scope, c), result));
     return result;
   },
   Identifier: function(node, scope) {
@@ -220,8 +230,8 @@ var inferExprVisitor = {
     return found.aval;
   },
   ThisExpression: function(node, scope, c) {
-    // FIXME
-    return new AVal();
+    for (var s = scope; !s.self; s = s.prev) {}
+    return s ? s.self : aval._undef;
   },
   Literal: function(node) {
     return new literalType(node.value);
@@ -239,7 +249,7 @@ var inferWrapper = walk.make({
 
   FunctionDeclaration: function(node, scope, c) {
     var inner = node.body.scope;
-    var aval = new AVal(new Fn(inner.argvals, inner.retval));
+    var aval = new AVal(new Fn(inner.self, inner.argvals, inner.retval));
     assignVar(node.id.name, scope, aval);
     c(node.body, scope, "ScopeBody");
   },
