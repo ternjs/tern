@@ -72,6 +72,14 @@ function propName(node, scope, c) {
   runInfer(node, scope, c);
   return "<i>";
 }
+function getProp(obj, propName) {
+  var pn = "prop_" + propName, found = obj[pn];
+  if (!found) {
+    found = obj[pn] = new AVal;
+    obj.propagate(new aval.PropIsSubset(propName, found));
+  }
+  return found;
+}
 
 function setHint(aval, hint) {
   if (aval instanceof AVal && !aval.types.length) aval.hint = hint;
@@ -193,26 +201,21 @@ var inferExprVisitor = {
     var callee, self, args = [];
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
-      self = new AVal;
-      callee.propagate(new aval.PropIsSubset("prototype", self));
+      self = getProp(callee, "prototype");
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
-      callee = new AVal;
-      self.propagate(new aval.PropIsSubset(propName(node.callee.property, scope, c), callee));
+      callee = getProp(self, propName(node.callee.property, scope, c));
     } else {
       callee = runInfer(node.callee, scope, c)
     }
     if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
       args.push(runInfer(node.arguments[i], scope, c));
-    var retval = new AVal;
+    var retval = callee.retval || (callee.retval = new AVal);
     callee.propagate(new aval.IsCallee(self, args, retval));
     return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
-    var obj = runInfer(node.object, scope, c);
-    var result = new AVal;
-    obj.propagate(new aval.PropIsSubset(propName(node.property, scope, c), result));
-    return result;
+    return getProp(runInfer(node.object, scope, c), propName(node.property, scope, c));
   },
   Identifier: function(node, scope) {
     var found = lookup(node.name, scope);
