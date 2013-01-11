@@ -6,20 +6,19 @@ function add(obj, props) {
   return obj;
 }
 
+var flag_recGuard = 1;
+
 var AVal = exports.AVal = function(type) {
   this.types = [];
   this.forward = [];
+  this.flags = 0;
   if (type) type.propagate(this);
 };
+
 add(AVal.prototype, {
-  toString: function() {
-    var types = this.types.map(function(t) { return t.toString(); });
-    types.sort();
-    return types.join(" | ") || this.guessType() || "<?>"; 
-  },
   addType: function(type) {
     for (var i = 0; i < this.types.length; ++i)
-      if (this.types[i] == type) return;
+      if (real(this.types[i]) == type) return;
     this.types.push(type);
     for (var i = 0; i < this.forward.length; ++i)
       this.forward[i].addType(type);
@@ -27,31 +26,43 @@ add(AVal.prototype, {
   propagate: function(c) {
     this.forward.push(c);
     for (var i = 0; i < this.types.length; ++i)
-      c.addType(this.types[i]);
+      c.addType(real(this.types[i]));
   },
-  guessType: function() {
-    if (this.hint) return this.hint.toString();
-    var props = Object.create(null);
-    for (var i = 0; i < this.forward.length; ++i) {
+  display: function(cx) {
+    if (this.flags & flag_recGuard) return "<R>";
+    this.flags |= flag_recGuard;
+    var types = this.types.map(function(t) { return t.display(cx); });
+    types.sort();
+    var retval = types.length ? types.join(" | ") : this.guessType(cx);
+    this.flags &= ~flag_recGuard;
+    return retval;
+  },
+  guessType: function(cx) {
+    if (this.hint) return this.hint.display(cx);
+
+    var props = Object.create(null), retval = "<?>";
+    for (var i = 0; retval == "<?>" && i < this.forward.length; ++i) {
       var propagate = this.forward[i];
       if (propagate instanceof AVal) {
-        var found = propagate.toString();
-        if (found) return found;
+        retval = propagate.display(cx);
       } else if (propagate instanceof PropIsSubset || propagate instanceof PropHasSubset) {
         var cur = props[propagate.prop];
-        if (cur == "<?>") cur = null;
-        props[propagate.prop] = cur || propagate.target.toString();
+        if (!cur || cur == "<?>")
+          props[propagate.prop] = propagate.target.display(cx);
       } else if (propagate instanceof IsCallee) {
-        return new Fn(propagate.self, propagate.args, propagate.retval).toString();
+        retval = new Fn(cx, propagate.self, propagate.args, propagate.retval).display(cx);
       } else if (propagate instanceof IsAdded) {
-        return propagate.other.toString();
+        retval = propagate.other.display(cx);
       }
     }
-    // FIXME guess full obj type based on props
-    var propStrs = [];
-    for (var p in props) propStrs.push(p + ": " + props[p]);
-    propStrs.sort();
-    if (propStrs.length) return "{" + propStrs.join(", ") + "}";
+    if (retval == "<?>") {
+      // FIXME guess full obj type based on props
+      var propStrs = [];
+      for (var p in props) propStrs.push(p + ": " + props[p]);
+      propStrs.sort();
+      if (propStrs.length) retval = "{" + propStrs.join(", ") + "}";
+    }
+    return retval;
   }
 });
 
@@ -64,7 +75,7 @@ var PropIsSubset = exports.PropIsSubset = function(prop, target) {
 }
 PropIsSubset.prototype.addType = function(type) {
   if (type.ensureProp)
-    type.ensureProp(this.prop).propagate(this.target);
+    type.ensureProp(this.prop, true).propagate(this.target);
 };
 
 var PropHasSubset = exports.PropHasSubset = function(prop, target) {
@@ -90,11 +101,28 @@ var IsAdded = exports.IsAdded = function(other, target) {
   this.other = other; this.target = target;
 }
 IsAdded.prototype.addType = function(type) {
-  if (type == aval._str)
-    this.target.addType(aval._str);
-  else if (type == aval._num && hasType(aval._num, other))
-    this.target.addType(aval._num);
+  if (type == _str)
+    this.target.addType(_str);
+  else if (type == _num && hasType(_num, this.other))
+    this.target.addType(_num);
 };
+
+var real = exports.real = function(type) {
+  while (type.replaced) type = type.replaced;
+  return type;
+};
+
+function connect(a, b) {
+  a.propagate(b);
+  b.propagate(a);
+}
+
+function rmElt(arr, elt) {
+  for (var i = 0; i < arr.length; ++i) if (arr[i] == elt) {
+    arr.splice(i, 1);
+    break;
+  }
+}
 
 // FIXME handle reads from prototypes of primitive types (str.slice)
 // somehow
@@ -103,7 +131,7 @@ function Prim(name) {
   this.name = name;
 }
 add(Prim.prototype, {
-  toString: function() { return this.name; },
+  display: function() { return this.name; },
   propagate: function(c) { c.addType(this); }
 });
 
@@ -118,20 +146,25 @@ var Obj = exports.Obj = function(cx, props) {
   this.cx = cx;
   this.id = cx.nextObjId++;
   cx.objTypes.push(this);
+  this.replaced = null;
   if (props) for (prop in props) this.addProp(prop, props[prop]);
 };
 add(Obj.prototype, {
-  toString: function() {
+  display: function(cx) {
     var props = [];
     for (var prop in this.props)
-      props.push(prop + ": " + this.props[prop].toString());
+      props.push(prop + ": " + this.props[prop].display(cx));
     props.sort();
     return "{" + props.join(", ") + "}";
   },
-  ensureProp: function(prop) {
+  ensureProp: function(prop, speculative) {
     var found = this.props[prop];
-    if (found) return found;
+    if (found) {
+      if (!speculative && found.speculative) found.speculative = null;
+      return found;
+    }
     var av = new AVal;
+    if (speculative) av.speculative = true;
     this.addProp(prop, av);
     return av;
   },
@@ -141,7 +174,21 @@ add(Obj.prototype, {
     if (found) found.push(this);
     else this.cx.objProps[prop] = [this];
   },
-  propagate: Prim.prototype.propagate
+  propagate: function(c) { c.addType(this); },
+  merge: function(other) {
+    if (other == this) return;
+    this.replaced = other;
+    this.props = null;
+    for (var p in this.props) {
+      var av = this.props[p];
+      if (p in other.props)
+        connect(av, other.props[p]);
+      else
+        other.addProp(prop, av);
+      rmElt(cx.objProps[p], this);
+    }
+    rmElt(cx.objTypes, this);
+  }
 });
 
 var Fn = exports.Fn = function(cx, self, args, retval) {
@@ -149,19 +196,38 @@ var Fn = exports.Fn = function(cx, self, args, retval) {
   this.self = self;
   this.args = args;
   this.retval = retval;
-  this.proto = null;
 };
 Fn.prototype = add(Object.create(Obj.prototype), {
-  toString: function() {
-    var str = "fn(" + this.args.join(", ") + ")";
-    if (this.retval.types.length) str += " -> " + this.retval;
+  display: function(cx) {
+    var str = "fn(" + this.args.map(function(x) { return x.display(cx); }).join(", ") + ")";
+    var rettype = this.retval.display(cx);
+    if (rettype != "<?>") str += " -> " + rettype;
     return str;
+  },
+  merge: function(other) {
+    Obj.prototype.merge.call(this, other);
+    connect(this.retval, other.retval);
+    if (this.self && other.self)
+      connect(this.self, other.self);
+    else if (this.self)
+      other.self = this.self;
+    for (var i = 0; i < this.args.length; ++i) {
+      var otherArg = other.args[i];
+      if (otherArg)
+        connect(this.args[i], otherArg);
+      else
+        other.args[i] = this.args[i];
+    }
   }
 });
 
 exports.Context = function() {
   this.objTypes = [];
   this.objProps = Object.create(null);
+};
+
+exports.display = function(cx, av) {
+  return av.display(cx);
 };
 
 /*var Object_prototype = new Obj(null, props({

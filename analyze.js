@@ -67,9 +67,10 @@ function assignVar(name, scope, aval) {
 }
 
 function propName(node, scope, c) {
-  if (node.type == "Identifier") return node.name;
-  if (node.type == "Literal" && typeof node.value == "string") return node.value;
-  runInfer(node, scope, c);
+  var prop = node.property;
+  if (!node.computed) return prop.name;
+  if (prop.type == "Literal" && typeof prop.value == "string") return prop.value;
+  runInfer(prop, scope, c);
   return "<i>";
 }
 function getProp(obj, propName) {
@@ -99,7 +100,7 @@ function binopIsBoolean(op) {
   case "in": case "instanceof": return true;
   }
 }
-function literalType(val) {
+function literalType(cx, val) {
   switch (typeof val) {
   case "boolean": return aval._bool;
   case "number": return aval._num;
@@ -107,6 +108,7 @@ function literalType(val) {
   case "object":
     if (!val) return aval._null;
     // FIXME return something for regexps
+    return new Obj(cx);
   }
 }
 
@@ -164,8 +166,8 @@ var inferExprVisitor = {
       if (aval.hasType(aval._str, lhs) || aval.hasType(aval._str, rhs)) return aval._str;
       if (aval.hasType(aval._num, lhs) && aval.hasType(aval._num, rhs)) return aval._num;
       var result = new AVal;
-      lhs.propagage(new aval.IsAdded(rhs, result));
-      rhs.propagage(new aval.IsAdded(lhs, result));
+      lhs.propagate(new aval.IsAdded(rhs, result));
+      rhs.propagate(new aval.IsAdded(lhs, result));
       return result;
     }
     var isBool = binopIsBoolean(node.operator);
@@ -179,7 +181,7 @@ var inferExprVisitor = {
 
     if (node.left.type == "MemberExpression") {
       var obj = runInfer(node.left.object, scope, c);
-      obj.propagate(new aval.PropHasSubset(propName(node.left.property, scope, c), rhs));
+      obj.propagate(new aval.PropHasSubset(propName(node.left, scope, c), rhs));
     } else { // Identifier
       assignVar(node.left.name, scope, rhs);
     }
@@ -204,7 +206,7 @@ var inferExprVisitor = {
       self = getProp(callee, "prototype");
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
-      callee = getProp(self, propName(node.callee.property, scope, c));
+      callee = getProp(self, propName(node.callee, scope, c));
     } else {
       callee = runInfer(node.callee, scope, c)
     }
@@ -215,7 +217,7 @@ var inferExprVisitor = {
     return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
-    return getProp(runInfer(node.object, scope, c), propName(node.property, scope, c));
+    return getProp(runInfer(node.object, scope, c), propName(node, scope, c));
   },
   Identifier: function(node, scope) {
     var found = lookup(node.name, scope);
@@ -226,8 +228,8 @@ var inferExprVisitor = {
     for (var s = scope; !s.self; s = s.prev) {}
     return s ? s.self : aval._undef;
   },
-  Literal: function(node) {
-    return literalType(node.value);
+  Literal: function(node, scope) {
+    return literalType(scope.cx, node.value);
   }
 };
 

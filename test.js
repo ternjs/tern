@@ -1,5 +1,5 @@
 var fs = require("fs");
-var analyze = require("./analyze");
+var analyze = require("./analyze"), aval = require("./aval");
 
 if (process.argv[2]) outputInfo(process.argv[2]);
 else runTests();
@@ -19,19 +19,19 @@ function runTests() {
         ++failed;
         continue;
       }
-      var type = v.aval.toString();
+      var type = aval.display(info.cx, v.aval);
       if (type != m[2]) {
         console.log(file + ": variable " + m[1] + " has type\n  " + type + "\ninstead of expected type\n  " + m[2]);
         ++failed;
       }
     }
   });
-  console.log("Ran " + tests + " tests in " + files + " files.");
+  console.log("Ran " + tests + " tests from " + files + " files.");
   console.log(failed ? failed + " failures!" : "All passed.");
 }
 
 function outputInfo(file) {
   var info = analyze.analyze(file);
   for (var v in info.env.vars)
-    console.log(v + ": " + info.env.vars[v].aval.toString());
+    console.log(v + ": " + aval.display(info.cx, info.env.vars[v].aval));
 }
