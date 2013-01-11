@@ -113,9 +113,12 @@ var _bool = exports._bool = new Prim("bool");
 var _null = exports._null = new Prim("null");
 var _undef = exports._null = new Prim("undefined");
 
-var Obj = exports.Obj = function(props) {
+var Obj = exports.Obj = function(cx, props) {
   this.props = Object.create(null);
-  if (props) add(this.props, props);
+  this.cx = cx;
+  this.id = cx.nextObjId++;
+  cx.objTypes.push(this);
+  if (props) for (prop in props) this.addProp(prop, props[prop]);
 };
 add(Obj.prototype, {
   toString: function() {
@@ -128,13 +131,21 @@ add(Obj.prototype, {
   ensureProp: function(prop) {
     var found = this.props[prop];
     if (found) return found;
-    return this.props[prop] = new AVal();
+    var av = new AVal;
+    this.addProp(prop, av);
+    return av;
+  },
+  addProp: function(prop, val) {
+    this.props[prop] = val;
+    var found = this.cx.objProps[prop];
+    if (found) found.push(this);
+    else this.cx.objProps[prop] = [this];
   },
   propagate: Prim.prototype.propagate
 });
 
-var Fn = exports.Fn = function(self, args, retval) {
-  Obj.call(this);
+var Fn = exports.Fn = function(cx, self, args, retval) {
+  Obj.call(this, cx);
   this.self = self;
   this.args = args;
   this.retval = retval;
@@ -147,6 +158,11 @@ Fn.prototype = add(Object.create(Obj.prototype), {
     return str;
   }
 });
+
+exports.Context = function() {
+  this.objTypes = [];
+  this.objProps = Object.create(null);
+};
 
 /*var Object_prototype = new Obj(null, props({
   toString: Fn([], _str),

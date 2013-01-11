@@ -8,9 +8,10 @@ function Var(node) {
   this.node = node;
   this.aval = new AVal;
 }
-function Scope(prev) {
+function Scope(cx, prev) {
   this.vars = Object.create(null);
   this.prev = prev;
+  this.cx = cx;
 }
 
 function lookup(name, scope) {
@@ -26,7 +27,7 @@ function topScope(scope) {
 
 var scopeGatherer = walk.make({
   Function: function(node, scope, c) {
-    var inner = node.body.scope = new Scope(scope), argvals = inner.argvals = [];
+    var inner = node.body.scope = new Scope(scope.cx, scope), argvals = inner.argvals = [];
     for (var i = 0; i < node.params.length; ++i) {
       var param = node.params[i], v = new Var(param);
       inner.vars[param.name] = v;
@@ -97,7 +98,7 @@ function literalType(val) {
   case "string": return aval._str;
   case "object":
     if (!val) return aval._null;
-    return new Obj(); // FIXME point to single regexp obj
+    // FIXME return something for regexps
   }
 }
 
@@ -116,19 +117,19 @@ var inferExprVisitor = {
       var elt = node.elements[i];
       if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
-    return new Obj({"<i>": eltval});
+    return new Obj(scope.cx, {"<i>": eltval});
   },
   ObjectExpression: function(node, scope, c) {
-    var props = {};
+    var props = Object.create(null);
     for (var i = 0; i < node.properties.length; ++i) {
       var p = node.properties[i];
       props[p.key.name] = runInfer(p.value, scope, c);
     }
-    return new Obj(props);
+    return new Obj(scope.cx, props);
   },
   FunctionExpression: function(node, scope, c) {
     var inner = node.body.scope;
-    var aval = new AVal(new Fn(inner.self, inner.argvals, inner.retval));
+    var aval = new AVal(new Fn(scope.cx, inner.self, inner.argvals, inner.retval));
     if (node.id)
       assignVar(node.id.name, node.body.scope, aval);
     c(node.body, scope, "ScopeBody");
@@ -238,7 +239,7 @@ var inferWrapper = walk.make({
 
   FunctionDeclaration: function(node, scope, c) {
     var inner = node.body.scope;
-    var aval = new AVal(new Fn(inner.self, inner.argvals, inner.retval));
+    var aval = new AVal(new Fn(scope.cx, inner.self, inner.argvals, inner.retval));
     assignVar(node.id.name, scope, aval);
     c(node.body, scope, "ScopeBody");
   },
@@ -256,11 +257,15 @@ var inferWrapper = walk.make({
   }
 });
 
-var analyze = exports.analyze = function(file) {
+var analyze = exports.analyze = function(file, cx) {
+  if (!cx) {
+    cx = {};
+    aval.Context.call(cx);
+  }
   var text = fs.readFileSync(file, "utf8");
   var ast = acorn.parse(text);
-  var top = new Scope();
+  var top = new Scope(cx);
   walk.recursive(ast, top, null, scopeGatherer);
   walk.recursive(ast, top, null, inferWrapper);
-  return {ast: ast, text: text, env: top, file: file};
+  return {ast: ast, text: text, env: top, file: file, cx: cx};
 }
