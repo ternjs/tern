@@ -8,7 +8,7 @@ function add(obj, props) {
 
 var AVal = exports.AVal = function(type) {
   this.types = [];
-  this.constraints = [];
+  this.forward = [];
   if (type) this.addType(type);
 };
 add(AVal.prototype, {
@@ -21,13 +21,13 @@ add(AVal.prototype, {
     for (var i = 0; i < this.types.length; ++i)
       if (this.types[i] == type) return;
     this.types.push(type);
-    for (var i = 0; i < this.constraints.length; ++i)
-      this.constraints[i].newType(type);
+    for (var i = 0; i < this.forward.length; ++i)
+      this.forward[i].addType(type);
   },
-  addC: function(c) {
-    this.constraints.push(c);
+  propagate: function(c) {
+    this.forward.push(c);
     for (var i = 0; i < this.types.length; ++i)
-      c.newType(this.types[i]);
+      c.addType(this.types[i]);
   }
 });
 
@@ -39,7 +39,7 @@ function Prim(name) {
 }
 add(Prim.prototype, {
   toString: function() { return this.name; },
-  addC: function(c) { c.newType(this); }
+  propagate: function(c) { c.addType(this); }
 });
 
 var _num = exports._num = new Prim("number");
@@ -65,7 +65,7 @@ add(Obj.prototype, {
     if (found) return found;
     return this.props[prop] = new AVal();
   },
-  addC: Prim.prototype.addC
+  propagate: Prim.prototype.propagate
 });
 
 var Fn = exports.Fn = function(self, args, retval) {

@@ -59,35 +59,32 @@ var scopeGatherer = walk.make({
   }
 });
 
-function isSubset(other) { this.other = other; }
-isSubset.prototype.newType = function(type) { this.other.addType(type); };
-
 function propIsSubset(prop, other) { this.other = other; this.prop = prop; }
-propIsSubset.prototype.newType = function(type) {
+propIsSubset.prototype.addType = function(type) {
   if (type.ensureProp)
-    type.ensureProp(this.prop).addC(new isSubset(this.other));
+    type.ensureProp(this.prop).propagate(this.other);
 };
 
 function propHasSubset(prop, other) { this.other = other; this.prop = prop; }
-propHasSubset.prototype.newType = function(type) {
+propHasSubset.prototype.addType = function(type) {
   if (type.ensureProp)
-    this.other.addC(new isSubset(type.ensureProp(this.prop)));
+    this.other.propagate(type.ensureProp(this.prop));
 };
 
 // FIXME retval avals could be reused
 function isCallee(self, args, retval) { this.self = self; this.args = args; this.retval = retval; }
-isCallee.prototype.newType = function(type) {
+isCallee.prototype.addType = function(type) {
   if (!type.args) return;
   for (var i = 0, e = Math.min(this.args.length, type.args.length); i < e; ++i)
-    this.args[i].addC(new isSubset(type.args[i]));
-  if (this.self) this.self.addC(new isSubset(type.self));
-  type.retval.addC(new isSubset(this.retval));
+    this.args[i].propagate(type.args[i]);
+  if (this.self) this.self.propagate(type.self);
+  type.retval.propagate(this.retval);
 };
 
 function assignVar(name, scope, aval) {
   var found = lookup(name, scope);
   if (!found) found = topScope(scope).vars[name] = new Var();
-  aval.addC(new isSubset(found.aval));
+  aval.propagate(found.aval);
 }
 
 function propName(node, scope, c) {
@@ -125,8 +122,8 @@ function literalType(val) {
 
 function join(a, b) {
   if (a == b) return a;
-  var joined = new AVal, ct = new isSubset(joined);
-  a.addC(ct); b.addC(ct);
+  var joined = new AVal;
+  a.propagate(joined); b.propagate(joined);
   return joined;
 }
 
@@ -136,7 +133,7 @@ var inferExprVisitor = {
     var eltval = new AVal;
     for (var i = 0; i < node.elements.length; ++i) {
       var elt = node.elements[i];
-      if (elt) eltval.addC(new isSubset(runInfer(elt, scope, c)));
+      if (elt) eltval.propagate(runInfer(elt, scope, c));
     }
     return new Obj({"<i>": eltval});
   },
@@ -183,7 +180,7 @@ var inferExprVisitor = {
 
     if (node.left.type == "MemberExpression") {
       var obj = runInfer(node.left.object, scope, c);
-      obj.addC(new propHasSubset(propName(node.left.property, scope, c), rhs));
+      obj.propagate(new propHasSubset(propName(node.left.property, scope, c), rhs));
     } else { // Identifier
       assignVar(node.left.name, scope, rhs);
     }
@@ -206,24 +203,24 @@ var inferExprVisitor = {
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
       self = new AVal;
-      callee.addC(new propIsSubset("prototype", self));
+      callee.propagate(new propIsSubset("prototype", self));
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
       callee = new AVal;
-      self.addC(new propIsSubset(propName(node.callee.property, scope, c), callee));
+      self.propagate(new propIsSubset(propName(node.callee.property, scope, c), callee));
     } else {
       callee = runInfer(node.callee, scope, c)
     }
     if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
       args.push(runInfer(node.arguments[i], scope, c));
     var retval = new AVal;
-    callee.addC(new isCallee(self, args, retval));
+    callee.propagate(new isCallee(self, args, retval));
     return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
     var obj = runInfer(node.object, scope, c);
     var result = new AVal;
-    obj.addC(new propIsSubset(propName(node.property, scope, c), result));
+    obj.propagate(new propIsSubset(propName(node.property, scope, c), result));
     return result;
   },
   Identifier: function(node, scope) {
