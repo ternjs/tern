@@ -43,9 +43,9 @@ var scopeGatherer = walk.make({
   TryStatement: function(node, scope, c) {
     c(node.block, scope, "Statement");
     for (var i = 0; i < node.handlers.length; ++i) {
-      var handler = node.handlers[i], inner = handler.body.scope = new Scope(scope);
-      inner.vars[handler.param.name] = new Var(handler.param);
-      c(handler.body, inner, "ScopeBody");
+      var handler = node.handlers[i], name = handler.param.name;
+      if (!(name in scope.vars)) scope.vars[name] = new Var(handler.param);
+      c(handler.body, scope, "ScopeBody");
     }
     if (node.finalizer) c(node.finalizer, scope, "Statement");
   },
@@ -59,27 +59,39 @@ var scopeGatherer = walk.make({
   }
 });
 
-function propIsSubset(prop, other) { this.other = other; this.prop = prop; }
-propIsSubset.prototype.addType = function(type) {
+function hasType(type, set) {
+  return set == type || set.types && set.types.indexOf(type) > -1;
+}
+
+function PropIsSubset(prop, target) { this.target = target; this.prop = prop; }
+PropIsSubset.prototype.addType = function(type) {
   if (type.ensureProp)
-    type.ensureProp(this.prop).propagate(this.other);
+    type.ensureProp(this.prop).propagate(this.target);
 };
 
-function propHasSubset(prop, other) { this.other = other; this.prop = prop; }
-propHasSubset.prototype.addType = function(type) {
+function PropHasSubset(prop, target) { this.target = target; this.prop = prop; }
+PropHasSubset.prototype.addType = function(type) {
   if (type.ensureProp)
-    this.other.propagate(type.ensureProp(this.prop));
+    this.target.propagate(type.ensureProp(this.prop));
 };
 
-// FIXME retval avals could be reused
-function isCallee(self, args, retval) { this.self = self; this.args = args; this.retval = retval; }
-isCallee.prototype.addType = function(type) {
-  if (!type.args) return;
+function IsCallee(self, args, retval) { this.self = self; this.args = args; this.retval = retval; }
+IsCallee.prototype.addType = function(type) {
+  if (!(type instanceof Fn)) return;
   for (var i = 0, e = Math.min(this.args.length, type.args.length); i < e; ++i)
     this.args[i].propagate(type.args[i]);
   if (this.self) this.self.propagate(type.self);
   type.retval.propagate(this.retval);
 };
+
+function IsAdded(other, target) { this.other = other; this.target = target; }
+IsAdded.prototype.addType = function(type) {
+  if (type == aval._str)
+    this.target.addType(aval._str);
+  else if (type == aval._num && hasType(aval._num, other))
+    this.target.addType(aval._num);
+};
+
 
 function assignVar(name, scope, aval) {
   var found = lookup(name, scope);
@@ -127,7 +139,7 @@ function join(a, b) {
   return joined;
 }
 
-// FIXME cache retval and prop avals
+// FIXME cache retval and prop avals in their parents?
 var inferExprVisitor = {
   ArrayExpression: function(node, scope, c) {
     var eltval = new AVal;
@@ -168,19 +180,26 @@ var inferExprVisitor = {
     return aval._num;
   },
   BinaryExpression: function(node, scope, c) {
-    runInfer(node.left, scope, c);
-    runInfer(node.right, scope, c);
-    // FIXME handle + more precisely
+    var lhs = runInfer(node.left, scope, c);
+    var rhs = runInfer(node.right, scope, c);
+    if (node.operator == "+") {
+      if (hasType(aval._str, lhs) || hasType(aval._str, rhs)) return aval._str;
+      if (hasType(aval._num, lhs) && hasType(aval._num, rhs)) return aval._num;
+      var result = new AVal;
+      lhs.propagage(new IsAdded(rhs, result));
+      rhs.propagage(new IsAdded(lhs, result));
+      return result;
+    }
     return binopResultType(node.operator);
   },
   AssignmentExpression: function(node, scope, c) {
     var rhs = runInfer(node.right, scope, c);
-    // FIXME handle +
-    if (node.operator != "=") rhs = aval._num;
+    if (node.operator != "=" && node.operator != "+=")
+      rhs = aval._num;
 
     if (node.left.type == "MemberExpression") {
       var obj = runInfer(node.left.object, scope, c);
-      obj.propagate(new propHasSubset(propName(node.left.property, scope, c), rhs));
+      obj.propagate(new PropHasSubset(propName(node.left.property, scope, c), rhs));
     } else { // Identifier
       assignVar(node.left.name, scope, rhs);
     }
@@ -203,24 +222,24 @@ var inferExprVisitor = {
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
       self = new AVal;
-      callee.propagate(new propIsSubset("prototype", self));
+      callee.propagate(new PropIsSubset("prototype", self));
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
       callee = new AVal;
-      self.propagate(new propIsSubset(propName(node.callee.property, scope, c), callee));
+      self.propagate(new PropIsSubset(propName(node.callee.property, scope, c), callee));
     } else {
       callee = runInfer(node.callee, scope, c)
     }
     if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
       args.push(runInfer(node.arguments[i], scope, c));
     var retval = new AVal;
-    callee.propagate(new isCallee(self, args, retval));
+    callee.propagate(new IsCallee(self, args, retval));
     return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
     var obj = runInfer(node.object, scope, c);
     var result = new AVal;
-    obj.propagate(new propIsSubset(propName(node.property, scope, c), result));
+    obj.propagate(new PropIsSubset(propName(node.property, scope, c), result));
     return result;
   },
   Identifier: function(node, scope) {
@@ -244,7 +263,7 @@ function runInfer(node, scope, c) {
 var inferWrapper = walk.make({
   Expression: runInfer,
   
-  ScopeBody: function(node, scope, c) { c(node, node.scope); },
+  ScopeBody: function(node, scope, c) { c(node, node.scope || scope); },
 
   FunctionDeclaration: function(node, scope, c) {
     var inner = node.body.scope;
@@ -260,11 +279,9 @@ var inferWrapper = walk.make({
     }
   },
 
-  // FIXME handle implicit return somehow? Or simply default to
-  // undefined when nothing else is filled in.
   ReturnStatement: function(node, scope, c) {
-    for (var s = scope; !s.retval; s = s.prev) {}
-    s.retval.addType(node.argument ? runInfer(node.argument, scope, c) : aval._undef);
+    if (node.argument)
+      runInfer(node.argument, scope, c).propagate(scope.retval);
   }
 });
 

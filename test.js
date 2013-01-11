@@ -7,7 +7,7 @@ else runTests();
 function runTests() {
   fs.readdirSync("test/").forEach(function(file) {
     var info = analyze.analyze("test/" + file);
-    var assertion = /(?:\n|^)\/\/ (\w+): (.*)\n/g, m;
+    var assertion = /\/\/ (\w+): (.*)\n/g, m;
 
     while (m = assertion.exec(info.text)) {
       var v = info.env.vars[m[1]];
