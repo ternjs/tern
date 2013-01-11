@@ -59,40 +59,6 @@ var scopeGatherer = walk.make({
   }
 });
 
-function hasType(type, set) {
-  return set == type || set.types && set.types.indexOf(type) > -1;
-}
-
-function PropIsSubset(prop, target) { this.target = target; this.prop = prop; }
-PropIsSubset.prototype.addType = function(type) {
-  if (type.ensureProp)
-    type.ensureProp(this.prop).propagate(this.target);
-};
-
-function PropHasSubset(prop, target) { this.target = target; this.prop = prop; }
-PropHasSubset.prototype.addType = function(type) {
-  if (type.ensureProp)
-    this.target.propagate(type.ensureProp(this.prop));
-};
-
-function IsCallee(self, args, retval) { this.self = self; this.args = args; this.retval = retval; }
-IsCallee.prototype.addType = function(fn) {
-  if (!(fn instanceof Fn)) return;
-  for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
-    this.args[i].propagate(fn.args[i]);
-  if (this.self) this.self.propagate(fn.self);
-  fn.retval.propagate(this.retval);
-};
-
-function IsAdded(other, target) { this.other = other; this.target = target; }
-IsAdded.prototype.addType = function(type) {
-  if (type == aval._str)
-    this.target.addType(aval._str);
-  else if (type == aval._num && hasType(aval._num, other))
-    this.target.addType(aval._num);
-};
-
-
 function assignVar(name, scope, aval) {
   var found = lookup(name, scope);
   if (!found) found = topScope(scope).vars[name] = new Var();
@@ -106,6 +72,10 @@ function propName(node, scope, c) {
   return "<i>";
 }
 
+function setHint(aval, hint) {
+  if (aval instanceof AVal && !aval.types.length) aval.hint = hint;
+}
+
 function unopResultType(op) {
   switch (op) {
   case "+": case "-": case "~": return aval._num;
@@ -114,11 +84,10 @@ function unopResultType(op) {
   case "void": case "delete": return aval._undef;
   }
 }
-function binopResultType(op) {
+function binopIsBoolean(op) {
   switch (op) {
   case "==": case "!=": case "===": case "!==": case "<": case ">": case ">=": case "<=":
-  case "in": case "instanceof": return aval._bool;
-  default: return aval._num;
+  case "in": case "instanceof": return true;
   }
 }
 function literalType(val) {
@@ -183,14 +152,16 @@ var inferExprVisitor = {
     var lhs = runInfer(node.left, scope, c);
     var rhs = runInfer(node.right, scope, c);
     if (node.operator == "+") {
-      if (hasType(aval._str, lhs) || hasType(aval._str, rhs)) return aval._str;
-      if (hasType(aval._num, lhs) && hasType(aval._num, rhs)) return aval._num;
+      if (aval.hasType(aval._str, lhs) || aval.hasType(aval._str, rhs)) return aval._str;
+      if (aval.hasType(aval._num, lhs) && aval.hasType(aval._num, rhs)) return aval._num;
       var result = new AVal;
-      lhs.propagage(new IsAdded(rhs, result));
-      rhs.propagage(new IsAdded(lhs, result));
+      lhs.propagage(new aval.IsAdded(rhs, result));
+      rhs.propagage(new aval.IsAdded(lhs, result));
       return result;
     }
-    return binopResultType(node.operator);
+    var isBool = binopIsBoolean(node.operator);
+    if (!isBool) { setHint(lhs, aval._num); setHint(rhs, aval._num); }
+    return isBool ? aval._bool : aval._num;
   },
   AssignmentExpression: function(node, scope, c) {
     var rhs = runInfer(node.right, scope, c);
@@ -199,7 +170,7 @@ var inferExprVisitor = {
 
     if (node.left.type == "MemberExpression") {
       var obj = runInfer(node.left.object, scope, c);
-      obj.propagate(new PropHasSubset(propName(node.left.property, scope, c), rhs));
+      obj.propagate(new aval.PropHasSubset(propName(node.left.property, scope, c), rhs));
     } else { // Identifier
       assignVar(node.left.name, scope, rhs);
     }
@@ -222,24 +193,24 @@ var inferExprVisitor = {
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
       self = new AVal;
-      callee.propagate(new PropIsSubset("prototype", self));
+      callee.propagate(new aval.PropIsSubset("prototype", self));
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
       callee = new AVal;
-      self.propagate(new PropIsSubset(propName(node.callee.property, scope, c), callee));
+      self.propagate(new aval.PropIsSubset(propName(node.callee.property, scope, c), callee));
     } else {
       callee = runInfer(node.callee, scope, c)
     }
     if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
       args.push(runInfer(node.arguments[i], scope, c));
     var retval = new AVal;
-    callee.propagate(new IsCallee(self, args, retval));
+    callee.propagate(new aval.IsCallee(self, args, retval));
     return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
     var obj = runInfer(node.object, scope, c);
     var result = new AVal;
-    obj.propagate(new PropIsSubset(propName(node.property, scope, c), result));
+    obj.propagate(new aval.PropIsSubset(propName(node.property, scope, c), result));
     return result;
   },
   Identifier: function(node, scope) {
@@ -252,7 +223,7 @@ var inferExprVisitor = {
     return s ? s.self : aval._undef;
   },
   Literal: function(node) {
-    return new literalType(node.value);
+    return literalType(node.value);
   }
 };
 
