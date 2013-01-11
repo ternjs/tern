@@ -117,13 +117,13 @@ var inferExprVisitor = {
       var elt = node.elements[i];
       if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
-    return new Obj(scope.cx, {"<i>": eltval});
+    return new Obj(scope.cx, {"<i>": new AVal(eltval)});
   },
   ObjectExpression: function(node, scope, c) {
     var props = Object.create(null);
     for (var i = 0; i < node.properties.length; ++i) {
       var p = node.properties[i];
-      props[p.key.name] = runInfer(p.value, scope, c);
+      props[p.key.name] = new AVal(runInfer(p.value, scope, c));
     }
     return new Obj(scope.cx, props);
   },

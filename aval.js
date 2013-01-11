@@ -9,7 +9,7 @@ function add(obj, props) {
 var AVal = exports.AVal = function(type) {
   this.types = [];
   this.forward = [];
-  if (type) this.addType(type);
+  if (type) type.propagate(this);
 };
 add(AVal.prototype, {
   toString: function() {
