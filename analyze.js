@@ -76,12 +76,12 @@ PropHasSubset.prototype.addType = function(type) {
 };
 
 function IsCallee(self, args, retval) { this.self = self; this.args = args; this.retval = retval; }
-IsCallee.prototype.addType = function(type) {
-  if (!(type instanceof Fn)) return;
-  for (var i = 0, e = Math.min(this.args.length, type.args.length); i < e; ++i)
-    this.args[i].propagate(type.args[i]);
-  if (this.self) this.self.propagate(type.self);
-  type.retval.propagate(this.retval);
+IsCallee.prototype.addType = function(fn) {
+  if (!(fn instanceof Fn)) return;
+  for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
+    this.args[i].propagate(fn.args[i]);
+  if (this.self) this.self.propagate(fn.self);
+  fn.retval.propagate(this.retval);
 };
 
 function IsAdded(other, target) { this.other = other; this.target = target; }
@@ -145,7 +145,7 @@ var inferExprVisitor = {
     var eltval = new AVal;
     for (var i = 0; i < node.elements.length; ++i) {
       var elt = node.elements[i];
-      if (elt) eltval.propagate(runInfer(elt, scope, c));
+      if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
     return new Obj({"<i>": eltval});
   },

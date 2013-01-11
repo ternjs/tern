@@ -1,6 +1,6 @@
 function Foo(x) {
   this.x = x;
-  this.y = [];
+  this.y = [1];
 }
 
 Foo.prototype = {
@@ -11,4 +11,4 @@ Foo.prototype = {
 var z = new Foo(true);
 
 // Foo: fn(bool)
-// z: {bar: number, toString: fn() -> string), x: bool, y: {<i>: <empty>}}
+// z: {bar: number, toString: fn() -> string, x: bool, y: {<i>: number}}

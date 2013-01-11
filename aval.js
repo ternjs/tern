@@ -15,7 +15,7 @@ add(AVal.prototype, {
   toString: function() {
     var types = this.types.map(function(t) { return t.toString(); });
     types.sort();
-    return types.join(" | ") || "<empty>"; 
+    return types.join(" | ") || "<?>"; 
   },
   addType: function(type) {
     for (var i = 0; i < this.types.length; ++i)
@@ -78,7 +78,7 @@ var Fn = exports.Fn = function(self, args, retval) {
 Fn.prototype = add(Object.create(Obj.prototype), {
   toString: function() {
     var str = "fn(" + this.args.join(", ") + ")";
-    if (this.retval.types.length) str += " -> " + this.retval + ")";
+    if (this.retval.types.length) str += " -> " + this.retval;
     return str;
   }
 });
