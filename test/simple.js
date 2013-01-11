@@ -10,3 +10,7 @@ function init(v) {
 }
 
 init(x);
+
+// foo: number
+// x: {foo: number, bar: number}
+// init: fn({bar: number, foo: number})

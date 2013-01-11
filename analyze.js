@@ -123,6 +123,13 @@ function literalType(val) {
   }
 }
 
+function join(a, b) {
+  if (a == b) return a;
+  var joined = new AVal, ct = new isSubset(joined);
+  a.addC(ct); b.addC(ct);
+  return joined;
+}
+
 // FIXME cache retval and prop avals
 var inferExprVisitor = {
   ArrayExpression: function(node, scope, c) {
@@ -183,17 +190,13 @@ var inferExprVisitor = {
     return rhs;
   },
   LogicalExpression: function(node, scope, c) {
-    var aval = new AVal;
-    aval.addC(new isSubset(runInfer(node.left, scope, c)));
-    aval.addC(new isSubset(runInfer(node.right, scope, c)));
-    return aval;
+    return join(runInfer(node.left, scope, c),
+                runInfer(node.right, scope, c));
   },
   ConditionalExpression: function(node, scope, c) {
     runInfer(node.test, scope, c);
-    var aval = new AVal;
-    aval.addC(new isSubset(runInfer(node.consequent, scope, c)));
-    aval.addC(new isSubset(runInfer(node.alternate, scope, c)));
-    return aval;
+    return join(runInfer(node.consequent, scope, c),
+                runInfer(node.alternate, scope, c));
   },
   NewExpression: function(node, scope, c) {
     return this.CallExpression(node, scope, c, true);
@@ -215,8 +218,7 @@ var inferExprVisitor = {
       args.push(runInfer(node.arguments[i], scope, c));
     var retval = new AVal;
     callee.addC(new isCallee(self, args, retval));
-    if (isNew) self.addC(new isSubset(retval));
-    return retval;
+    return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
     var obj = runInfer(node.object, scope, c);
@@ -269,17 +271,11 @@ var inferWrapper = walk.make({
   }
 });
 
-function infer(ast, env) {
-  walk.recursive(ast, env, null, inferWrapper);
-}
-
-function analyze(ast) {
+var analyze = exports.analyze = function(file) {
+  var text = fs.readFileSync(file, "utf8");
+  var ast = acorn.parse(text);
   var top = new Scope();
   walk.recursive(ast, top, null, scopeGatherer);
-  infer(ast, top);
-  return top;
+  walk.recursive(ast, top, null, inferWrapper);
+  return {ast: ast, text: text, env: top, file: file};
 }
-
-var env = analyze(acorn.parse(require("fs").readFileSync(process.argv[2], "utf8")));
-for (var global in env.vars)
-  console.log(global + " = " + env.vars[global].aval.toString());

@@ -9,3 +9,6 @@ Foo.prototype = {
 };
 
 var z = new Foo(true);
+
+// Foo: fn(bool)
+// z: {toString: fn() -> string), bar: number, x: bool, y: {<i>: <empty>}}

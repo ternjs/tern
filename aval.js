@@ -12,7 +12,11 @@ var AVal = exports.AVal = function(type) {
   if (type) this.addType(type);
 };
 add(AVal.prototype, {
-  toString: function() { return this.types.join(" | ") || "<empty>"; },
+  toString: function() {
+    var types = this.types.map(function(t) { return t.toString(); });
+    types.sort();
+    return types.join(" | ") || "<empty>"; 
+  },
   addType: function(type) {
     for (var i = 0; i < this.types.length; ++i)
       if (this.types[i] == type) return;
@@ -50,13 +54,11 @@ var Obj = exports.Obj = function(props) {
 };
 add(Obj.prototype, {
   toString: function() {
-    var out = "{";
-    for (var prop in this.props) {
-      if (out.length > 1) out += ", ";
-      out += prop + ": " + this.props[prop].toString();
-    }
-    out += "}";
-    return out;
+    var props = [];
+    for (var prop in this.props)
+      props.push(prop + ": " + this.props[prop].toString());
+    props.sort();
+    return "{" + props.join(", ") + "}";
   },
   ensureProp: function(prop) {
     var found = this.props[prop];
