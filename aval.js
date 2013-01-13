@@ -50,32 +50,32 @@ add(AVal.prototype, {
     }
     return max == typeScore;
   },
-  display: function(cx) {
+  toString: function() {
     if (this.flags & flag_recGuard) return "<R>";
     this.flags |= flag_recGuard;
     if (this.types.length > 3) return "<giga>";
-    var types = this.types.map(function(t) { return t.display(cx); });
+    var types = this.types.map(function(t) { return t.toString(); });
     types.sort();
-    var retval = types.length ? types.join(" | ") : this.guessType(cx);
+    var retval = types.length ? types.join(" | ") : this.guessType();
     this.flags &= ~flag_recGuard;
     return retval;
   },
-  guessType: function(cx) {
-    if (this.hint) return this.hint.display(cx);
+  guessType: function() {
+    if (this.hint) return this.hint.toString();
 
     var props = Object.create(null), retval = "<?>";
     for (var i = 0; retval == "<?>" && i < this.forward.length; ++i) {
       var propagate = this.forward[i];
       if (propagate instanceof AVal) {
-        retval = propagate.display(cx);
+        retval = propagate.toString();
       } else if (propagate instanceof PropIsSubset || propagate instanceof PropHasSubset) {
         var cur = props[propagate.prop];
         if (!cur || cur == "<?>")
-          props[propagate.prop] = propagate.target.display(cx);
+          props[propagate.prop] = propagate.target.toString();
       } else if (propagate instanceof IsCallee) {
-        retval = new Fn(cx, propagate.self, propagate.args, propagate.retval).display(cx);
+        retval = new Fn(cx, propagate.self, propagate.args, propagate.retval).toString();
       } else if (propagate instanceof IsAdded) {
-        retval = propagate.other.display(cx);
+        retval = propagate.other.toString();
       }
     }
     if (retval == "<?>") {
@@ -149,7 +149,7 @@ function Prim(name) {
   this.name = name;
 }
 add(Prim.prototype, {
-  display: function() { return this.name; },
+  toString: function() { return this.name; },
   propagate: function(c) { c.addType(this); },
   sameType: function(other) { return other == this; }
 });
@@ -160,19 +160,18 @@ var _bool = exports._bool = new Prim("bool");
 var _null = exports._null = new Prim("null");
 var _undef = exports._null = new Prim("undefined");
 
-var Obj = exports.Obj = function(cx, props) {
+var Obj = exports.Obj = function(props) {
   this.props = Object.create(null);
-  this.cx = cx;
   this.id = cx.nextObjId++;
   cx.objTypes.push(this);
   this.replaced = null;
   if (props) for (prop in props) this.addProp(prop, props[prop]);
 };
 add(Obj.prototype, {
-  display: function(cx) {
+  toString: function() {
     var props = [];
     for (var prop in this.props)
-      props.push(prop + ": " + this.props[prop].display(cx));
+      props.push(prop + ": " + this.props[prop].toString());
     props.sort();
     return "{" + props.join(", ") + "}";
   },
@@ -189,9 +188,9 @@ add(Obj.prototype, {
   },
   addProp: function(prop, val) {
     this.props[prop] = val;
-    var found = this.cx.objProps[prop];
+    var found = cx.objProps[prop];
     if (found) found.push(this);
-    else this.cx.objProps[prop] = [this];
+    else cx.objProps[prop] = [this];
   },
   propagate: function(c) { c.addType(this); }
 });
@@ -201,30 +200,37 @@ function compatible(one, two) {
   return one.isDominant(two.dominantType());
 }
 
-var Fn = exports.Fn = function(cx, self, args, retval) {
-  Obj.call(this, cx);
+var Fn = exports.Fn = function(self, args, retval) {
+  Obj.call(this);
   this.self = self;
   this.args = args;
   this.retval = retval;
 };
 Fn.prototype = add(Object.create(Obj.prototype), {
   constructor: Fn,
-  display: function(cx) {
-    var str = "fn(" + this.args.map(function(x) { return x.display(cx); }).join(", ") + ")";
-    var rettype = this.retval.display(cx);
+  toString: function() {
+    var str = "fn(" + this.args.map(function(x) { return x.toString(); }).join(", ") + ")";
+    var rettype = this.retval.toString();
     if (rettype != "<?>") str += " -> " + rettype;
     return str;
   }
 });
 
-exports.Context = function() {
+var Context = exports.Context = function() {
   this.objTypes = [];
   this.objProps = Object.create(null);
 };
 
-exports.display = function(cx, av) {
-  return av.display(cx);
+var cx = null;
+
+exports.withContext = function(context, f) {
+  var old = cx;
+  cx = context || new Context();
+  try { return f(); }
+  finally { cx = old; }
 };
+
+exports.cx = function() { return cx; };
 
 /*var Object_prototype = new Obj(null, props({
   toString: Fn([], _str),

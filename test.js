@@ -1,8 +1,10 @@
 var fs = require("fs");
 var analyze = require("./analyze"), aval = require("./aval");
 
-if (process.argv[2]) outputInfo(process.argv[2]);
-else runTests();
+aval.withContext(null, function() {
+  if (process.argv[2]) outputInfo(process.argv[2]);
+  else runTests();
+});
 
 function runTests() {
   var files = 0, tests = 0, failed = 0;
@@ -19,7 +21,7 @@ function runTests() {
         ++failed;
         continue;
       }
-      var type = aval.display(info.cx, v.aval);
+      var type = v.aval.toString();
       if (type != m[2]) {
         console.log(file + ": variable " + m[1] + " has type\n  " + type + "\ninstead of expected type\n  " + m[2]);
         ++failed;
@@ -33,5 +35,5 @@ function runTests() {
 function outputInfo(file) {
   var info = analyze.analyze(file);
   for (var v in info.env.vars)
-    console.log(v + ": " + aval.display(info.cx, info.env.vars[v].aval));
+    console.log(v + ": " + info.env.vars[v].aval.toString());
 }
