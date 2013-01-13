@@ -10,6 +10,7 @@ var flag_recGuard = 1;
 
 var AVal = exports.AVal = function(type) {
   this.types = [];
+  this.scores = [];
   this.forward = [];
   this.flags = 0;
   if (type) type.propagate(this);
@@ -17,20 +18,56 @@ var AVal = exports.AVal = function(type) {
 
 add(AVal.prototype, {
   addType: function(type) {
-    for (var i = 0; i < this.types.length; ++i)
-      if (real(this.types[i]) == type) return;
+    for (var i = 0; i < this.types.length; ++i) {
+      if (this.types[i].sameType(type)) {
+        ++this.scores[i];
+        return;
+      }
+    }
     this.types.push(type);
+    this.scores.push(1);
     for (var i = 0; i < this.forward.length; ++i)
       this.forward[i].addType(type);
   },
   propagate: function(c) {
     this.forward.push(c);
     for (var i = 0; i < this.types.length; ++i)
-      c.addType(real(this.types[i]));
+      c.addType(this.types[i]);
+  },
+  dominantType: function() {
+    this.clean();
+    var max = 0, maxType;
+    for (var i = 0; i < this.types.length; ++i) if (this.scores[i] > max) {
+      max = this.scores[i];
+      maxType = this.types[i];
+    }
+    return maxType;
+  },
+  isDominant: function(type) {
+    this.clean();
+    var max = 0, typeScore = 0;
+    for (var i = 0; i < this.types.length; ++i) {
+      if (this.types[i] == type) typeScore = this.scores[i];
+      if (this.scores[i] > max) max = this.scores[i];
+    }
+    return max == typeScore;
+  },
+  clean: function() {
+    for (var i = 0, types = this.types; i < types.length; ++i) {
+      var cur = types[i] = real(types[i]);
+      for (var j = 0; j < i; ++j) if (cur == types[j]) {
+        this.scores[j] += this.scores[i];
+        types.splice(i, 1);
+        this.scores.splice(i--, 1);
+        break;
+      }
+    }
   },
   display: function(cx) {
     if (this.flags & flag_recGuard) return "<R>";
     this.flags |= flag_recGuard;
+    this.clean();
+    if (this.types.length > 3) return "<giga>";
     var types = this.types.map(function(t) { return t.display(cx); });
     types.sort();
     var retval = types.length ? types.join(" | ") : this.guessType(cx);
@@ -107,11 +144,6 @@ IsAdded.prototype.addType = function(type) {
     this.target.addType(_num);
 };
 
-var real = exports.real = function(type) {
-  while (type.replaced) type = type.replaced;
-  return type;
-};
-
 function connect(a, b) {
   a.propagate(b);
   b.propagate(a);
@@ -132,7 +164,8 @@ function Prim(name) {
 }
 add(Prim.prototype, {
   display: function() { return this.name; },
-  propagate: function(c) { c.addType(this); }
+  propagate: function(c) { c.addType(this); },
+  sameType: function(other) { return other == this; }
 });
 
 var _num = exports._num = new Prim("number");
@@ -140,6 +173,19 @@ var _str = exports._str = new Prim("string");
 var _bool = exports._bool = new Prim("bool");
 var _null = exports._null = new Prim("null");
 var _undef = exports._null = new Prim("undefined");
+
+var real = exports.real = function(type) {
+  while (type.replaced) type = type.replaced;
+  return type;
+};
+// Forward method calls when an object type has been merged
+function fw(f) {
+  return function(a, b, c, d) {
+    var self = this;
+    while (self.replaced) self = self.replaced;
+    return f.call(self, a, b, c, d);
+  };
+}
 
 var Obj = exports.Obj = function(cx, props) {
   this.props = Object.create(null);
@@ -150,14 +196,14 @@ var Obj = exports.Obj = function(cx, props) {
   if (props) for (prop in props) this.addProp(prop, props[prop]);
 };
 add(Obj.prototype, {
-  display: function(cx) {
+  display: fw(function(cx) {
     var props = [];
     for (var prop in this.props)
       props.push(prop + ": " + this.props[prop].display(cx));
     props.sort();
     return "{" + props.join(", ") + "}";
-  },
-  ensureProp: function(prop, speculative) {
+  }),
+  ensureProp: fw(function(prop, speculative) {
     var found = this.props[prop];
     if (found) {
       if (!speculative && found.speculative) found.speculative = null;
@@ -167,29 +213,56 @@ add(Obj.prototype, {
     if (speculative) av.speculative = true;
     this.addProp(prop, av);
     return av;
-  },
-  addProp: function(prop, val) {
+  }),
+  addProp: fw(function(prop, val) {
     this.props[prop] = val;
     var found = this.cx.objProps[prop];
     if (found) found.push(this);
     else this.cx.objProps[prop] = [this];
-  },
-  propagate: function(c) { c.addType(this); },
-  merge: function(other) {
+  }),
+  propagate: fw(function(c) { c.addType(this); }),
+  merge: fw(function(other) {
     if (other == this) return;
     this.replaced = other;
-    this.props = null;
     for (var p in this.props) {
       var av = this.props[p];
       if (p in other.props)
         connect(av, other.props[p]);
       else
         other.addProp(prop, av);
-      rmElt(cx.objProps[p], this);
+      other = real(other);
+      rmElt(this.cx.objProps[p], this);
     }
-    rmElt(cx.objTypes, this);
-  }
+    this.props = null;
+    rmElt(this.cx.objTypes, this);
+  }),
+  sameType: fw(function(other) {
+    other = real(other);
+    if (this == other) return true;
+    if (other.constructor != Obj) return false;
+    return this.sameTypeInner(other);
+  }),
+  sameTypeInner: fw(function(other) {
+    if (propsMatch(this, other) || propsMatch(other, this)) {
+      other.merge(this);
+      return true;
+    }
+  })
 });
+
+function propsMatch(one, two) {
+  var match = 0, total = 0;
+  for (var p in one.props) {
+    ++total;
+    if (p in two.props && compatible(one.props[p], two.props[p])) ++match;
+  }
+  return match > 1 && match / total > .7;
+}
+
+function compatible(one, two) {
+  if (!one.types.length || !two.types.length) return true;
+  return one.isDominant(two.dominantType());
+}
 
 var Fn = exports.Fn = function(cx, self, args, retval) {
   Obj.call(this, cx);
@@ -198,13 +271,14 @@ var Fn = exports.Fn = function(cx, self, args, retval) {
   this.retval = retval;
 };
 Fn.prototype = add(Object.create(Obj.prototype), {
-  display: function(cx) {
+  constructor: Fn,
+  display: fw(function(cx) {
     var str = "fn(" + this.args.map(function(x) { return x.display(cx); }).join(", ") + ")";
     var rettype = this.retval.display(cx);
     if (rettype != "<?>") str += " -> " + rettype;
     return str;
-  },
-  merge: function(other) {
+  }),
+  merge: fw(function(other) {
     Obj.prototype.merge.call(this, other);
     connect(this.retval, other.retval);
     if (this.self && other.self)
@@ -218,7 +292,20 @@ Fn.prototype = add(Object.create(Obj.prototype), {
       else
         other.args[i] = this.args[i];
     }
-  }
+    this.args = this.self = this.retval = null;
+  }),
+  sameType: fw(function(other) {
+    other = real(other);
+    if (other == this) return true;
+    if (other.constructor != Fn ||
+        this.args.length != other.args.length ||
+        !compatible(this.self, other.self) ||
+        !compatible(this.retval, other.retval))
+      return false;
+    for (var i = 0; i < this.args.length; ++i)
+      if (!compatible(this.args[i], other.args[i])) return false;
+    return this.sameTypeInner(other);
+  })
 });
 
 exports.Context = function() {
