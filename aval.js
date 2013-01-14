@@ -1,12 +1,13 @@
 // Abstract types
 
+// FIXME remove this, use direct assignments
 var hop = Object.prototype.hasOwnProperty;
 function add(obj, props) {
   for (var p in props) if (hop.call(props, p)) obj[p] = props[p];
   return obj;
 }
 
-var flag_recGuard = 1;
+var flag_recGuard = 1, flag_speculative = 2, flag_initializer = 4;
 
 var AVal = exports.AVal = function(type) {
   this.types = [];
@@ -178,11 +179,12 @@ add(Obj.prototype, {
   ensureProp: function(prop, speculative) {
     var found = this.props[prop];
     if (found) {
-      if (!speculative && found.speculative) found.speculative = null;
+      if (!speculative && found.flags & flag_speculative)
+        found.flags &= ~flag_speculative;
       return found;
     }
     var av = new AVal;
-    if (speculative) av.speculative = true;
+    if (speculative) av.flags |= flag_speculative;
     this.addProp(prop, av);
     return av;
   },
@@ -196,9 +198,36 @@ add(Obj.prototype, {
 });
 
 function compatible(one, two) {
-  if (!one.types.length || !two.types.length) return true;
-  return one.isDominant(two.dominantType());
+  if (two instanceof AVal) {
+    return !one.types.length || !two.types.length || one.isDominant(two.dominantType());
+  } else {
+    return one.isDominant(two);
+  }
 }
+
+Obj.fromInitializer = function(props) {
+  var types = props.length && cx.objProps[props[0].name];
+  if (types) for (var i = 0; i < types.length; ++i) {
+    var type = types[i], matching = 0;
+    for (var p in type.props) {
+      var prop = type.props[p];
+      if ((prop.flags & flag_initializer) && props.some(function(x) {
+        return x.name == p && compatible(prop, x.type);
+      }))
+        ++matching;
+    }
+    if (matching == props.length) return type;
+  }
+
+  // Nothing found, allocate a new one
+  var obj = new Obj();
+  for (var i = 0; i < props.length; ++i) {
+    var prop = props[i], aval = obj.ensureProp(prop.name);
+    aval.flags |= flag_initializer;
+    prop.type.propagate(aval);
+  }
+  return obj;
+};
 
 var Fn = exports.Fn = function(self, args, retval) {
   Obj.call(this);

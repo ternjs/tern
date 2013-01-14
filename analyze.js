@@ -118,7 +118,6 @@ function join(a, b) {
   return joined;
 }
 
-// FIXME cache retval and prop avals in their parents?
 var inferExprVisitor = {
   ArrayExpression: function(node, scope, c) {
     var eltval = new AVal;
@@ -126,15 +125,16 @@ var inferExprVisitor = {
       var elt = node.elements[i];
       if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
+    // FIXME implement array type
     return new Obj({"<i>": new AVal(eltval)});
   },
   ObjectExpression: function(node, scope, c) {
-    var props = Object.create(null);
+    var props = [];
     for (var i = 0; i < node.properties.length; ++i) {
       var p = node.properties[i];
-      props[p.key.name] = new AVal(runInfer(p.value, scope, c));
+      props.push({name: p.key.name, type: runInfer(p.value, scope, c)});
     }
-    return new Obj(props);
+    return Obj.fromInitializer(props);
   },
   FunctionExpression: function(node, scope, c) {
     var inner = node.body.scope;
