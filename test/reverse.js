@@ -11,5 +11,5 @@ function obj(x) {
   return x.foo - x.bar;
 }
 
-// num: fn(number) -> number
-// obj: fn({bar: number, foo: number}) -> number
+// num: fn(<number>) -> <number>
+// obj: fn({bar: <number>, foo: <number>}) -> <number>

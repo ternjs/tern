@@ -10,5 +10,5 @@ Foo.prototype = {
 
 var z = new Foo(true);
 
-// Foo: fn(bool)
-// z: {bar: number, toString: fn() -> string, x: bool, y: {<i>: number}}
+// Foo: fn(<bool>)
+// z: {bar: <number>, toString: fn() -> <string>, x: <bool>, y: {<i>: <number>}}

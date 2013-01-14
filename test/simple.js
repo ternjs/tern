@@ -11,6 +11,6 @@ function init(v) {
 
 init(x);
 
-// foo: number
-// x: {bar: number, foo: number}
-// init: fn({bar: number, foo: number})
+// foo: <number>
+// x: {bar: <number>, foo: <number>}
+// init: fn({bar: <number>, foo: <number>})

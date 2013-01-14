@@ -1,5 +1,5 @@
 var fs = require("fs");
-var analyze = require("./analyze"), aval = require("./aval");
+var infer = require("./infer");
 
 if (process.argv[2]) outputInfo(process.argv[2]);
 else runTests();
@@ -8,13 +8,13 @@ function runTests() {
   var files = 0, tests = 0, failed = 0;
   fs.readdirSync("test/").forEach(function(file) {
     ++files;
-    aval.withContext(null, function() {
-      var info = analyze.analyze("test/" + file);
+    infer.withContext(null, function() {
+      var info = infer.analyze("test/" + file);
       var assertion = /\/\/ (\w+)(?:\((d+)\))?: (.*)\n/g, m;
 
       while (m = assertion.exec(info.text)) {
         ++tests;
-        var v = info.env.vars[m[1]];
+        var v = info.scope.vars[m[1]];
         if (!v) {
           console.log(file + ": variable " + m[1] + " not defined");
           ++failed;
@@ -33,9 +33,9 @@ function runTests() {
 }
 
 function outputInfo(file) {
-  aval.withContext(null, function() {
-    var info = analyze.analyze(file);
-    for (var v in info.env.vars)
-      console.log(v + ": " + info.env.vars[v].aval.toString(2));
+  infer.withContext(null, function() {
+    var info = infer.analyze(file);
+    for (var v in info.scope.vars)
+      console.log(v + ": " + info.scope.vars[v].aval.toString(2));
   });
 }
