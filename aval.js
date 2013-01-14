@@ -51,42 +51,65 @@ add(AVal.prototype, {
     }
     return max == typeScore;
   },
-  toString: function() {
+  toString: function(maxDepth) {
     if (this.flags & flag_recGuard) return "<R>";
     this.flags |= flag_recGuard;
-    if (this.types.length > 3) return "<giga>";
-    var types = this.types.map(function(t) { return t.toString(); });
-    types.sort();
-    var retval = types.length ? types.join(" | ") : this.guessType();
-    this.flags &= ~flag_recGuard;
-    return retval;
-  },
-  guessType: function() {
-    if (this.hint) return this.hint.toString();
 
-    var props = Object.create(null), retval = "<?>";
+    var name = this.types.length ? this.summarizeType(maxDepth) : this.guessType(maxDepth);
+
+    this.flags &= ~flag_recGuard;
+    return name;
+  },
+  guessType: function(maxDepth) {
+    if (this.hint) return this.hint.toString(maxDepth);
+
+    var props = {}, propCount = 0, retval = "<?>";
     for (var i = 0; retval == "<?>" && i < this.forward.length; ++i) {
       var propagate = this.forward[i];
       if (propagate instanceof AVal) {
-        retval = propagate.toString();
+        retval = propagate.toString(maxDepth);
       } else if (propagate instanceof PropIsSubset || propagate instanceof PropHasSubset) {
-        var cur = props[propagate.prop];
-        if (!cur || cur == "<?>")
-          props[propagate.prop] = propagate.target.toString();
+        if (!props[propagate.prop]) {
+          props[propagate.prop] = true;
+          ++propCount;
+        }
       } else if (propagate instanceof IsCallee) {
-        retval = new Fn(cx, propagate.self, propagate.args, propagate.retval).toString();
+        retval = new Fn(propagate.self, propagate.args, propagate.retval).toString(maxDepth);
       } else if (propagate instanceof IsAdded) {
-        retval = propagate.other.toString();
+        retval = propagate.other.toString(maxDepth);
       }
     }
-    if (retval == "<?>") {
-      // FIXME guess full obj type based on props
-      var propStrs = [];
-      for (var p in props) propStrs.push(p + ": " + props[p]);
-      propStrs.sort();
-      if (propStrs.length) retval = "{" + propStrs.join(", ") + "}";
+    if (retval == "<?>" && propCount) {
+      // FIXME this comes up with rather far-fetched results when, for
+      // example, the only known property is toString
+      var bestMatch, bestScore = -Infinity;
+      for (var p in props) {
+        var objs = cx.objProps[p];
+        if (objs) for (var i = 0; i < objs.length; ++i) {
+          var type = objs[i], score = 0;
+          if (type == bestMatch) continue;
+          for (var p2 in type.props) if (p2 in props) ++score;
+          if (score > bestScore) { bestScore = score; bestMatch = type; }
+        }
+      }
+      if (bestMatch) retval = bestMatch.toString(maxDepth);
+      // FIXME maybe make up a simple {x, y, z}-style string here?
     }
     return retval;
+  },
+  summarizeType: function(maxDepth) {
+    var max = 0, found = [];
+    for (var i = 0; i < this.types.length; ++i) {
+      if (this.scores[i] > max) {
+        max = this.scores[i];
+        found.length = 0;
+      }
+      if (this.scores[i] == max) found.push(this.types[i]);
+    }
+    if (found.length > 3) return "<?>";
+    for (var i = 0; i < found.length; ++i) found[i] = found[i].toString(maxDepth);
+    found.sort();
+    return found.join(" | ");
   }
 });
 
@@ -169,10 +192,10 @@ var Obj = exports.Obj = function(props) {
   if (props) for (prop in props) this.addProp(prop, props[prop]);
 };
 add(Obj.prototype, {
-  toString: function() {
+  toString: function(maxDepth) {
     var props = [];
     for (var prop in this.props)
-      props.push(prop + ": " + this.props[prop].toString());
+      props.push(maxDepth ? prop + ": " + this.props[prop].toString(maxDepth - 1) : prop);
     props.sort();
     return "{" + props.join(", ") + "}";
   },
@@ -237,9 +260,10 @@ var Fn = exports.Fn = function(self, args, retval) {
 };
 Fn.prototype = add(Object.create(Obj.prototype), {
   constructor: Fn,
-  toString: function() {
-    var str = "fn(" + this.args.map(function(x) { return x.toString(); }).join(", ") + ")";
-    var rettype = this.retval.toString();
+  toString: function(maxDepth) {
+    if (maxDepth) maxDepth--;
+    var str = "fn(" + this.args.map(function(x) { return x.toString(maxDepth); }).join(", ") + ")";
+    var rettype = this.retval.toString(maxDepth);
     if (rettype != "<?>") str += " -> " + rettype;
     return str;
   }

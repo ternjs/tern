@@ -1,6 +1,8 @@
 // Test inverted flow of information (against propagation) when no
 // accurate information is available.
 
+var x = {foo: 1, bar: 2};
+
 function num(x) {
   return x * 3;
 }

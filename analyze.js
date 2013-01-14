@@ -8,6 +8,7 @@ function Var(node) {
   this.node = node;
   this.aval = new AVal;
 }
+// FIXME bind arguments
 function Scope(prev) {
   this.vars = Object.create(null);
   this.prev = prev;
