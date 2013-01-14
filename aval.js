@@ -51,6 +51,7 @@ add(AVal.prototype, {
     }
     return max == typeScore;
   },
+  typeHint: function(maxDepth) { return this.toString(maxDepth); },
   toString: function(maxDepth) {
     if (this.flags & flag_recGuard) return "<R>";
     this.flags |= flag_recGuard;
@@ -66,38 +67,47 @@ add(AVal.prototype, {
     var props = {}, propCount = 0, retval = "<?>";
     for (var i = 0; retval == "<?>" && i < this.forward.length; ++i) {
       var propagate = this.forward[i];
-      if (propagate instanceof AVal) {
-        retval = propagate.toString(maxDepth);
-      } else if (propagate instanceof PropIsSubset || propagate instanceof PropHasSubset) {
-        if (!props[propagate.prop]) {
-          props[propagate.prop] = true;
-          ++propCount;
-        }
-      } else if (propagate instanceof IsCallee) {
-        retval = new Fn(propagate.self, propagate.args, propagate.retval).toString(maxDepth);
-      } else if (propagate instanceof IsAdded) {
-        retval = propagate.other.toString(maxDepth);
+      if (propagate.typeHint) retval = propagate.typeHint();
+      var prop = propagate.propHint && propagate.propHint();
+      if (prop && !props[prop]) {
+        props[propagate.prop] = true;
+        ++propCount;
       }
     }
     if (retval == "<?>" && propCount) {
-      // FIXME this comes up with rather far-fetched results when, for
-      // example, the only known property is toString
-      var bestMatch, bestScore = -Infinity;
+      var bestMatch, bestMatchTotalProps, bestScore = 0;
       for (var p in props) {
         var objs = cx.objProps[p];
         if (objs) for (var i = 0; i < objs.length; ++i) {
-          var type = objs[i], score = 0;
+          var type = objs[i], score = 0, totalProps = 0;
           if (type == bestMatch) continue;
-          for (var p2 in type.props) if (p2 in props) ++score;
-          if (score > bestScore) { bestScore = score; bestMatch = type; }
+          for (var p2 in type.props) {
+            if (p2 in props) ++score;
+            ++totalProps;
+          }
+          if (score > bestScore || (score == score && totalProps < bestMatchTotalProps)) {
+            bestScore = score;
+            bestMatch = type;
+            bestMatchTotalProps = totalProps;
+          }
         }
       }
-      if (bestMatch) retval = bestMatch.toString(maxDepth);
-      // FIXME maybe make up a simple {x, y, z}-style string here?
+      if (bestMatch) {
+        retval = bestMatch.toString(maxDepth);
+      } else {
+        retval = "{";
+        for (var p in props) {
+          if (retval.length != 1) retval += ", ";
+          retval += p;
+          if (retval.length > 20) break;
+        }
+        retval += "}";
+      }
     }
     return retval;
   },
   summarizeType: function(maxDepth) {
+    // FIXME this is a rather random heuristic
     var max = 0, found = [];
     for (var i = 0; i < this.types.length; ++i) {
       if (this.scores[i] > max) {
@@ -124,6 +134,7 @@ PropIsSubset.prototype.addType = function(type) {
   if (type.ensureProp)
     type.ensureProp(this.prop, true).propagate(this.target);
 };
+PropIsSubset.prototype.propHint = function() { return this.prop; };
 
 var PropHasSubset = exports.PropHasSubset = function(prop, target) {
   this.target = target; this.prop = prop;
@@ -132,6 +143,7 @@ PropHasSubset.prototype.addType = function(type) {
   if (type.ensureProp)
     this.target.propagate(type.ensureProp(this.prop));
 };
+PropHasSubset.prototype.propHint = function() { return this.prop; };
 
 var IsCallee = exports.IsCallee = function(self, args, retval) {
   this.self = self; this.args = args; this.retval = retval;
@@ -143,6 +155,15 @@ IsCallee.prototype.addType = function(fn) {
   if (this.self) this.self.propagate(fn.self);
   fn.retval.propagate(this.retval);
 };
+IsCallee.prototype.typeHint = function(maxDepth) {
+  return new Fn(null, this.self, this.args, this.retval).toString(maxDepth);
+};
+
+function IsProto(name) { this.name = name; }
+IsProto.prototype.addType = function(o) {
+  if (o instanceof Obj && !o.name) o.name = this.name;
+};
+IsProto.prototype.typeHint = function() { return this.name; };
 
 var IsAdded = exports.IsAdded = function(other, target) {
   this.other = other; this.target = target;
@@ -152,6 +173,9 @@ IsAdded.prototype.addType = function(type) {
     this.target.addType(_str);
   else if (type == _num && hasType(_num, this.other))
     this.target.addType(_num);
+};
+IsAdded.prototype.typeHint = function(maxDepth) {
+  return this.other.toString(maxDepth);
 };
 
 function connect(a, b) {
@@ -184,18 +208,22 @@ var _bool = exports._bool = new Prim("bool");
 var _null = exports._null = new Prim("null");
 var _undef = exports._null = new Prim("undefined");
 
-var Obj = exports.Obj = function(props) {
+var Obj = exports.Obj = function(name) {
   this.props = Object.create(null);
-  this.id = cx.nextObjId++;
+  this.name = name;
   cx.objTypes.push(this);
-  this.replaced = null;
-  if (props) for (prop in props) this.addProp(prop, props[prop]);
 };
 add(Obj.prototype, {
   toString: function(maxDepth) {
+    if (!maxDepth && this.name) return this.name;
+    // FIXME cache these strings?
     var props = [];
-    for (var prop in this.props)
-      props.push(maxDepth ? prop + ": " + this.props[prop].toString(maxDepth - 1) : prop);
+    for (var prop in this.props) {
+      if (maxDepth)
+        props.push(prop + ": " + this.props[prop].toString(maxDepth - 1));
+      else if (this.props[prop].flags & flag_initializer)
+        props.push(prop);
+    }
     props.sort();
     return "{" + props.join(", ") + "}";
   },
@@ -228,7 +256,7 @@ function compatible(one, two) {
   }
 }
 
-Obj.fromInitializer = function(props) {
+Obj.fromInitializer = function(props, name) {
   var types = props.length && cx.objProps[props[0].name];
   if (types) for (var i = 0; i < types.length; ++i) {
     var type = types[i], matching = 0;
@@ -243,7 +271,7 @@ Obj.fromInitializer = function(props) {
   }
 
   // Nothing found, allocate a new one
-  var obj = new Obj();
+  var obj = new Obj(name);
   for (var i = 0; i < props.length; ++i) {
     var prop = props[i], aval = obj.ensureProp(prop.name);
     aval.flags |= flag_initializer;
@@ -252,8 +280,8 @@ Obj.fromInitializer = function(props) {
   return obj;
 };
 
-var Fn = exports.Fn = function(self, args, retval) {
-  Obj.call(this);
+var Fn = exports.Fn = function(name, self, args, retval) {
+  Obj.call(this, name);
   this.self = self;
   this.args = args;
   this.retval = retval;
@@ -266,6 +294,12 @@ Fn.prototype = add(Object.create(Obj.prototype), {
     var rettype = this.retval.toString(maxDepth);
     if (rettype != "<?>") str += " -> " + rettype;
     return str;
+  },
+  ensureProp: function(prop, speculative) {
+    var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
+    var retval = Obj.prototype.ensureProp.call(this, prop, speculative);
+    if (newProto) retval.propagate(new IsProto(this.name));
+    return retval;
   }
 });
 

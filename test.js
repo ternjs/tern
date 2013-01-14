@@ -10,7 +10,7 @@ function runTests() {
     ++files;
     aval.withContext(null, function() {
       var info = analyze.analyze("test/" + file);
-      var assertion = /\/\/ (\w+): (.*)\n/g, m;
+      var assertion = /\/\/ (\w+)(?:\((d+)\))?: (.*)\n/g, m;
 
       while (m = assertion.exec(info.text)) {
         ++tests;
@@ -20,9 +20,9 @@ function runTests() {
           ++failed;
           continue;
         }
-        var type = v.aval.toString(5);
-        if (type != m[2]) {
-          console.log(file + ": variable " + m[1] + " has type\n  " + type + "\ninstead of expected type\n  " + m[2]);
+        var type = v.aval.toString(Number(m[2] || 5));
+        if (type != m[3]) {
+          console.log(file + ": variable " + m[1] + " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
           ++failed;
         }
       }

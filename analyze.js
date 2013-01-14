@@ -82,6 +82,11 @@ function getProp(obj, propName) {
   return found;
 }
 
+function lvalName(node) {
+  if (node.type == "Identifier") return node.name;
+  if (node.type == "MemberExpression" && node.computed) return node.property.name;
+}
+
 function setHint(aval, hint) {
   if (aval instanceof AVal && !aval.types.length) aval.hint = hint;
 }
@@ -127,19 +132,23 @@ var inferExprVisitor = {
       if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
     // FIXME implement array type
-    return new Obj({"<i>": new AVal(eltval)});
+    var arr = new Obj();
+    eltval.propagate(arr.ensureProp("<i>"));
+    return arr;
   },
-  ObjectExpression: function(node, scope, c) {
+  ObjectExpression: function(node, scope, c, name) {
     var props = [];
     for (var i = 0; i < node.properties.length; ++i) {
       var p = node.properties[i];
       props.push({name: p.key.name, type: runInfer(p.value, scope, c)});
     }
-    return Obj.fromInitializer(props);
+    // FIXME better heuristic for whether this is the top scope (i.e. module top scope)
+    return Obj.fromInitializer(props, !scope.prev && name);
   },
-  FunctionExpression: function(node, scope, c) {
+  FunctionExpression: function(node, scope, c, name) {
     var inner = node.body.scope;
-    var aval = new AVal(new Fn(inner.self, inner.argvals, inner.retval));
+    var aval = new AVal(new Fn(node.id ? node.id.name : name,
+                               inner.self, inner.argvals, inner.retval));
     if (node.id)
       assignVar(node.id.name, node.body.scope, aval);
     c(node.body, scope, "ScopeBody");
@@ -175,7 +184,7 @@ var inferExprVisitor = {
     return isBool ? aval._bool : aval._num;
   },
   AssignmentExpression: function(node, scope, c) {
-    var rhs = runInfer(node.right, scope, c);
+    var rhs = runInfer(node.right, scope, c, lvalName(node.left));
     if (node.operator != "=" && node.operator != "+=")
       rhs = aval._num;
 
@@ -244,7 +253,7 @@ var inferWrapper = walk.make({
 
   FunctionDeclaration: function(node, scope, c) {
     var inner = node.body.scope;
-    var aval = new AVal(new Fn(inner.self, inner.argvals, inner.retval));
+    var aval = new AVal(new Fn(node.id.name, inner.self, inner.argvals, inner.retval));
     assignVar(node.id.name, scope, aval);
     c(node.body, scope, "ScopeBody");
   },
