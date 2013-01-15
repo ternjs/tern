@@ -14,13 +14,13 @@ function runTests() {
 
       while (m = assertion.exec(info.text)) {
         ++tests;
-        var v = info.scope.vars[m[1]];
+        var v = info.scope.props[m[1]];
         if (!v) {
           console.log(file + ": variable " + m[1] + " not defined");
           ++failed;
           continue;
         }
-        var type = v.aval.toString(Number(m[2] || 5));
+        var type = v.toString(Number(m[2] || 5));
         if (type != m[3]) {
           console.log(file + ": variable " + m[1] + " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
           ++failed;
@@ -35,7 +35,7 @@ function runTests() {
 function outputInfo(file) {
   infer.withContext(null, function() {
     var info = infer.analyze(file);
-    for (var v in info.scope.vars)
-      console.log(v + ": " + info.scope.vars[v].aval.toString(2));
+    for (var v in info.scope.props)
+      console.log(v + ": " + info.scope.props[v].toString(2));
   });
 }

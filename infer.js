@@ -134,7 +134,7 @@ function PropIsSubset(prop, target) {
 PropIsSubset.prototype = {
   addType: function(type) {
     if (type.ensureProp)
-      type.ensureProp(this.prop).propagate(this.target);
+      type.findProp(this.prop).propagate(this.target);
   },
   propHint: function() { return this.prop; }
 };
@@ -145,7 +145,7 @@ function PropHasSubset(prop, target) {
 PropHasSubset.prototype = {
   addType: function(type) {
     if (type.ensureProp)
-      this.target.propagate(type.ensureProp(this.prop, true));
+      this.target.propagate(type.ensureProp(this.prop));
   },
   propHint: function() { return this.prop; }
 };
@@ -227,16 +227,20 @@ Obj.prototype = {
     props.sort();
     return "{" + props.join(", ") + "}";
   },
-  ensureProp: function(prop, local) {
+  ensureProp: function(prop, alsoProto) {
     var found = this.props[prop];
-    if (found && (!local || hop(this.props, prop))) return found;
+    if (found && (alsoProto || hop(this.props, prop))) return found;
     var av = new AVal;
     this.addProp(prop, av);
     return av;
   },
+  findProp: function(prop) {
+    return this.ensureProp(prop, true);
+  },
   addProp: function(prop, val) {
     this.props[prop] = val;
     // FIXME should objProps also list proto's props? maybe move back to objList?
+    if (this.prev) return; // If this is a scope, it shouldn't be registered
     var found = cx.objProps[prop];
     if (found) found.push(this);
     else cx.objProps[prop] = [this];
@@ -262,7 +266,7 @@ Obj.fromInitializer = function(props, name) {
   // Nothing found, allocate a new one
   var obj = new Obj(cx.protos.Object, name);
   for (var i = 0; i < props.length; ++i) {
-    var prop = props[i], aval = obj.ensureProp(prop.name, true);
+    var prop = props[i], aval = obj.ensureProp(prop.name);
     aval.flags |= flag_initializer;
     prop.type.propagate(aval);
   }
@@ -293,9 +297,9 @@ Fn.prototype.toString = function(maxDepth) {
   if (rettype != "<?>") str += " -> " + rettype;
   return str;
 };
-Fn.prototype.ensureProp = function(prop, local) {
+Fn.prototype.ensureProp = function(prop, alsoProto) {
   var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
-  var retval = Obj.prototype.ensureProp.call(this, prop, local);
+  var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto);
   if (newProto) retval.propagate(new IsProto(this.name));
   return retval;
 };
@@ -326,26 +330,20 @@ exports.withContext = function(context, f) {
 
 // SCOPES
 
-function Var(node, type) {
-  this.node = node;
-  this.aval = new AVal(type);
-}
-// FIXME bind arguments
+// FIXME local arguments variable
 function Scope(prev) {
-  this.vars = Object.create(null);
+  Obj.call(this, null, prev ? null : "global");
   this.prev = prev;
 }
-
-function lookup(name, scope) {
-  for (; scope; scope = scope.prev) {
-    var found = scope.vars[name];
-    if (found) return found;
+Scope.prototype = Object.create(Obj.prototype);
+Scope.prototype.lookup = function(name, force) {
+  var self = this;
+  while (self) {
+    if (name in self.props) return self.props[name];
+    self = self.prev;
   }
-}
-function topScope(scope) {
-  while (scope.prev) scope = scope.prev;
-  return scope;
-}
+  if (force) return self.ensureProp(name);
+};
 
 // SCOPE GATHERING PASS
 
@@ -353,15 +351,15 @@ var scopeGatherer = walk.make({
   Function: function(node, scope, c) {
     var inner = node.body.scope = new Scope(scope), argvals = inner.argvals = [];
     for (var i = 0; i < node.params.length; ++i) {
-      var param = node.params[i], v = new Var(param);
-      inner.vars[param.name] = v;
-      argvals.push(v.aval);
+      var param = node.params[i], b = inner.ensureProp(param.name);
+      b.node = param;
+      argvals.push(b);
     }
     inner.retval = new AVal;
     inner.self = new AVal;
     if (node.id) {
       var decl = node.type == "FunctionDeclaration";
-      (decl ? scope : inner).vars[node.id.name] = new Var(node.id);
+      (decl ? scope : inner).ensureProp(node.id.name).node = node.id;
     }
     c(node.body, inner, "ScopeBody");
   },
@@ -369,7 +367,7 @@ var scopeGatherer = walk.make({
     c(node.block, scope, "Statement");
     for (var i = 0; i < node.handlers.length; ++i) {
       var handler = node.handlers[i], name = handler.param.name;
-      if (!(name in scope.vars)) scope.vars[name] = new Var(handler.param);
+      scope.ensureProp(name).node = handler.param;
       c(handler.body, scope, "ScopeBody");
     }
     if (node.finalizer) c(node.finalizer, scope, "Statement");
@@ -377,17 +375,14 @@ var scopeGatherer = walk.make({
   VariableDeclaration: function(node, scope, c) {
     for (var i = 0; i < node.declarations.length; ++i) {
       var decl = node.declarations[i];
-      if (!(decl.id.name in scope.vars))
-        scope.vars[decl.id.name] = new Var(decl.id);
+      scope.ensureProp(decl.id.name).node = decl.id;
       if (decl.init) c(decl.init, scope, "Expression");
     }
   }
 });
 
 function assignVar(name, scope, aval) {
-  var found = lookup(name, scope);
-  if (!found) found = topScope(scope).vars[name] = new Var();
-  aval.propagate(found.aval);
+  aval.propagate(scope.lookup(name, true));
 }
 
 function propName(node, scope, c) {
@@ -457,7 +452,7 @@ var inferExprVisitor = {
     }
     // FIXME implement array type
     var arr = new Obj(cx.protos.Array);
-    eltval.propagate(arr.ensureProp("<i>", true));
+    eltval.propagate(arr.ensureProp("<i>"));
     return arr;
   },
   ObjectExpression: function(node, scope, c, name) {
@@ -553,9 +548,7 @@ var inferExprVisitor = {
     return getProp(runInfer(node.object, scope, c), propName(node, scope, c));
   },
   Identifier: function(node, scope) {
-    var found = lookup(node.name, scope);
-    if (!found) found = topScope(scope).vars[node.name] = new Var();
-    return found.aval;
+    return scope.lookup(node.name, true);
   },
   ThisExpression: function(node, scope, c) {
     for (var s = scope; !s.self; s = s.prev) {}
@@ -605,7 +598,7 @@ var analyze = exports.analyze = function(file) {
 
 // CONTEXT POPULATING
 
-function parsePropSpec(specIn, name, self) {
+function parseType(specIn, name, self) {
   var spec = specIn, pos = 0;
   function parseArgs() {
     var args = [];
@@ -643,7 +636,7 @@ function parsePropSpec(specIn, name, self) {
       ++pos;
       // FIXME array type
       var elt = inner(), arr = new Obj(cx.protos.Array);
-      if (elt) elt.propagate(arr.ensureProp("<i>", true));
+      if (elt) elt.propagate(arr.ensureProp("<i>"));
       if (spec.charAt(pos) == "]") {
         ++pos;
         return arr;
@@ -659,13 +652,12 @@ function parsePropSpec(specIn, name, self) {
 }
 
 function populate(obj, props) {
-  for (var prop in props)
-    obj.ensureProp(prop, true).addType(parsePropSpec(props[prop], prop, obj));
+  for (var prop in props) {
+    var v = cx.topScope.ensureProp(prop), spec = props[prop];
+    var t = typeof spec == "string" ? parseType(spec, prop, obj) : spec;
+    if (t) t.propagate(v);
+  }
   return obj;
-}
-function defVars(defs) {
-  for (var prop in defs)
-    cx.topScope.vars[prop] = new Var(null, parsePropSpec(defs[prop], prop));
 }
 
 function initJSContext() {
@@ -802,19 +794,39 @@ function initJSContext() {
     message: "<string>"
   });
 
-  defVars({
+  cx.topScope.props = Object.create(objProto);
+  var errC = parseType("ctor(<string>)", "Error");
+  var top = populate(cx.topScope, {
     Infinity: "<number>",
     undefined: "<undefined>",
     NaN: "<number>",
-    Object: "ctor()",
+    Object: populate(parseType("ctor()", "Object"), {
+      getPrototypeOf: "fn(<?>) -> <?>",
+      create: "fn(<?>) -> <?>",
+      defineProperties: "fn(<?>, <?>)",
+      keys: "fn(<?>) -> [<string>]"
+    }),
     Function: "ctor(<string>)",
-    Array: "ctor(<number>)",
-    Number: "ctor(<?>)",
-    String: "ctor(<?>)",
+    Array: populate(parseType("ctor(<number>)", "Array"), {
+      isArray: "fn(<?>) -> <bool>"
+    }),
+    String: populate(parseType("ctor(<?>) -> <string>", "String"), {
+      fromCharCode: "fn(<number>) -> <string>"
+    }),
+    Number: populate(parseType("ctor(<?>) -> <number>", "Number"), {
+      MAX_VALUE: "<number>",
+      MIN_VALUE: "<number>",
+      POSITIVE_INFINITY: "<number>",
+      NEGATIVE_INFINITY: "<number>"
+    }),
     RegExp: "ctor(<string>, <string>)",
-    Date: "ctor(<number>)",
+    Date: populate(parseType("ctor(<number>)", "Date"), {
+      parse: "fn(<string>) -> Date",
+      UTC: "fn(<number>, <number>, <number>, <number>, <number>, <number>, <number>) -> <number>",
+      now: "fn() -> <number>"
+    }),
     Boolean: "fn(<?>) -> <bool>",
-    Error: "ctor(<string>)",
+    Error: errC, SyntaxError: errC, ReferenceError: errC, URIError: errC, EvalError: errC, RangeError: errC,
     parseInt: "fn(<string>, <number>) -> <number>",
     parseFloat: "fn(<string>) -> <number>",
     isNaN: "fn(<number>) -> <bool>",
@@ -822,59 +834,33 @@ function initJSContext() {
     encodeURI: "fn(<string>) -> <string>",
     encodeURIComponent: "fn(<string>) -> <string>",
     decodeURI: "fn(<string>) -> <string>",
-    decodeURIComponent: "fn(<string>) -> <string>"
-  });
-  var top = cx.topScope.vars;
-  // FIXME wrap in vars (?)
-  top.SyntaxError = top.ReferenceError = top.TypeError = top.URIError = top.EvalError = top.RangeError = top.Error;
-  top.Math = new Var(null, populate(new Obj(objProto, "Math"), {
-    E: "<number>", LN2: "<number>", LN10: "<number>", LOG2E: "<number>", LOG10E: "<number>",
-    SQRT1_2: "<number>", SQRT2: "<number>", PI: "<number>",
-    abs: "fn(<number>) -> <number>",
-    cos: "fn(<number>) -> <number>",
-    sin: "fn(<number>) -> <number>",
-    tan: "fn(<number>) -> <number>",
-    acos: "fn(<number>) -> <number>",
-    asin: "fn(<number>) -> <number>",
-    atan: "fn(<number>) -> <number>",
-    atan2: "fn(<number>, <number>) -> <number>",
-    ceil: "fn(<number>) -> <number>",
-    floor: "fn(<number>) -> <number>",
-    round: "fn(<number>) -> <number>",
-    exp: "fn(<number>) -> <number>",
-    log: "fn(<number>) -> <number>",
-    sqrt: "fn(<number>) -> <number>",
-    pow: "fn(<number>, <number>) -> <number>",
-    max: "fn(<number>, <number>) -> <number>",
-    min: "fn(<number>, <number>) -> <number>",
-    random: "fn() -> <number>"
-  }));
-  top.JSON = new Var(null, populate(new Obj(objProto, "JSON"), {
-    parse: "fn(<string>) -> <?>",
-    stringify: "fn(<?>) -> <string>"
-  }));
-  populate(top.Object.aval.types[0], {
-    getPrototypeOf: "fn(<?>) -> <?>",
-    create: "fn(<?>) -> <?>",
-    defineProperties: "fn(<?>, <?>)",
-    keys: "fn(<?>) -> [<string>]"
-  });
-  populate(top.Array.aval.types[0], {
-    isArray: "fn(<?>) -> <bool>"
-  });
-  populate(top.String.aval.types[0], {
-    fromCharCode: "fn(<number>) -> <string>"
-  });
-  populate(top.Number.aval.types[0], {
-    MAX_VALUE: "<number>",
-    MIN_VALUE: "<number>",
-    POSITIVE_INFINITY: "<number>",
-    NEGATIVE_INFINITY: "<number>"
-  });
-  populate(top.Date.aval.types[0], {
-    parse: "fn(<string>) -> Date",
-    UTC: "fn(<number>, <number>, <number>, <number>, <number>, <number>, <number>) -> <number>",
-    now: "fn() -> <number>"
+    decodeURIComponent: "fn(<string>) -> <string>",
+    Math: populate(new Obj(objProto, "Math"), {
+      E: "<number>", LN2: "<number>", LN10: "<number>", LOG2E: "<number>", LOG10E: "<number>",
+      SQRT1_2: "<number>", SQRT2: "<number>", PI: "<number>",
+      abs: "fn(<number>) -> <number>",
+      cos: "fn(<number>) -> <number>",
+      sin: "fn(<number>) -> <number>",
+      tan: "fn(<number>) -> <number>",
+      acos: "fn(<number>) -> <number>",
+      asin: "fn(<number>) -> <number>",
+      atan: "fn(<number>) -> <number>",
+      atan2: "fn(<number>, <number>) -> <number>",
+      ceil: "fn(<number>) -> <number>",
+      floor: "fn(<number>) -> <number>",
+      round: "fn(<number>) -> <number>",
+      exp: "fn(<number>) -> <number>",
+      log: "fn(<number>) -> <number>",
+      sqrt: "fn(<number>) -> <number>",
+      pow: "fn(<number>, <number>) -> <number>",
+      max: "fn(<number>, <number>) -> <number>",
+      min: "fn(<number>, <number>) -> <number>",
+      random: "fn() -> <number>"
+    }),
+    JSON: populate(new Obj(objProto, "JSON"), {
+      parse: "fn(<string>) -> <?>",
+      stringify: "fn(<?>) -> <string>"
+    })
   });
 }
 
