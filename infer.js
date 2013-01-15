@@ -1,7 +1,7 @@
 var acorn = require("acorn"), walk = require("acorn/util/walk");
 var fs = require("fs");
 
-var flag_recGuard = 1, flag_speculative = 2, flag_initializer = 4;
+var flag_recGuard = 1, flag_initializer = 2;
 
 // ABSTRACT VALUES
 
@@ -134,7 +134,7 @@ function PropIsSubset(prop, target) {
 PropIsSubset.prototype = {
   addType: function(type) {
     if (type.ensureProp)
-      type.ensureProp(this.prop, true).propagate(this.target);
+      type.ensureProp(this.prop).propagate(this.target);
   },
   propHint: function() { return this.prop; }
 };
@@ -145,7 +145,7 @@ function PropHasSubset(prop, target) {
 PropHasSubset.prototype = {
   addType: function(type) {
     if (type.ensureProp)
-      this.target.propagate(type.ensureProp(this.prop));
+      this.target.propagate(type.ensureProp(this.prop, true));
   },
   propHint: function() { return this.prop; }
 };
@@ -183,10 +183,10 @@ function IsAdded(other, target) {
 }
 IsAdded.prototype = {
   addType: function(type) {
-    if (type == _str)
-      this.target.addType(_str);
-    else if (type == _num && hasType(_num, this.other))
-      this.target.addType(_num);
+    if (type == cx.prim.str)
+      this.target.addType(cx.prim.str);
+    else if (type == cx.prim.num && hasType(cx.prim.num, this.other))
+      this.target.addType(cx.prim.num);
   },
   typeHint: function(maxDepth) {
     return this.other.toString(maxDepth);
@@ -198,30 +198,27 @@ IsAdded.prototype = {
 // FIXME handle reads from prototypes of primitive types (str.slice)
 // somehow
 
-function Prim(name) { this.name = name; }
+function Prim(proto, name) { this.name = name; }
 Prim.prototype = {
   toString: function() { return this.name; },
   propagate: function(c) { c.addType(this); },
   sameType: function(other) { return other == this; }
 };
 
-var _num = new Prim("<number>");
-var _str = new Prim("<string>");
-var _bool = new Prim("<bool>");
-var _null = new Prim("<null>");
-var _undef = new Prim("<undefined>");
+function hop(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
 
-function Obj(name) {
-  this.props = Object.create(null);
+function Obj(proto, name) {
+  this.props = Object.create(proto && proto.props);
   this.name = name;
-  cx.objTypes.push(this);
 }
 Obj.prototype = {
   toString: function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
     // FIXME cache these strings?
     var props = [];
-    for (var prop in this.props) {
+    for (var prop in this.props) if (hop(this.props, prop)) {
       if (maxDepth)
         props.push(prop + ": " + this.props[prop].toString(maxDepth - 1));
       else if (this.props[prop].flags & flag_initializer)
@@ -230,20 +227,16 @@ Obj.prototype = {
     props.sort();
     return "{" + props.join(", ") + "}";
   },
-  ensureProp: function(prop, speculative) {
+  ensureProp: function(prop, local) {
     var found = this.props[prop];
-    if (found) {
-      if (!speculative && found.flags & flag_speculative)
-        found.flags &= ~flag_speculative;
-      return found;
-    }
+    if (found && (!local || hop(this.props, prop))) return found;
     var av = new AVal;
-    if (speculative) av.flags |= flag_speculative;
     this.addProp(prop, av);
     return av;
   },
   addProp: function(prop, val) {
     this.props[prop] = val;
+    // FIXME should objProps also list proto's props? maybe move back to objList?
     var found = cx.objProps[prop];
     if (found) found.push(this);
     else cx.objProps[prop] = [this];
@@ -253,6 +246,7 @@ Obj.prototype = {
 
 Obj.fromInitializer = function(props, name) {
   var types = props.length && cx.objProps[props[0].name];
+  // FIXME check prototype
   if (types) for (var i = 0; i < types.length; ++i) {
     var type = types[i], matching = 0;
     for (var p in type.props) {
@@ -266,9 +260,9 @@ Obj.fromInitializer = function(props, name) {
   }
 
   // Nothing found, allocate a new one
-  var obj = new Obj(name);
+  var obj = new Obj(cx.protos.Object, name);
   for (var i = 0; i < props.length; ++i) {
-    var prop = props[i], aval = obj.ensureProp(prop.name);
+    var prop = props[i], aval = obj.ensureProp(prop.name, true);
     aval.flags |= flag_initializer;
     prop.type.propagate(aval);
   }
@@ -283,8 +277,10 @@ function compatible(one, two) {
   }
 }
 
+// FIXME save argument names
+
 function Fn(name, self, args, retval) {
-  Obj.call(this, name);
+  Obj.call(this, cx.protos.Function, name);
   this.self = self;
   this.args = args;
   this.retval = retval;
@@ -297,42 +293,42 @@ Fn.prototype.toString = function(maxDepth) {
   if (rettype != "<?>") str += " -> " + rettype;
   return str;
 };
-Fn.prototype.ensureProp = function(prop, speculative) {
+Fn.prototype.ensureProp = function(prop, local) {
   var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
-  var retval = Obj.prototype.ensureProp.call(this, prop, speculative);
+  var retval = Obj.prototype.ensureProp.call(this, prop, local);
   if (newProto) retval.propagate(new IsProto(this.name));
   return retval;
 };
 
 // INFERENCE CONTEXT
 
-function Context() {
-  this.objTypes = [];
+function Context(type) {
+  this.type = type;
   this.objProps = Object.create(null);
   this.topScope = new Scope();
+  this.protos = Object.create(null);
+  this.prim = Object.create(null);
+  exports.withContext(this, function() {
+    initJSContext();
+    if (type == "browser") initBrowserContext();
+    else if (type == "node") initNodeContext();
+  });
 }
 
 var cx = null;
 
 exports.withContext = function(context, f) {
   var old = cx;
-  cx = context || new Context();
+  cx = context || new Context("browser");
   try { return f(); }
   finally { cx = old; }
 };
 
-/*var Object_prototype = new Obj(null, props({
-  toString: Fn([], _str),
-  valueOf: Fn([], _num),
-  hasOwnProperty: Fn([_str], _bool),
-  propertyIsEnumerable: Fn([_str], _bool)
-}));*/
-
 // SCOPES
 
-function Var(node) {
+function Var(node, type) {
   this.node = node;
-  this.aval = new AVal;
+  this.aval = new AVal(type);
 }
 // FIXME bind arguments
 function Scope(prev) {
@@ -421,10 +417,10 @@ function setHint(aval, hint) {
 
 function unopResultType(op) {
   switch (op) {
-  case "+": case "-": case "~": return _num;
-  case "!": return _bool;
-  case "typeof": return _str;
-  case "void": case "delete": return _undef;
+  case "+": case "-": case "~": return cx.prim.num;
+  case "!": return cx.prim.bool;
+  case "typeof": return cx.prim.str;
+  case "void": case "delete": return cx.prim.undef;
   }
 }
 function binopIsBoolean(op) {
@@ -435,13 +431,13 @@ function binopIsBoolean(op) {
 }
 function literalType(val) {
   switch (typeof val) {
-  case "boolean": return _bool;
-  case "number": return _num;
-  case "string": return _str;
+  case "boolean": return cx.prim.bool;
+  case "number": return cx.prim.num;
+  case "string": return cx.prim.str;
   case "object":
-    if (!val) return _null;
+    if (!val) return cx.prim.null;
     // FIXME return something for regexps
-    return new Obj();
+    return new Obj(cx.protos.RegExp);
   }
 }
 
@@ -460,8 +456,8 @@ var inferExprVisitor = {
       if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
     // FIXME implement array type
-    var arr = new Obj();
-    eltval.propagate(arr.ensureProp("<i>"));
+    var arr = new Obj(cx.protos.Array);
+    eltval.propagate(arr.ensureProp("<i>", true));
     return arr;
   },
   ObjectExpression: function(node, scope, c, name) {
@@ -494,27 +490,27 @@ var inferExprVisitor = {
   },
   UpdateExpression: function(node, scope, c) {
     runInfer(node.argument, scope, c);
-    return _num;
+    return cx.prim.num;
   },
   BinaryExpression: function(node, scope, c) {
     var lhs = runInfer(node.left, scope, c);
     var rhs = runInfer(node.right, scope, c);
     if (node.operator == "+") {
-      if (hasType(_str, lhs) || hasType(_str, rhs)) return _str;
-      if (hasType(_num, lhs) && hasType(_num, rhs)) return _num;
+      if (hasType(cx.prim.str, lhs) || hasType(cx.prim.str, rhs)) return cx.prim.str;
+      if (hasType(cx.prim.num, lhs) && hasType(cx.prim.num, rhs)) return cx.prim.num;
       var result = new AVal;
       lhs.propagate(new IsAdded(rhs, result));
       rhs.propagate(new IsAdded(lhs, result));
       return result;
     }
     var isBool = binopIsBoolean(node.operator);
-    if (!isBool) { setHint(lhs, _num); setHint(rhs, _num); }
-    return isBool ? _bool : _num;
+    if (!isBool) { setHint(lhs, cx.prim.num); setHint(rhs, cx.prim.num); }
+    return isBool ? cx.prim.bool : cx.prim.num;
   },
   AssignmentExpression: function(node, scope, c) {
     var rhs = runInfer(node.right, scope, c, lvalName(node.left));
     if (node.operator != "=" && node.operator != "+=")
-      rhs = _num;
+      rhs = cx.prim.num;
 
     if (node.left.type == "MemberExpression") {
       var obj = runInfer(node.left.object, scope, c);
@@ -563,7 +559,7 @@ var inferExprVisitor = {
   },
   ThisExpression: function(node, scope, c) {
     for (var s = scope; !s.self; s = s.prev) {}
-    return s ? s.self : _undef;
+    return s ? s.self : cx.prim.undef;
   },
   Literal: function(node, scope) {
     return literalType(node.value);
@@ -605,4 +601,287 @@ var analyze = exports.analyze = function(file) {
   walk.recursive(ast, cx.topScope, null, scopeGatherer);
   walk.recursive(ast, cx.topScope, null, inferWrapper);
   return {ast: ast, text: text, scope: cx.topScope, file: file};
+};
+
+// CONTEXT POPULATING
+
+function parsePropSpec(specIn, name, self) {
+  var spec = specIn, pos = 0;
+  function parseArgs() {
+    var args = [];
+    while (spec.charAt(pos) != ")") {
+      args.push(new AVal(inner()));
+      if (spec.indexOf(", ", pos) == pos) pos += 2;
+    }
+    ++pos;
+    return args;
+  }
+  function inner(name, self) {
+    if (spec.indexOf("fn(", pos) == pos) {
+      pos += 3;
+      var args = parseArgs(), retType;
+      if (spec.indexOf(" -> ", pos) == pos) {
+        pos += 4;
+        retType = inner();
+      }
+      return new Fn(name, new AVal(self), args, new AVal(retType));
+    } else if (spec.indexOf("ctor(", pos) == pos) {
+      pos += 5;
+      return new Fn(name, new AVal(cx.protos[name]), parseArgs(), new AVal);
+    } else if (spec.charAt(pos) == "<") {
+      var end = spec.indexOf(">", pos), word = spec.slice(pos + 1, end);
+      pos = end + 1;
+      switch (word) {
+      case "number": return cx.prim.num;
+      case "string": return cx.prim.str;
+      case "bool": return cx.prim.bool;
+      case "null": return cx.prim.null;
+      case "undefined": return cx.prim.undef;
+      case "?": return null;
+      }
+    } else if (spec.charAt(pos) == "[") {
+      ++pos;
+      // FIXME array type
+      var elt = inner(), arr = new Obj(cx.protos.Array);
+      if (elt) elt.propagate(arr.ensureProp("<i>", true));
+      if (spec.charAt(pos) == "]") {
+        ++pos;
+        return arr;
+      }
+    } else {
+      var word = "", ch;
+      while ((ch = spec.charAt(pos)) && /\w/.test(ch)) { word += ch; ++pos; }
+      if (word in cx.protos) return cx.protos[word];
+    }
+    throw new Error("Unrecognized type spec: " + specIn);
+  }
+  return inner(name, self);
+}
+
+function populate(obj, props) {
+  for (var prop in props)
+    obj.ensureProp(prop, true).addType(parsePropSpec(props[prop], prop, obj));
+  return obj;
+}
+function defVars(defs) {
+  for (var prop in defs)
+    cx.topScope.vars[prop] = new Var(null, parsePropSpec(defs[prop], prop));
+}
+
+function initJSContext() {
+  var objProto = cx.protos.Object = new Obj(null, "Object");
+  cx.protos.Array = new Obj(objProto, "Array");
+  cx.protos.Function = new Obj(objProto, "Function");
+  cx.protos.String = new Obj(objProto, "String");
+  cx.protos.Number = new Obj(objProto, "Number");
+  cx.protos.Date = new Obj(objProto, "Date")
+  cx.prim.str = new Prim(cx.protos.String, "<string>");
+  cx.prim.bool = new Prim(cx.protos.Object, "<bool>");
+  cx.prim.num = new Prim(cx.protos.Number, "<number>");
+  cx.prim.null = new Prim(null, "<null>");
+  cx.prim.undef = new Prim(null, "<undefined>");
+
+  populate(objProto, {
+    toString: "fn() -> <string>",
+    toLocaleString: "fn() -> <string>",
+    valueOf: "fn() -> <number>",
+    hasOwnProperty: "fn(<string>) -> <bool>",
+    propertyIsEnumerable: "fn(<string>) -> <bool>"
+  });
+  // FIXME use information about array elt type to fill in types somehow
+  // FIXME type parameters would be neat -- i.e the inner type of map's result is the retval of the argument function
+  populate(cx.protos.Array, {
+    length: "<number>",
+    concat: "fn([<?>]) -> [<?>]",
+    join: "fn(<string>) -> <string>",
+    splice: "fn(<number>, <number>)",
+    pop: "fn() -> <?>",
+    push: "fn(<?>) -> <number>",
+    shift: "fn() -> <?>",
+    unshift: "fn(<?>) -> <number>",
+    slice: "fn(<number>, <number>) -> [<?>]",
+    reverse: "fn()",
+    sort: "fn(fn(<?>, <?>) -> <number>)",
+    indexOf: "fn(<?>, <number>) -> <number>",
+    lastIndexOf: "fn(<?>, <number>) -> <number>",
+    every: "fn(fn(<?>, <number>) -> <bool>) -> <bool>",
+    some: "fn(fn(<?>, <number>) -> <bool>) -> <bool>",
+    filter: "fn(fn(<?>, <number>) -> <bool>) -> [<?>]",
+    forEach: "fn(fn(<?>, <number>))",
+    map: "fn(fn(<?>, <number>) -> <?>) -> [<?>]",
+    reduce: "fn(fn(<?>, <?>, <number>) -> <?>, <?>) -> <?>",
+    reduceRight: "fn(fn(<?>, <?>, <number>) -> <?>, <?>) -> <?>"
+  });
+  populate(cx.protos.Function, {
+    apply: "fn(<?>, [<?>])",
+    call: "fn(<?>)",
+    bind: "fn(<?>)"
+  });
+  cx.protos.RegExp = populate(new Obj(objProto, "RegExp"), {
+    exec: "fn(<string>) -> [<string>]",
+    compile: "fn(<string>, <string>)",
+    test: "fn(<string>) -> <bool>",
+    global: "<bool>",
+    ignoreCase: "<bool>",
+    multiline: "<bool>",
+    source: "<string>",
+    lastIndex: "<number>"
+  });
+  populate(cx.protos.String, {
+    length: "<number>",
+    charAt: "fn(<number>) -> <string>",
+    charCodeAt: "fn(<number>) -> <number>",
+    indexOf: "fn(<string>, <number>) -> <number>",
+    lastIndexOf: "fn(<string>, <number>) -> <number>",
+    substring: "fn(<number>, <number>) -> <string>",
+    substr: "fn(<number>, <number>) -> <string>",
+    slice: "fn(<number>, <number>) -> <string>",
+    trim: "fn() -> <string>",
+    trimLeft: "fn() -> <string>",
+    trimRight: "fn() -> <string>",
+    toUpperCase: "fn() -> <string>",
+    toLowerCase: "fn() -> <string>",
+    toLocaleUpperCase: "fn() -> <string>",
+    toLocaleLowerCase: "fn() -> <string>",
+    split: "fn(<string>) -> [<string>]",
+    concat: "fn(<string>) -> <string>",
+    localeCompare: "fn(<string>) -> <number>",
+    match: "fn(RegExp) -> [<string>]",
+    replace: "fn(RegExp, <string>) -> <string>",
+    search: "fn(RegExp) -> <number>"
+  });
+  populate(cx.protos.Number, {
+    toString: "fn(<number>) -> <string>",
+    toFixed: "fn(<number>) -> <string>",
+    toExponential: "fn(<number>) -> <string>"
+  });
+  populate(cx.protos.Date, {
+    toUTCString: "fn() -> <string>",
+    toISOString: "fn() -> <string>",
+    toDateString: "fn() -> <string>",
+    toTimeString: "fn() -> <string>",
+    toLocaleString: "fn() -> <string>",
+    toLocaleDateString: "fn() -> <string>",
+    toLocaleTimeString: "fn() -> <string>",
+    getTime: "fn() -> <number>",
+    getFullYear: "fn() -> <number>",
+    getYear: "fn() -> <number>",
+    getMonth: "fn() -> <number>",
+    getUTCMonth: "fn() -> <number>",
+    getDate: "fn() -> <number>",
+    getUTCDate: "fn() -> <number>",
+    getDay: "fn() -> <number>",
+    getUTCDay: "fn() -> <number>",
+    getHours: "fn() -> <number>",
+    getUTCHours: "fn() -> <number>",
+    getMinutes: "fn() -> <number>",
+    getUTCMinutes: "fn() -> <number>",
+    getSeconds: "fn() -> <number>",
+    getUTCSeconds: "fn() -> <number>",
+    getMilliseconds: "fn() -> <number>",
+    getUTCMilliseconds: "fn() -> <number>",
+    getTimezoneOffset: "fn() -> <number>",
+    setTime: "fn(Date) -> <number>",
+    setFullYear: "fn(<number>) -> <number>",
+    setUTCFullYear: "fn(<number>) -> <number>",
+    setMonth: "fn(<number>) -> <number>",
+    setUTCMonth: "fn(<number>) -> <number>",
+    setDate: "fn(<number>) -> <number>",
+    setUTCDate: "fn(<number>) -> <number>",
+    setHours: "fn(<number>) -> <number>",
+    setUTCHours: "fn(<number>) -> <number>",
+    setMinutes: "fn(<number>) -> <number>",
+    setUTCMinutes: "fn(<number>) -> <number>",
+    setSeconds: "fn(<number>) -> <number>",
+    setUTCSeconds: "fn(<number>) -> <number>",
+    setMilliseconds: "fn(<number>) -> <number>",
+    setUTCMilliseconds: "fn(<number>) -> <number>"
+  });
+  cx.protos.Error = populate(new Obj(objProto, "Error"), {
+    name: "<string>",
+    message: "<string>"
+  });
+
+  defVars({
+    Infinity: "<number>",
+    undefined: "<undefined>",
+    NaN: "<number>",
+    Object: "ctor()",
+    Function: "ctor(<string>)",
+    Array: "ctor(<number>)",
+    Number: "ctor(<?>)",
+    String: "ctor(<?>)",
+    RegExp: "ctor(<string>, <string>)",
+    Date: "ctor(<number>)",
+    Boolean: "fn(<?>) -> <bool>",
+    Error: "ctor(<string>)",
+    parseInt: "fn(<string>, <number>) -> <number>",
+    parseFloat: "fn(<string>) -> <number>",
+    isNaN: "fn(<number>) -> <bool>",
+    eval: "fn(<string>) -> <?>",
+    encodeURI: "fn(<string>) -> <string>",
+    encodeURIComponent: "fn(<string>) -> <string>",
+    decodeURI: "fn(<string>) -> <string>",
+    decodeURIComponent: "fn(<string>) -> <string>"
+  });
+  var top = cx.topScope.vars;
+  // FIXME wrap in vars (?)
+  top.SyntaxError = top.ReferenceError = top.TypeError = top.URIError = top.EvalError = top.RangeError = top.Error;
+  top.Math = new Var(null, populate(new Obj(objProto, "Math"), {
+    E: "<number>", LN2: "<number>", LN10: "<number>", LOG2E: "<number>", LOG10E: "<number>",
+    SQRT1_2: "<number>", SQRT2: "<number>", PI: "<number>",
+    abs: "fn(<number>) -> <number>",
+    cos: "fn(<number>) -> <number>",
+    sin: "fn(<number>) -> <number>",
+    tan: "fn(<number>) -> <number>",
+    acos: "fn(<number>) -> <number>",
+    asin: "fn(<number>) -> <number>",
+    atan: "fn(<number>) -> <number>",
+    atan2: "fn(<number>, <number>) -> <number>",
+    ceil: "fn(<number>) -> <number>",
+    floor: "fn(<number>) -> <number>",
+    round: "fn(<number>) -> <number>",
+    exp: "fn(<number>) -> <number>",
+    log: "fn(<number>) -> <number>",
+    sqrt: "fn(<number>) -> <number>",
+    pow: "fn(<number>, <number>) -> <number>",
+    max: "fn(<number>, <number>) -> <number>",
+    min: "fn(<number>, <number>) -> <number>",
+    random: "fn() -> <number>"
+  }));
+  top.JSON = new Var(null, populate(new Obj(objProto, "JSON"), {
+    parse: "fn(<string>) -> <?>",
+    stringify: "fn(<?>) -> <string>"
+  }));
+  populate(top.Object.aval.types[0], {
+    getPrototypeOf: "fn(<?>) -> <?>",
+    create: "fn(<?>) -> <?>",
+    defineProperties: "fn(<?>, <?>)",
+    keys: "fn(<?>) -> [<string>]"
+  });
+  populate(top.Array.aval.types[0], {
+    isArray: "fn(<?>) -> <bool>"
+  });
+  populate(top.String.aval.types[0], {
+    fromCharCode: "fn(<number>) -> <string>"
+  });
+  populate(top.Number.aval.types[0], {
+    MAX_VALUE: "<number>",
+    MIN_VALUE: "<number>",
+    POSITIVE_INFINITY: "<number>",
+    NEGATIVE_INFINITY: "<number>"
+  });
+  populate(top.Date.aval.types[0], {
+    parse: "fn(<string>) -> Date",
+    UTC: "fn(<number>, <number>, <number>, <number>, <number>, <number>, <number>) -> <number>",
+    now: "fn() -> <number>"
+  });
+}
+
+function initBrowserContext() {
+  // FIXME
+}
+
+function initNodeContext() {
+  // FIXME
 }
