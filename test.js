@@ -35,7 +35,9 @@ function runTests() {
 function outputInfo(file) {
   infer.withContext(null, function() {
     var info = infer.analyze(file);
-    for (var v in info.scope.props)
-      console.log(v + ": " + info.scope.props[v].toString(2));
+    for (var i = 3; i < process.argv.length; ++i) {
+      var v = process.argv[i], found = info.scope.lookup(v, true);
+      console.log(v + ": " + found.toString(2));
+    }
   });
 }

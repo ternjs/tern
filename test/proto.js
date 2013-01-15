@@ -1,3 +1,4 @@
+// Foo: fn(<bool>)
 function Foo(x) {
   this.x = x;
   this.y = [1];
@@ -8,7 +9,5 @@ Foo.prototype = {
   bar: 13
 };
 
+// z: {bar: <number>, toString: fn() -> <string>, x: <bool>, y: [<number>]}
 var z = new Foo(true);
-
-// Foo: fn(<bool>)
-// z: {bar: <number>, toString: fn() -> <string>, x: <bool>, y: {<i>: <number>}}

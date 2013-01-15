@@ -218,7 +218,7 @@ Obj.prototype = {
     if (!maxDepth && this.name) return this.name;
     // FIXME cache these strings?
     var props = [];
-    for (var prop in this.props) if (hop(this.props, prop)) {
+    for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop)) {
       if (maxDepth)
         props.push(prop + ": " + this.props[prop].toString(maxDepth - 1));
       else if (this.props[prop].flags & flag_initializer)
@@ -304,6 +304,16 @@ Fn.prototype.ensureProp = function(prop, alsoProto) {
   return retval;
 };
 
+function Arr(contentType) {
+  Obj.call(this, cx.protos.Array);
+  if (contentType) contentType.propagate(this.ensureProp("<i>"));
+}
+Arr.prototype = Object.create(Obj.prototype);
+Arr.prototype.toString = function(maxDepth) {
+  if (maxDepth) maxDepth--;
+  return "[" + this.findProp("<i>").toString(maxDepth) + "]";
+};
+
 // INFERENCE CONTEXT
 
 function Context(type) {
@@ -338,9 +348,11 @@ function Scope(prev) {
 Scope.prototype = Object.create(Obj.prototype);
 Scope.prototype.lookup = function(name, force) {
   var self = this;
-  while (self) {
+  for (;;) {
     if (name in self.props) return self.props[name];
-    self = self.prev;
+    var prev = self.prev;
+    if (prev) self = prev;
+    else break;
   }
   if (force) return self.ensureProp(name);
 };
@@ -450,10 +462,7 @@ var inferExprVisitor = {
       var elt = node.elements[i];
       if (elt) runInfer(elt, scope, c).propagate(eltval);
     }
-    // FIXME implement array type
-    var arr = new Obj(cx.protos.Array);
-    eltval.propagate(arr.ensureProp("<i>"));
-    return arr;
+    return new Arr(eltval);
   },
   ObjectExpression: function(node, scope, c, name) {
     var props = [];
@@ -634,9 +643,7 @@ function parseType(specIn, name, self) {
       }
     } else if (spec.charAt(pos) == "[") {
       ++pos;
-      // FIXME array type
-      var elt = inner(), arr = new Obj(cx.protos.Array);
-      if (elt) elt.propagate(arr.ensureProp("<i>"));
+      var arr = new Arr(inner());
       if (spec.charAt(pos) == "]") {
         ++pos;
         return arr;
@@ -652,8 +659,8 @@ function parseType(specIn, name, self) {
 }
 
 function populate(obj, props) {
-  for (var prop in props) {
-    var v = cx.topScope.ensureProp(prop), spec = props[prop];
+  for (var prop in props) if (hop(props, prop)) {
+    var v = obj.ensureProp(prop), spec = props[prop];
     var t = typeof spec == "string" ? parseType(spec, prop, obj) : spec;
     if (t) t.propagate(v);
   }
@@ -794,9 +801,9 @@ function initJSContext() {
     message: "<string>"
   });
 
-  cx.topScope.props = Object.create(objProto);
+  cx.topScope.props = Object.create(objProto.props);
   var errC = parseType("ctor(<string>)", "Error");
-  var top = populate(cx.topScope, {
+  populate(cx.topScope, {
     Infinity: "<number>",
     undefined: "<undefined>",
     NaN: "<number>",
