@@ -1,4 +1,4 @@
-// Foo: fn(<bool>)
+// Foo: fn(x: <bool>)
 function Foo(x) {
   this.x = x;
   this.y = [1];

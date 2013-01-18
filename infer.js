@@ -292,7 +292,12 @@ function Fn(name, self, args, retval) {
 Fn.prototype = Object.create(Obj.prototype);
 Fn.prototype.toString = function(maxDepth) {
   if (maxDepth) maxDepth--;
-  var str = "fn(" + this.args.map(function(x) { return x.toString(maxDepth); }).join(", ") + ")";
+  var str = "fn(" + this.args.map(function(x) {
+    var name = x.name, typ = x.toString(maxDepth);
+    if (name && typeof name != "string") name = name.name;
+    if (name) return name + ": " + typ;
+    else return typ;
+  }).join(", ") + ")";
   var rettype = this.retval.toString(maxDepth);
   if (rettype != "<?>") str += " -> " + rettype;
   return str;
@@ -364,14 +369,14 @@ var scopeGatherer = walk.make({
     var inner = node.body.scope = new Scope(scope), argvals = inner.argvals = [];
     for (var i = 0; i < node.params.length; ++i) {
       var param = node.params[i], b = inner.ensureProp(param.name);
-      b.node = param;
+      b.name = param;
       argvals.push(b);
     }
     inner.retval = new AVal;
     inner.self = new AVal;
     if (node.id) {
       var decl = node.type == "FunctionDeclaration";
-      (decl ? scope : inner).ensureProp(node.id.name).node = node.id;
+      (decl ? scope : inner).ensureProp(node.id.name).name = node.id;
     }
     c(node.body, inner, "ScopeBody");
   },
@@ -379,7 +384,7 @@ var scopeGatherer = walk.make({
     c(node.block, scope, "Statement");
     for (var i = 0; i < node.handlers.length; ++i) {
       var handler = node.handlers[i], name = handler.param.name;
-      scope.ensureProp(name).node = handler.param;
+      scope.ensureProp(name).name = handler.param;
       c(handler.body, scope, "ScopeBody");
     }
     if (node.finalizer) c(node.finalizer, scope, "Statement");
@@ -387,7 +392,7 @@ var scopeGatherer = walk.make({
   VariableDeclaration: function(node, scope, c) {
     for (var i = 0; i < node.declarations.length; ++i) {
       var decl = node.declarations[i];
-      scope.ensureProp(decl.id.name).node = decl.id;
+      scope.ensureProp(decl.id.name).name = decl.id;
       if (decl.init) c(decl.init, scope, "Expression");
     }
   }
@@ -607,12 +612,21 @@ var analyze = exports.analyze = function(file) {
 
 // CONTEXT POPULATING
 
-function parseType(specIn, name, self) {
-  var spec = specIn, pos = 0;
+function parseType(spec, name, self) {
+  var pos = 0;
   function parseArgs() {
     var args = [];
     while (spec.charAt(pos) != ")") {
-      args.push(new AVal(inner()));
+      var colon = spec.indexOf(": ", pos), argname, aval;
+      if (colon != -1) {
+        argname = spec.slice(pos, colon);
+        if (/^[\w?]+$/.test(argname))
+          pos = colon + 2;
+        else
+          argname = null;
+      }
+      args.push(aval = new AVal(inner()));
+      if (argname) aval.name = argname;
       if (spec.indexOf(", ", pos) == pos) pos += 2;
     }
     ++pos;
@@ -653,7 +667,7 @@ function parseType(specIn, name, self) {
       while ((ch = spec.charAt(pos)) && /\w/.test(ch)) { word += ch; ++pos; }
       if (word in cx.protos) return cx.protos[word];
     }
-    throw new Error("Unrecognized type spec: " + specIn);
+    throw new Error("Unrecognized type spec: " + spec);
   }
   return inner(name, self);
 }
@@ -684,42 +698,42 @@ function initJSContext() {
     toString: "fn() -> <string>",
     toLocaleString: "fn() -> <string>",
     valueOf: "fn() -> <number>",
-    hasOwnProperty: "fn(<string>) -> <bool>",
-    propertyIsEnumerable: "fn(<string>) -> <bool>"
+    hasOwnProperty: "fn(prop: <string>) -> <bool>",
+    propertyIsEnumerable: "fn(prop: <string>) -> <bool>"
   });
   // FIXME use information about array elt type to fill in types somehow
   // FIXME type parameters would be neat -- i.e the inner type of map's result is the retval of the argument function
   populate(cx.protos.Array, {
     length: "<number>",
-    concat: "fn([<?>]) -> [<?>]",
-    join: "fn(<string>) -> <string>",
-    splice: "fn(<number>, <number>)",
+    concat: "fn(other: [<?>]) -> [<?>]",
+    join: "fn(separator?: <string>) -> <string>",
+    splice: "fn(pos: <number>, amount: <number>)",
     pop: "fn() -> <?>",
-    push: "fn(<?>) -> <number>",
+    push: "fn(newelt: <?>) -> <number>",
     shift: "fn() -> <?>",
-    unshift: "fn(<?>) -> <number>",
-    slice: "fn(<number>, <number>) -> [<?>]",
+    unshift: "fn(newelt: <?>) -> <number>",
+    slice: "fn(from: <number>, to?: <number>) -> [<?>]",
     reverse: "fn()",
-    sort: "fn(fn(<?>, <?>) -> <number>)",
-    indexOf: "fn(<?>, <number>) -> <number>",
-    lastIndexOf: "fn(<?>, <number>) -> <number>",
-    every: "fn(fn(<?>, <number>) -> <bool>) -> <bool>",
-    some: "fn(fn(<?>, <number>) -> <bool>) -> <bool>",
-    filter: "fn(fn(<?>, <number>) -> <bool>) -> [<?>]",
-    forEach: "fn(fn(<?>, <number>))",
-    map: "fn(fn(<?>, <number>) -> <?>) -> [<?>]",
-    reduce: "fn(fn(<?>, <?>, <number>) -> <?>, <?>) -> <?>",
-    reduceRight: "fn(fn(<?>, <?>, <number>) -> <?>, <?>) -> <?>"
+    sort: "fn(compare?: fn(a: <?>, b: <?>) -> <number>)",
+    indexOf: "fn(elt: <?>, from?: <number>) -> <number>",
+    lastIndexOf: "fn(elt: <?>, from?: <number>) -> <number>",
+    every: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> <bool>",
+    some: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> <bool>",
+    filter: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> [<?>]",
+    forEach: "fn(f: fn(elt: <?>, i: <number>))",
+    map: "fn(f: fn(elt: <?>, i: <number>) -> <?>) -> [<?>]",
+    reduce: "fn(combine: fn(sum: <?>, elt: <?>, i: <number>) -> <?>, init?: <?>) -> <?>",
+    reduceRight: "fn(combine: fn(sum: <?>, elt: <?>, i: <number>) -> <?>, init?: <?>) -> <?>"
   });
   populate(cx.protos.Function, {
-    apply: "fn(<?>, [<?>])",
-    call: "fn(<?>)",
-    bind: "fn(<?>)"
+    apply: "fn(this: <?>, args: [<?>])",
+    call: "fn(this: <?>)",
+    bind: "fn(this: <?>)"
   });
   cx.protos.RegExp = populate(new Obj(objProto, "RegExp"), {
-    exec: "fn(<string>) -> [<string>]",
-    compile: "fn(<string>, <string>)",
-    test: "fn(<string>) -> <bool>",
+    exec: "fn(input: <string>) -> [<string>]",
+    compile: "fn(source: <string>, flags?: <string>)",
+    test: "fn(input: <string>) -> <bool>",
     global: "<bool>",
     ignoreCase: "<bool>",
     multiline: "<bool>",
@@ -728,13 +742,13 @@ function initJSContext() {
   });
   populate(cx.protos.String, {
     length: "<number>",
-    charAt: "fn(<number>) -> <string>",
-    charCodeAt: "fn(<number>) -> <number>",
-    indexOf: "fn(<string>, <number>) -> <number>",
-    lastIndexOf: "fn(<string>, <number>) -> <number>",
-    substring: "fn(<number>, <number>) -> <string>",
-    substr: "fn(<number>, <number>) -> <string>",
-    slice: "fn(<number>, <number>) -> <string>",
+    charAt: "fn(i: <number>) -> <string>",
+    charCodeAt: "fn(i: <number>) -> <number>",
+    indexOf: "fn(char: <string>, from?: <number>) -> <number>",
+    lastIndexOf: "fn(char: <string>, from?: <number>) -> <number>",
+    substring: "fn(from: <number>, to?: <number>) -> <string>",
+    substr: "fn(from: <number>, length?: <number>) -> <string>",
+    slice: "fn(from: <number>, to?: <number>) -> <string>",
     trim: "fn() -> <string>",
     trimLeft: "fn() -> <string>",
     trimRight: "fn() -> <string>",
@@ -742,17 +756,17 @@ function initJSContext() {
     toLowerCase: "fn() -> <string>",
     toLocaleUpperCase: "fn() -> <string>",
     toLocaleLowerCase: "fn() -> <string>",
-    split: "fn(<string>) -> [<string>]",
-    concat: "fn(<string>) -> <string>",
-    localeCompare: "fn(<string>) -> <number>",
-    match: "fn(RegExp) -> [<string>]",
-    replace: "fn(RegExp, <string>) -> <string>",
-    search: "fn(RegExp) -> <number>"
+    split: "fn(pattern: <string>) -> [<string>]",
+    concat: "fn(other: <string>) -> <string>",
+    localeCompare: "fn(other: <string>) -> <number>",
+    match: "fn(pattern: RegExp) -> [<string>]",
+    replace: "fn(pattern: RegExp, replacement: <string>) -> <string>",
+    search: "fn(pattern: RegExp) -> <number>"
   });
   populate(cx.protos.Number, {
-    toString: "fn(<number>) -> <string>",
-    toFixed: "fn(<number>) -> <string>",
-    toExponential: "fn(<number>) -> <string>"
+    toString: "fn(radix?: <number>) -> <string>",
+    toFixed: "fn(digits: <number>) -> <string>",
+    toExponential: "fn(digits: <number>) -> <string>"
   });
   populate(cx.protos.Date, {
     toUTCString: "fn() -> <string>",
@@ -780,21 +794,21 @@ function initJSContext() {
     getMilliseconds: "fn() -> <number>",
     getUTCMilliseconds: "fn() -> <number>",
     getTimezoneOffset: "fn() -> <number>",
-    setTime: "fn(Date) -> <number>",
-    setFullYear: "fn(<number>) -> <number>",
-    setUTCFullYear: "fn(<number>) -> <number>",
-    setMonth: "fn(<number>) -> <number>",
-    setUTCMonth: "fn(<number>) -> <number>",
-    setDate: "fn(<number>) -> <number>",
-    setUTCDate: "fn(<number>) -> <number>",
-    setHours: "fn(<number>) -> <number>",
-    setUTCHours: "fn(<number>) -> <number>",
-    setMinutes: "fn(<number>) -> <number>",
-    setUTCMinutes: "fn(<number>) -> <number>",
-    setSeconds: "fn(<number>) -> <number>",
-    setUTCSeconds: "fn(<number>) -> <number>",
-    setMilliseconds: "fn(<number>) -> <number>",
-    setUTCMilliseconds: "fn(<number>) -> <number>"
+    setTime: "fn(date: Date) -> <number>",
+    setFullYear: "fn(year: <number>) -> <number>",
+    setUTCFullYear: "fn(year: <number>) -> <number>",
+    setMonth: "fn(month: <number>) -> <number>",
+    setUTCMonth: "fn(month: <number>) -> <number>",
+    setDate: "fn(day: <number>) -> <number>",
+    setUTCDate: "fn(day: <number>) -> <number>",
+    setHours: "fn(hour: <number>) -> <number>",
+    setUTCHours: "fn(hour: <number>) -> <number>",
+    setMinutes: "fn(min: <number>) -> <number>",
+    setUTCMinutes: "fn(min: <number>) -> <number>",
+    setSeconds: "fn(sec: <number>) -> <number>",
+    setUTCSeconds: "fn(sec: <number>) -> <number>",
+    setMilliseconds: "fn(ms: <number>) -> <number>",
+    setUTCMilliseconds: "fn(ms: <number>) -> <number>"
   });
   cx.protos.Error = populate(new Obj(objProto, "Error"), {
     name: "<string>",
@@ -802,46 +816,46 @@ function initJSContext() {
   });
 
   cx.topScope.props = Object.create(objProto.props);
-  var errC = parseType("ctor(<string>)", "Error");
+  var errC = parseType("ctor(message: <string>)", "Error");
   populate(cx.topScope, {
     Infinity: "<number>",
     undefined: "<undefined>",
     NaN: "<number>",
     Object: populate(parseType("ctor()", "Object"), {
-      getPrototypeOf: "fn(<?>) -> <?>",
-      create: "fn(<?>) -> <?>",
-      defineProperties: "fn(<?>, <?>)",
-      keys: "fn(<?>) -> [<string>]"
+      getPrototypeOf: "fn(obj: <?>) -> <?>",
+      create: "fn(proto: <?>) -> <?>",
+      defineProperties: "fn(obn: <?>, props: <?>)",
+      keys: "fn(obj: <?>) -> [<string>]"
     }),
-    Function: "ctor(<string>)",
-    Array: populate(parseType("ctor(<number>)", "Array"), {
-      isArray: "fn(<?>) -> <bool>"
+    Function: "ctor(body: <string>)",
+    Array: populate(parseType("ctor(size: <number>)", "Array"), {
+      isArray: "fn(value: <?>) -> <bool>"
     }),
-    String: populate(parseType("ctor(<?>) -> <string>", "String"), {
-      fromCharCode: "fn(<number>) -> <string>"
+    String: populate(parseType("ctor(value: <?>) -> <string>", "String"), {
+      fromCharCode: "fn(code: <number>) -> <string>"
     }),
-    Number: populate(parseType("ctor(<?>) -> <number>", "Number"), {
+    Number: populate(parseType("ctor(value: <?>) -> <number>", "Number"), {
       MAX_VALUE: "<number>",
       MIN_VALUE: "<number>",
       POSITIVE_INFINITY: "<number>",
       NEGATIVE_INFINITY: "<number>"
     }),
-    RegExp: "ctor(<string>, <string>)",
-    Date: populate(parseType("ctor(<number>)", "Date"), {
-      parse: "fn(<string>) -> Date",
-      UTC: "fn(<number>, <number>, <number>, <number>, <number>, <number>, <number>) -> <number>",
+    RegExp: "ctor(source: <string>, flags?: <string>)",
+    Date: populate(parseType("ctor(ms: <number>)", "Date"), {
+      parse: "fn(source: <string>) -> Date",
+      UTC: "fn(year: <number>, month: <number>, date: <number>, hour?: <number>, min?: <number>, sec?: <number>, ms?: <number>) -> <number>",
       now: "fn() -> <number>"
     }),
-    Boolean: "fn(<?>) -> <bool>",
+    Boolean: "fn(value: <?>) -> <bool>",
     Error: errC, SyntaxError: errC, ReferenceError: errC, URIError: errC, EvalError: errC, RangeError: errC,
-    parseInt: "fn(<string>, <number>) -> <number>",
-    parseFloat: "fn(<string>) -> <number>",
-    isNaN: "fn(<number>) -> <bool>",
-    eval: "fn(<string>) -> <?>",
-    encodeURI: "fn(<string>) -> <string>",
-    encodeURIComponent: "fn(<string>) -> <string>",
-    decodeURI: "fn(<string>) -> <string>",
-    decodeURIComponent: "fn(<string>) -> <string>",
+    parseInt: "fn(string: <string>, radix?: <number>) -> <number>",
+    parseFloat: "fn(string: <string>) -> <number>",
+    isNaN: "fn(value: <number>) -> <bool>",
+    eval: "fn(code: <string>) -> <?>",
+    encodeURI: "fn(uri: <string>) -> <string>",
+    encodeURIComponent: "fn(uir: <string>) -> <string>",
+    decodeURI: "fn(uri: <string>) -> <string>",
+    decodeURIComponent: "fn(uri: <string>) -> <string>",
     Math: populate(new Obj(objProto, "Math"), {
       E: "<number>", LN2: "<number>", LN10: "<number>", LOG2E: "<number>", LOG10E: "<number>",
       SQRT1_2: "<number>", SQRT2: "<number>", PI: "<number>",
@@ -865,8 +879,8 @@ function initJSContext() {
       random: "fn() -> <number>"
     }),
     JSON: populate(new Obj(objProto, "JSON"), {
-      parse: "fn(<string>) -> <?>",
-      stringify: "fn(<?>) -> <string>"
+      parse: "fn(json: <string>) -> <?>",
+      stringify: "fn(value: <?>) -> <string>"
     })
   });
 }

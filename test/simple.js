@@ -6,7 +6,7 @@ var foo = (function() {
 // x: {bar: <number>, foo: <number>}
 var x = {};
 
-// init: fn({bar: <number>, foo: <number>})
+// init: fn(v: {bar: <number>, foo: <number>})
 function init(v) {
   v.foo = 10;
   v.bar = 1 + 1;
