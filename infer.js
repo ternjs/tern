@@ -32,6 +32,14 @@ AVal.prototype = {
     for (var i = 0; i < this.types.length; ++i)
       c.addType(this.types[i]);
   },
+  getProp: function(prop) {
+    var found = (this.props || (this.props = Object.create(null)))[prop];
+    if (!found) {
+      found = this.props[prop] = new AVal;
+      this.propagate(new PropIsSubset(prop, found));
+    }
+    return found;
+  },
 
   dominantType: function() {
     var max = 0, maxType;
@@ -134,7 +142,7 @@ function PropIsSubset(prop, target) {
 PropIsSubset.prototype = {
   addType: function(type) {
     if (type.ensureProp)
-      type.findProp(this.prop).propagate(this.target);
+      type.getProp(this.prop).propagate(this.target);
   },
   propHint: function() { return this.prop; }
 };
@@ -156,10 +164,10 @@ function IsCallee(self, args, retval) {
 IsCallee.prototype = {
   addType: function(fn) {
     if (!(fn instanceof Fn)) return;
-    for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
+    if (this.args) for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
       this.args[i].propagate(fn.args[i]);
     if (this.self) this.self.propagate(fn.self);
-    fn.retval.propagate(this.retval);
+    if (this.retval) fn.retval.propagate(this.retval);
   },
   typeHint: function(maxDepth) {
     return new Fn(null, this.self, this.args, this.retval).toString(maxDepth);
@@ -234,7 +242,7 @@ Obj.prototype = {
     this.addProp(prop, av);
     return av;
   },
-  findProp: function(prop) {
+  getProp: function(prop) {
     return this.ensureProp(prop, true);
   },
   addProp: function(prop, val) {
@@ -311,12 +319,13 @@ Fn.prototype.ensureProp = function(prop, alsoProto) {
 
 function Arr(contentType) {
   Obj.call(this, cx.protos.Array);
-  if (contentType) contentType.propagate(this.ensureProp("<i>"));
+  var content = this.ensureProp("<i>");
+  if (contentType) contentType.propagate(content);
 }
 Arr.prototype = Object.create(Obj.prototype);
 Arr.prototype.toString = function(maxDepth) {
   if (maxDepth) maxDepth--;
-  return "[" + this.findProp("<i>").toString(maxDepth) + "]";
+  return "[" + this.getProp("<i>").toString(maxDepth) + "]";
 };
 
 // INFERENCE CONTEXT
@@ -408,14 +417,6 @@ function propName(node, scope, c) {
   if (prop.type == "Literal" && typeof prop.value == "string") return prop.value;
   runInfer(prop, scope, c);
   return "<i>";
-}
-function getProp(obj, propName) {
-  var pn = "prop_" + propName, found = obj[pn];
-  if (!found) {
-    found = obj[pn] = new AVal;
-    obj.propagate(new PropIsSubset(propName, found));
-  }
-  return found;
 }
 
 function lvalName(node) {
@@ -545,10 +546,10 @@ var inferExprVisitor = {
     var callee, self, args = [];
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
-      self = getProp(callee, "prototype");
+      self = callee.getProp("prototype");
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
-      callee = getProp(self, propName(node.callee, scope, c));
+      callee = self.getProp(propName(node.callee, scope, c));
     } else {
       callee = runInfer(node.callee, scope, c)
     }
@@ -559,7 +560,7 @@ var inferExprVisitor = {
     return isNew ? self : retval;
   },
   MemberExpression: function(node, scope, c) {
-    return getProp(runInfer(node.object, scope, c), propName(node, scope, c));
+    return runInfer(node.object, scope, c).getProp(propName(node, scope, c));
   },
   Identifier: function(node, scope) {
     return scope.lookup(node.name, true);
@@ -612,41 +613,61 @@ var analyze = exports.analyze = function(file) {
 
 // CONTEXT POPULATING
 
-function parseType(spec, name, self) {
-  var pos = 0;
-  function parseArgs() {
+function TypeParser(spec) {
+  this.pos = 0; this.spec = spec; this._vars = null;
+}
+TypeParser.prototype = {
+  eat: function(str) {
+    if (str.length == 1 ? this.spec.charAt(this.pos) == str : this.spec.indexOf(str, this.pos) == this.pos) {
+      this.pos += str.length;
+      return true;
+    }
+  },
+  word: function(re) {
+    var word = "", ch, re = re || /[\w$]/;
+    while ((ch = this.spec.charAt(this.pos)) && re.test(ch)) { word += ch; ++this.pos; }
+    return word;
+  },
+  error: function() {
+    throw new Error("Unrecognized type spec: " + this.spec + " " + this.pos);
+  },
+  vars: function() {
+    return this._vars || (this._vars = Object.create(null));
+  },
+  parseArgs: function() {
     var args = [];
-    while (spec.charAt(pos) != ")") {
-      var colon = spec.indexOf(": ", pos), argname, aval;
+    while (!this.eat(")")) {
+      var colon = this.spec.indexOf(": ", this.pos), argname, aval;
       if (colon != -1) {
-        argname = spec.slice(pos, colon);
-        if (/^[\w?]+$/.test(argname))
-          pos = colon + 2;
+        argname = this.spec.slice(this.pos, colon);
+        if (/^[$\w?]+$/.test(argname))
+          this.pos = colon + 2;
         else
           argname = null;
       }
-      args.push(aval = new AVal(inner()));
-      if (argname) aval.name = argname;
-      if (spec.indexOf(", ", pos) == pos) pos += 2;
-    }
-    ++pos;
-    return args;
-  }
-  function inner(name, self) {
-    if (spec.indexOf("fn(", pos) == pos) {
-      pos += 3;
-      var args = parseArgs(), retType;
-      if (spec.indexOf(" -> ", pos) == pos) {
-        pos += 4;
-        retType = inner();
+      args.push(aval = new AVal(this.parseType()));
+      if (argname) {
+        if (argname.charAt(0) == "$") {
+          argname = argname.slice(1);
+          this.vars()[argname] = aval;
+        }
+        aval.name = argname;
       }
-      return new Fn(name, new AVal(self), args, new AVal(retType));
-    } else if (spec.indexOf("ctor(", pos) == pos) {
-      pos += 5;
-      return new Fn(name, new AVal(cx.protos[name]), parseArgs(), new AVal);
-    } else if (spec.charAt(pos) == "<") {
-      var end = spec.indexOf(">", pos), word = spec.slice(pos + 1, end);
-      pos = end + 1;
+      this.eat(", ");
+    }
+    return args;
+  },
+  parseTypeInner: function(name, self) {
+    if (this.eat("fn(")) {
+      if (self) this.self = new AVal(self);
+      var args = this.parseArgs(), retType;
+      if (this.eat(" -> ")) retType = this.parseType();
+      return new Fn(name, this.self || new AVal, args, new AVal(retType));
+    } else if (name && this.eat("ctor(")) {
+      return new Fn(name, new AVal(cx.protos[name]), this.parseArgs(), new AVal);
+    } else if (this.eat("<")) {
+      var end = this.spec.indexOf(">", this.pos), word = this.spec.slice(this.pos, end);
+      this.pos = end + 1;
       switch (word) {
       case "number": return cx.prim.num;
       case "string": return cx.prim.str;
@@ -655,21 +676,51 @@ function parseType(spec, name, self) {
       case "undefined": return cx.prim.undef;
       case "?": return null;
       }
-    } else if (spec.charAt(pos) == "[") {
-      ++pos;
-      var arr = new Arr(inner());
-      if (spec.charAt(pos) == "]") {
-        ++pos;
-        return arr;
-      }
+    } else if (this.eat("[")) {
+      var arr = new Arr(this.parseType());
+      if (this.eat("]")) return arr;
+    } else if (this.eat("$")) {
+      var name = this.word() || this.error(), vars = this.vars();
+      var found = vars[name];
+      if (!found) vars[name] = found = new AVal;
+      return found;
     } else {
-      var word = "", ch;
-      while ((ch = spec.charAt(pos)) && /\w/.test(ch)) { word += ch; ++pos; }
+      var word = this.word();
+      if (word == "this" && this.self) return this.self;
       if (word in cx.protos) return cx.protos[word];
     }
-    throw new Error("Unrecognized type spec: " + spec);
+    this.error();
+  },
+  parseType: function(name, self) {
+    var t = this.parseTypeInner(name, self);
+    while (this.eat(".")) {
+      var propName = this.word(/[\w<>$]/) || this.error();
+      if (propName != "$ret") {
+        t = t.getProp(propName);
+      } else if (t instanceof Fn) { // FIXME this is a bit of a kludge
+        t = t.retval;
+      } else {
+        var rv = new AVal;
+        t.propagate(new IsCallee(null, null, rv));
+        t = rv;
+      }
+    }
+    return t;
   }
-  return inner(name, self);
+}
+
+function parseType(spec, name, self) {
+  var p = new TypeParser(spec);
+  var found = p.parseType(name, self);
+
+  while (p.eat(", ")) {
+    var lhs = p.parseType();
+    if (!(lhs instanceof AVal) || !p.eat(" += ")) p.error();
+    var rhs = p.parseType();
+    rhs.propagate(lhs);
+    found.generic = true; // FIXME actually identify newly allocated avals, so that they can be copied
+  }
+  return found;
 }
 
 function populate(obj, props) {
@@ -705,29 +756,29 @@ function initJSContext() {
   // FIXME type parameters would be neat -- i.e the inner type of map's result is the retval of the argument function
   populate(cx.protos.Array, {
     length: "<number>",
-    concat: "fn(other: [<?>]) -> [<?>]",
+    concat: "fn($other: [this.<i>]) -> [$out], $out += $other.<i>, $out += this.<i>",
     join: "fn(separator?: <string>) -> <string>",
     splice: "fn(pos: <number>, amount: <number>)",
-    pop: "fn() -> <?>",
-    push: "fn(newelt: <?>) -> <number>",
-    shift: "fn() -> <?>",
-    unshift: "fn(newelt: <?>) -> <number>",
-    slice: "fn(from: <number>, to?: <number>) -> [<?>]",
+    pop: "fn() -> this.<i>",
+    push: "fn(newelt: this.<i>) -> <number>",
+    shift: "fn() -> this.<i>",
+    unshift: "fn(newelt: this.<i>) -> <number>",
+    slice: "fn(from: <number>, to?: <number>) -> [$out], $out += this.<i>",
     reverse: "fn()",
-    sort: "fn(compare?: fn(a: <?>, b: <?>) -> <number>)",
-    indexOf: "fn(elt: <?>, from?: <number>) -> <number>",
-    lastIndexOf: "fn(elt: <?>, from?: <number>) -> <number>",
-    every: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> <bool>",
-    some: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> <bool>",
-    filter: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> [<?>]",
-    forEach: "fn(f: fn(elt: <?>, i: <number>))",
-    map: "fn(f: fn(elt: <?>, i: <number>) -> <?>) -> [<?>]",
-    reduce: "fn(combine: fn(sum: <?>, elt: <?>, i: <number>) -> <?>, init?: <?>) -> <?>",
-    reduceRight: "fn(combine: fn(sum: <?>, elt: <?>, i: <number>) -> <?>, init?: <?>) -> <?>"
+    sort: "fn(compare?: fn(a: this.<i>, b: this.<i>) -> <number>)",
+    indexOf: "fn(elt: this.<i>, from?: <number>) -> <number>",
+    lastIndexOf: "fn(elt: this.<i>, from?: <number>) -> <number>",
+    every: "fn(test: fn(elt: this.<i>, i: <number>) -> <bool>) -> <bool>",
+    some: "fn(test: fn(elt: this.<i>, i: <number>) -> <bool>) -> <bool>",
+    filter: "fn(test: fn(elt: this.<i>, i: <number>) -> <bool>) -> [this.<i>]",
+    forEach: "fn(f: fn(elt: this.<i>, i: <number>))",
+    map: "fn($f: fn(elt: this.<i>, i: <number>) -> <?>) -> [$f.$ret]",
+    reduce: "fn(combine: fn($sum: <?>, elt: this.<i>, i: <number>) -> $sum, $init: <?>) -> $sum, $sum += $init",
+    reduceRight: "fn(combine: fn($sum: <?>, elt: this.<i>, i: <number>) -> $sum, $init: <?>) -> $sum, $sum += $init"
   });
   populate(cx.protos.Function, {
-    apply: "fn(this: <?>, args: [<?>])",
-    call: "fn(this: <?>)",
+    apply: "fn(this: <?>, args: [<?>]) -> this.$ret",
+    call: "fn(this: <?>, args?: <?>) -> this.$ret",
     bind: "fn(this: <?>)"
   });
   cx.protos.RegExp = populate(new Obj(objProto, "RegExp"), {
