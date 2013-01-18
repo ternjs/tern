@@ -11,7 +11,7 @@ var b = a.slice(2);
 var c = a.pop()
 
 // d: [<string>]
-var d = [].concat(["hi"]);
+var d = ["x"].concat(["hi"]);
 
 // e: [<bool>]
 var e = [true, false, true].filter(function(x){return x;});
@@ -20,7 +20,7 @@ var e = [true, false, true].filter(function(x){return x;});
 var f = [].map(function() {return "x";});
 
 // g: <number>
-var g = [].reduce(function(a, b) { return a + b; }, 0);
+var g = [].reduce(function(a, b) { return a - 2; }, 0);
 
 // h: <number>
 var h = Math.cos.call(null, 10);
