@@ -222,6 +222,7 @@ function hop(obj, prop) {
 }
 
 function Obj(proto, name) {
+  if (proto === true) proto = cx.protos.Object;
   this.props = Object.create(proto && proto.props);
   this.name = name;
 }
@@ -276,7 +277,7 @@ Obj.fromInitializer = function(props, name) {
   }
 
   // Nothing found, allocate a new one
-  var obj = new Obj(cx.protos.Object, name);
+  var obj = new Obj(true, name);
   for (var i = 0; i < props.length; ++i) {
     var prop = props[i], aval = obj.ensureProp(prop.name);
     aval.flags |= flag_initializer;
@@ -341,6 +342,7 @@ function Context(type) {
   this.topScope = new Scope();
   this.protos = Object.create(null);
   this.prim = Object.create(null);
+  this.defs = Object.create(null);
   exports.withContext(this, function() {
     initJSContext();
     if (type == "browser") initBrowserContext();
@@ -544,6 +546,8 @@ var inferExprVisitor = {
     return join(runInfer(node.consequent, scope, c),
                 runInfer(node.alternate, scope, c));
   },
+  // FIXME separate between prototype and instances, but reuse
+  // instance type
   NewExpression: function(node, scope, c) {
     return this.CallExpression(node, scope, c, true);
   },
@@ -682,6 +686,7 @@ TypeParser.prototype = {
       if (this.eat("]")) return arr;
     } else {
       var word = this.word();
+      if (word in cx.defs) return cx.defs[word];
       if (word in cx.protos) return cx.protos[word];
     }
     this.error();
@@ -721,217 +726,52 @@ function parseType(spec, name, self) {
   return new TypeParser(spec).parseType(name, self, true);
 }
 
-function populate(obj, props) {
-  for (var prop in props) if (hop(props, prop)) {
-    var v = obj.ensureProp(prop), spec = props[prop], ty = spec;
-    if (typeof spec == "string") ty = parseType(spec, prop, obj);
+function populate(obj, props, name) {
+  for (var prop in props) if (hop(props, prop) && !/^__/.test(prop)) {
+    var nm = name ? name + "." + prop : prop;
+    var v = obj.ensureProp(prop);
+    var ty = interpret(props[prop], nm, obj);
     if (ty) ty.propagate(v);
   }
   return obj;
 }
 
+function interpret(spec, name, self) {
+  if (typeof spec == "string") return parseType(spec, name, self);
+  // Else, it is an object spec
+  var obj;
+  if (spec.__type) obj = interpret(spec.__type, name, self);
+  else if (spec.__stdProto) obj = cx.protos[spec.__stdProto];
+  else if (spec.__isDef) obj = cx.defs[spec.__isDef];
+  else obj = new Obj(spec.__proto ? interpret(spec.__proto) : true, name);
+  return populate(obj, spec, spec.__name || name);
+}
+
+function loadEnvironment(file) {
+  var info = JSON.parse(fs.readFileSync("ecma5.json"));
+  if (info.__def) for (var name in info.__def) if (hop(info.__def, name))
+    cx.defs[name] = interpret(info.__def[name]);
+  populate(cx.topScope, info);
+}
+
 function initJSContext() {
-  var objProto = cx.protos.Object = new Obj(null, "Object");
-  cx.protos.Array = new Obj(objProto, "Array");
-  cx.protos.Function = new Obj(objProto, "Function");
-  cx.protos.String = new Obj(objProto, "String");
-  cx.protos.Number = new Obj(objProto, "Number");
-  cx.protos.Date = new Obj(objProto, "Date")
+  cx.protos.Object = new Obj(null, "Object");
+  cx.topScope.props = Object.create(cx.protos.Object.props);
+
+  cx.protos.Array = new Obj(true, "Array.prototype");
+  cx.protos.Function = new Obj(true, "Function.prototype");
+  cx.protos.RegExp = new Obj(true, "RegExp.prototype");
+  cx.protos.String = new Obj(true, "String.prototype");
+  cx.protos.Number = new Obj(true, "Number.prototype");
+  cx.protos.Boolean = new Obj(true, "Boolean.prototype");
   cx.prim.str = new Prim(cx.protos.String, "<string>");
-  cx.prim.bool = new Prim(cx.protos.Object, "<bool>");
+  cx.prim.bool = new Prim(cx.protos.Boolean, "<bool>");
   cx.prim.num = new Prim(cx.protos.Number, "<number>");
   cx.prim.null = new Prim(null, "<null>");
   cx.prim.undef = new Prim(null, "<undefined>");
-
-  populate(objProto, {
-    toString: "fn() -> <string>",
-    toLocaleString: "fn() -> <string>",
-    valueOf: "fn() -> <number>",
-    hasOwnProperty: "fn(prop: <string>) -> <bool>",
-    propertyIsEnumerable: "fn(prop: <string>) -> <bool>"
-  });
-  // FIXME use information about array elt type to fill in types somehow
-  // FIXME type parameters would be neat -- i.e the inner type of map's result is the retval of the argument function
-  populate(cx.protos.Array, {
-    length: "<number>",
-    concat: "fn(other: [<?>]) -> $this",
-    join: "fn(separator?: <string>) -> <string>",
-    splice: "fn(pos: <number>, amount: <number>)",
-    pop: "fn() -> $this.<i>",
-    push: "fn(newelt: <?>) -> <number>",
-    shift: "fn() -> $this.<i>",
-    unshift: "fn(newelt: <?>) -> <number>",
-    slice: "fn(from: <number>, to?: <number>) -> $this",
-    reverse: "fn()",
-    sort: "fn(compare?: fn(a: <?>, b: <?>) -> <number>)",
-    indexOf: "fn(elt: <?>, from?: <number>) -> <number>",
-    lastIndexOf: "fn(elt: <?>, from?: <number>) -> <number>",
-    every: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> <bool>",
-    some: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> <bool>",
-    filter: "fn(test: fn(elt: <?>, i: <number>) -> <bool>) -> $this",
-    forEach: "fn(f: fn(elt: <?>, i: <number>))",
-    map: "fn(f: fn(elt: <?>, i: <number>) -> <?>) -> [$0.$ret]",
-    reduce: "fn(combine: fn(sum: <?>, elt: <?>, i: <number>) -> <?>, init?: <?>) -> $0.$ret",
-    reduceRight: "fn(combine: fn(sum: <?>, elt: <?>, i: <number>) -> <?>, init?: <?>) -> $0.$ret"
-  });
-  populate(cx.protos.Function, {
-    apply: "fn(this: <?>, args: [<?>]) -> $this.$ret",
-    call: "fn(this: <?>, args?: <?>) -> $this.$ret",
-    bind: "fn(this: <?>) -> fn()"
-  });
-  cx.protos.RegExp = populate(new Obj(objProto, "RegExp"), {
-    exec: "fn(input: <string>) -> [<string>]",
-    compile: "fn(source: <string>, flags?: <string>)",
-    test: "fn(input: <string>) -> <bool>",
-    global: "<bool>",
-    ignoreCase: "<bool>",
-    multiline: "<bool>",
-    source: "<string>",
-    lastIndex: "<number>"
-  });
-  populate(cx.protos.String, {
-    length: "<number>",
-    charAt: "fn(i: <number>) -> <string>",
-    charCodeAt: "fn(i: <number>) -> <number>",
-    indexOf: "fn(char: <string>, from?: <number>) -> <number>",
-    lastIndexOf: "fn(char: <string>, from?: <number>) -> <number>",
-    substring: "fn(from: <number>, to?: <number>) -> <string>",
-    substr: "fn(from: <number>, length?: <number>) -> <string>",
-    slice: "fn(from: <number>, to?: <number>) -> <string>",
-    trim: "fn() -> <string>",
-    trimLeft: "fn() -> <string>",
-    trimRight: "fn() -> <string>",
-    toUpperCase: "fn() -> <string>",
-    toLowerCase: "fn() -> <string>",
-    toLocaleUpperCase: "fn() -> <string>",
-    toLocaleLowerCase: "fn() -> <string>",
-    split: "fn(pattern: <string>) -> [<string>]",
-    concat: "fn(other: <string>) -> <string>",
-    localeCompare: "fn(other: <string>) -> <number>",
-    match: "fn(pattern: RegExp) -> [<string>]",
-    replace: "fn(pattern: RegExp, replacement: <string>) -> <string>",
-    search: "fn(pattern: RegExp) -> <number>"
-  });
-  populate(cx.protos.Number, {
-    toString: "fn(radix?: <number>) -> <string>",
-    toFixed: "fn(digits: <number>) -> <string>",
-    toExponential: "fn(digits: <number>) -> <string>"
-  });
-  populate(cx.protos.Date, {
-    toUTCString: "fn() -> <string>",
-    toISOString: "fn() -> <string>",
-    toDateString: "fn() -> <string>",
-    toTimeString: "fn() -> <string>",
-    toLocaleString: "fn() -> <string>",
-    toLocaleDateString: "fn() -> <string>",
-    toLocaleTimeString: "fn() -> <string>",
-    getTime: "fn() -> <number>",
-    getFullYear: "fn() -> <number>",
-    getYear: "fn() -> <number>",
-    getMonth: "fn() -> <number>",
-    getUTCMonth: "fn() -> <number>",
-    getDate: "fn() -> <number>",
-    getUTCDate: "fn() -> <number>",
-    getDay: "fn() -> <number>",
-    getUTCDay: "fn() -> <number>",
-    getHours: "fn() -> <number>",
-    getUTCHours: "fn() -> <number>",
-    getMinutes: "fn() -> <number>",
-    getUTCMinutes: "fn() -> <number>",
-    getSeconds: "fn() -> <number>",
-    getUTCSeconds: "fn() -> <number>",
-    getMilliseconds: "fn() -> <number>",
-    getUTCMilliseconds: "fn() -> <number>",
-    getTimezoneOffset: "fn() -> <number>",
-    setTime: "fn(date: Date) -> <number>",
-    setFullYear: "fn(year: <number>) -> <number>",
-    setUTCFullYear: "fn(year: <number>) -> <number>",
-    setMonth: "fn(month: <number>) -> <number>",
-    setUTCMonth: "fn(month: <number>) -> <number>",
-    setDate: "fn(day: <number>) -> <number>",
-    setUTCDate: "fn(day: <number>) -> <number>",
-    setHours: "fn(hour: <number>) -> <number>",
-    setUTCHours: "fn(hour: <number>) -> <number>",
-    setMinutes: "fn(min: <number>) -> <number>",
-    setUTCMinutes: "fn(min: <number>) -> <number>",
-    setSeconds: "fn(sec: <number>) -> <number>",
-    setUTCSeconds: "fn(sec: <number>) -> <number>",
-    setMilliseconds: "fn(ms: <number>) -> <number>",
-    setUTCMilliseconds: "fn(ms: <number>) -> <number>"
-  });
-  cx.protos.Error = populate(new Obj(objProto, "Error"), {
-    name: "<string>",
-    message: "<string>"
-  });
-
-  cx.topScope.props = Object.create(objProto.props);
-  var errC = parseType("ctor(message: <string>)", "Error");
-  populate(cx.topScope, {
-    Infinity: "<number>",
-    undefined: "<undefined>",
-    NaN: "<number>",
-    Object: populate(parseType("ctor()", "Object"), {
-      getPrototypeOf: "fn(obj: <?>) -> <?>",
-      create: "fn(proto: <?>) -> <?>",
-      defineProperties: "fn(obn: <?>, props: <?>)",
-      keys: "fn(obj: <?>) -> [<string>]"
-    }),
-    Function: "ctor(body: <string>)",
-    Array: populate(parseType("ctor(size: <number>)", "Array"), {
-      isArray: "fn(value: <?>) -> <bool>"
-    }),
-    String: populate(parseType("ctor(value: <?>) -> <string>", "String"), {
-      fromCharCode: "fn(code: <number>) -> <string>"
-    }),
-    Number: populate(parseType("ctor(value: <?>) -> <number>", "Number"), {
-      MAX_VALUE: "<number>",
-      MIN_VALUE: "<number>",
-      POSITIVE_INFINITY: "<number>",
-      NEGATIVE_INFINITY: "<number>"
-    }),
-    RegExp: "ctor(source: <string>, flags?: <string>)",
-    Date: populate(parseType("ctor(ms: <number>)", "Date"), {
-      parse: "fn(source: <string>) -> Date",
-      UTC: "fn(year: <number>, month: <number>, date: <number>, hour?: <number>, min?: <number>, sec?: <number>, ms?: <number>) -> <number>",
-      now: "fn() -> <number>"
-    }),
-    Boolean: "fn(value: <?>) -> <bool>",
-    Error: errC, SyntaxError: errC, ReferenceError: errC, URIError: errC, EvalError: errC, RangeError: errC,
-    parseInt: "fn(string: <string>, radix?: <number>) -> <number>",
-    parseFloat: "fn(string: <string>) -> <number>",
-    isNaN: "fn(value: <number>) -> <bool>",
-    eval: "fn(code: <string>) -> <?>",
-    encodeURI: "fn(uri: <string>) -> <string>",
-    encodeURIComponent: "fn(uir: <string>) -> <string>",
-    decodeURI: "fn(uri: <string>) -> <string>",
-    decodeURIComponent: "fn(uri: <string>) -> <string>",
-    Math: populate(new Obj(objProto, "Math"), {
-      E: "<number>", LN2: "<number>", LN10: "<number>", LOG2E: "<number>", LOG10E: "<number>",
-      SQRT1_2: "<number>", SQRT2: "<number>", PI: "<number>",
-      abs: "fn(<number>) -> <number>",
-      cos: "fn(<number>) -> <number>",
-      sin: "fn(<number>) -> <number>",
-      tan: "fn(<number>) -> <number>",
-      acos: "fn(<number>) -> <number>",
-      asin: "fn(<number>) -> <number>",
-      atan: "fn(<number>) -> <number>",
-      atan2: "fn(<number>, <number>) -> <number>",
-      ceil: "fn(<number>) -> <number>",
-      floor: "fn(<number>) -> <number>",
-      round: "fn(<number>) -> <number>",
-      exp: "fn(<number>) -> <number>",
-      log: "fn(<number>) -> <number>",
-      sqrt: "fn(<number>) -> <number>",
-      pow: "fn(<number>, <number>) -> <number>",
-      max: "fn(<number>, <number>) -> <number>",
-      min: "fn(<number>, <number>) -> <number>",
-      random: "fn() -> <number>"
-    }),
-    JSON: populate(new Obj(objProto, "JSON"), {
-      parse: "fn(json: <string>) -> <?>",
-      stringify: "fn(value: <?>) -> <string>"
-    })
-  });
+  
+  // FIXME cache this (maybe even pre-parse/compile)
+  loadEnvironment("ecma5.json");
 }
 
 function initBrowserContext() {
