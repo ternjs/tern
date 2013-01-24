@@ -5,9 +5,15 @@ function Foo(x) {
 }
 
 Foo.prototype = {
-  toString: function() { return "hi"; },
+  makeString: function() { return "hi"; },
   bar: 13
 };
 
-// z: {bar: <number>, toString: fn() -> <string>, x: <bool>, y: [<number>]}
+// z: {x: <bool>, y: [<number>]}
 var z = new Foo(true);
+
+// z_makeString: fn() -> <string>
+var z_makeString = z.toString;
+
+// z_bar: <number>
+var z_bar = z.bar;

@@ -178,12 +178,26 @@ IsCallee.prototype = {
   }
 };
 
-function IsProto(name) { this.name = name; }
-IsProto.prototype = {
+function HasName(name) { this.name = name; }
+HasName.prototype = {
   addType: function(o) {
     if (o instanceof Obj && !o.name) o.name = this.name;
   },
   typeHint: function() { return this.name; }
+};
+
+function IsProto(other) { this.other = other; }
+IsProto.getInstance = function(o) {
+  if (!(o instanceof Obj)) return null;
+  if (!o.instance)
+    o.instance = new Obj(o, this.name && /\.prototype$/.test(this.name) ? this.name.slice(0, this.name.length - 10) : null);
+  return o.instance;
+};
+IsProto.prototype = {
+  addType: function(o) {
+    var inst = IsProto.getInstance(o);
+    if (inst) this.other.addType(inst);
+  }
 };
 
 function hasType(type, set) {
@@ -319,7 +333,7 @@ Fn.prototype.toString = function(maxDepth) {
 Fn.prototype.ensureProp = function(prop, alsoProto) {
   var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
   var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto);
-  if (newProto) retval.propagate(new IsProto(this.name));
+  if (newProto) retval.propagate(new HasName(this.name + ".prototype"));
   return retval;
 };
 
@@ -342,7 +356,7 @@ function Context(type) {
   this.topScope = new Scope();
   this.protos = Object.create(null);
   this.prim = Object.create(null);
-  this.defs = Object.create(null);
+  this.localProtos = null;
   exports.withContext(this, function() {
     initJSContext();
     if (type == "browser") initBrowserContext();
@@ -555,7 +569,8 @@ var inferExprVisitor = {
     var callee, self, args = [];
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
-      self = callee.getProp("prototype");
+      self = new AVal;
+      callee.getProp("prototype").propagate(new IsProto(self));
     } else if (node.callee.type == "MemberExpression") {
       self = runInfer(node.callee.object, scope, c);
       callee = self.getProp(propName(node.callee, scope, c));
@@ -686,8 +701,8 @@ TypeParser.prototype = {
       if (this.eat("]")) return arr;
     } else {
       var word = this.word();
-      if (word in cx.defs) return cx.defs[word];
-      if (word in cx.protos) return cx.protos[word];
+      if (word in cx.localProtos) return IsProto.getInstance(cx.localProtos[word]);
+      if (word in cx.protos) return IsProto.getInstance(cx.protos[word]);
     }
     this.error();
   },
@@ -709,15 +724,14 @@ TypeParser.prototype = {
     var inner = this.parseRetTypeInner();
     if (this.eat(".")) {
       var propName = this.word(/[\w<>$]/) || this.error();
-      if (propName != "$ret")
-        return function(self, args) {return inner(self, args).getProp(propName);};
-      return function(self, args) {
+      if (propName == "$ret") return function(self, args) {
         var lhs = inner(self, args);
         if (lhs instanceof Fn) return lhs.retval; // FIXME this is a bit of a kludge
         var rv = new AVal;
         lhs.propagate(new IsCallee(null, null, rv));
         return rv;
       };
+      return function(self, args) {return inner(self, args).getProp(propName);};
     } else return inner;
   }
 }
@@ -742,15 +756,17 @@ function interpret(spec, name, self) {
   var obj;
   if (spec.__type) obj = interpret(spec.__type, name, self);
   else if (spec.__stdProto) obj = cx.protos[spec.__stdProto];
-  else if (spec.__isDef) obj = cx.defs[spec.__isDef];
+  else if (spec.__isProto) obj = cx.localProtos[spec.__isProto];
   else obj = new Obj(spec.__proto ? interpret(spec.__proto) : true, name);
-  return populate(obj, spec, spec.__name || name);
+  return populate(obj, spec, name);
 }
 
 function loadEnvironment(file) {
+  cx.localProtos = Object.create(null);
   var info = JSON.parse(fs.readFileSync("ecma5.json"));
-  if (info.__def) for (var name in info.__def) if (hop(info.__def, name))
-    cx.defs[name] = interpret(info.__def[name]);
+  var ps = info.__protos;
+  if (ps) for (var name in ps) if (hop(ps, name))
+    cx.localProtos[name] = interpret(ps[name], name + ".prototype");
   populate(cx.topScope, info);
 }
 
