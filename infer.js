@@ -42,24 +42,6 @@ AVal.prototype = {
     return found;
   },
 
-  dominantType: function() {
-    var max = 0, maxType;
-    for (var i = 0; i < this.types.length; ++i) if (this.scores[i] > max) {
-      max = this.scores[i];
-      maxType = this.types[i];
-    }
-    return maxType;
-  },
-
-  isDominant: function(type) {
-    var max = 0, typeScore = 0;
-    for (var i = 0; i < this.types.length; ++i) {
-      if (this.types[i] == type) typeScore = this.scores[i];
-      if (this.scores[i] > max) max = this.scores[i];
-    }
-    return max == typeScore;
-  },
-
   typeHint: function(maxDepth) { return this.toString(maxDepth); },
 
   toString: function(maxDepth) {
@@ -282,9 +264,7 @@ Obj.fromInitializer = function(props, name) {
     var type = types[i], matching = 0;
     for (var p in type.props) {
       var prop = type.props[p];
-      if ((prop.flags & flag_initializer) && props.some(function(x) {
-        return x.name == p && compatible(prop, x.type);
-      }))
+      if ((prop.flags & flag_initializer) && props.some(function(x) {return x.name == p;}))
         ++matching;
     }
     if (matching == props.length) return type;
@@ -299,15 +279,6 @@ Obj.fromInitializer = function(props, name) {
   }
   return obj;
 };
-
-// FIXME this is very random and unstable
-function compatible(one, two) {
-  if (two instanceof AVal) {
-    return !one.types.length || !two.types.length || one.isDominant(two.dominantType());
-  } else {
-    return one.isDominant(two);
-  }
-}
 
 // FIXME save argument names
 
