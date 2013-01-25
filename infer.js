@@ -121,6 +121,23 @@ AVal.prototype = {
   }
 };
 
+// A variant of AVal used when the type is fixed, for example when
+// parsed from a type description.
+function FVal(type) { this.type = type; }
+FVal.prototype = {
+  addType: function() {},
+  propagate: function(c) {
+    if (this.type) c.addType(this.type);
+  },
+  getProp: function(prop) {
+    if (this.type && this.type.getProp) return this.type.getProp(prop);
+    return new AVal;
+  },
+  hasType: function(type) { return this.type == type; },
+  typeHint: function(maxDepth) { return this.toString(maxDepth); },
+  toString: function(maxDepth) { return this.type ? this.type.toString(maxDepth) : "<?>"; }
+};
+
 // PROPAGATION STRATEGIES
 
 function PropIsSubset(prop, target) {
@@ -206,7 +223,7 @@ IsAdded.prototype = {
 // FIXME handle reads from prototypes of primitive types (str.slice)
 // somehow
 
-function Type(name) { this.name = name; }
+function Type() {}
 Type.prototype = {
   propagate: function(c) { c.addType(this); },
   hasType: function(other) { return other == this; }
@@ -637,13 +654,13 @@ TypeParser.prototype = {
         else
           argname = null;
       }
-      args.push(aval = new AVal(this.parseType()));
+      args.push(aval = new FVal(this.parseType()));
       if (argname) aval.name = argname;
       this.eat(", ");
     }
     return args;
   },
-  parseType: function(name, self, top) {
+  parseType: function(name, top) {
     if (this.eat("fn(")) {
       var args = this.parseArgs(), retType, computeRet;
       if (this.eat(" -> ")) {
@@ -652,11 +669,9 @@ TypeParser.prototype = {
           computeRet = this.parseRetType();
         } else retType = this.parseType();
       }
-      var fn = new Fn(name, new AVal, args, new AVal(retType));
+      var fn = new Fn(name, new FVal, args, new FVal(retType));
       if (computeRet) fn.computeRet = computeRet;
       return fn;
-    } else if (name && this.eat("ctor(")) {
-      return new Fn(name, new AVal(cx.protos[name]), this.parseArgs(), new AVal);
     } else if (this.eat("<")) {
       var end = this.spec.indexOf(">", this.pos), word = this.spec.slice(this.pos, end);
       this.pos = end + 1;
@@ -708,25 +723,25 @@ TypeParser.prototype = {
   }
 }
 
-function parseType(spec, name, self) {
-  return new TypeParser(spec).parseType(name, self, true);
+function parseType(spec, name) {
+  return new TypeParser(spec).parseType(name, true);
 }
 
 function populate(obj, props, name) {
   for (var prop in props) if (hop(props, prop) && !/^__/.test(prop)) {
     var nm = name ? name + "." + prop : prop;
     var v = obj.ensureProp(prop);
-    var ty = interpret(props[prop], nm, obj);
+    var ty = interpret(props[prop], nm);
     if (ty) ty.propagate(v);
   }
   return obj;
 }
 
-function interpret(spec, name, self) {
-  if (typeof spec == "string") return parseType(spec, name, self);
+function interpret(spec, name) {
+  if (typeof spec == "string") return parseType(spec, name);
   // Else, it is an object spec
   var obj;
-  if (spec.__type) obj = interpret(spec.__type, name, self);
+  if (spec.__type) obj = interpret(spec.__type, name);
   else if (spec.__stdProto) obj = cx.protos[spec.__stdProto];
   else if (spec.__isProto) obj = cx.localProtos[spec.__isProto];
   else obj = new Obj(spec.__proto ? interpret(spec.__proto) : true, name);
