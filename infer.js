@@ -42,6 +42,10 @@ AVal.prototype = {
     return found;
   },
 
+  hasType: function(type) {
+    return this.types.indexOf(type) > -1;
+  },
+
   typeHint: function(maxDepth) { return this.toString(maxDepth); },
 
   toString: function(maxDepth) {
@@ -182,10 +186,6 @@ IsProto.prototype = {
   }
 };
 
-function hasType(type, set) {
-  return set == type || set.types && set.types.indexOf(type) > -1;
-}
-
 function IsAdded(other, target) {
   this.other = other; this.target = target;
 }
@@ -193,7 +193,7 @@ IsAdded.prototype = {
   addType: function(type) {
     if (type == cx.prim.str)
       this.target.addType(cx.prim.str);
-    else if (type == cx.prim.num && hasType(cx.prim.num, this.other))
+    else if (type == cx.prim.num && this.other.hasType(cx.prim.num))
       this.target.addType(cx.prim.num);
   },
   typeHint: function(maxDepth) {
@@ -206,12 +206,15 @@ IsAdded.prototype = {
 // FIXME handle reads from prototypes of primitive types (str.slice)
 // somehow
 
-function Prim(proto, name) { this.name = name; }
-Prim.prototype = {
-  toString: function() { return this.name; },
+function Type(name) { this.name = name; }
+Type.prototype = {
   propagate: function(c) { c.addType(this); },
-  sameType: function(other) { return other == this; }
+  hasType: function(other) { return other == this; }
 };
+
+function Prim(proto, name) { this.name = name; }
+Prim.prototype = Object.create(Type.prototype);
+Prim.prototype.toString = function() { return this.name; };
 
 function hop(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -222,39 +225,37 @@ function Obj(proto, name) {
   this.props = Object.create(proto && proto.props);
   this.name = name;
 }
-Obj.prototype = {
-  toString: function(maxDepth) {
-    if (!maxDepth && this.name) return this.name;
-    // FIXME cache these strings?
-    var props = [];
-    for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop)) {
-      if (maxDepth)
-        props.push(prop + ": " + this.props[prop].toString(maxDepth - 1));
-      else if (this.props[prop].flags & flag_initializer)
-        props.push(prop);
-    }
-    props.sort();
-    return "{" + props.join(", ") + "}";
-  },
-  ensureProp: function(prop, alsoProto) {
-    var found = this.props[prop];
-    if (found && (alsoProto || hop(this.props, prop))) return found;
-    var av = new AVal;
-    this.addProp(prop, av);
-    return av;
-  },
-  getProp: function(prop) {
-    return this.ensureProp(prop, true);
-  },
-  addProp: function(prop, val) {
-    this.props[prop] = val;
-    // FIXME should objProps also list proto's props? maybe move back to objList?
-    if (this.prev) return; // If this is a scope, it shouldn't be registered
-    var found = cx.objProps[prop];
-    if (found) found.push(this);
-    else cx.objProps[prop] = [this];
-  },
-  propagate: function(c) { c.addType(this); }
+Obj.prototype = Object.create(Type.prototype);
+Obj.prototype.toString = function(maxDepth) {
+  if (!maxDepth && this.name) return this.name;
+  // FIXME cache these strings?
+  var props = [];
+  for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop)) {
+    if (maxDepth)
+      props.push(prop + ": " + this.props[prop].toString(maxDepth - 1));
+    else if (this.props[prop].flags & flag_initializer)
+      props.push(prop);
+  }
+  props.sort();
+  return "{" + props.join(", ") + "}";
+};
+Obj.prototype.ensureProp = function(prop, alsoProto) {
+  var found = this.props[prop];
+  if (found && (alsoProto || hop(this.props, prop))) return found;
+  var av = new AVal;
+  this.addProp(prop, av);
+  return av;
+};
+Obj.prototype.getProp = function(prop) {
+  return this.ensureProp(prop, true);
+};
+Obj.prototype.addProp = function(prop, val) {
+  this.props[prop] = val;
+  // FIXME should objProps also list proto's props? maybe move back to objList?
+  if (this.prev) return; // If this is a scope, it shouldn't be registered
+  var found = cx.objProps[prop];
+  if (found) found.push(this);
+  else cx.objProps[prop] = [this];
 };
 
 Obj.fromInitializer = function(props, name) {
@@ -417,7 +418,7 @@ function lvalName(node) {
 }
 
 function setHint(aval, hint) {
-  if (aval instanceof AVal && !aval.types.length) aval.hint = hint;
+  if (aval.types && !aval.types.length) aval.hint = hint;
 }
 
 function unopResultType(op) {
@@ -498,8 +499,8 @@ var inferExprVisitor = {
     var lhs = runInfer(node.left, scope, c);
     var rhs = runInfer(node.right, scope, c);
     if (node.operator == "+") {
-      if (hasType(cx.prim.str, lhs) || hasType(cx.prim.str, rhs)) return cx.prim.str;
-      if (hasType(cx.prim.num, lhs) && hasType(cx.prim.num, rhs)) return cx.prim.num;
+      if (lhs.hasType(cx.prim.str) || rhs.hasType(cx.prim.str)) return cx.prim.str;
+      if (lhs.hasType(cx.prim.num) && rhs.hasType(cx.prim.num)) return cx.prim.num;
       var result = new AVal;
       lhs.propagate(new IsAdded(rhs, result));
       rhs.propagate(new IsAdded(lhs, result));
