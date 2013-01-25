@@ -1,16 +1,16 @@
 {
-  "__protos": {"Date": {}},
+  "!types": {"Date": {}},
   "Infinity": "<number>",
   "undefined": "<undefined>",
   "NaN": "<number>",
   "Object": {
-    "__type": "fn()",
+    "!type": "fn()",
     "getPrototypeOf": "fn(obj: <?>) -> <?>",
     "create": "fn(proto: <?>) -> <?>",
     "defineProperties": "fn(obn: <?>, props: <?>)",
     "keys": "fn(obj: <?>) -> [<string>]",
     "prototype": {
-      "__stdProto": "Object",
+      "!stdProto": "Object",
       "toString": "fn() -> <string>",
       "toLocaleString": "fn() -> <string>",
       "valueOf": "fn() -> <number>",
@@ -19,19 +19,19 @@
     }
   },
   "Function": {
-    "__type": "fn(body: <string>)",
+    "!type": "fn(body: <string>)",
     "prototype": {
-      "__stdProto": "Function",
+      "!stdProto": "Function",
       "apply": "fn(this: <?>, args: [<?>]) -> $this.$ret",
       "call": "fn(this: <?>, args?: <?>) -> $this.$ret",
       "bind": "fn(this: <?>) -> fn()"
     }
   },
   "Array": {
-    "__type": "fn(size: <number>) -> [<?>]",
+    "!type": "fn(size: <number>) -> [<?>]",
     "isArray": "fn(value: <?>) -> <bool>",
     "prototype": {
-      "__stdProto": "Array",
+      "!stdProto": "Array",
       "length": "<number>",
       "concat": "fn(other: [<?>]) -> $this",
       "join": "fn(separator?: <string>) -> <string>",
@@ -55,10 +55,10 @@
     }
   },
   "String": {
-    "__type": "fn(value: <?>) -> <string>",
+    "!type": "fn(value: <?>) -> <string>",
     "fromCharCode": "fn(code: <number>) -> <string>",
     "prototype": {
-      "__stdProto": "String",
+      "!stdProto": "String",
       "length": "<number>",
       "charAt": "fn(i: <number>) -> <string>",
       "charCodeAt": "fn(i: <number>) -> <number>",
@@ -83,26 +83,26 @@
     }
   },
   "Number": {
-    "__type": "fn(value: <?>) -> <number>",
+    "!type": "fn(value: <?>) -> <number>",
     "MAX_VALUE": "<number>",
     "MIN_VALUE": "<number>",
     "POSITIVE_INFINITY": "<number>",
     "NEGATIVE_INFINITY": "<number>",
     "prototype": {
-      "__stdProto": "Number",
+      "!stdProto": "Number",
       "toString": "fn(radix?: <number>) -> <string>",
       "toFixed": "fn(digits: <number>) -> <string>",
       "toExponential": "fn(digits: <number>) -> <string>"
     }
   },
   "Boolean": {
-    "__type": "fn(value: <?>) -> <bool>",
-    "prototype": {"__stdProto": "Boolean"}
+    "!type": "fn(value: <?>) -> <bool>",
+    "prototype": {"!stdProto": "Boolean"}
   },
   "RegExp": {
-    "__type": "fn(source: <string>, flags?: <string>)",
+    "!type": "fn(source: <string>, flags?: <string>)",
     "prototype": {
-      "__stdProto": "RegExp",
+      "!stdProto": "RegExp",
       "exec": "fn(input: <string>) -> [<string>]",
       "compile": "fn(source: <string>, flags?: <string>)",
       "test": "fn(input: <string>) -> <bool>",
@@ -114,12 +114,12 @@
     }
   },
   "Date": {
-    "__type": "fn(ms: <number>)",
+    "!type": "fn(ms: <number>)",
     "parse": "fn(source: <string>) -> Date",
     "UTC": "fn(year: <number>, month: <number>, date: <number>, hour?: <number>, min?: <number>, sec?: <number>, ms?: <number>) -> <number>",
     "now": "fn() -> <number>",
     "prototype": {
-      "__isProto": "Date",
+      "!isProto": "Date",
       "toUTCString": "fn() -> <string>",
       "toISOString": "fn() -> <string>",
       "toDateString": "fn() -> <string>",
@@ -163,7 +163,7 @@
     }
   },
   "Error": {
-    "__type": "fn(message: <string>)",
+    "!type": "fn(message: <string>)",
     "prototype": {
       "name": "<string>",
       "message": "<string>"

@@ -728,7 +728,7 @@ function parseType(spec, name) {
 }
 
 function populate(obj, props, name) {
-  for (var prop in props) if (hop(props, prop) && !/^__/.test(prop)) {
+  for (var prop in props) if (hop(props, prop) && prop.charCodeAt(0) != 33) {
     var nm = name ? name + "." + prop : prop;
     var v = obj.ensureProp(prop);
     var ty = interpret(props[prop], nm);
@@ -741,17 +741,17 @@ function interpret(spec, name) {
   if (typeof spec == "string") return parseType(spec, name);
   // Else, it is an object spec
   var obj;
-  if (spec.__type) obj = interpret(spec.__type, name);
-  else if (spec.__stdProto) obj = cx.protos[spec.__stdProto];
-  else if (spec.__isProto) obj = cx.localProtos[spec.__isProto];
-  else obj = new Obj(spec.__proto ? interpret(spec.__proto) : true, name);
+  if (spec["!type"]) obj = interpret(spec["!type"], name);
+  else if (spec["!stdProto"]) obj = cx.protos[spec["!stdProto"]];
+  else if (spec["!isProto"]) obj = cx.localProtos[spec["!isProto"]];
+  else obj = new Obj(spec["!proto"] ? interpret(spec["!proto"]) : true, name);
   return populate(obj, spec, name);
 }
 
 function loadEnvironment(file) {
   cx.localProtos = Object.create(null);
   var info = JSON.parse(fs.readFileSync("ecma5.json"));
-  var ps = info.__protos;
+  var ps = info["!types"];
   if (ps) for (var name in ps) if (hop(ps, name))
     cx.localProtos[name] = interpret(ps[name], name + ".prototype");
   populate(cx.topScope, info);
