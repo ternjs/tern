@@ -1,28 +1,28 @@
-// x: <number>
-// y: <number>
+// x: number
+// y: number
 var x = Math.PI, y = Math.cos(x);
 
-// a: [<number>]
+// a: [number]
 var a = [1, 2, 3];
-// b: [<number>]
+// b: [number]
 var b = a.slice(2);
 
-// c: <number>
+// c: number
 var c = a.pop()
 
-// d: [<string>]
+// d: [string]
 var d = ["x"].concat(["hi"]);
 
-// e: [<bool>]
+// e: [bool]
 var e = [true, false, true].filter(function(x){return x;});
 
-// f: [<string>]
+// f: [string]
 var f = [].map(function() {return "x";});
 
-// g: <number>
+// g: number
 var g = [].reduce(function(a, b) { return a - 2; }, 0);
 
-// h: <number>
+// h: number
 var h = Math.cos.call(null, 10);
 
-// toString: fn() -> <string>
+// toString: fn() -> string

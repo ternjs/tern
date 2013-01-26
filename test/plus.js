@@ -1,11 +1,11 @@
 var x = 10;
 var y = "foo";
 
-// a: <number>
+// a: number
 var a = x + 20;
-// b: <string>
+// b: string
 var b = x + y;
-// c: <string>
+// c: string
 var c = "foo" + y;
-// d: <string>
+// d: string
 var d = "foo" + x;

@@ -3,12 +3,12 @@
 
 var x = {foo: 1, bar: 2};
 
-// num: fn(x: <number>) -> <number>
+// num: fn(x: number) -> number
 function num(x) {
   return x * 3;
 }
 
-// obj: fn(x: {bar: <number>, foo: <number>}) -> <number>
+// obj: fn(x: {bar: number, foo: number}) -> number
 function obj(x) {
   return x.foo - x.bar;
 }

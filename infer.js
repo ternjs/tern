@@ -15,7 +15,7 @@ function AVal(type) {
 }
 AVal.prototype = {
   addType: function(type) {
-    // FIXME merge strategy -- [<?>] + [<int>] = [<int>], similar for object & fn types
+    // FIXME merge strategy -- [?] + [<int>] = [<int>], similar for object & fn types
     for (var i = 0; i < this.types.length; ++i) {
       if (this.types[i] == type) {
         ++this.scores[i];
@@ -61,8 +61,8 @@ AVal.prototype = {
   guessType: function(maxDepth) {
     if (this.hint) return this.hint.toString(maxDepth);
 
-    var props = {}, propCount = 0, retval = "<?>";
-    for (var i = 0; retval == "<?>" && i < this.forward.length; ++i) {
+    var props = {}, propCount = 0, retval = "?";
+    for (var i = 0; retval == "?" && i < this.forward.length; ++i) {
       var propagate = this.forward[i];
       if (propagate.typeHint) retval = propagate.typeHint();
       var prop = propagate.propHint && propagate.propHint();
@@ -71,7 +71,7 @@ AVal.prototype = {
         ++propCount;
       }
     }
-    if (retval == "<?>" && propCount) {
+    if (retval == "?" && propCount) {
       var bestMatch, bestMatchTotalProps, bestScore = 0;
       for (var p in props) {
         var objs = cx.objProps[p];
@@ -114,7 +114,7 @@ AVal.prototype = {
       }
       if (this.scores[i] == max) found.push(this.types[i]);
     }
-    if (found.length > 3) return "<?>";
+    if (found.length > 3) return "?";
     for (var i = 0; i < found.length; ++i) found[i] = found[i].toString(maxDepth);
     found.sort();
     return found.join(" | ");
@@ -135,7 +135,7 @@ FVal.prototype = {
   },
   hasType: function(type) { return this.type == type; },
   typeHint: function(maxDepth) { return this.toString(maxDepth); },
-  toString: function(maxDepth) { return this.type ? this.type.toString(maxDepth) : "<?>"; }
+  toString: function(maxDepth) { return this.type ? this.type.toString(maxDepth) : "?"; }
 };
 
 // PROPAGATION STRATEGIES
@@ -312,7 +312,7 @@ Fn.prototype.toString = function(maxDepth) {
     else return typ;
   }).join(", ") + ")";
   var rettype = this.retval.toString(maxDepth);
-  if (rettype != "<?>") str += " -> " + rettype;
+  if (rettype != "?") str += " -> " + rettype;
   return str;
 };
 Fn.prototype.ensureProp = function(prop, alsoProto) {
@@ -671,9 +671,11 @@ TypeParser.prototype = {
       var fn = new Fn(name, new FVal, args, new FVal(retType));
       if (computeRet) fn.computeRet = computeRet;
       return fn;
-    } else if (this.eat("<")) {
-      var end = this.spec.indexOf(">", this.pos), word = this.spec.slice(this.pos, end);
-      this.pos = end + 1;
+    } else if (this.eat("[")) {
+      var arr = new Arr(this.parseType());
+      if (this.eat("]")) return arr;
+    } else {
+      var word = this.word(/[<>\w$?]/);
       switch (word) {
       case "number": return cx.prim.num;
       case "string": return cx.prim.str;
@@ -681,13 +683,8 @@ TypeParser.prototype = {
       case "null": return cx.prim.null;
       case "undefined": return cx.prim.undef;
       case "?": return null;
-      case "top": return cx.topScope;
+      case "<top>": return cx.topScope;
       }
-    } else if (this.eat("[")) {
-      var arr = new Arr(this.parseType());
-      if (this.eat("]")) return arr;
-    } else {
-      var word = this.word();
       if (word in cx.localProtos) return IsProto.getInstance(cx.localProtos[word]);
       if (word in cx.protos) return IsProto.getInstance(cx.protos[word]);
     }
@@ -767,11 +764,11 @@ function initJSContext() {
   cx.protos.String = new Obj(true, "String.prototype");
   cx.protos.Number = new Obj(true, "Number.prototype");
   cx.protos.Boolean = new Obj(true, "Boolean.prototype");
-  cx.prim.str = new Prim(cx.protos.String, "<string>");
-  cx.prim.bool = new Prim(cx.protos.Boolean, "<bool>");
-  cx.prim.num = new Prim(cx.protos.Number, "<number>");
-  cx.prim.null = new Prim(null, "<null>");
-  cx.prim.undef = new Prim(null, "<undefined>");
+  cx.prim.str = new Prim(cx.protos.String, "string");
+  cx.prim.bool = new Prim(cx.protos.Boolean, "bool");
+  cx.prim.num = new Prim(cx.protos.Number, "number");
+  cx.prim.null = new Prim(null, "null");
+  cx.prim.undef = new Prim(null, "undefined");
   
   // FIXME cache this (maybe even pre-parse/compile)
   loadEnvironment("ecma5.json");
