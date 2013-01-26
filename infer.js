@@ -238,9 +238,9 @@ function hop(obj, prop) {
 }
 
 function Obj(proto, name) {
+  this.name = name || proto && proto.name;
   if (proto === true) proto = cx.protos.Object;
   this.props = Object.create(proto && proto.props);
-  this.name = name;
 }
 Obj.prototype = Object.create(Type.prototype);
 Obj.prototype.toString = function(maxDepth) {
@@ -339,8 +339,7 @@ Arr.prototype.toString = function(maxDepth) {
 
 // INFERENCE CONTEXT
 
-function Context(type) {
-  this.type = type;
+var Context = exports.Context = function(environment) {
   this.objProps = Object.create(null);
   this.topScope = new Scope();
   this.protos = Object.create(null);
@@ -348,10 +347,10 @@ function Context(type) {
   this.localProtos = null;
   exports.withContext(this, function() {
     initJSContext();
-    if (type == "browser") initBrowserContext();
-    else if (type == "node") initNodeContext();
+    if (environment) for (var i = 0; i < environment.length; ++i)
+      loadEnvironment(environment[i] + ".json");
   });
-}
+};
 
 var cx = null;
 
@@ -616,8 +615,8 @@ var inferWrapper = walk.make({
   }
 });
 
-var analyze = exports.analyze = function(file) {
-  var text = fs.readFileSync(file, "utf8");
+var analyze = exports.analyze = function(text, file) {
+  if (!text) text = fs.readFileSync(file, "utf8");
   var ast = acorn.parse(text);
   walk.recursive(ast, cx.topScope, null, scopeGatherer);
   walk.recursive(ast, cx.topScope, null, inferWrapper);
@@ -682,6 +681,7 @@ TypeParser.prototype = {
       case "null": return cx.prim.null;
       case "undefined": return cx.prim.undef;
       case "?": return null;
+      case "top": return cx.topScope;
       }
     } else if (this.eat("[")) {
       var arr = new Arr(this.parseType());
@@ -750,7 +750,7 @@ function interpret(spec, name) {
 
 function loadEnvironment(file) {
   cx.localProtos = Object.create(null);
-  var info = JSON.parse(fs.readFileSync("ecma5.json"));
+  var info = JSON.parse(fs.readFileSync(file));
   var ps = info["!types"];
   if (ps) for (var name in ps) if (hop(ps, name))
     cx.localProtos[name] = interpret(ps[name], name + ".prototype");
@@ -775,12 +775,4 @@ function initJSContext() {
   
   // FIXME cache this (maybe even pre-parse/compile)
   loadEnvironment("ecma5.json");
-}
-
-function initBrowserContext() {
-  // FIXME
-}
-
-function initNodeContext() {
-  // FIXME
 }
