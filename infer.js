@@ -181,19 +181,10 @@ IsCallee.prototype = {
   }
 };
 
-function HasName(name) { this.name = name; }
-HasName.prototype = {
-  addType: function(o) {
-    if (o instanceof Obj && !o.name) o.name = this.name;
-  },
-  typeHint: function() { return this.name; }
-};
-
 function IsProto(other) { this.other = other; }
 IsProto.getInstance = function(o) {
   if (!(o instanceof Obj)) return null;
-  if (!o.instance)
-    o.instance = new Obj(o, this.name && /\.prototype$/.test(this.name) ? this.name.slice(0, this.name.length - 10) : null);
+  if (!o.instance) o.instance = new Obj(o);
   return o.instance;
 };
 IsProto.prototype = {
@@ -238,7 +229,12 @@ function hop(obj, prop) {
 }
 
 function Obj(proto, name) {
-  this.name = name || proto && proto.name;
+  if (proto && !name && proto.name) {
+    var match = /^(.*)\.prototype$/.exec(proto.name);
+    this.name = match ? match[1] : proto.name;
+  } else {
+    this.name = name;
+  }
   if (proto === true) proto = cx.protos.Object;
   this.props = Object.create(proto && proto.props);
 }
@@ -320,9 +316,10 @@ Fn.prototype.toString = function(maxDepth) {
   return str;
 };
 Fn.prototype.ensureProp = function(prop, alsoProto) {
-  var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
-  var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto);
-  if (newProto) retval.propagate(new HasName(this.name + ".prototype"));
+  var newProto = this.name && prop == "prototype" && !hop(this.props, "prototype");
+  var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
+  if (newProto && !retval.types.length && alsoProto)
+    retval.addType(new Obj(true, this.name + ".prototype"));
   return retval;
 };
 
@@ -430,7 +427,10 @@ function propName(node, scope, c) {
 
 function lvalName(node) {
   if (node.type == "Identifier") return node.name;
-  if (node.type == "MemberExpression" && node.computed) return node.property.name;
+  if (node.type == "MemberExpression" && !node.computed) {
+    if (node.object.type != "Identifier") return node.property.name;
+    return node.object.name + "." + node.property.name;
+  }
 }
 
 function setHint(aval, hint) {
@@ -551,9 +551,9 @@ var inferExprVisitor = {
   // FIXME separate between prototype and instances, but reuse
   // instance type
   NewExpression: function(node, scope, c) {
-    return this.CallExpression(node, scope, c, true);
+    return this.CallExpression(node, scope, c, null, true);
   },
-  CallExpression: function(node, scope, c, isNew) {
+  CallExpression: function(node, scope, c, _name, isNew) {
     var callee, self, args = [];
     if (isNew) {
       callee = runInfer(node.callee, scope, c);
@@ -586,8 +586,8 @@ var inferExprVisitor = {
   }
 };
 
-function runInfer(node, scope, c) {
-  return inferExprVisitor[node.type](node, scope, c);
+function runInfer(node, scope, c, name) {
+  return inferExprVisitor[node.type](node, scope, c, name);
 }
 
 var inferWrapper = walk.make({
@@ -605,7 +605,7 @@ var inferWrapper = walk.make({
   VariableDeclaration: function(node, scope, c) {
     for (var i = 0; i < node.declarations.length; ++i) {
       var decl = node.declarations[i];
-      if (decl.init) assignVar(decl.id.name, scope, runInfer(decl.init, scope, c));
+      if (decl.init) assignVar(decl.id.name, scope, runInfer(decl.init, scope, c, decl.id.name));
     }
   },
 

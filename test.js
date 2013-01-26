@@ -18,7 +18,7 @@ function runTests() {
     var data = getFile("test/" + file);
     infer.withContext(new infer.Context(data.env), function() {
       var info = infer.analyze(data.text, data.file);
-      var assertion = /\/\/ (\w+)(?:\((d+)\))?: (.*)\n/g, m;
+      var assertion = /\/\/ (\w+)(?:\((\d+)\))?: (.*)\n/g, m;
 
       while (m = assertion.exec(info.text)) {
         ++tests;
@@ -41,7 +41,7 @@ function runTests() {
 }
 
 function outputInfo(file) {
-  var data = getFile("test/" + file);
+  var data = getFile(file);
   infer.withContext(new infer.Context(data.env), function() {
     var info = infer.analyze(data.text, data.file);
     for (var i = 3; i < process.argv.length; ++i) {
