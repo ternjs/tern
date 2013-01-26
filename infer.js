@@ -211,9 +211,6 @@ IsAdded.prototype = {
 
 // TYPE OBJECTS
 
-// FIXME handle reads from prototypes of primitive types (str.slice)
-// somehow
-
 function Type() {}
 Type.prototype = {
   propagate: function(c) { c.addType(this); },
@@ -267,6 +264,7 @@ Obj.prototype.getProp = function(prop) {
   return this.ensureProp(prop, true);
 };
 Obj.prototype.addProp = function(prop, val) {
+  if (prop == "__proto__") return;
   this.props[prop] = val;
   // FIXME should objProps also list proto's props? maybe move back to objList?
   if (this.prev) return; // If this is a scope, it shouldn't be registered
@@ -297,8 +295,6 @@ Obj.fromInitializer = function(props, name) {
   }
   return obj;
 };
-
-// FIXME save argument names
 
 function Fn(name, self, args, retval) {
   Obj.call(this, cx.protos.Function, name);
@@ -364,7 +360,6 @@ exports.withContext = function(context, f) {
 
 // SCOPES
 
-// FIXME local arguments variable
 function Scope(prev) {
   Obj.call(this, null, prev ? null : "global");
   this.prev = prev;
@@ -462,8 +457,7 @@ function literalType(val) {
   case "string": return cx.prim.str;
   case "object":
     if (!val) return cx.prim.null;
-    // FIXME return something for regexps
-    return new Obj(cx.protos.RegExp);
+    return IsProto.getInstance(cx.protos.RegExp);
   }
 }
 
@@ -489,8 +483,7 @@ var inferExprVisitor = {
       var p = node.properties[i];
       props.push({name: p.key.name, type: runInfer(p.value, scope, c)});
     }
-    // FIXME better heuristic for whether this is the top scope (i.e. module top scope)
-    return Obj.fromInitializer(props, !scope.prev && name);
+    return Obj.fromInitializer(props, name);
   },
   FunctionExpression: function(node, scope, c, name) {
     var inner = node.body.scope;
@@ -552,8 +545,6 @@ var inferExprVisitor = {
     return join(runInfer(node.consequent, scope, c),
                 runInfer(node.alternate, scope, c));
   },
-  // FIXME separate between prototype and instances, but reuse
-  // instance type
   NewExpression: function(node, scope, c) {
     return this.CallExpression(node, scope, c, null, true);
   },
@@ -579,6 +570,8 @@ var inferExprVisitor = {
     return runInfer(node.object, scope, c).getProp(propName(node, scope, c));
   },
   Identifier: function(node, scope) {
+    if (node.name == "arguments" && !scope.props.arguments)
+      scope.ensureProp(node.name).addType(new Arr);
     return scope.lookup(node.name, true);
   },
   ThisExpression: function(node, scope, c) {
