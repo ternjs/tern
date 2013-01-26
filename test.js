@@ -1,13 +1,18 @@
 var fs = require("fs");
 var infer = require("./infer");
 
+var ecma5 = JSON.parse(fs.readFileSync("ecma5.json"));
+var envData = {
+  browser: JSON.parse(fs.readFileSync("browser.json"))
+};
+
 if (process.argv[2]) outputInfo(process.argv[2]);
 else runTests();
 
 function getFile(file) {
-  var text = fs.readFileSync(file, "utf8"), env = [];
+  var text = fs.readFileSync(file, "utf8"), env = [ecma5];
   var envSpec = /\/\/ environment=(\w+)\n/g, m;
-  while (m = envSpec.exec(text)) env.push(m[1]);
+  while (m = envSpec.exec(text)) env.push(envData[m[1]]);
   return {text: text, file: file, env: env};
 }
 

@@ -1,5 +1,4 @@
 var acorn = require("acorn"), walk = require("acorn/util/walk");
-var fs = require("fs");
 
 var flag_recGuard = 1, flag_initializer = 2;
 
@@ -237,7 +236,7 @@ function Obj(proto, name) {
     this.name = name;
   }
   if (proto === true) proto = cx.protos.Object;
-  this.props = Object.create(proto && proto.props);
+  this.props = Object.create((proto && proto.props) || null);
 }
 Obj.prototype = Object.create(Type.prototype);
 Obj.prototype.toString = function(maxDepth) {
@@ -338,14 +337,27 @@ Arr.prototype.toString = function(maxDepth) {
 
 var Context = exports.Context = function(environment) {
   this.objProps = Object.create(null);
-  this.topScope = new Scope();
   this.protos = Object.create(null);
   this.prim = Object.create(null);
   this.localProtos = null;
+
   exports.withContext(this, function() {
-    initJSContext();
+    cx.protos.Object = new Obj(null, "Object");
+    cx.topScope = new Scope(null, true);
+    cx.protos.Array = new Obj(true, "Array.prototype");
+    cx.protos.Function = new Obj(true, "Function.prototype");
+    cx.protos.RegExp = new Obj(true, "RegExp.prototype");
+    cx.protos.String = new Obj(true, "String.prototype");
+    cx.protos.Number = new Obj(true, "Number.prototype");
+    cx.protos.Boolean = new Obj(true, "Boolean.prototype");
+    cx.prim.str = new Prim(cx.protos.String, "string");
+    cx.prim.bool = new Prim(cx.protos.Boolean, "bool");
+    cx.prim.num = new Prim(cx.protos.Number, "number");
+    cx.prim.null = new Prim(null, "null");
+    cx.prim.undef = new Prim(null, "undefined");
+
     if (environment) for (var i = 0; i < environment.length; ++i)
-      loadEnvironment(environment[i] + ".json");
+      loadEnvironment(environment[i]);
   });
 };
 
@@ -360,8 +372,8 @@ exports.withContext = function(context, f) {
 
 // SCOPES
 
-function Scope(prev) {
-  Obj.call(this, null, prev ? null : "global");
+function Scope(prev, proto) {
+  Obj.call(this, proto, prev ? null : "global");
   this.prev = prev;
 }
 Scope.prototype = Object.create(Obj.prototype);
@@ -613,7 +625,6 @@ var inferWrapper = walk.make({
 });
 
 var analyze = exports.analyze = function(text, file) {
-  if (!text) text = fs.readFileSync(file, "utf8");
   var ast = acorn.parse(text);
   walk.recursive(ast, cx.topScope, null, scopeGatherer);
   walk.recursive(ast, cx.topScope, null, inferWrapper);
@@ -742,31 +753,10 @@ function interpret(spec, name) {
   return populate(obj, spec, name);
 }
 
-function loadEnvironment(file) {
+function loadEnvironment(data) {
   cx.localProtos = Object.create(null);
-  var info = JSON.parse(fs.readFileSync(file));
-  var ps = info["!types"];
+  var ps = data["!types"];
   if (ps) for (var name in ps) if (hop(ps, name))
     cx.localProtos[name] = interpret(ps[name], name + ".prototype");
-  populate(cx.topScope, info);
-}
-
-function initJSContext() {
-  cx.protos.Object = new Obj(null, "Object");
-  cx.topScope.props = Object.create(cx.protos.Object.props);
-
-  cx.protos.Array = new Obj(true, "Array.prototype");
-  cx.protos.Function = new Obj(true, "Function.prototype");
-  cx.protos.RegExp = new Obj(true, "RegExp.prototype");
-  cx.protos.String = new Obj(true, "String.prototype");
-  cx.protos.Number = new Obj(true, "Number.prototype");
-  cx.protos.Boolean = new Obj(true, "Boolean.prototype");
-  cx.prim.str = new Prim(cx.protos.String, "string");
-  cx.prim.bool = new Prim(cx.protos.Boolean, "bool");
-  cx.prim.num = new Prim(cx.protos.Number, "number");
-  cx.prim.null = new Prim(null, "null");
-  cx.prim.undef = new Prim(null, "undefined");
-  
-  // FIXME cache this (maybe even pre-parse/compile)
-  loadEnvironment("ecma5.json");
+  populate(cx.topScope, data);
 }
