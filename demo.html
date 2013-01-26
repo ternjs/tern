@@ -1,0 +1,49 @@
+<!doctype html>
+<script src="node_modules/codemirror/lib/codemirror.js"></script>
+<script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
+<link rel=stylesheet href="node_modules/codemirror/lib/codemirror.css">
+<script src="node_modules/acorn/acorn.js"></script>
+<script src="node_modules/acorn/util/walk.js"></script>
+<script src="infer.js"></script>
+<title>Tern demo</title>
+<style>.CodeMirror { border: 1px solid silver; }</style>
+
+<textarea id=code>
+var foo = (function() {
+  return 42;
+})();
+
+var x = {};
+
+function init(v) {
+  v.foo = 10;
+  v.bar = 1 + 1;
+}
+
+init(x);
+</textarea>
+<button onclick="analyze()">Analyze</button>
+<pre id=out></pre>
+
+<script>
+  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true
+  });
+  function load(file) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", file, false);
+    xhr.send();
+    return xhr.responseText;
+  }
+  var ecma5 = JSON.parse(load("ecma5.json")), browser = JSON.parse(load("browser.json"));
+  function analyze() {
+    editor.focus();
+    var token = editor.getTokenAt(editor.getCursor()), out = document.getElementById("out");
+    if (!/^variable/.test(token.type)) return out.innerHTML = "Not at variable.";
+    var cx = new tern.Context([ecma5, browser]);
+    tern.withContext(cx, function() {
+      tern.analyze(editor.getValue());
+      out.innerHTML = cx.topScope.lookup(token.string).toString(2);
+    });
+  }
+</script>
