@@ -25,4 +25,10 @@ var g = [].reduce(function(a, b) { return a - 2; }, 0);
 // h: number
 var h = Math.cos.call(null, 10);
 
+// i: fn(digits: number) -> string
+var i = (10).toFixed;
+
+// j: [string]
+var j = "foo bar baz".split(" ");
+
 // toString: fn() -> string

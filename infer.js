@@ -130,8 +130,8 @@ FVal.prototype = {
     if (this.type) c.addType(this.type);
   },
   getProp: function(prop) {
-    if (this.type && this.type.getProp) return this.type.getProp(prop);
-    return new AVal;
+    if (this.type) return this.type.getProp(prop);
+    return new FVal;
   },
   hasType: function(type) { return this.type == type; },
   typeHint: function(maxDepth) { return this.toString(maxDepth); },
@@ -220,9 +220,13 @@ Type.prototype = {
   hasType: function(other) { return other == this; }
 };
 
-function Prim(proto, name) { this.name = name; }
+function Prim(proto, name) { this.name = name; this.proto = proto; }
 Prim.prototype = Object.create(Type.prototype);
 Prim.prototype.toString = function() { return this.name; };
+Prim.prototype.getProp = function(prop) {
+  if (this.proto) return this.proto.getProp(prop);
+  return cx.prim.undef;
+};
 
 function hop(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
