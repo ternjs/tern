@@ -152,7 +152,7 @@
   }
   PropIsSubset.prototype = {
     addType: function(type) {
-      if (type.ensureProp)
+      if (type.getProp)
         type.getProp(this.prop).propagate(this.target);
     },
     propHint: function() { return this.prop; }

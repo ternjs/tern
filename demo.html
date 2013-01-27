@@ -27,7 +27,8 @@ init(x);
 
 <script>
   var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-    lineNumbers: true
+    lineNumbers: true,
+    extraKeys: {"Ctrl-Space": analyze}
   });
   function load(file) {
     var xhr = new XMLHttpRequest();
@@ -43,7 +44,8 @@ init(x);
     var cx = new tern.Context([ecma5, browser]);
     tern.withContext(cx, function() {
       tern.analyze(editor.getValue());
-      out.innerHTML = cx.topScope.lookup(token.string).toString(2);
+      var tp = cx.topScope.lookup(token.string);
+      out.innerHTML = tp.toString(2);
     });
   }
 </script>
