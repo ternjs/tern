@@ -127,6 +127,11 @@
       for (var i = 0; i < found.length; ++i) found[i] = found[i].toString(maxDepth);
       found.sort();
       return found.join(" | ");
+    },
+
+    gatherProperties: function(prefix, direct, proto) {
+      for (var i = 0; i < this.types.length; ++i)
+        this.types[i].gatherProperties(prefix, direct, proto);
     }
   };
 
@@ -137,7 +142,8 @@
     getProp: function() { return ANull; },
     hasType: function() { return false; },
     isEmpty: function() { return true; },
-    toString: function() { return "?"; }
+    toString: function() { return "?"; },
+    gatherProperties: function() {}
   };
 
   // PROPAGATION STRATEGIES
@@ -228,6 +234,9 @@
     if (this.proto) return this.proto.getProp(prop);
     return cx.prim.undef;
   };
+  Prim.prototype.gatherProperties = function(prefix, direct, proto) {
+    if (this.proto) this.proto.gatherProperties(prefix, direct, proto);
+  };
 
   function hop(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -276,6 +285,15 @@
     var found = cx.objProps[prop];
     if (found) found.push(this);
     else cx.objProps[prop] = [this];
+  };
+  Obj.prototype.gatherProperties = function(prefix, direct, proto) {
+    for (var prop in this.props) {
+      if (prefix && prop.indexOf(prefix) != 0) continue;
+      var val = this.props[prop];
+      if (!(val.flags & flag_definite)) continue;
+      if (direct.indexOf(prop) > -1 || proto.indexOf(prop) > -1) continue;
+      (hop(this.props, prop) ? direct : proto).push(prop);
+    }
   };
 
   Obj.fromInitializer = function(props, name) {
@@ -353,7 +371,7 @@
 
     exports.withContext(this, function() {
       cx.protos.Object = new Obj(null, "Object");
-      cx.topScope = new Scope(null, true);
+      cx.topScope = new Scope();
       cx.protos.Array = new Obj(true, "Array.prototype");
       cx.protos.Function = new Obj(true, "Function.prototype");
       cx.protos.RegExp = new Obj(true, "RegExp.prototype");
@@ -382,20 +400,15 @@
 
   // SCOPES
 
-  function Scope(prev, proto) {
-    Obj.call(this, proto, prev ? null : "global");
+  function Scope(prev) {
+    Obj.call(this, prev || true);
     this.prev = prev;
   }
   Scope.prototype = Object.create(Obj.prototype);
   Scope.prototype.lookup = function(name, force) {
-    var self = this;
-    for (;;) {
-      if (name in self.props) return self.props[name];
-      var prev = self.prev;
-      if (prev) self = prev;
-      else break;
-    }
-    if (force) return self.ensureProp(name);
+    if (name in this.props) return this.props[name];
+    for (var top = this; top.prev; top = top.prev) {}
+    if (force) return top.ensureProp(name, true);
   };
 
   // SCOPE GATHERING PASS
@@ -763,6 +776,24 @@
     var found = walk.findNodeAt(ast, start, end, "Expression", scopePasser, cx.topScope);
     if (!found) return null;
     return findType(found.node, found.state);
+  };
+
+  exports.propertiesOf = function(type, prefix) {
+    var direct = [], proto = [];
+    type.gatherProperties(prefix, direct, proto);
+    direct.sort();
+    proto.sort();
+    return direct.concat(proto);
+  };
+
+  // LOCAL-VARIABLE QUERIES
+
+  exports.localsAt = function(ast, pos, prefix) {
+    var found = walk.findNodeAround(ast, pos, "ScopeBody", scopePasser, cx.topScope);
+    var scope = found ? found.node.scope : cx.topScope, locals = [];
+    scope.gatherProperties(prefix, locals, locals);
+    locals.sort();
+    return locals;
   };
 
   // CONTEXT POPULATING
