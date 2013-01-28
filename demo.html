@@ -39,13 +39,12 @@ init(x);
   var ecma5 = JSON.parse(load("ecma5.json")), browser = JSON.parse(load("browser.json"));
   function analyze() {
     editor.focus();
-    var token = editor.getTokenAt(editor.getCursor()), out = document.getElementById("out");
-    if (!/^variable/.test(token.type)) return out.innerHTML = "Not at variable.";
+    var out = document.getElementById("out");
     var cx = new tern.Context([ecma5, browser]);
     tern.withContext(cx, function() {
-      tern.analyze(editor.getValue());
-      var tp = cx.topScope.lookup(token.string);
-      out.innerHTML = tp.toString(2);
+      var data = tern.analyze(editor.getValue());
+      var tp = tern.expressionType(data.ast, editor.indexFromPos(editor.getCursor()));
+      out.innerHTML = tp ? tp.toString(2) : "not found";
     });
   }
 </script>

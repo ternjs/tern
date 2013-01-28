@@ -52,6 +52,7 @@
     hasType: function(type) {
       return this.types.indexOf(type) > -1;
     },
+    isEmpty: function() { return this.types.length == 0; },
 
     typeHint: function(maxDepth) { return this.toString(maxDepth); },
 
@@ -141,6 +142,7 @@
       return new FVal;
     },
     hasType: function(type) { return this.type == type; },
+    isEmpty: function() { return this.type == null; },
     typeHint: function(maxDepth) { return this.toString(maxDepth); },
     toString: function(maxDepth) { return this.type ? this.type.toString(maxDepth) : "?"; }
   };
@@ -221,7 +223,8 @@
   function Type() {}
   Type.prototype = {
     propagate: function(c) { c.addType(this); },
-    hasType: function(other) { return other == this; }
+    hasType: function(other) { return other == this; },
+    isEmpty: function() { return false; }
   };
 
   function Prim(proto, name) { this.name = name; this.proto = proto; }
@@ -432,6 +435,8 @@
     }
   });
 
+  // CONSTRAINT GATHERING PASS
+
   function assignVar(name, scope, aval) {
     aval.propagate(scope.lookup(name, true));
   }
@@ -440,7 +445,7 @@
     var prop = node.property;
     if (!node.computed) return prop.name;
     if (prop.type == "Literal" && typeof prop.value == "string") return prop.value;
-    runInfer(prop, scope, c);
+    if (c) runInfer(prop, scope, c);
     return "<i>";
   }
 
@@ -578,7 +583,7 @@
         self = runInfer(node.callee.object, scope, c);
         callee = self.getProp(propName(node.callee, scope, c));
       } else {
-        callee = runInfer(node.callee, scope, c)
+        callee = runInfer(node.callee, scope, c);
       }
       if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
         args.push(runInfer(node.arguments[i], scope, c));
@@ -595,8 +600,7 @@
       return scope.lookup(node.name, true);
     },
     ThisExpression: function(node, scope, c) {
-      for (var s = scope; !s.self; s = s.prev) {}
-      return s ? s.self : cx.prim.undef;
+      return scope.self || cx.prim.undef;
     },
     Literal: function(node, scope) {
       return literalType(node.value);
@@ -607,11 +611,13 @@
     return inferExprVisitor[node.type](node, scope, c, name);
   }
 
+  var scopePasser = walk.make({
+    ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
+  });
+
   var inferWrapper = walk.make({
     Expression: runInfer,
     
-    ScopeBody: function(node, scope, c) { c(node, node.scope || scope); },
-
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope;
       var aval = new AVal(new Fn(node.id.name, inner.self, inner.argvals, inner.retval));
@@ -630,13 +636,116 @@
       if (node.argument)
         runInfer(node.argument, scope, c).propagate(scope.retval);
     }
-  });
+  }, scopePasser);
 
-  var analyze = exports.analyze = function(text, file) {
+  exports.analyze = function(text, file) {
     var ast = acorn.parse(text);
     walk.recursive(ast, cx.topScope, null, scopeGatherer);
     walk.recursive(ast, cx.topScope, null, inferWrapper);
     return {ast: ast, text: text, scope: cx.topScope, file: file};
+  };
+
+  // EXPRESSION TYPE DETERMINATION
+
+  // FIXME too much duplication with runInfer above
+  var typeFinder = {
+    ArrayExpression: function(node, scope) {
+      var eltval = new AVal;
+      for (var i = 0; i < node.elements.length; ++i) {
+        var elt = node.elements[i];
+        if (elt) findType(elt, scope).propagate(eltval);
+      }
+      return new Arr(eltval);
+    },
+    ObjectExpression: function(node, scope) {
+      var props = [];
+      for (var i = 0; i < node.properties.length; ++i) {
+        var p = node.properties[i];
+        props.push({name: p.key.name, type: findType(p.value, scope)});
+      }
+      return Obj.fromInitializer(props);
+    },
+    FunctionExpression: function(node) {
+      var inner = node.body.scope;
+      return new Fn(node.id && node.id.name, inner.self, inner.argvals, inner.retval);
+    },
+    SequenceExpression: function(node, scope) {
+      return findType(node.expressions[node.expressions.length-1], scope);
+    },
+    UnaryExpression: function(node) {
+      return unopResultType(node.operator);
+    },
+    UpdateExpression: function() {
+      return cx.prim.num;
+    },
+    BinaryExpression: function(node, scope) {
+      if (binopIsBoolean(node.operator)) return cx.prim.bool;
+      if (node.operator == "+") {
+        var lhs = findType(node.left, scope);
+        var rhs = findType(node.right, scope);
+        if (lhs.hasType(cx.prim.str) || rhs.hasType(cx.prim.str)) return cx.prim.str;
+      }
+      return cx.prim.num;
+    },
+    AssignmentExpression: function(node, scope) {
+      return findType(node.right, scope);
+    },
+    LogicalExpression: function(node, scope) {
+      var lhs = findType(node.left, scope);
+      return lhs.isEmpty() ? findType(node.right, scope) : lhs;
+    },
+    ConditionalExpression: function(node, scope) {
+      var lhs = findType(node.consequent, scope);
+      return lhs.isEmpty() ? findType(node.alternate, scope) : lhs;
+    },
+    NewExpression: function(node, scope) {
+      return this.CallExpression(node, scope, true);
+    },
+    CallExpression: function(node, scope, isNew) {
+      var callee, self, args = [];
+      if (isNew) {
+        callee = findType(node.callee, scope);
+        self = new AVal;
+        callee.getProp("prototype").propagate(new IsProto(self));
+      } else if (node.callee.type == "MemberExpression") {
+        self = findType(node.callee.object, scope);
+        var propN = propName(node.callee, scope, c);
+        callee = self.getProp(propN);
+        if (callee.isEmpty()) callee = findByPropertyName(propN);
+      } else {
+        callee = findType(node.callee, scope);
+      }
+      if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
+        args.push(findType(node.arguments[i], scope));
+      if (isNew) return self;
+      var retval = new AVal;
+      callee.propagate(new IsCallee(self, args, retval));
+      return retval;
+    },
+    MemberExpression: function(node, scope) {
+      var propN = propName(node, scope);
+      var prop = findType(node.object, scope).getProp(propN);
+      return prop.isEmpty() ? findByPropertyName(propN) : prop;
+    },
+    Identifier: function(node, scope) {
+      return scope.lookup(node.name, true);
+    },
+    ThisExpression: function(node, scope) {
+      return scope.self || cx.prim.undef;
+    },
+    Literal: function(node) {
+      return literalType(node.value);
+    }
+  };
+
+  function findType(node, scope) {
+    return typeFinder[node.type](node, scope);
+  }
+
+  exports.expressionType = function(ast, exprEnd) {
+    var found = walk.findNodeAt(ast, null, exprEnd, "Expression", scopePasser, cx.topScope);
+    if (!found) return null;
+    return findType(found.node, found.state);
   };
 
   // CONTEXT POPULATING
