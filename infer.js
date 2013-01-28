@@ -654,6 +654,15 @@
 
   // EXPRESSION TYPE DETERMINATION
 
+  function findByPropertyName(name) {
+    var found = cx.objProps[name];
+    if (found) for (var i = 0; i < found.length; ++i) {
+      var val = found[i].getProp(name);
+      if (!val.isEmpty()) return val;
+    }
+    return new FVal;
+  }
+
   // FIXME too much duplication with runInfer above
   var typeFinder = {
     ArrayExpression: function(node, scope) {
