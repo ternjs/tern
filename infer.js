@@ -2,7 +2,7 @@
   var acorn, walk;
   if (typeof require != "undefined") {
     acorn = require("acorn");
-    acorn.parse_dammit = require("acorn_loose").parse_dammit;
+    acorn.parse_dammit = require("acorn/acorn_loose").parse_dammit;
     walk = require("acorn/util/walk");
   } else {
     acorn = window.acorn;
@@ -130,22 +130,14 @@
     }
   };
 
-  // A variant of AVal used when the type is fixed, for example when
-  // parsed from a type description.
-  function FVal(type) { this.type = type; }
-  FVal.prototype = {
+  // A variant of AVal used for unknown, dead-end values
+  var ANull = {
     addType: function() {},
-    propagate: function(c) {
-      if (this.type) c.addType(this.type);
-    },
-    getProp: function(prop) {
-      if (this.type) return this.type.getProp(prop);
-      return new FVal;
-    },
-    hasType: function(type) { return this.type == type; },
-    isEmpty: function() { return this.type == null; },
-    typeHint: function(maxDepth) { return this.toString(maxDepth); },
-    toString: function(maxDepth) { return this.type ? this.type.toString(maxDepth) : "?"; }
+    propagate: function() {},
+    getProp: function() { return ANull; },
+    hasType: function() { return false; },
+    isEmpty: function() { return true; },
+    toString: function() { return "?"; }
   };
 
   // PROPAGATION STRATEGIES
@@ -225,7 +217,8 @@
   Type.prototype = {
     propagate: function(c) { c.addType(this); },
     hasType: function(other) { return other == this; },
-    isEmpty: function() { return false; }
+    isEmpty: function() { return false; },
+    addType: function() {}
   };
 
   function Prim(proto, name) { this.name = name; this.proto = proto; }
@@ -307,21 +300,25 @@
     return obj;
   };
 
-  function Fn(name, self, args, retval) {
+  function Fn(name, self, args, argNames, retval) {
     Obj.call(this, cx.protos.Function, name);
     this.self = self;
     this.args = args;
+    this.argNames = argNames;
     this.retval = retval;
   }
   Fn.prototype = Object.create(Obj.prototype);
   Fn.prototype.toString = function(maxDepth) {
     if (maxDepth) maxDepth--;
-    var str = "fn(" + this.args.map(function(x) {
-      var name = x.name, typ = x.toString(maxDepth);
+    var str = "fn(";
+    for (var i = 0; i < this.args.length; ++i) {
+      if (i) str += ", ";
+      var name = this.argNames[i];
       if (name && typeof name != "string") name = name.name;
-      if (name) return name + ": " + typ;
-      else return typ;
-    }).join(", ") + ")";
+      if (name) str += name + ": ";
+      str += this.args[i].toString(maxDepth);
+    }
+    str += ")";
     var rettype = this.retval.toString(maxDepth);
     if (rettype != "?") str += " -> " + rettype;
     return str;
@@ -329,7 +326,7 @@
   Fn.prototype.ensureProp = function(prop, alsoProto) {
     var newProto = this.name && prop == "prototype" && !hop(this.props, "prototype");
     var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
-    if (newProto && !retval.types.length && alsoProto)
+    if (newProto && retval.isEmpty() && alsoProto)
       retval.addType(new Obj(true, this.name + ".prototype"));
     return retval;
   };
@@ -404,11 +401,12 @@
 
   var scopeGatherer = walk.make({
     Function: function(node, scope, c) {
-      var inner = node.body.scope = new Scope(scope), argvals = inner.argvals = [];
+      var inner = node.body.scope = new Scope(scope);
+      var argVals = inner.argVals = [], argNames = inner.argNames = [];
       for (var i = 0; i < node.params.length; ++i) {
-        var param = node.params[i], b = inner.ensureProp(param.name);
-        b.name = param;
-        argvals.push(b);
+        var param = node.params[i];
+        argNames.push(param);
+        argVals.push(inner.ensureProp(param.name));
       }
       inner.retval = new AVal;
       inner.self = new AVal;
@@ -459,7 +457,7 @@
   }
 
   function setHint(aval, hint) {
-    if (aval.types && !aval.types.length) aval.hint = hint;
+    if (aval.isEmpty()) aval.hint = hint;
   }
 
   function unopResultType(op) {
@@ -514,7 +512,7 @@
     FunctionExpression: function(node, scope, c, name) {
       var inner = node.body.scope;
       var aval = new AVal(new Fn(node.id ? node.id.name : name,
-                                 inner.self, inner.argvals, inner.retval));
+                                 inner.self, inner.argVals, inner.argNames, inner.retval));
       if (node.id)
         assignVar(node.id.name, node.body.scope, aval);
       c(node.body, scope, "ScopeBody");
@@ -621,7 +619,8 @@
     
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope;
-      var aval = new AVal(new Fn(node.id.name, inner.self, inner.argvals, inner.retval));
+      var aval = new AVal(new Fn(node.id.name, inner.self, inner.argVals,
+                                 inner.argNames, inner.retval));
       assignVar(node.id.name, scope, aval);
       c(node.body, scope, "ScopeBody");
     },
@@ -660,7 +659,7 @@
       var val = found[i].getProp(name);
       if (!val.isEmpty()) return val;
     }
-    return new FVal;
+    return ANull;
   }
 
   // FIXME too much duplication with runInfer above
@@ -683,7 +682,8 @@
     },
     FunctionExpression: function(node) {
       var inner = node.body.scope;
-      return new Fn(node.id && node.id.name, inner.self, inner.argvals, inner.retval);
+      return new Fn(node.id && node.id.name, inner.self, inner.argVals,
+                    inner.argNames, inner.retval);
     },
     SequenceExpression: function(node, scope) {
       return findType(node.expressions[node.expressions.length-1], scope);
@@ -784,8 +784,8 @@
     error: function() {
       throw new Error("Unrecognized type spec: " + this.spec + " " + this.pos);
     },
-    parseArgs: function() {
-      for (var args = [], i = 0; !this.eat(")"); ++i) {
+    parseFnType: function(name, top) {
+      for (var args = [], names = [], i = 0; !this.eat(")"); ++i) {
         var colon = this.spec.indexOf(": ", this.pos), argname, aval;
         if (colon != -1) {
           argname = this.spec.slice(this.pos, colon);
@@ -794,24 +794,24 @@
           else
             argname = null;
         }
-        args.push(aval = new FVal(this.parseType()));
-        if (argname) aval.name = argname;
+        names.push(argname);
+        args.push(this.parseType());
         this.eat(", ");
       }
-      return args;
+      var retType, computeRet;
+      if (this.eat(" -> ")) {
+        if (top && this.spec.indexOf("$", this.pos) > -1) {
+          retType = null;
+          computeRet = this.parseRetType();
+        } else retType = this.parseType();
+      }
+      var fn = new Fn(name, ANull, args, names, retType);
+      if (computeRet) fn.computeRet = computeRet;
+      return fn;
     },
     parseType: function(name, top) {
       if (this.eat("fn(")) {
-        var args = this.parseArgs(), retType, computeRet;
-        if (this.eat(" -> ")) {
-          if (top && this.spec.indexOf("$", this.pos) > -1) {
-            retType = null;
-            computeRet = this.parseRetType();
-          } else retType = this.parseType();
-        }
-        var fn = new Fn(name, new FVal, args, new FVal(retType));
-        if (computeRet) fn.computeRet = computeRet;
-        return fn;
+        return this.parseFnType(name, top);
       } else if (this.eat("[")) {
         var arr = new Arr(this.parseType());
         if (this.eat("]")) return arr;
@@ -823,7 +823,7 @@
         case "bool": return cx.prim.bool;
         case "null": return cx.prim.null;
         case "undefined": return cx.prim.undef;
-        case "?": return null;
+        case "?": return ANull;
         case "<top>": return cx.topScope;
         }
         if (word in cx.localProtos) return IsProto.getInstance(cx.localProtos[word]);
@@ -869,8 +869,7 @@
     for (var prop in props) if (hop(props, prop) && prop.charCodeAt(0) != 33) {
       var nm = name ? name + "." + prop : prop;
       var v = obj.ensureProp(prop);
-      var ty = interpret(props[prop], nm);
-      if (ty) ty.propagate(v);
+      interpret(props[prop], nm).propagate(v);
     }
     return obj;
   }
