@@ -2,6 +2,7 @@
   var acorn, walk;
   if (typeof require != "undefined") {
     acorn = require("acorn");
+    acorn.parse_dammit = require("acorn_loose").parse_dammit;
     walk = require("acorn/util/walk");
   } else {
     acorn = window.acorn;
@@ -639,7 +640,13 @@
   }, scopePasser);
 
   exports.analyze = function(text, file) {
-    var ast = acorn.parse(text);
+    var ast;
+    try {
+        ast = acorn.parse(text);
+    } catch (e) {
+      if (e instanceof SyntaxError) ast = acorn.parse_dammit(text);
+      else throw e;
+    }
     walk.recursive(ast, cx.topScope, null, scopeGatherer);
     walk.recursive(ast, cx.topScope, null, inferWrapper);
     return {ast: ast, text: text, scope: cx.topScope, file: file};
