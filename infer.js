@@ -758,8 +758,8 @@
     return typeFinder[node.type](node, scope);
   }
 
-  exports.expressionType = function(ast, exprEnd) {
-    var found = walk.findNodeAt(ast, null, exprEnd, "Expression", scopePasser, cx.topScope);
+  exports.expressionType = function(ast, start, end) {
+    var found = walk.findNodeAt(ast, start, end, "Expression", scopePasser, cx.topScope);
     if (!found) return null;
     return findType(found.node, found.state);
   };
