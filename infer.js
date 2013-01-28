@@ -9,7 +9,7 @@
     walk = acorn.walk;
   }
 
-  var flag_recGuard = 1, flag_initializer = 2;
+  var flag_recGuard = 1, flag_initializer = 2, flag_definite = 4;
 
   // ABSTRACT VALUES
 
@@ -261,6 +261,7 @@
     var found = this.props[prop];
     if (found && (alsoProto || hop(this.props, prop))) return found;
     var av = new AVal;
+    if (!alsoProto) av.flags |= flag_definite;
     this.addProp(prop, av);
     return av;
   };
@@ -268,7 +269,7 @@
     return this.ensureProp(prop, true);
   };
   Obj.prototype.addProp = function(prop, val) {
-    if (prop == "__proto__") return;
+    if (prop == "__proto__" || prop == "✖") return;
     this.props[prop] = val;
     // FIXME should objProps also list proto's props? maybe move back to objList?
     if (this.prev) return; // If this is a scope, it shouldn't be registered
@@ -725,7 +726,7 @@
         callee.getProp("prototype").propagate(new IsProto(self));
       } else if (node.callee.type == "MemberExpression") {
         self = findType(node.callee.object, scope);
-        var propN = propName(node.callee, scope, c);
+        var propN = propName(node.callee, scope);
         callee = self.getProp(propN);
         if (callee.isEmpty()) callee = findByPropertyName(propN);
       } else {
