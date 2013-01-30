@@ -68,5 +68,13 @@ function complete(cm) {
 }
 
 function jumpToDef(cm) {
-  // FIXME
+  var cx = new tern.Context([ecma5, browser]);
+  tern.withContext(cx, function() {
+    var data = tern.analyze(cm.getValue());
+    var end = cm.indexFromPos(cm.getCursor());
+    var type = tern.expressionType(data.ast, null, end), orig;
+    if (type.types) for (var i = 0; i < type.types.length && !orig; ++i) orig = type.types[i].origin;
+    else orig = type.origin;
+    if (orig) cm.setSelection(cm.posFromIndex(orig.end), cm.posFromIndex(orig.start));
+  });
 }

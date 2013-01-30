@@ -296,7 +296,7 @@
     }
   };
 
-  Obj.fromInitializer = function(props, name) {
+  Obj.fromInitializer = function(props, name, origin) {
     var types = props.length && cx.objProps[props[0].name];
     // FIXME check prototype
     if (types) for (var i = 0; i < types.length; ++i) {
@@ -311,6 +311,7 @@
 
     // Nothing found, allocate a new one
     var obj = new Obj(true, name);
+    obj.origin = origin;
     for (var i = 0; i < props.length; ++i) {
       var prop = props[i], aval = obj.ensureProp(prop.name);
       aval.flags |= flag_initializer;
@@ -521,16 +522,17 @@
         var p = node.properties[i];
         props.push({name: p.key.name, type: runInfer(p.value, scope, c)});
       }
-      return Obj.fromInitializer(props, name);
+      return Obj.fromInitializer(props, name, node);
     },
     FunctionExpression: function(node, scope, c, name) {
       var inner = node.body.scope;
-      var aval = new AVal(new Fn(node.id ? node.id.name : name,
-                                 inner.self, inner.argVals, inner.argNames, inner.retval));
+      var fn = new Fn(node.id ? node.id.name : name,
+                      inner.self, inner.argVals, inner.argNames, inner.retval);
+      fn.origin = node;
       if (node.id)
-        assignVar(node.id.name, node.body.scope, aval);
+        assignVar(node.id.name, node.body.scope, fn);
       c(node.body, scope, "ScopeBody");
-      return aval;
+      return fn;
     },
     SequenceExpression: function(node, scope, c) {
       var v;
@@ -624,18 +626,15 @@
     return inferExprVisitor[node.type](node, scope, c, name);
   }
 
-  var scopePasser = walk.make({
-    ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
-  });
-
   var inferWrapper = walk.make({
     Expression: runInfer,
     
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope;
-      var aval = new AVal(new Fn(node.id.name, inner.self, inner.argVals,
-                                 inner.argNames, inner.retval));
-      assignVar(node.id.name, scope, aval);
+      var fn = new Fn(node.id.name, inner.self, inner.argVals,
+                      inner.argNames, inner.retval);
+      fn.origin = node;
+      assignVar(node.id.name, scope, fn);
       c(node.body, scope, "ScopeBody");
     },
 
@@ -649,8 +648,10 @@
     ReturnStatement: function(node, scope, c) {
       if (node.argument)
         runInfer(node.argument, scope, c).propagate(scope.retval);
-    }
-  }, scopePasser);
+    },
+
+    ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
+  });
 
   exports.analyze = function(text, file) {
     var ast;
@@ -692,12 +693,14 @@
         var p = node.properties[i];
         props.push({name: p.key.name, type: findType(p.value, scope)});
       }
-      return Obj.fromInitializer(props);
+      return Obj.fromInitializer(props, null, node);
     },
     FunctionExpression: function(node) {
       var inner = node.body.scope;
-      return new Fn(node.id && node.id.name, inner.self, inner.argVals,
-                    inner.argNames, inner.retval);
+      var fn = new Fn(node.id && node.id.name, inner.self, inner.argVals,
+                      inner.argNames, inner.retval);
+      fn.origin = node;
+      return fn;
     },
     SequenceExpression: function(node, scope) {
       return findType(node.expressions[node.expressions.length-1], scope);
@@ -772,9 +775,31 @@
     return typeFinder[node.type](node, scope);
   }
 
+  var searchVisitor = walk.make({
+    Function: function(node, st, c) {
+      var scope = node.body.scope;
+      if (node.id) c(node.id, scope);
+      for (var i = 0; i < node.params.length; ++i)
+        c(node.params[i], scope);
+      c(node.body, scope, "ScopeBody");
+    },
+    TryStatement: function(node, st, c) {
+      for (var i = 0; i < node.handlers.length; ++i)
+        c(node.handlers[i].param, st, c);
+      walk.base.TryStatement(node, st, c);
+    },
+    VariableDeclaration: function(node, st, c) {
+      for (var i = 0; i < node.declarations.length; ++i) {
+        var decl = node.declarations[i];
+        c(decl.id, st);
+        if (decl.init) c(decl.init, st, "Expression");
+      }
+    }
+  });
+
   exports.expressionType = function(ast, start, end) {
-    var found = walk.findNodeAt(ast, start, end, "Expression", scopePasser, cx.topScope);
-    if (!found) return null;
+    var found = walk.findNodeAt(ast, start, end, null, searchVisitor, cx.topScope);
+    if (!found || !typeFinder.hasOwnProperty(found.node.type)) return null;
     return findType(found.node, found.state);
   };
 
@@ -789,7 +814,7 @@
   // LOCAL-VARIABLE QUERIES
 
   exports.localsAt = function(ast, pos, prefix) {
-    var found = walk.findNodeAround(ast, pos, "ScopeBody", scopePasser, cx.topScope);
+    var found = walk.findNodeAround(ast, pos, "ScopeBody");
     var scope = found ? found.node.scope : cx.topScope, locals = [];
     scope.gatherProperties(prefix, locals, locals);
     locals.sort();
