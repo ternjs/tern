@@ -15,23 +15,14 @@
 
   function AVal(type) {
     this.types = [];
-    // FIXME move inline with types
-    this.scores = [];
     this.forward = [];
     this.flags = 0;
     if (type) type.propagate(this);
   }
   AVal.prototype = {
     addType: function(type) {
-      // FIXME merge strategy -- [?] + [<int>] = [<int>], similar for object & fn types
-      for (var i = 0; i < this.types.length; ++i) {
-        if (this.types[i] == type) {
-          ++this.scores[i];
-          return;
-        }
-      }
+      for (var i = 0; i < this.types.length; ++i) if (this.types[i] == type) return;
       this.types.push(type);
-      this.scores.push(1);
       for (var i = 0; i < this.forward.length; ++i)
         this.forward[i].addType(type);
     },
@@ -114,19 +105,8 @@
     },
 
     summarizeType: function(maxDepth) {
-      // FIXME this is a rather random heuristic
-      var max = 0, found = [];
-      for (var i = 0; i < this.types.length; ++i) {
-        if (this.scores[i] > max) {
-          max = this.scores[i];
-          found.length = 0;
-        }
-        if (this.scores[i] == max) found.push(this.types[i]);
-      }
-      if (found.length > 3) return "?";
-      for (var i = 0; i < found.length; ++i) found[i] = found[i].toString(maxDepth);
-      found.sort();
-      return found.join(" | ");
+      // FIXME combine array/function types, return special value when no single type
+      return this.types[0].toString(maxDepth);
     },
 
     gatherProperties: function(prefix, direct, proto) {
@@ -254,7 +234,6 @@
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
-    // FIXME cache these strings?
     var props = [];
     for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop)) {
       if (maxDepth)
