@@ -421,7 +421,9 @@
       for (var i = 0; i < node.params.length; ++i) {
         var param = node.params[i];
         argNames.push(param);
-        argVals.push(inner.ensureProp(param.name));
+        var val = inner.ensureProp(param.name);
+        argVals.push(val);
+        val.name = param;
       }
       inner.retval = new AVal;
       inner.self = new AVal;
@@ -797,9 +799,13 @@
     }
   });
 
-  exports.expressionType = function(ast, start, end) {
+  exports.findExpression = function(ast, start, end) {
     var found = walk.findNodeAt(ast, start, end, null, searchVisitor, cx.topScope);
     if (!found || !typeFinder.hasOwnProperty(found.node.type)) return null;
+    return found;
+  };
+
+  exports.expressionType = function(found) {
     return findType(found.node, found.state);
   };
 
