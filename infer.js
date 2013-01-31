@@ -9,9 +9,9 @@
     walk = acorn.walk;
   }
 
-  var flag_recGuard = 1, flag_initializer = 2, flag_definite = 4;
-
   // ABSTRACT VALUES
+
+  var flag_recGuard = 1, flag_initializer = 2, flag_definite = 4;
 
   function AVal(type) {
     this.types = [];
@@ -176,13 +176,12 @@
   IsCallee.prototype = {
     addType: function(fn) {
       if (!(fn instanceof Fn)) return;
-      if (this.args) for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
+      for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
         this.args[i].propagate(fn.args[i]);
-      if (this.self) this.self.propagate(fn.self);
-      if (this.retval) {
-        var rv = fn.computeRet && this.args && this.self ? fn.computeRet(this.self, this.args) : fn.retval;
-        rv.propagate(this.retval);
-      }
+      this.self.propagate(fn.self);
+
+      var rv = fn.computeRet ? fn.computeRet(this.self, this.args) : fn.retval;
+      rv.propagate(this.retval);
     },
     typeHint: function(maxDepth) {
       return new Fn(null, this.self, this.args, this.retval).toString(maxDepth);
@@ -601,6 +600,7 @@
         callee = self.getProp(propName(node.callee, scope, c));
       } else {
         callee = runInfer(node.callee, scope, c);
+        self = ANull;
       }
       if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
         args.push(runInfer(node.arguments[i], scope, c));
@@ -648,7 +648,7 @@
     },
 
     ReturnStatement: function(node, scope, c) {
-      if (node.argument)
+      if (node.argument && scope.retval)
         runInfer(node.argument, scope, c).propagate(scope.retval);
     },
 
@@ -916,7 +916,7 @@
           var lhs = inner(self, args);
           if (lhs instanceof Fn) return lhs.retval; // FIXME this is a bit of a kludge
           var rv = new AVal;
-          lhs.propagate(new IsCallee(null, null, rv));
+          lhs.propagate(new IsCallee(ANull, [], rv));
           return rv;
         };
         return function(self, args) {return inner(self, args).getProp(propName);};
