@@ -42,6 +42,10 @@
       return found;
     },
 
+    forAllProps: function(c) {
+      this.propagate(new ForAllProps(c));
+    },
+
     hasType: function(type) {
       return this.types.indexOf(type) > -1;
     },
@@ -151,6 +155,12 @@
     propHint: function() { return this.prop; }
   };
 
+  function ForAllProps(c) { this.c = c; }
+  ForAllProps.prototype.addType = function(type) {
+    if (!(type instanceof Obj)) return;
+    type.forAllProps(this.c);
+  };
+
   function IsCallee(self, args, retval) {
     this.self = self; this.args = args; this.retval = retval;
   }
@@ -170,19 +180,15 @@
   };
 
   function IfObjType(other) { this.other = other; }
-  IfObjType.prototype = {
-    addType: function(obj) {
-      if (obj instanceof Obj) this.other.addType(obj);
-    }
+  IfObjType.prototype.addType = function(obj) {
+    if (obj instanceof Obj) this.other.addType(obj);
   };
 
   function HasMethodCall(propName, args, retval) {
     this.propName = propName; this.args = args; this.retval = retval;
   }
-  HasMethodCall.prototype = {
-    addType: function(obj) {
-      obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.retval));
-    }
+  HasMethodCall.prototype.addType = function(obj) {
+    obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.retval));
   };
 
   function IsProto(other) { this.other = other; }
@@ -219,7 +225,8 @@
     propagate: function(c) { c.addType(this); },
     hasType: function(other) { return other == this; },
     isEmpty: function() { return false; },
-    addType: function() {}
+    addType: function() {},
+    forAllProps: function() {}
   };
 
   function Prim(proto, name) { this.name = name; this.proto = proto; }
@@ -274,8 +281,10 @@
   Obj.prototype.addProp = function(prop, val) {
     if (prop == "__proto__" || prop == "✖") return;
     this.props[prop] = val;
-    if (this.prev) return; // If this is a scope, it shouldn't be registered
-    registerProp(prop, this);
+    // If this is a scope, it shouldn't be registered
+    if (!this.prev) registerProp(prop, this);
+    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i)
+      this.onNewProp[i](prop, val);
   };
   Obj.prototype.gatherProperties = function(prefix, direct, proto) {
     for (var prop in this.props) {
@@ -284,6 +293,13 @@
       if (!(val.flags & flag_definite)) continue;
       if (direct.indexOf(prop) > -1 || proto.indexOf(prop) > -1) continue;
       (hop(this.props, prop) ? direct : proto).push(prop);
+    }
+  };
+  Obj.prototype.forAllProps = function(c) {
+    (this.onNewProp || (this.onNewProp = [])).push(c);
+    for (var prop in this.props) if (hop(this.props, prop)) {
+      var val = this.props[prop];
+      if (val.flags & flag_definite) c(prop, val);
     }
   };
 
@@ -431,6 +447,11 @@
     for (var top = this; top.prev; top = top.prev) {}
     if (force) return top.ensureProp(name, true);
   };
+
+  function maybeTypeManipulator(scope, score) {
+    if (!scope.typeManipScore) scope.typeManipScore = 0;
+    scope.typeManipScore += score;
+  }
 
   // SCOPE GATHERING PASS
 
@@ -590,7 +611,19 @@
 
       if (node.left.type == "MemberExpression") {
         var obj = runInfer(node.left.object, scope, c);
-        obj.propagate(new PropHasSubset(propName(node.left, scope, c), rhs));
+        var pName = propName(node.left, scope, c);
+        obj.propagate(new PropHasSubset(pName, rhs));
+        if (pName == "prototype") maybeTypeManipulator(scope, 20);
+        if (pName == "<i>" && node.right.type == "MemberExpression" && node.right.computed) {
+          // This is a hack to recognize for/in loops that copy
+          // properties, and do the copying ourselves, insofar as we
+          // manage, because such loops tend to be relevant for type
+          // information.
+          var over = scope.lookup(node.right.property.name).iteratesOver;
+          if (over) over.forAllProps(function(prop, val) {
+            obj.propagate(new PropHasSubset(prop, val));
+          });
+        }
       } else { // Identifier
         assignVar(node.left.name, scope, rhs);
       }
@@ -606,6 +639,9 @@
                   runInfer(node.alternate, scope, c));
     },
     NewExpression: function(node, scope, c) {
+      if (node.callee.type == "Identifier" && hop(scope.props, node.callee.name))
+        maybeTypeManipulator(scope, 20);
+
       for (var i = 0, args = []; i < node.arguments.length; ++i)
         args.push(runInfer(node.arguments[i], scope, c));
       var callee = runInfer(node.callee, scope, c);
@@ -670,6 +706,23 @@
     ReturnStatement: function(node, scope, c) {
       if (node.argument && scope.fnType)
         runInfer(node.argument, scope, c).propagate(scope.fnType.retval);
+    },
+
+    ForInStatement: function(node, scope, c) {
+      var source = runInfer(node.right, scope, c);
+      if ((node.right.type == "Identifier" && hop(scope.props, node.right.name)) ||
+          (node.right.type == "MemberExpression" && node.right.property.name == "prototype")) {
+        maybeTypeManipulator(scope, 5);
+        var varName;
+        if (node.left.type == "Identifier") {
+          varName = node.left.name;
+        } else if (node.left.type == "VariableDeclaration") {
+          varName = node.left.declarations[0].id.name;
+        }
+        if (varName && hop(scope.props, varName))
+          scope.lookup(varName).iteratesOver = source;
+      }
+      c(node.body, scope, "Statement");
     },
 
     ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
