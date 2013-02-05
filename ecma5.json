@@ -6,7 +6,7 @@
   "Object": {
     "!type": "fn()",
     "getPrototypeOf": "fn(obj: ?) -> ?",
-    "create": "fn(proto: ?) -> ?",
+    "create": "fn(proto: ?) -> $Object_create",
     "defineProperties": "fn(obn: ?, props: ?)",
     "keys": "fn(obj: ?) -> [string]",
     "prototype": {

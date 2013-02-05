@@ -992,6 +992,24 @@
         var arg = this.word(/\d/);
         if (arg) { arg = Number(arg); return function(self, args) {return args[arg];}; }
         if (this.eat("this")) return function(self) {return self;};
+        if (this.eat("Object_create")) return function(self, args) {
+          var result = new AVal;
+          (args[0] || cx.prim.null).propagate({addType: function(tp) {
+            if (tp == cx.prim.null) {
+              result.addType(new Obj());
+            } else if (tp instanceof Obj) {
+              var derived = new Obj(tp), spec = args[1];
+              if (spec instanceof AVal) spec = spec.types[0];
+              if (spec instanceof Obj) for (var prop in spec.props) if (hop(spec.props, prop)) {
+                var cur = spec.props[prop].types[0];
+                var p = derived.ensureProp(prop);
+                if (cur && cur instanceof Obj && cur.props.value) p.addType(cur.props.value);
+              }
+              result.addType(derived)
+            }
+          }});
+          return result;
+        };
         else this.error();
       }
       var t = this.parseType();
