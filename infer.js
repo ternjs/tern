@@ -258,6 +258,8 @@
     }
     if (proto === true) proto = cx.protos.Object;
     this.props = Object.create((proto && proto.props) || null);
+
+    if (proto) proto.forAllProps(this.onProtoProp.bind(this));
   }
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
@@ -278,7 +280,7 @@
       var own = hop(this.props, prop);
       if (own && !alsoProto && !(found.flags & flag_definite)) {
         found.flags |= flag_definite;
-        this.broadcastProp(prop, found);
+        this.broadcastProp(prop, found, true);
       }
       if (own || alsoProto) return found;
     }
@@ -289,18 +291,28 @@
     this.props[prop] = av;
     if (!alsoProto) {
       av.flags |= flag_definite;
-      this.broadcastProp(prop, av);
+      this.broadcastProp(prop, av, true);
     }
     return av;
   };
   Obj.prototype.getProp = function(prop) {
     return this.ensureProp(prop, true);
   };
-  Obj.prototype.broadcastProp = function(prop, val) {
+  Obj.prototype.broadcastProp = function(prop, val, local) {
     // If this is a scope, it shouldn't be registered
-    if (!this.prev) registerProp(prop, this);
-    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i) {
-      if (this.onNewProp[i](prop, val)) this.onNewProp.splice(i--, 1);
+    if (local && !this.prev) registerProp(prop, this);
+
+    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i)
+      this.onNewProp[i](prop, val, local);
+  };
+  Obj.prototype.onProtoProp = function(prop, val, local) {
+    if (hop(this.props, prop)) {
+      var val = this.props[prop];
+      if (val.flags & flag_definite) return;
+      delete this.props[prop];
+      this.props[prop].propagate(val);
+    } else {
+      this.broadcastProp(prop, val, false);
     }
   };
   Obj.prototype.gatherProperties = function(prefix, direct, proto) {
@@ -314,9 +326,9 @@
   };
   Obj.prototype.forAllProps = function(c) {
     (this.onNewProp || (this.onNewProp = [])).push(c);
-    for (var prop in this.props) if (hop(this.props, prop)) {
+    for (var prop in this.props) {
       var val = this.props[prop];
-      if (val.flags & flag_definite) c(prop, val);
+      if (val.flags & flag_definite) c(prop, val, hop(this.props, prop));
     }
   };
 
@@ -641,8 +653,8 @@
           // manage, because such loops tend to be relevant for type
           // information.
           var over = scope.lookup(node.right.property.name).iteratesOver;
-          if (over) over.forAllProps(function(prop, val) {
-            if (prop != "prototype" && prop != "<i>")
+          if (over) over.forAllProps(function(prop, val, local) {
+            if (local && prop != "prototype" && prop != "<i>")
               obj.propagate(new PropHasSubset(prop, val));
           });
         }
