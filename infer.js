@@ -167,12 +167,14 @@
   IsCallee.prototype = {
     addType: function(fn) {
       if (!(fn instanceof Fn)) return;
-      for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
-        this.args[i].propagate(fn.args[i]);
-      this.self.propagate(fn.self);
-
-      var rv = fn.computeRet ? fn.computeRet(this.self, this.args) : fn.retval;
-      rv.propagate(this.retval);
+      if (fn.computeRet) {
+        fn.computeRet(this.self, this.args).propagate(this.retval);
+      } else {
+        for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
+          this.args[i].propagate(fn.args[i]);
+        this.self.propagate(fn.self);
+        fn.retval.propagate(this.retval);
+      }
     },
     typeHint: function(maxDepth) {
       return new Fn(null, this.self, this.args, this.retval).toString(maxDepth);
@@ -191,15 +193,18 @@
     obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.retval));
   };
 
-  function IsProto(other) { this.other = other; }
-  IsProto.getInstance = function(o) {
-    if (!o.instance) o.instance = new Obj(o);
-    return o.instance;
-  };
+  function IsProto(other, ctor) { this.other = other; this.ctor = ctor; }
   IsProto.prototype = {
     addType: function(o) {
-      if (!(o instanceof Obj)) return null;
-      this.other.addType(IsProto.getInstance(o));
+      if (!(o instanceof Obj)) return;
+      if (!o.instances) o.instances = [];
+      for (var i = 0; i < o.instances.length; ++i) {
+        var cur = o.instances[i];
+        if (cur.ctor == this.ctor) return this.other.addType(cur.instance);
+      }
+      var instance = new Obj(o);
+      o.instances.push({ctor: this.ctor, instance: instance});
+      this.other.addType(instance);
     }
   };
 
@@ -453,6 +458,24 @@
     scope.typeManipScore += score;
   }
 
+  function maybeTagAsTypeManipulator(node, scope) {
+    if (scope.typeManipScore && scope.typeManipScore / (node.end - node.start) > .01) {
+      scope.fnType.computeRet = function(self, args) {
+        var scopeCopy = new Scope(scope.prev), fn = scope.fnType;
+        for (var v in scope.props) if (hop(scope.props, v)) {
+          var local = scopeCopy.ensureProp(v);
+          for (var i = 0; i < fn.argNames.length; ++i) if (fn.argNames[i].name == v && i < args.length)
+            args[i].propagate(local);
+        }
+        scopeCopy.fnType = new Fn(fn.name, self, args, fn.argNames, new AVal);
+        node.body.scope = scopeCopy;
+        walk.recursive(node.body, scopeCopy, null, scopeGatherer);
+        walk.recursive(node.body, scopeCopy, null, inferWrapper);
+        return scopeCopy.fnType.retval;
+      };
+    }
+  }
+
   // SCOPE GATHERING PASS
 
   var scopeGatherer = walk.make({
@@ -518,6 +541,10 @@
     if (aval.isEmpty()) aval.hint = hint;
   }
 
+  function getInstance(obj) {
+    return obj.instance || (obj.instance = new Obj(obj));
+  }
+
   function unopResultType(op) {
     switch (op) {
     case "+": case "-": case "~": return cx.prim.num;
@@ -539,7 +566,7 @@
     case "string": return cx.prim.str;
     case "object":
       if (!val) return cx.prim.null;
-      return IsProto.getInstance(cx.protos.RegExp);
+      return getInstance(cx.protos.RegExp);
     }
   }
 
@@ -573,6 +600,7 @@
       if (name && !fn.name) fn.name = name;
       if (node.id)
         assignVar(node.id.name, node.body.scope, fn);
+      maybeTagAsTypeManipulator(node, inner);
       return fn;
     },
     SequenceExpression: function(node, scope, c) {
@@ -621,7 +649,8 @@
           // information.
           var over = scope.lookup(node.right.property.name).iteratesOver;
           if (over) over.forAllProps(function(prop, val) {
-            obj.propagate(new PropHasSubset(prop, val));
+            if (prop != "prototype" && prop != "<i>")
+              obj.propagate(new PropHasSubset(prop, val));
           });
         }
       } else { // Identifier
@@ -646,7 +675,7 @@
         args.push(runInfer(node.arguments[i], scope, c));
       var callee = runInfer(node.callee, scope, c);
       var self = new AVal;
-      callee.getProp("prototype").propagate(new IsProto(self));
+      callee.getProp("prototype").propagate(new IsProto(self, callee));
       var retval = callee.retval || (callee.retval = new AVal);
       callee.propagate(new IsCallee(self, args, retval));
       retval.propagate(new IfObjType(self));
@@ -693,6 +722,7 @@
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope, fn = inner.fnType;
       assignVar(node.id.name, scope, fn);
+      maybeTagAsTypeManipulator(node, inner);
       c(node.body, scope, "ScopeBody");
     },
 
@@ -959,8 +989,8 @@
         case "?": return ANull;
         case "<top>": return cx.topScope;
         }
-        if (word in cx.localProtos) return IsProto.getInstance(cx.localProtos[word]);
-        if (word in cx.protos) return IsProto.getInstance(cx.protos[word]);
+        if (word in cx.localProtos) return getInstance(cx.localProtos[word]);
+        if (word in cx.protos) return getInstance(cx.protos[word]);
       }
       this.error();
     },
