@@ -375,32 +375,13 @@
 
   // THE PROPERTY REGISTRY
 
-  function propData(prop) {
-    var data = cx.props[prop];
-    if (!data) data = cx.props[prop] = {objs: [], handlers: []};
-    return data;
-  }
-
   function registerProp(prop, obj) {
-    var data = propData(prop);
-    data.objs.push(obj);
-    for (var i = 0; i < data.handlers.length; ++i) data.handlers[i](obj);
+    var data = cx.props[prop] || (cx.props[prop] = []);
+    data.push(obj);
   }
 
   function objsWithProp(prop) {
-    var found = cx.props[prop];
-    return found && found.objs;
-  }
-
-  // FIXME not used yet, maybe misguided
-
-  function onPropRegistered(prop, handler) {
-    propData(prop).handlers.push(handler);
-  }
-
-  function offPropRegistered(prop, handler) {
-    var handlers = propData(prop).handlers;
-    handlers.splice(handlers.indexOf(handler), 1);
+    return cx.props[prop];
   }
 
   // INFERENCE CONTEXT
