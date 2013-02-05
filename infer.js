@@ -274,22 +274,34 @@
   };
   Obj.prototype.ensureProp = function(prop, alsoProto) {
     var found = this.props[prop];
-    if (found && (alsoProto || hop(this.props, prop))) return found;
+    if (found) {
+      var own = hop(this.props, prop);
+      if (own && !alsoProto && !(found.flags & flag_definite)) {
+        found.flags |= flag_definite;
+        this.broadcastProp(prop, found);
+      }
+      if (own || alsoProto) return found;
+    }
+
     var av = new AVal;
-    if (!alsoProto) av.flags |= flag_definite;
-    this.addProp(prop, av);
+    if (prop == "__proto__" || prop == "✖") return av;
+
+    this.props[prop] = av;
+    if (!alsoProto) {
+      av.flags |= flag_definite;
+      this.broadcastProp(prop, av);
+    }
     return av;
   };
   Obj.prototype.getProp = function(prop) {
     return this.ensureProp(prop, true);
   };
-  Obj.prototype.addProp = function(prop, val) {
-    if (prop == "__proto__" || prop == "✖") return;
-    this.props[prop] = val;
+  Obj.prototype.broadcastProp = function(prop, val) {
     // If this is a scope, it shouldn't be registered
     if (!this.prev) registerProp(prop, this);
-    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i)
-      this.onNewProp[i](prop, val);
+    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i) {
+      if (this.onNewProp[i](prop, val)) this.onNewProp.splice(i--, 1);
+    }
   };
   Obj.prototype.gatherProperties = function(prefix, direct, proto) {
     for (var prop in this.props) {
