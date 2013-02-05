@@ -437,7 +437,7 @@
   var scopeGatherer = walk.make({
     Function: function(node, scope, c) {
       var inner = node.body.scope = new Scope(scope);
-      var argVals = inner.argVals = [], argNames = inner.argNames = [];
+      var argVals = [], argNames = [];
       for (var i = 0; i < node.params.length; ++i) {
         var param = node.params[i];
         argNames.push(param);
@@ -445,8 +445,8 @@
         argVals.push(val);
         val.name = param;
       }
-      inner.retval = new AVal;
-      inner.self = new AVal;
+      inner.fnType = new Fn(node.id && node.id.name, new AVal, argVals, argNames, new AVal);
+      inner.fnType.origin = node;
       if (node.id) {
         var decl = node.type == "FunctionDeclaration";
         (decl ? scope : inner).ensureProp(node.id.name).name = node.id;
@@ -548,10 +548,8 @@
     },
     FunctionExpression: function(node, scope, c, name) {
       c(node.body, scope, "ScopeBody");
-      var inner = node.body.scope;
-      var fn = new Fn(node.id ? node.id.name : name,
-                      inner.self, inner.argVals, inner.argNames, inner.retval);
-      fn.origin = node;
+      var inner = node.body.scope, fn = inner.fnType;
+      if (name && !fn.name) fn.name = name;
       if (node.id)
         assignVar(node.id.name, node.body.scope, fn);
       return fn;
@@ -642,7 +640,7 @@
       return scope.lookup(node.name, true);
     },
     ThisExpression: function(node, scope, c) {
-      return scope.self || cx.prim.undef;
+      return scope.fnType ? scope.fnType.self : cx.prim.undef;
     },
     Literal: function(node, scope) {
       return literalType(node.value);
@@ -657,10 +655,7 @@
     Expression: runInfer,
     
     FunctionDeclaration: function(node, scope, c) {
-      var inner = node.body.scope;
-      var fn = new Fn(node.id.name, inner.self, inner.argVals,
-                      inner.argNames, inner.retval);
-      fn.origin = node;
+      var inner = node.body.scope, fn = inner.fnType;
       assignVar(node.id.name, scope, fn);
       c(node.body, scope, "ScopeBody");
     },
@@ -673,8 +668,8 @@
     },
 
     ReturnStatement: function(node, scope, c) {
-      if (node.argument && scope.retval)
-        runInfer(node.argument, scope, c).propagate(scope.retval);
+      if (node.argument && scope.fnType)
+        runInfer(node.argument, scope, c).propagate(scope.fnType.retval);
     },
 
     ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
@@ -723,11 +718,7 @@
       return Obj.fromInitializer(props, null, node);
     },
     FunctionExpression: function(node) {
-      var inner = node.body.scope;
-      var fn = new Fn(node.id && node.id.name, inner.self, inner.argVals,
-                      inner.argNames, inner.retval);
-      fn.origin = node;
-      return fn;
+      return node.body.scope.fnType;
     },
     SequenceExpression: function(node, scope) {
       return findType(node.expressions[node.expressions.length-1], scope);
@@ -792,7 +783,7 @@
       return scope.lookup(node.name, true);
     },
     ThisExpression: function(node, scope) {
-      return scope.self || cx.prim.undef;
+      return scope.fnType ? scope.fnType.self : cx.prim.undef;
     },
     Literal: function(node) {
       return literalType(node.value);
