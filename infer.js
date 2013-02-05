@@ -815,27 +815,13 @@
     },
     // FIXME follow changes above
     NewExpression: function(node, scope) {
-      return this.CallExpression(node, scope, true);
+      var self = new AVal;
+      callee.getProp("prototype").propagate(new IsProto(self, callee));
+      return self;
     },
-    CallExpression: function(node, scope, isNew) {
-      var callee, self, args = [];
-      if (isNew) {
-        callee = findType(node.callee, scope);
-        self = new AVal;
-        callee.getProp("prototype").propagate(new IsProto(self));
-      } else if (node.callee.type == "MemberExpression") {
-        self = findType(node.callee.object, scope);
-        var propN = propName(node.callee, scope);
-        callee = self.getProp(propN);
-        if (callee.isEmpty()) callee = findByPropertyName(propN);
-      } else {
-        callee = findType(node.callee, scope);
-      }
-      for (var i = 0; i < node.arguments.length; ++i)
-        args.push(findType(node.arguments[i], scope));
-      if (isNew) return self;
+    CallExpression: function(node, scope) {
       var retval = new AVal;
-      callee.propagate(new IsCallee(self, args, retval));
+      findType(node.callee, scope).propagate(new IsCallee(ANull, [], retval));
       return retval;
     },
     MemberExpression: function(node, scope) {
