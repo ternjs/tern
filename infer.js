@@ -787,7 +787,6 @@
     return ANull;
   }
 
-  // FIXME too much duplication with runInfer above
   var typeFinder = {
     ArrayExpression: function(node, scope) {
       var eltval = new AVal;
@@ -837,7 +836,6 @@
       var lhs = findType(node.consequent, scope);
       return lhs.isEmpty() ? findType(node.alternate, scope) : lhs;
     },
-    // FIXME follow changes above
     NewExpression: function(node, scope) {
       var self = new AVal;
       callee.getProp("prototype").propagate(new IsProto(self, callee));
@@ -1005,7 +1003,7 @@
         var propName = this.word(/[\w<>$]/) || this.error();
         if (propName == "$ret") return function(self, args) {
           var lhs = inner(self, args);
-          if (lhs instanceof Fn) return lhs.retval; // FIXME this is a bit of a kludge
+          if (lhs instanceof Fn) return lhs.retval;
           var rv = new AVal;
           lhs.propagate(new IsCallee(ANull, [], rv));
           return rv;
