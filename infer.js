@@ -32,6 +32,7 @@
       for (var i = 0; i < this.types.length; ++i)
         c.addType(this.types[i]);
     },
+
     getProp: function(prop) {
       var found = (this.props || (this.props = Object.create(null)))[prop];
       if (!found) {
@@ -74,7 +75,7 @@
       if (retval == "?" && propCount) {
         var bestMatch, bestMatchTotalProps, bestScore = 0;
         for (var p in props) {
-          var objs = cx.objProps[p];
+          var objs = objsWithProp(p);
           if (objs) for (var i = 0; i < objs.length; ++i) {
             var type = objs[i], score = 0, totalProps = 0;
             if (type == bestMatch) continue;
@@ -168,16 +169,31 @@
     }
   };
 
+  function IfObjType(other) { this.other = other; }
+  IfObjType.prototype = {
+    addType: function(obj) {
+      if (obj instanceof Obj) this.other.addType(obj);
+    }
+  };
+
+  function HasMethodCall(propName, args, retval) {
+    this.propName = propName; this.args = args; this.retval = retval;
+  }
+  HasMethodCall.prototype = {
+    addType: function(obj) {
+      obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.retval));
+    }
+  };
+
   function IsProto(other) { this.other = other; }
   IsProto.getInstance = function(o) {
-    if (!(o instanceof Obj)) return null;
     if (!o.instance) o.instance = new Obj(o);
     return o.instance;
   };
   IsProto.prototype = {
     addType: function(o) {
-      var inst = IsProto.getInstance(o);
-      if (inst) this.other.addType(inst);
+      if (!(o instanceof Obj)) return null;
+      this.other.addType(IsProto.getInstance(o));
     }
   };
 
@@ -258,15 +274,12 @@
   Obj.prototype.addProp = function(prop, val) {
     if (prop == "__proto__" || prop == "✖") return;
     this.props[prop] = val;
-    // FIXME should objProps also list proto's props? maybe move back to objList?
     if (this.prev) return; // If this is a scope, it shouldn't be registered
-    var found = cx.objProps[prop];
-    if (found) found.push(this);
-    else cx.objProps[prop] = [this];
+    registerProp(prop, this);
   };
   Obj.prototype.gatherProperties = function(prefix, direct, proto) {
     for (var prop in this.props) {
-      if (prefix && prop.indexOf(prefix) != 0) continue;
+      if (prefix && prop.indexOf(prefix) != 0 || prop == "<i>") continue;
       var val = this.props[prop];
       if (!(val.flags & flag_definite)) continue;
       if (direct.indexOf(prop) > -1 || proto.indexOf(prop) > -1) continue;
@@ -275,11 +288,10 @@
   };
 
   Obj.fromInitializer = function(props, name, origin) {
-    var types = props.length && cx.objProps[props[0].name];
-    // FIXME check prototype
+    var types = props.length && objsWithProp(props[0].name);
     if (types) for (var i = 0; i < types.length; ++i) {
       var type = types[i], matching = 0;
-      for (var p in type.props) {
+      for (var p in type.props) if (hop(type.props, p)) {
         var prop = type.props[p];
         if ((prop.flags & flag_initializer) && props.some(function(x) {return x.name == p;}))
           ++matching;
@@ -340,10 +352,40 @@
     return "[" + this.getProp("<i>").toString(maxDepth) + "]";
   };
 
+  // THE PROPERTY REGISTRY
+
+  function propData(prop) {
+    var data = cx.props[prop];
+    if (!data) data = cx.props[prop] = {objs: [], handlers: []};
+    return data;
+  }
+
+  function registerProp(prop, obj) {
+    var data = propData(prop);
+    data.objs.push(obj);
+    for (var i = 0; i < data.handlers.length; ++i) data.handlers[i](obj);
+  }
+
+  function objsWithProp(prop) {
+    var found = cx.props[prop];
+    return found && found.objs;
+  }
+
+  // FIXME not used yet, maybe misguided
+
+  function onPropRegistered(prop, handler) {
+    propData(prop).handlers.push(handler);
+  }
+
+  function offPropRegistered(prop, handler) {
+    var handlers = propData(prop).handlers;
+    handlers.splice(handlers.indexOf(handler), 1);
+  }
+
   // INFERENCE CONTEXT
 
   var Context = exports.Context = function(environment) {
-    this.objProps = Object.create(null);
+    this.props = Object.create(null);
     this.protos = Object.create(null);
     this.prim = Object.create(null);
     this.localProtos = null;
@@ -431,8 +473,8 @@
 
   // CONSTRAINT GATHERING PASS
 
-  function assignVar(name, scope, aval) {
-    aval.propagate(scope.lookup(name, true));
+  function assignVar(name, scope, src) {
+    src.propagate(scope.lookup(name, true));
   }
 
   function propName(node, scope, c) {
@@ -505,13 +547,13 @@
       return Obj.fromInitializer(props, name, node);
     },
     FunctionExpression: function(node, scope, c, name) {
+      c(node.body, scope, "ScopeBody");
       var inner = node.body.scope;
       var fn = new Fn(node.id ? node.id.name : name,
                       inner.self, inner.argVals, inner.argNames, inner.retval);
       fn.origin = node;
       if (node.id)
         assignVar(node.id.name, node.body.scope, fn);
-      c(node.body, scope, "ScopeBody");
       return fn;
     },
     SequenceExpression: function(node, scope, c) {
@@ -566,26 +608,30 @@
                   runInfer(node.alternate, scope, c));
     },
     NewExpression: function(node, scope, c) {
-      return this.CallExpression(node, scope, c, null, true);
-    },
-    CallExpression: function(node, scope, c, _name, isNew) {
-      var callee, self, args = [];
-      if (isNew) {
-        callee = runInfer(node.callee, scope, c);
-        self = new AVal;
-        callee.getProp("prototype").propagate(new IsProto(self));
-      } else if (node.callee.type == "MemberExpression") {
-        self = runInfer(node.callee.object, scope, c);
-        callee = self.getProp(propName(node.callee, scope, c));
-      } else {
-        callee = runInfer(node.callee, scope, c);
-        self = ANull;
-      }
-      if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
+      for (var i = 0, args = []; i < node.arguments.length; ++i)
         args.push(runInfer(node.arguments[i], scope, c));
+      var callee = runInfer(node.callee, scope, c);
+      var self = new AVal;
+      callee.getProp("prototype").propagate(new IsProto(self));
       var retval = callee.retval || (callee.retval = new AVal);
       callee.propagate(new IsCallee(self, args, retval));
-      return isNew ? self : retval;
+      retval.propagate(new IfObjType(self));
+      return self;
+    },
+    CallExpression: function(node, scope, c, _name) {
+      for (var i = 0, args = []; i < node.arguments.length; ++i)
+        args.push(runInfer(node.arguments[i], scope, c));
+      if (node.callee.type == "MemberExpression") {
+        var self = runInfer(node.callee.object, scope, c);
+        var retval = new AVal;
+        self.propagate(new HasMethodCall(propName(node.callee, scope, c), args, retval));
+        return retval;
+      } else {
+        var callee = runInfer(node.callee, scope, c);
+        var retval = callee.retval || (callee.retval = new AVal);
+        callee.propagate(new IsCallee(ANull, args, retval));
+        return retval;
+      }
     },
     MemberExpression: function(node, scope, c) {
       return runInfer(node.object, scope, c).getProp(propName(node, scope, c));
@@ -650,7 +696,7 @@
   // EXPRESSION TYPE DETERMINATION
 
   function findByPropertyName(name) {
-    var found = cx.objProps[name];
+    var found = objsWithProp(name);
     if (found) for (var i = 0; i < found.length; ++i) {
       var val = found[i].getProp(name);
       if (!val.isEmpty()) return val;
@@ -712,6 +758,7 @@
       var lhs = findType(node.consequent, scope);
       return lhs.isEmpty() ? findType(node.alternate, scope) : lhs;
     },
+    // FIXME follow changes above
     NewExpression: function(node, scope) {
       return this.CallExpression(node, scope, true);
     },
@@ -729,7 +776,7 @@
       } else {
         callee = findType(node.callee, scope);
       }
-      if (node.arguments) for (var i = 0; i < node.arguments.length; ++i)
+      for (var i = 0; i < node.arguments.length; ++i)
         args.push(findType(node.arguments[i], scope));
       if (isNew) return self;
       var retval = new AVal;
@@ -846,7 +893,7 @@
           retType = null;
           computeRet = this.parseRetType();
         } else retType = this.parseType();
-      }
+      } else retType = ANull;
       var fn = new Fn(name, ANull, args, names, retType);
       if (computeRet) fn.computeRet = computeRet;
       return fn;
