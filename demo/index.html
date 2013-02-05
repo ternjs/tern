@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="UTF-8">
+<script src="../node_modules/codemirror/lib/codemirror.js"></script>
+<script src="../node_modules/codemirror/mode/javascript/javascript.js"></script>
+<link rel=stylesheet href="../node_modules/codemirror/lib/codemirror.css">
+<script src="../node_modules/codemirror/addon/hint/show-hint.js"></script>
+<link rel="stylesheet" href="../node_modules/codemirror/addon/hint/show-hint.css">
+<script src="../node_modules/acorn/acorn.js"></script>
+<script src="../node_modules/acorn/acorn_loose.js"></script>
+<script src="../node_modules/acorn/util/walk.js"></script>
+<script src="../infer.js"></script>
+<script src="demo.js"></script>
+<title>Tern demo</title>
+<style>.CodeMirror { border: 1px solid silver; height: 85%; line-height: 1.3; } html, body { height: 100%; } </style>
+
+<textarea id=code>
+function Type1() { this.is1 = true; }
+Type1.prototype.method = function() { this.m1called = true; };
+Type1.prototype.prop1 = true;
+
+function Type2() { this.is2 = true; }
+Type2.prototype.method = function() { this.m2called = true; };
+Type2.prototype.prop2 = true;
+
+var o = Math.random() < .5 ? new Type1 : new Type2;
+o.method();
+
+var o1 = new Type1;
+o1.
+</textarea>
+<pre id=out style="background: #eee; border-radius: 4px"></pre>
+<p><strong>Ctrl-Space</strong>: Autocomplete<br>
+  <strong>Ctrl-I</strong>: Find type at cursor<br>
+  <strong>Alt-.</strong>: Jump to definition
+</p>
