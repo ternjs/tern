@@ -7,6 +7,7 @@ CodeMirror.on(window, "load", function() {
                 "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, complete); },
                 "Alt-.": jumpToDef}
   });
+  editor.on("cursorActivity", updateArgumentHints);
 });
 
 function load(file) {
@@ -87,4 +88,63 @@ function jumpToDef(cm) {
     }
     if (def) cm.setSelection(cm.posFromIndex(def.end), cm.posFromIndex(def.start));
   });
+}
+
+function elt(tagname, text, cls) {
+  var e = document.createElement(tagname);
+  if (text) e.appendChild(document.createTextNode(text));
+  if (cls) e.className = cls;
+  return e;
+}
+
+var cachedFunction = {line: null, ch: null, name: null, type: null, bad: null};
+
+function updateArgumentHints(cm) {
+  var out = document.getElementById("out");
+  out.innerHTML = "";
+  if (cm.somethingSelected()) return;
+
+  var lex = cm.getTokenAt(cm.getCursor()).state.lexical;
+  if (lex.info != "call") return;
+  var ch = lex.column, pos = lex.pos || 0;
+  for (var line = cm.getCursor().line, e = Math.max(0, line - 9), found = false; line >= e; --line)
+    if (cm.getLine(line).charAt(ch) == "(") {found = true; break;}
+  if (!found) return;
+
+  var cache = cachedFunction;
+  if (cache.line != line || cache.ch != ch) {
+    cache.line = line; cache.ch = ch; cache.bad = true;
+
+    var cx = new tern.Context([ecma5, browser]);
+    if (tern.withContext(cx, function() {
+      var data = tern.analyze(cm.getValue());
+      var callee = tern.findExpression(data.ast, null, cm.indexFromPos({line: line, ch: ch}));
+      if (!callee) return true;
+      var tp = tern.expressionType(callee).getFunctionType(), name;
+      if (!tp) return true;
+
+      if (callee.node.type == "Identifier")
+        cache.name = callee.node.name;
+      else if (callee.node.type == "MemberExpression" && !callee.node.computed)
+        cache.name = callee.node.property.name;
+      else
+        cache.name = tp.name || "fn";
+
+      cache.type = tp;
+      cache.bad = false;
+    })) return;
+  }
+
+  if (cache.bad) return;
+  var tp = cache.type;
+
+  out.appendChild(elt("span", cache.name, "Tern-functionname"));
+  out.appendChild(document.createTextNode("("));
+  for (var i = 0; i < tp.argNames.length; ++i) {
+    if (i) out.appendChild(document.createTextNode(", "));
+    var argname = tp.argNames[i];
+    if (typeof argname == "object") argname = argname.name;
+    out.appendChild(elt("span", argname, "Tern-functionarg" + (i == pos ? " Tern-functionarg-current" : "")));
+  }
+  out.appendChild(document.createTextNode(")"));
 }

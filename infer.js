@@ -50,6 +50,11 @@
       return this.types.indexOf(type) > -1;
     },
     isEmpty: function() { return this.types.length == 0; },
+    getFunctionType: function() {
+      // FIXME find most complete one?
+      for (var i = 0; i < this.types.length; ++i)
+        if (this.types[i] instanceof Fn) return this.types[i];
+    },
 
     typeHint: function(maxDepth) { return this.toString(maxDepth); },
 
@@ -127,6 +132,7 @@
     getProp: function() { return ANull; },
     hasType: function() { return false; },
     isEmpty: function() { return true; },
+    getFunctionType: function() {},
     toString: function() { return "?"; },
     gatherProperties: function() {}
   };
@@ -230,6 +236,7 @@
     propagate: function(c) { c.addType(this); },
     hasType: function(other) { return other == this; },
     isEmpty: function() { return false; },
+    getFunctionType: function() {},
     addType: function() {},
     forAllProps: function() {}
   };
@@ -385,6 +392,7 @@
       retval.addType(new Obj(true, this.name + ".prototype"));
     return retval;
   };
+  Fn.prototype.getFunctionType = function() { return this; };
 
   function Arr(contentType) {
     Obj.call(this, cx.protos.Array);

@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="UTF-8">
 <script src="../node_modules/codemirror/lib/codemirror.js"></script>
-<script src="../node_modules/codemirror/mode/javascript/javascript.js"></script>
+<script src="javascript_tern.js"></script>
 <link rel=stylesheet href="../node_modules/codemirror/lib/codemirror.css">
 <script src="../node_modules/codemirror/addon/hint/show-hint.js"></script>
 <link rel="stylesheet" href="../node_modules/codemirror/addon/hint/show-hint.css">
@@ -11,9 +11,25 @@
 <script src="../infer.js"></script>
 <script src="demo.js"></script>
 <title>Tern demo</title>
-<style>.CodeMirror { border: 1px solid silver; height: 85%; line-height: 1.3; } html, body { height: 100%; } </style>
+<style>
+  .CodeMirror { border: 1px solid silver; height: 85%; line-height: 1.3; }
+  html, body { height: 100%; }
+  .output {
+    background: #eee;
+    margin-top: 0;
+    padding: 2px 10px;
+    min-height: 1.3em;
+    border: 1px solid silver;
+    border-top-width: 0;
+  }
+  .Tern-functionname { color: #009; }
+  .Tern-functionarg { color: #07a; }
+  .Tern-functionarg-current { text-decoration: underline; }
+</style>
 
 <textarea id=code>
+document.body.replaceChild(wasThisTheNewNode, orIsItThisOne);
+
 function Type1() { this.is1 = true; }
 Type1.prototype.method = function() { this.m1called = true; };
 Type1.prototype.prop1 = true;
@@ -28,7 +44,7 @@ o.method();
 var o1 = new Type1;
 o1.
 </textarea>
-<pre id=out style="background: #eee; border-radius: 4px"></pre>
+<pre id=out class=output>&nbsp;</pre>
 <p><strong>Ctrl-Space</strong>: Autocomplete<br>
   <strong>Ctrl-I</strong>: Find type at cursor<br>
   <strong>Alt-.</strong>: Jump to definition
