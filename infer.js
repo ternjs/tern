@@ -874,7 +874,9 @@
   };
 
   function findType(node, scope) {
-    return typeFinder[node.type](node, scope);
+    var found = typeFinder[node.type](node, scope);
+    if (found.isEmpty()) return found.findType() || found;
+    return found;
   }
 
   var searchVisitor = walk.make({
