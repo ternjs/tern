@@ -97,7 +97,7 @@ function elt(tagname, text, cls) {
   return e;
 }
 
-var cachedFunction = {line: null, ch: null, name: null, type: null, bad: null};
+var cachedFunction = {line: null, ch: null, name: null, type: null, bad: null, cx: null};
 
 function updateArgumentHints(cm) {
   var out = document.getElementById("out");
@@ -131,20 +131,31 @@ function updateArgumentHints(cm) {
         cache.name = tp.name || "fn";
 
       cache.type = tp;
+      cache.cx = cx;
       cache.bad = false;
     })) return;
   }
 
   if (cache.bad) return;
-  var tp = cache.type;
 
-  out.appendChild(elt("span", cache.name, "Tern-functionname"));
-  out.appendChild(document.createTextNode("("));
-  for (var i = 0; i < tp.argNames.length; ++i) {
-    if (i) out.appendChild(document.createTextNode(", "));
-    var argname = tp.argNames[i];
-    if (typeof argname == "object") argname = argname.name;
-    out.appendChild(elt("span", argname, "Tern-functionarg" + (i == pos ? " Tern-functionarg-current" : "")));
-  }
-  out.appendChild(document.createTextNode(")"));
+  tern.withContext(cache.cx, function() {
+    var tp = cache.type;
+
+    out.appendChild(elt("span", cache.name, "Tern-fname"));
+    out.appendChild(document.createTextNode("("));
+    for (var i = 0; i < tp.argNames.length; ++i) {
+      if (i) out.appendChild(document.createTextNode(", "));
+      var argname = tp.argNames[i];
+      if (typeof argname == "object") argname = argname.name;
+      out.appendChild(elt("span", argname, "Tern-farg" + (i == pos ? " Tern-farg-current" : "")));
+      var argtype = tp.args[i].getType();
+      if (argtype) {
+        out.appendChild(document.createTextNode(": "));
+        out.appendChild(elt("span", argtype.toString(), "Tern-type"));
+      }
+    }
+    var rettype = !tp.retval.isEmpty() && tern.toString(tp.retval.getType());
+    out.appendChild(document.createTextNode(rettype ? ") -> " : ")"));
+    if (rettype) out.appendChild(elt("span", rettype, "Tern-type"));
+  });
 }
