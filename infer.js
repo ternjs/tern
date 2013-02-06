@@ -9,9 +9,11 @@
     walk = acorn.walk;
   }
 
-  // ABSTRACT VALUES
+  var toString = exports.toString = function(type, maxDepth) {
+    return type ? type.toString(maxDepth) : "?";
+  };
 
-  var flag_recGuard = 1, flag_initializer = 2, flag_definite = 4;
+  // ABSTRACT VALUES
 
   function AVal(type) {
     this.types = [];
@@ -56,68 +58,68 @@
         if (this.types[i] instanceof Fn) return this.types[i];
     },
 
-    typeHint: function(maxDepth) { return this.toString(maxDepth); },
+    getType: function() {
+      if (this.types.length == 0) return this.makeupType();
+      if (this.types.length == 1) return this.types[0];
 
-    toString: function(maxDepth) {
-      if (this.flags & flag_recGuard) return "<R>";
-      this.flags |= flag_recGuard;
-
-      var name = this.types.length ? this.summarizeType(maxDepth) : this.guessType(maxDepth);
-
-      this.flags &= ~flag_recGuard;
-      return name;
-    },
-
-    guessType: function(maxDepth) {
-      if (this.hint) return this.hint.toString(maxDepth);
-
-      var props = {}, propCount = 0, retval = "?";
-      for (var i = 0; retval == "?" && i < this.forward.length; ++i) {
-        var propagate = this.forward[i];
-        if (propagate.typeHint) retval = propagate.typeHint();
-        var prop = propagate.propHint && propagate.propHint();
-        if (prop && !props[prop]) {
-          props[propagate.prop] = true;
-          ++propCount;
-        }
+      var arrays = 0, fns = 0, objs = 0, prims = 0;
+      for (var i = 0; i < this.types.length; ++i) {
+        var tp = this.types[i];
+        if (tp instanceof Arr) ++arrays;
+        else if (tp instanceof Fn) ++fns;
+        else if (tp instanceof Obj) ++objs;
+        else if (tp instanceof Prim && tp != cx.prim.null && tp != cx.prim.undef) ++prims;
       }
-      if (retval == "?" && propCount) {
-        var bestMatch, bestMatchTotalProps, bestScore = 0;
-        for (var p in props) {
-          var objs = objsWithProp(p);
-          if (objs) for (var i = 0; i < objs.length; ++i) {
-            var type = objs[i], score = 0, totalProps = 0;
-            if (type == bestMatch) continue;
-            for (var p2 in type.props) {
-              if (p2 in props) ++score;
-              ++totalProps;
-            }
-            if (score > bestScore || (score == score && totalProps < bestMatchTotalProps)) {
-              bestScore = score;
-              bestMatch = type;
-              bestMatchTotalProps = totalProps;
-            }
-          }
+      var kinds = (arrays || 1) + (fns || 1) + (objs || 1) + (prims || 1);
+      if (kinds > 1) return null;
+
+      var maxScore = 0, maxTp = null;
+      for (var i = 0; i < this.types.length; ++i) {
+        var tp = this.types[i], score = 0;
+        if (arrays && tp instanceof Arr) {
+          score = tp.getProp("<i>").isEmpty() ? 1 : 2;
+        } else if (fns && tp instanceof Fn) {
+          score = 1;
+          for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].empty()) ++score;
+          if (tp.retval && !tp.retval.isEmpty()) ++score;
+        } else if (objs && tp instanceof Obj) {
+          score = 1;
+          for (var prop in tp.props) if (!tp.props[prop].isEmpty()) ++score;
+        } else if (prims && tp instanceof Prim && tp != cx.prim.undef && tp != cx.prim.null) {
+          score = 1;
         }
-        if (bestMatch) {
-          retval = bestMatch.toString(maxDepth);
-        } else {
-          retval = "{";
-          for (var p in props) {
-            if (retval.length != 1) retval += ", ";
-            retval += p;
-            if (retval.length > 20) break;
-          }
-          retval += "}";
-        }
+        if (score > maxScore) { maxScore = score; maxTp = tp; }
       }
-      return retval;
+      return maxTp;
     },
 
-    summarizeType: function(maxDepth) {
-      // FIXME combine array/function types, return special value when no single type
-      return this.types[0].toString(maxDepth);
+    makeupType: function() {
+      if (this.hint) return this.hint;
+
+      for (var i = 0; i < this.forward.length; ++i) {
+        var fw = this.forward[i], hint = fw.typeHint && fw.typeHint();
+        if (hint && !hint.isEmpty()) return hint;
+      }
+
+      var props = Object.create(null), foundProp = null;
+      for (var i = 0; i < this.forward.length; ++i) {
+        var fw = this.forward[i], prop = fw.propHint && fw.propHint();
+        if (prop) { props[prop] = true; foundProp = prop; }
+      }
+      if (!foundProp) return null;
+
+      var objs = objsWithProp(foundProp);
+      if (objs) search: for (var i = 0; i < objs.length; ++i) {
+        var obj = objs[i];
+        for (var prop in props) {
+          var match = obj.props[prop];
+          if (!match || !(match.flags & flag_definite)) continue search;
+        }
+        return obj;
+      }
     },
+
+    typeHint: function() { return this.types.length ? this.types[0] : null; },
 
     gatherProperties: function(prefix, direct, proto) {
       for (var i = 0; i < this.types.length; ++i)
@@ -133,7 +135,7 @@
     hasType: function() { return false; },
     isEmpty: function() { return true; },
     getFunctionType: function() {},
-    toString: function() { return "?"; },
+    getType: function() {},
     gatherProperties: function() {}
   };
 
@@ -182,8 +184,8 @@
         fn.retval.propagate(this.retval);
       }
     },
-    typeHint: function(maxDepth) {
-      return new Fn(null, this.self, this.args, this.retval).toString(maxDepth);
+    typeHint: function() {
+      return new Fn(null, this.self, this.args, this.retval);
     }
   };
 
@@ -224,9 +226,7 @@
       else if (type == cx.prim.num && this.other.hasType(cx.prim.num))
         this.target.addType(cx.prim.num);
     },
-    typeHint: function(maxDepth) {
-      return this.other.toString(maxDepth);
-    }
+    typeHint: function() { return this.other; }
   };
 
   // TYPE OBJECTS
@@ -237,6 +237,7 @@
     hasType: function(other) { return other == this; },
     isEmpty: function() { return false; },
     getFunctionType: function() {},
+    getType: function() { return this; },
     addType: function() {},
     forAllProps: function() {}
   };
@@ -256,6 +257,8 @@
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
+  var flag_initializer = 1, flag_definite = 2;
+
   function Obj(proto, name) {
     if (proto && !name && proto.name) {
       var match = /^(.*)\.prototype$/.exec(proto.name);
@@ -274,7 +277,7 @@
     var props = [];
     for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop)) {
       if (maxDepth)
-        props.push(prop + ": " + this.props[prop].toString(maxDepth - 1));
+        props.push(prop + ": " + toString(this.props[prop].getType(), maxDepth - 1));
       else if (this.props[prop].flags & flag_initializer)
         props.push(prop);
     }
@@ -378,11 +381,11 @@
       var name = this.argNames[i];
       if (name && typeof name != "string") name = name.name;
       if (name) str += name + ": ";
-      str += this.args[i].toString(maxDepth);
+      str += toString(this.args[i].getType(), maxDepth);
     }
     str += ")";
-    var rettype = this.retval.toString(maxDepth);
-    if (rettype != "?") str += " -> " + rettype;
+    if (!this.retval.isEmpty())
+      str += " -> " + toString(this.retval.getType(), maxDepth);
     return str;
   };
   Fn.prototype.ensureProp = function(prop, alsoProto) {
@@ -402,7 +405,7 @@
   Arr.prototype = Object.create(Obj.prototype);
   Arr.prototype.toString = function(maxDepth) {
     if (maxDepth) maxDepth--;
-    return "[" + this.getProp("<i>").toString(maxDepth) + "]";
+    return "[" + toString(this.getProp("<i>").getType(), maxDepth) + "]";
   };
 
   // THE PROPERTY REGISTRY
@@ -1011,7 +1014,10 @@
               if (spec instanceof Obj) for (var prop in spec.props) if (hop(spec.props, prop)) {
                 var cur = spec.props[prop].types[0];
                 var p = derived.ensureProp(prop);
-                if (cur && cur instanceof Obj && cur.props.value) p.addType(cur.props.value);
+                if (cur && cur instanceof Obj && cur.props.value) {
+                  var vtp = cur.props.value.getType();
+                  if (vtp) p.addType(vtp);
+                }
               }
               result.addType(derived)
             }

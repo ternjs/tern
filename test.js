@@ -33,7 +33,7 @@ function runTests() {
           ++failed;
           continue;
         }
-        var type = v.toString(Number(m[2] || 5));
+        var type = infer.toString(v.getType(), Number(m[2] || 5));
         if (type != m[3]) {
           console.log(file + ": variable " + m[1] + " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
           ++failed;
@@ -51,7 +51,7 @@ function outputInfo(file) {
     var info = infer.analyze(data.text, data.file);
     for (var i = 3; i < process.argv.length; ++i) {
       var v = process.argv[i], found = info.scope.lookup(v, true);
-      console.log(v + ": " + found.toString(2));
+      console.log(v + ": " + infer.toString(found.getType(), 2));
     }
   });
 }
