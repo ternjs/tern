@@ -68,7 +68,7 @@
         if (tp instanceof Arr) ++arrays;
         else if (tp instanceof Fn) ++fns;
         else if (tp instanceof Obj) ++objs;
-        else if (tp instanceof Prim && tp != cx.prim.null && tp != cx.prim.undef) ++prims;
+        else if (tp instanceof Prim) ++prims;
       }
       var kinds = (arrays && 1) + (fns && 1) + (objs && 1) + (prims && 1);
       if (kinds > 1) return null;
@@ -84,8 +84,9 @@
           if (!tp.retval.isEmpty()) ++score;
         } else if (objs && tp instanceof Obj) {
           score = tp.name ? 100 : 1;
+          // FIXME this heuristic is useless. maybe find overlapping properties?
           for (var prop in tp.props) if (hop(tp.props, prop) && tp.props[prop].flags & flag_definite) ++score;
-        } else if (prims && tp instanceof Prim && tp != cx.prim.undef && tp != cx.prim.null) {
+        } else if (prims && tp instanceof Prim) {
           score = 1;
         }
         if (score > maxScore) { maxScore = score; maxTp = tp; }
@@ -247,10 +248,7 @@
   function Prim(proto, name) { this.name = name; this.proto = proto; }
   Prim.prototype = Object.create(Type.prototype);
   Prim.prototype.toString = function() { return this.name; };
-  Prim.prototype.getProp = function(prop) {
-    if (this.proto) return this.proto.getProp(prop);
-    return cx.prim.undef;
-  };
+  Prim.prototype.getProp = function(prop) { return this.proto.getProp(prop); };
   Prim.prototype.gatherProperties = function(prefix, direct, proto) {
     if (this.proto) this.proto.gatherProperties(prefix, direct, proto);
   };
@@ -441,8 +439,6 @@
       cx.prim.str = new Prim(cx.protos.String, "string");
       cx.prim.bool = new Prim(cx.protos.Boolean, "bool");
       cx.prim.num = new Prim(cx.protos.Number, "number");
-      cx.prim.null = new Prim(null, "null");
-      cx.prim.undef = new Prim(null, "undefined");
 
       if (environment) for (var i = 0; i < environment.length; ++i)
         loadEnvironment(environment[i]);
@@ -568,7 +564,7 @@
     case "+": case "-": case "~": return cx.prim.num;
     case "!": return cx.prim.bool;
     case "typeof": return cx.prim.str;
-    case "void": case "delete": return cx.prim.undef;
+    case "void": case "delete": return ANull;
     }
   }
   function binopIsBoolean(op) {
@@ -583,7 +579,7 @@
     case "number": return cx.prim.num;
     case "string": return cx.prim.str;
     case "object":
-      if (!val) return cx.prim.null;
+      if (!val) return ANull;
       return getInstance(cx.protos.RegExp);
     }
   }
@@ -723,7 +719,7 @@
       return scope.lookup(node.name, true);
     },
     ThisExpression: function(node, scope, c) {
-      return scope.fnType ? scope.fnType.self : cx.prim.undef;
+      return scope.fnType ? scope.fnType.self : ANull;
     },
     Literal: function(node, scope) {
       return literalType(node.value);
@@ -879,7 +875,7 @@
       return scope.lookup(node.name, true);
     },
     ThisExpression: function(node, scope) {
-      return scope.fnType ? scope.fnType.self : cx.prim.undef;
+      return scope.fnType ? scope.fnType.self : ANull;
     },
     Literal: function(node) {
       return literalType(node.value);
@@ -999,8 +995,6 @@
         case "number": return cx.prim.num;
         case "string": return cx.prim.str;
         case "bool": return cx.prim.bool;
-        case "null": return cx.prim.null;
-        case "undefined": return cx.prim.undef;
         case "?": return ANull;
         case "<top>": return cx.topScope;
         }
@@ -1020,8 +1014,8 @@
         if (this.eat("this")) return function(self) {return self;};
         if (this.eat("Object_create")) return function(self, args) {
           var result = new AVal;
-          (args[0] || cx.prim.null).propagate({addType: function(tp) {
-            if (tp == cx.prim.null) {
+          if (args[0]) args[0].propagate({addType: function(tp) {
+            if (tp.isEmpty()) {
               result.addType(new Obj());
             } else if (tp instanceof Obj) {
               var derived = new Obj(tp), spec = args[1];

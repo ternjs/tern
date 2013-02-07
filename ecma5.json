@@ -1,7 +1,7 @@
 {
   "!types": {"Date": {}},
   "Infinity": "number",
-  "undefined": "undefined",
+  "undefined": "?",
   "NaN": "number",
   "Object": {
     "!type": "fn()",
