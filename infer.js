@@ -70,7 +70,7 @@
         else if (tp instanceof Obj) ++objs;
         else if (tp instanceof Prim && tp != cx.prim.null && tp != cx.prim.undef) ++prims;
       }
-      var kinds = (arrays || 1) + (fns || 1) + (objs || 1) + (prims || 1);
+      var kinds = (arrays && 1) + (fns && 1) + (objs && 1) + (prims && 1);
       if (kinds > 1) return null;
 
       var maxScore = 0, maxTp = null;
@@ -81,10 +81,10 @@
         } else if (fns && tp instanceof Fn) {
           score = 1;
           for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].empty()) ++score;
-          if (tp.retval && !tp.retval.isEmpty()) ++score;
+          if (!tp.retval.isEmpty()) ++score;
         } else if (objs && tp instanceof Obj) {
-          score = 1;
-          for (var prop in tp.props) if (!tp.props[prop].isEmpty()) ++score;
+          score = tp.name ? 100 : 1;
+          for (var prop in tp.props) if (hop(tp.props, prop) && tp.props[prop].flags & flag_definite) ++score;
         } else if (prims && tp instanceof Prim && tp != cx.prim.undef && tp != cx.prim.null) {
           score = 1;
         }
@@ -185,7 +185,9 @@
       }
     },
     typeHint: function() {
-      return new Fn(null, this.self, this.args, this.retval);
+      var names = [];
+      for (var i = 0; i < this.args.length; ++i) names.push("?");
+      return new Fn(null, this.self, this.args, names, this.retval);
     }
   };
 
@@ -275,7 +277,7 @@
   Obj.prototype.toString = function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
     var props = [];
-    for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop)) {
+    for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop) && this.props[prop].flags & flag_definite) {
       if (maxDepth)
         props.push(prop + ": " + toString(this.props[prop].getType(), maxDepth - 1));
       else if (this.props[prop].flags & flag_initializer)
@@ -860,7 +862,7 @@
     MemberExpression: function(node, scope) {
       var propN = propName(node, scope);
       var prop = findType(node.object, scope).getProp(propN);
-      return prop.isEmpty() ? findByPropertyName(propN) : prop;
+      return prop.isEmpty() && propN != "<i>" ? findByPropertyName(propN) : prop;
     },
     Identifier: function(node, scope) {
       return scope.lookup(node.name, true);
@@ -875,7 +877,7 @@
 
   function findType(node, scope) {
     var found = typeFinder[node.type](node, scope);
-    if (found.isEmpty()) return found.findType() || found;
+    if (found.isEmpty()) return found.getType() || found;
     return found;
   }
 
@@ -966,7 +968,7 @@
       var retType, computeRet;
       if (this.eat(" -> ")) {
         if (top && this.spec.indexOf("$", this.pos) > -1) {
-          retType = null;
+          retType = ANull;
           computeRet = this.parseRetType();
         } else retType = this.parseType();
       } else retType = ANull;
@@ -1037,7 +1039,7 @@
         var propName = this.word(/[\w<>$]/) || this.error();
         if (propName == "$ret") return function(self, args) {
           var lhs = inner(self, args);
-          if (lhs instanceof Fn) return lhs.retval;
+          if (lhs.retval) return lhs.retval;
           var rv = new AVal;
           lhs.propagate(new IsCallee(ANull, [], rv));
           return rv;
