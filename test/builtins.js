@@ -32,3 +32,6 @@ var i = (10).toFixed;
 var j = "foo bar baz".split(" ");
 
 // toString: fn() -> string
+
+// k(0): Date
+var k = new Date;

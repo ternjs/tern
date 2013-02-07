@@ -28,7 +28,7 @@ function findType(cm) {
     var expr = tern.findExpression(data.ast, start, end);
     if (!expr) return;
     var tp = tern.expressionType(expr);
-    out.innerHTML = tp ? tern.toString(tp.getType(), 2) : "not found";
+    out.innerHTML = tp ? tern.toString(tp.getType()) : "not found";
   });
 }
 

@@ -850,14 +850,25 @@
       return lhs.isEmpty() ? findType(node.alternate, scope) : lhs;
     },
     NewExpression: function(node, scope) {
-      var self = new AVal;
-      callee.getProp("prototype").propagate(new IsProto(self, callee));
-      return self;
+      var f = findType(node.callee, scope).getFunctionType();
+      var proto = f && f.getProp("prototype").getType();
+      if (!proto) return ANull;
+      if (proto.instances) return proto.instances[0].instance;
+      else return proto;
     },
     CallExpression: function(node, scope) {
-      var retval = new AVal;
-      findType(node.callee, scope).propagate(new IsCallee(ANull, [], retval));
-      return retval;
+      var f = findType(node.callee, scope).getFunctionType();
+      if (!f) return ANull;
+      if (f.computeRet) {
+        for (var i = 0, args = []; i < node.arguments.length; ++i)
+          args.push(findType(node.arguments[i], scope));
+        var self = ANull;
+        if (node.callee.type == "MemberExpression")
+          self = findType(node.callee.object);
+        return f.computeRet(self, args);
+      } else {
+        return f.retval;
+      }
     },
     MemberExpression: function(node, scope) {
       var propN = propName(node, scope);
