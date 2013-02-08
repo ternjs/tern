@@ -216,7 +216,7 @@
         var cur = o.instances[i];
         if (cur.ctor == this.ctor) return this.other.addType(cur.instance);
       }
-      var instance = new Obj(o);
+      var instance = new Obj(o, null, o.origin || false);
       o.instances.push({ctor: this.ctor, instance: instance});
       this.other.addType(instance);
     }
@@ -227,10 +227,10 @@
   }
   IsAdded.prototype = {
     addType: function(type) {
-      if (type == cx.prim.str)
-        this.target.addType(cx.prim.str);
-      else if (type == cx.prim.num && this.other.hasType(cx.prim.num))
-        this.target.addType(cx.prim.num);
+      if (type == cx.str)
+        this.target.addType(cx.str);
+      else if (type == cx.num && this.other.hasType(cx.num))
+        this.target.addType(cx.num);
     },
     typeHint: function() { return this.other; }
   };
@@ -262,7 +262,7 @@
 
   var flag_initializer = 1, flag_definite = 2;
 
-  function Obj(proto, name) {
+  function Obj(proto, name, origin) {
     if (proto && !name && proto.name) {
       var match = /^(.*)\.prototype$/.exec(proto.name);
       this.name = match ? match[1] : proto.name;
@@ -273,6 +273,8 @@
     this.props = Object.create((proto && proto.props) || null);
 
     if (proto) proto.forAllProps(this.onProtoProp.bind(this));
+
+    if (origin !== false) this.setOrigin(origin);
   }
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
@@ -345,6 +347,18 @@
     }
   };
 
+  Obj.prototype.setOrigin = function(orig) {
+    if (!orig && !(orig = cx.curOrigin)) return;
+    this.origin = orig;
+    if (this.name) {
+      var tag = this.originTag();
+      if (!(tag in cx.tags)) cx.tags[tag] = this;
+    }
+  };
+  Obj.prototype.originTag = function() {
+    return this.origin + (this instanceof Fn ? "/fn/" : "/") + this.name;
+  };
+
   Obj.findByProps = function(props) {
     if (!props.length) return null;
     var types = objsWithProp(props[0].key.name);
@@ -360,11 +374,12 @@
   };
 
   function Fn(name, self, args, argNames, retval) {
-    Obj.call(this, cx.protos.Function, name);
+    Obj.call(this, cx.protos.Function, name, false);
     this.self = self;
     this.args = args;
     this.argNames = argNames;
     this.retval = retval;
+    this.setOrigin();
   }
   Fn.prototype = Object.create(Obj.prototype);
   Fn.prototype.toString = function(maxDepth) {
@@ -392,7 +407,7 @@
   Fn.prototype.getFunctionType = function() { return this; };
 
   function Arr(contentType) {
-    Obj.call(this, cx.protos.Array);
+    Obj.call(this, cx.protos.Array, false);
     var content = this.ensureProp("<i>");
     if (contentType) contentType.propagate(content);
   }
@@ -419,10 +434,13 @@
     this.props = Object.create(null);
     this.protos = Object.create(null);
     this.prim = Object.create(null);
+    this.tags = Object.create(null);
+    this.curOrigin = "ecma5";
     this.localProtos = null;
 
     exports.withContext(this, function() {
-      cx.protos.Object = new Obj(null, "Object");
+      this.curOrigin = "ecma5";
+      cx.protos.Object = new Obj(null, "Object.prototype");
       cx.topScope = new Scope();
       cx.protos.Array = new Obj(true, "Array.prototype");
       cx.protos.Function = new Obj(true, "Function.prototype");
@@ -430,9 +448,10 @@
       cx.protos.String = new Obj(true, "String.prototype");
       cx.protos.Number = new Obj(true, "Number.prototype");
       cx.protos.Boolean = new Obj(true, "Boolean.prototype");
-      cx.prim.str = new Prim(cx.protos.String, "string");
-      cx.prim.bool = new Prim(cx.protos.Boolean, "bool");
-      cx.prim.num = new Prim(cx.protos.Number, "number");
+      cx.str = new Prim(cx.protos.String, "string");
+      cx.bool = new Prim(cx.protos.Boolean, "bool");
+      cx.num = new Prim(cx.protos.Number, "number");
+      this.curOrigin = null;
 
       if (environment) for (var i = 0; i < environment.length; ++i)
         loadEnvironment(environment[i]);
@@ -451,7 +470,7 @@
   // SCOPES
 
   function Scope(prev) {
-    Obj.call(this, prev || true);
+    Obj.call(this, prev || true, true);
     this.prev = prev;
   }
   Scope.prototype = Object.create(Obj.prototype);
@@ -535,7 +554,7 @@
         val.name = param;
       }
       inner.fnType = new Fn(node.id && node.id.name, new AVal, argVals, argNames, new AVal);
-      inner.fnType.origin = node;
+      inner.fnType.originNode = node;
       if (node.id) {
         var decl = node.type == "FunctionDeclaration";
         (decl ? scope : inner).ensureProp(node.id.name).name = node.id;
@@ -584,9 +603,9 @@
 
   function unopResultType(op) {
     switch (op) {
-    case "+": case "-": case "~": return cx.prim.num;
-    case "!": return cx.prim.bool;
-    case "typeof": return cx.prim.str;
+    case "+": case "-": case "~": return cx.num;
+    case "!": return cx.bool;
+    case "typeof": return cx.str;
     case "void": case "delete": return ANull;
     }
   }
@@ -598,9 +617,9 @@
   }
   function literalType(val) {
     switch (typeof val) {
-    case "boolean": return cx.prim.bool;
-    case "number": return cx.prim.num;
-    case "string": return cx.prim.str;
+    case "boolean": return cx.bool;
+    case "number": return cx.num;
+    case "string": return cx.str;
     case "object":
       if (!val) return ANull;
       return getInstance(cx.protos.RegExp);
@@ -642,7 +661,7 @@
       var obj = Obj.findByProps(node.properties);
       if (!obj) {
         obj = new Obj(true, name);
-        obj.origin = node;
+        obj.originNode = node;
       }
 
       for (var i = 0; i < node.properties.length; ++i) {
@@ -671,14 +690,14 @@
     }),
     UpdateExpression: ret(function(node, scope, c) {
       infer(node.argument, scope, c, ANull);
-      return cx.prim.num;
+      return cx.num;
     }),
     BinaryExpression: ret(function(node, scope, c) {
       if (node.operator == "+") {
         var lhs = infer(node.left, scope, c);
         var rhs = infer(node.right, scope, c);
-        if (lhs.hasType(cx.prim.str) || rhs.hasType(cx.prim.str)) return cx.prim.str;
-        if (lhs.hasType(cx.prim.num) && rhs.hasType(cx.prim.num)) return cx.prim.num;
+        if (lhs.hasType(cx.str) || rhs.hasType(cx.str)) return cx.str;
+        if (lhs.hasType(cx.num) && rhs.hasType(cx.num)) return cx.num;
         var result = new AVal;
         lhs.propagate(new IsAdded(rhs, result));
         rhs.propagate(new IsAdded(lhs, result));
@@ -686,7 +705,7 @@
       } else {
         infer(node.left, scope, c, ANull);
         infer(node.right, scope, c, ANull);
-        return binopIsBoolean(node.operator) ? cx.prim.bool : cx.prim.num;
+        return binopIsBoolean(node.operator) ? cx.bool : cx.num;
       }
     }),
     AssignmentExpression: ret(function(node, scope, c) {
@@ -701,7 +720,7 @@
 
       if (node.operator != "=" && node.operator != "+=") {
         infer(node.right, scope, c, ANull, name);
-        rhs = cx.prim.num;
+        rhs = cx.num;
       } else {
         rhs = infer(node.right, scope, c, null, name);
       }
@@ -825,6 +844,7 @@
   });
 
   exports.analyze = function(text, file) {
+    cx.curOrigin = file;
     var ast;
     try {
         ast = acorn.parse(text);
@@ -834,6 +854,7 @@
     }
     walk.recursive(ast, cx.topScope, null, scopeGatherer);
     walk.recursive(ast, cx.topScope, null, inferWrapper);
+    cx.curOrigin = null;
     return {ast: ast, text: text, scope: cx.topScope, file: file};
   };
 
@@ -871,16 +892,16 @@
       return unopResultType(node.operator);
     },
     UpdateExpression: function() {
-      return cx.prim.num;
+      return cx.num;
     },
     BinaryExpression: function(node, scope) {
-      if (binopIsBoolean(node.operator)) return cx.prim.bool;
+      if (binopIsBoolean(node.operator)) return cx.bool;
       if (node.operator == "+") {
         var lhs = findType(node.left, scope);
         var rhs = findType(node.right, scope);
-        if (lhs.hasType(cx.prim.str) || rhs.hasType(cx.prim.str)) return cx.prim.str;
+        if (lhs.hasType(cx.str) || rhs.hasType(cx.str)) return cx.str;
       }
-      return cx.prim.num;
+      return cx.num;
     },
     AssignmentExpression: function(node, scope) {
       return findType(node.right, scope);
@@ -1040,11 +1061,11 @@
       } else {
         var word = this.word(/[<>\w$?]/);
         switch (word) {
-        case "number": return cx.prim.num;
-        case "string": return cx.prim.str;
-        case "bool": return cx.prim.bool;
-        case "?": return ANull;
+        case "number": return cx.num;
+        case "string": return cx.str;
+        case "bool": return cx.bool;
         case "<top>": return cx.topScope;
+        case "?": return ANull;
         }
         if (word in cx.localProtos) return getInstance(cx.localProtos[word]);
         if (word in cx.protos) return getInstance(cx.protos[word]);
@@ -1128,10 +1149,12 @@
 
   function loadEnvironment(data) {
     cx.localProtos = Object.create(null);
+    cx.curOrigin = data["!name"];
     var ps = data["!types"];
     if (ps) for (var name in ps) if (hop(ps, name))
       cx.localProtos[name] = interpret(ps[name], name + ".prototype");
     populate(cx.topScope, data);
+    cx.curOrigin = null;
   }
 
 })(typeof exports == "undefined" ? (window.tern = {}) : exports);

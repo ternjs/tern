@@ -83,8 +83,8 @@ function jumpToDef(cm) {
     }
     if (!def) {
       var type = tern.expressionType(expr);
-      if (type.types) for (var i = 0; i < type.types.length && !def; ++i) def = type.types[i].origin;
-      else def = type.origin;
+      if (type.types) for (var i = 0; i < type.types.length && !def; ++i) def = type.types[i].originNode;
+      else def = type.originNode;
     }
     if (def) cm.setSelection(cm.posFromIndex(def.end), cm.posFromIndex(def.start));
   });

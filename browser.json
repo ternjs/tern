@@ -1,4 +1,5 @@
 {
+  "!name": "browser",
   "!types": {
     "Node": {}, "Element": {}, "Text": {}, "Document": {}, "Attr": {},
     "NodeList": {}, "NamedNodeMap": {}, "HTMLCollection": {}, "DOMTokenList": {},

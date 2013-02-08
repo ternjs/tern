@@ -1,4 +1,5 @@
 {
+  "!name": "ecma5",
   "!types": {"Date": {}},
   "Infinity": "number",
   "undefined": "?",
