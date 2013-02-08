@@ -121,6 +121,7 @@
     },
 
     typeHint: function() { return this.types.length ? this.types[0] : null; },
+    propagatesTo: function() { return this; },
 
     gatherProperties: function(prefix, direct, proto) {
       for (var i = 0; i < this.types.length; ++i)
@@ -150,7 +151,10 @@
       if (type.getProp)
         type.getProp(this.prop).propagate(this.target);
     },
-    propHint: function() { return this.prop; }
+    propHint: function() { return this.prop; },
+    propagatesTo: function() {
+      return {target: this.target, pathExt: "." + this.prop};
+    }
   };
 
   function PropHasSubset(prop, target) {
@@ -487,6 +491,43 @@
         walk.recursive(node.body, scopeCopy, null, inferWrapper);
         return scopeCopy.fnType.retval;
       };
+      return true;
+    }
+  }
+
+  function maybeTagAsGeneric(node, fn) {
+    if (!fn.retval.isEmpty()) return;
+
+    function explore(aval, path, depth) {
+      if (depth > 6 || !aval.forward) return;
+      for (var i = 0; i < aval.forward.length; ++i) {
+        var fw = aval.forward[i], prop = fw.propagatesTo && fw.propagatesTo();
+        if (!prop) continue;
+        var newPath = path, target;
+        if (prop instanceof AVal) {
+          target = prop;
+        } else if (prop.target instanceof AVal) {
+          newPath += prop.pathExt;
+          target = prop.target;
+        } else continue;
+        if (target == fn.retval) throw {foundPath: newPath};
+        explore(target, newPath, depth + 1);
+      }
+    }
+
+    var foundPath;
+    try {
+      explore(fn.self, "$this", 0);
+      for (var i = 0; i < fn.args.length; ++i)
+        explore(fn.args[i], "$" + i, 0);
+    } catch (e) {
+      if (!(foundPath = e.foundPath)) throw e;
+    }
+
+    if (foundPath) {
+      var p = new TypeParser(foundPath);
+      fn.computeRet = p.parseRetType();
+      return true;
     }
   }
 
@@ -614,7 +655,7 @@
       if (name && !fn.name) fn.name = name;
       if (node.id)
         assignVar(node.id.name, node.body.scope, fn);
-      maybeTagAsTypeManipulator(node, inner);
+      maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
       return fn;
     },
     SequenceExpression: function(node, scope, c) {
@@ -688,9 +729,8 @@
       for (var i = 0, args = []; i < node.arguments.length; ++i)
         args.push(runInfer(node.arguments[i], scope, c));
       var callee = runInfer(node.callee, scope, c);
-      var self = new AVal;
+      var self = new AVal, retval = new AVal;
       callee.getProp("prototype").propagate(new IsProto(self, callee));
-      var retval = callee.retval || (callee.retval = new AVal);
       callee.propagate(new IsCallee(self, args, retval));
       retval.propagate(new IfObjType(self));
       return self;
@@ -705,7 +745,7 @@
         return retval;
       } else {
         var callee = runInfer(node.callee, scope, c);
-        var retval = callee.retval || (callee.retval = new AVal);
+        var retval = new AVal;
         callee.propagate(new IsCallee(ANull, args, retval));
         return retval;
       }
@@ -735,9 +775,9 @@
     
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope, fn = inner.fnType;
-      assignVar(node.id.name, scope, fn);
-      maybeTagAsTypeManipulator(node, inner);
       c(node.body, scope, "ScopeBody");
+      maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
+      assignVar(node.id.name, scope, fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
