@@ -5,7 +5,8 @@ CodeMirror.on(window, "load", function() {
     lineNumbers: true,
     extraKeys: {"Ctrl-I": findType,
                 "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, complete); },
-                "Alt-.": jumpToDef}
+                "Alt-.": jumpToDef,
+                "Ctrl-Q": condense}
   });
   editor.on("cursorActivity", updateArgumentHints);
 });
@@ -157,5 +158,13 @@ function updateArgumentHints(cm) {
     var rettype = !tp.retval.isEmpty() && tern.toString(tp.retval.getType());
     out.appendChild(document.createTextNode(rettype ? ") -> " : ")"));
     if (rettype) out.appendChild(elt("span", rettype, "Tern-type"));
+  });
+}
+
+function condense(cm) {
+  var cx = new tern.Context([ecma5, browser]);
+  tern.withContext(cx, function() {
+    var data = tern.analyze(cm.getValue(), "local");
+    console.log(JSON.stringify(tern.condense("local"), null, 2));
   });
 }

@@ -132,7 +132,6 @@
       "toISOString": "fn() -> string",
       "toDateString": "fn() -> string",
       "toTimeString": "fn() -> string",
-      "toLocaleString": "fn() -> string",
       "toLocaleDateString": "fn() -> string",
       "toLocaleTimeString": "fn() -> string",
       "getTime": "fn() -> number",

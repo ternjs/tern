@@ -249,6 +249,7 @@
   };
 
   function Prim(proto, name) { this.name = name; this.proto = proto; }
+  exports.Prim = Prim;
   Prim.prototype = Object.create(Type.prototype);
   Prim.prototype.toString = function() { return this.name; };
   Prim.prototype.getProp = function(prop) { return this.proto.getProp(prop); };
@@ -260,7 +261,8 @@
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
-  var flag_initializer = 1, flag_definite = 2;
+  var flag_initializer = exports.flag_initializer = 1;
+  var flag_definite = exports.flag_definite = 2;
 
   function Obj(proto, name, origin) {
     this.props = Object.create(null);
@@ -275,6 +277,7 @@
 
     if (this.proto && !this.prev) this.proto.forAllProps(this.onProtoProp.bind(this));
   }
+  exports.Obj = Obj;
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
@@ -352,12 +355,11 @@
   Obj.prototype.setOrigin = function(orig) {
     if (!orig && !(orig = cx.curOrigin)) return;
     this.origin = orig;
-    if (this.name) {
-      var tag = this.originTag();
-      if (!(tag in cx.tags)) cx.tags[tag] = this;
-    }
+    var tag = this.originTag();
+    if (tag && !(tag in cx.tags)) cx.tags[tag] = this;
   };
   Obj.prototype.originTag = function() {
+    if (!this.origin || !this.name) return null;
     return this.origin + (this instanceof Fn ? "/fn/" : "/") + this.name;
   };
 
@@ -383,6 +385,7 @@
     this.retval = retval;
     this.setOrigin();
   }
+  exports.Fn = Fn;
   Fn.prototype = Object.create(Obj.prototype);
   Fn.prototype.toString = function(maxDepth) {
     if (maxDepth) maxDepth--;
@@ -413,6 +416,7 @@
     var content = this.ensureProp("<i>");
     if (contentType) contentType.propagate(content);
   }
+  exports.Arr = Arr;
   Arr.prototype = Object.create(Obj.prototype);
   Arr.prototype.toString = function(maxDepth) {
     if (maxDepth) maxDepth--;
@@ -461,6 +465,7 @@
   };
 
   var cx = null;
+  exports.cx = function() { return cx; };
 
   exports.withContext = function(context, f) {
     var old = cx;
@@ -547,6 +552,7 @@
     if (foundPath) {
       var p = new TypeParser(foundPath);
       fn.computeRet = p.parseRetType();
+      fn.computeRetSource = foundPath;
       return true;
     }
   }
