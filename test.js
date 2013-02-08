@@ -27,7 +27,7 @@ function runTests() {
 
       while (m = assertion.exec(info.text)) {
         ++tests;
-        var v = info.scope.props[m[1]];
+        var v = info.scope.findVar(m[1]);
         if (!v) {
           console.log(file + ": variable " + m[1] + " not defined");
           ++failed;
@@ -50,8 +50,8 @@ function outputInfo(file) {
   infer.withContext(new infer.Context(data.env), function() {
     var info = infer.analyze(data.text, data.file);
     for (var i = 3; i < process.argv.length; ++i) {
-      var v = process.argv[i], found = info.scope.lookup(v, true);
-      console.log(v + ": " + infer.toString(found.getType(), 2));
+      var v = process.argv[i], found = info.scope.findVar(v);
+      console.log(v + ": " + infer.toString(found && found.getType(), 2));
     }
   });
 }

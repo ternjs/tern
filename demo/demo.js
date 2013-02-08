@@ -78,7 +78,7 @@ function jumpToDef(cm) {
     var expr = tern.findExpression(data.ast, null, cm.indexFromPos(cm.getCursor())), def;
     if (!expr) return;
     if (expr.node.type == "Identifier") {
-      var found = expr.state.lookup(expr.node.name);
+      var found = expr.state.findVar(expr.node.name);
       def = found && found.name;
     }
     if (!def) {

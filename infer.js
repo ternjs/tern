@@ -263,24 +263,23 @@
   var flag_initializer = 1, flag_definite = 2;
 
   function Obj(proto, name, origin) {
+    this.props = Object.create(null);
+    this.proto = proto === true ? cx.protos.Object : proto;
     if (proto && !name && proto.name) {
       var match = /^(.*)\.prototype$/.exec(proto.name);
       this.name = match ? match[1] : proto.name;
     } else {
       this.name = name;
     }
-    if (proto === true) proto = cx.protos.Object;
-    this.props = Object.create((proto && proto.props) || null);
-
-    if (proto) proto.forAllProps(this.onProtoProp.bind(this));
-
     if (origin !== false) this.setOrigin(origin);
+
+    if (this.proto && !this.prev) this.proto.forAllProps(this.onProtoProp.bind(this));
   }
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
     var props = [];
-    for (var prop in this.props) if (prop != "<i>" && hop(this.props, prop) && this.props[prop].flags & flag_definite) {
+    for (var prop in this.props) if (prop != "<i>" && this.props[prop].flags & flag_definite) {
       if (maxDepth)
         props.push(prop + ": " + toString(this.props[prop].getType(), maxDepth - 1));
       else if (this.props[prop].flags & flag_initializer)
@@ -291,13 +290,13 @@
   };
   Obj.prototype.ensureProp = function(prop, alsoProto) {
     var found = this.props[prop];
+    if (alsoProto) for (var p = this.proto; p && !found; p = p.proto) found = p.props[prop];
     if (found) {
-      var own = hop(this.props, prop);
-      if (own && !alsoProto && !(found.flags & flag_definite)) {
+      if (!alsoProto && !(found.flags & flag_definite)) {
         found.flags |= flag_definite;
         this.broadcastProp(prop, found, true);
       }
-      if (own || alsoProto) return found;
+      return found;
     }
 
     var av = new AVal;
@@ -321,11 +320,11 @@
       this.onNewProp[i](prop, val, local);
   };
   Obj.prototype.onProtoProp = function(prop, val, local) {
-    if (hop(this.props, prop)) {
-      var val = this.props[prop];
+    var val = this.props[prop];
+    if (val) {
       if (val.flags & flag_definite) return;
       delete this.props[prop];
-      this.props[prop].propagate(val);
+      this.proto.getProp(prop).propagate(val);
     } else {
       this.broadcastProp(prop, val, false);
     }
@@ -336,14 +335,17 @@
       var val = this.props[prop];
       if (!(val.flags & flag_definite)) continue;
       if (direct.indexOf(prop) > -1 || proto.indexOf(prop) > -1) continue;
-      (hop(this.props, prop) ? direct : proto).push(prop);
+      direct.push(prop);
     }
+    if (this.proto) this.proto.gatherProperties(prefix, proto, proto);
   };
   Obj.prototype.forAllProps = function(c) {
     (this.onNewProp || (this.onNewProp = [])).push(c);
-    for (var prop in this.props) {
-      var val = this.props[prop];
-      if (val.flags & flag_definite) c(prop, val, hop(this.props, prop));
+    for (var o = this; o; o = o.proto) {
+      for (var prop in o.props) {
+        var val = o.props[prop];
+        if (val.flags & flag_definite) c(prop, val, o == this);
+      }
     }
   };
 
@@ -364,7 +366,7 @@
     var types = objsWithProp(props[0].key.name);
     if (types) for (var i = 0; i < types.length; ++i) {
       var type = types[i], matching = 0;
-      for (var p in type.props) if (hop(type.props, p)) {
+      for (var p in type.props) {
         var prop = type.props[p];
         if ((prop.flags & flag_initializer) && props.some(function(x) {return x.key.name == p;}))
           ++matching;
@@ -398,7 +400,7 @@
     return str;
   };
   Fn.prototype.ensureProp = function(prop, alsoProto) {
-    var newProto = this.name && prop == "prototype" && !hop(this.props, "prototype");
+    var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
     var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
     if (newProto && retval.isEmpty() && alsoProto)
       retval.addType(new Obj(true, this.name + ".prototype"));
@@ -470,14 +472,23 @@
   // SCOPES
 
   function Scope(prev) {
-    Obj.call(this, prev || true, true);
     this.prev = prev;
+    Obj.call(this, prev || true, true);
   }
   Scope.prototype = Object.create(Obj.prototype);
-  Scope.prototype.lookup = function(name, force) {
-    if (name in this.props) return this.props[name];
-    for (var top = this; top.prev; top = top.prev) {}
-    if (force) return top.ensureProp(name, true);
+  Scope.prototype.getVar = function(name, define) {
+    for (var s = this; ; s = s.proto) {
+      var found = s.props[name];
+      if (found) return found;
+      if (!s.proto) return s.ensureProp(name, !define);
+    }
+  };
+  Scope.prototype.defVar = function(name) { return this.getVar(name, true); };
+  Scope.prototype.findVar = function(name) {
+    for (var s = this; s; s = s.proto) {
+      var found = s.props[name];
+      if (found) return found;
+    }
   };
 
   function maybeTypeManipulator(scope, score) {
@@ -489,7 +500,7 @@
     if (scope.typeManipScore && scope.typeManipScore / (node.end - node.start) > .01) {
       scope.fnType.computeRet = function(self, args) {
         var scopeCopy = new Scope(scope.prev), fn = scope.fnType;
-        for (var v in scope.props) if (hop(scope.props, v)) {
+        for (var v in scope.props) {
           var local = scopeCopy.ensureProp(v);
           for (var i = 0; i < fn.argNames.length; ++i) if (fn.argNames[i].name == v && i < args.length)
             args[i].propagate(local);
@@ -675,7 +686,7 @@
       c(node.body, scope, "ScopeBody");
       var inner = node.body.scope, fn = inner.fnType;
       if (name && !fn.name) fn.name = name;
-      if (node.id) inner.lookup(node.id.name, true).addType(fn);
+      if (node.id) inner.defVar(node.id.name).addType(fn);
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
       return fn;
     }),
@@ -733,7 +744,7 @@
           // properties, and do the copying ourselves, insofar as we
           // manage, because such loops tend to be relevant for type
           // information.
-          var over = scope.lookup(node.right.property.name).iteratesOver;
+          var local = scope.props[node.right.property.name], over = local && local.iteratesOver;
           if (over) over.forAllProps(function(prop, val, local) {
             if (local && prop != "prototype" && prop != "<i>")
               obj.propagate(new PropHasSubset(prop, val));
@@ -742,7 +753,7 @@
           obj.propagate(new PropHasSubset(pName, rhs));
         }
       } else { // Identifier
-        rhs.propagate(scope.lookup(node.left.name, true));
+        rhs.propagate(scope.defVar(node.left.name));
       }
       return rhs;
     }),
@@ -756,7 +767,7 @@
       infer(node.alternate, scope, c, out);
     }),
     NewExpression: fill(function(node, scope, c, out) {
-      if (node.callee.type == "Identifier" && hop(scope.props, node.callee.name))
+      if (node.callee.type == "Identifier" && node.callee.name in scope.props)
         maybeTypeManipulator(scope, 20);
 
       for (var i = 0, args = []; i < node.arguments.length; ++i)
@@ -782,9 +793,9 @@
       return infer(node.object, scope, c).getProp(propName(node, scope, c));
     }),
     Identifier: ret(function(node, scope) {
-      if (node.name == "arguments" && !scope.props.arguments)
+      if (node.name == "arguments" && !(node.name in scope.props))
         scope.ensureProp(node.name).addType(new Arr);
-      return scope.lookup(node.name, true);
+      return scope.getVar(node.name);
     }),
     ThisExpression: ret(function(node, scope) {
       return scope.fnType ? scope.fnType.self : ANull;
@@ -807,14 +818,14 @@
       var inner = node.body.scope, fn = inner.fnType;
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
-      scope.lookup(node.id.name, true).addType(fn);
+      scope.defVar(node.id.name).addType(fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
       for (var i = 0; i < node.declarations.length; ++i) {
         var decl = node.declarations[i];
         if (decl.init)
-          infer(decl.init, scope, c, scope.lookup(decl.id.name, true), decl.id.name);
+          infer(decl.init, scope, c, scope.defVar(decl.id.name), decl.id.name);
       }
     },
 
@@ -825,7 +836,7 @@
 
     ForInStatement: function(node, scope, c) {
       var source = infer(node.right, scope, c);
-      if ((node.right.type == "Identifier" && hop(scope.props, node.right.name)) ||
+      if ((node.right.type == "Identifier" && node.right.name in scope.props) ||
           (node.right.type == "MemberExpression" && node.right.property.name == "prototype")) {
         maybeTypeManipulator(scope, 5);
         var varName;
@@ -834,8 +845,8 @@
         } else if (node.left.type == "VariableDeclaration") {
           varName = node.left.declarations[0].id.name;
         }
-        if (varName && hop(scope.props, varName))
-          scope.lookup(varName).iteratesOver = source;
+        if (varName && varName in scope.props)
+          scope.getVar(varName).iteratesOver = source;
       }
       c(node.body, scope, "Statement");
     },
@@ -941,7 +952,7 @@
       return prop.isEmpty() && propN != "<i>" ? findByPropertyName(propN) : prop;
     },
     Identifier: function(node, scope) {
-      return scope.lookup(node.name, true);
+      return scope.getVar(node.name, true);
     },
     ThisExpression: function(node, scope) {
       return scope.fnType ? scope.fnType.self : ANull;
@@ -1089,7 +1100,7 @@
             } else if (tp instanceof Obj) {
               var derived = new Obj(tp), spec = args[1];
               if (spec instanceof AVal) spec = spec.types[0];
-              if (spec instanceof Obj) for (var prop in spec.props) if (hop(spec.props, prop)) {
+              if (spec instanceof Obj) for (var prop in spec.props) {
                 var cur = spec.props[prop].types[0];
                 var p = derived.ensureProp(prop);
                 if (cur && cur instanceof Obj && cur.props.value) {
