@@ -95,8 +95,6 @@
     },
 
     makeupType: function() {
-      if (this.hint) return this.hint;
-
       if (!this.forward) return null;
       for (var i = 0; i < this.forward.length; ++i) {
         var fw = this.forward[i], hint = fw.typeHint && fw.typeHint();
@@ -347,27 +345,18 @@
     }
   };
 
-  Obj.fromInitializer = function(props, name, origin) {
-    var types = props.length && objsWithProp(props[0].name);
+  Obj.findByProps = function(props) {
+    if (!props.length) return null;
+    var types = objsWithProp(props[0].key.name);
     if (types) for (var i = 0; i < types.length; ++i) {
       var type = types[i], matching = 0;
       for (var p in type.props) if (hop(type.props, p)) {
         var prop = type.props[p];
-        if ((prop.flags & flag_initializer) && props.some(function(x) {return x.name == p;}))
+        if ((prop.flags & flag_initializer) && props.some(function(x) {return x.key.name == p;}))
           ++matching;
       }
       if (matching == props.length) return type;
     }
-
-    // Nothing found, allocate a new one
-    var obj = new Obj(true, name);
-    obj.origin = origin;
-    for (var i = 0; i < props.length; ++i) {
-      var prop = props[i], aval = obj.ensureProp(prop.name);
-      aval.flags |= flag_initializer;
-      prop.type.propagate(aval);
-    }
-    return obj;
   };
 
   function Fn(name, self, args, argNames, retval) {
@@ -573,15 +562,11 @@
 
   // CONSTRAINT GATHERING PASS
 
-  function assignVar(name, scope, src) {
-    src.propagate(scope.lookup(name, true));
-  }
-
   function propName(node, scope, c) {
     var prop = node.property;
     if (!node.computed) return prop.name;
     if (prop.type == "Literal" && typeof prop.value == "string") return prop.value;
-    if (c) runInfer(prop, scope, c);
+    if (c) infer(prop, scope, c, ANull);
     return "<i>";
   }
 
@@ -591,10 +576,6 @@
       if (node.object.type != "Identifier") return node.property.name;
       return node.object.name + "." + node.property.name;
     }
-  }
-
-  function setHint(aval, hint) {
-    if (aval.isEmpty()) aval.hint = hint;
   }
 
   function getInstance(obj) {
@@ -633,70 +614,100 @@
     return joined;
   }
 
+  function ret(f) {
+    return function(node, scope, c, out, name) {
+      var r = f(node, scope, c, name);
+      if (out) r.propagate(out);
+      return r;
+    };
+  }
+  function fill(f) {
+    return function(node, scope, c, out, name) {
+      if (!out) out = new AVal;
+      f(node, scope, c, out, name);
+      return out;
+    };
+  }
+
   var inferExprVisitor = {
-    ArrayExpression: function(node, scope, c) {
+    ArrayExpression: ret(function(node, scope, c) {
       var eltval = new AVal;
       for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt) runInfer(elt, scope, c).propagate(eltval);
+        if (elt) infer(elt, scope, c, eltval);
       }
       return new Arr(eltval);
-    },
-    ObjectExpression: function(node, scope, c, name) {
-      var props = [];
-      for (var i = 0; i < node.properties.length; ++i) {
-        var p = node.properties[i];
-        props.push({name: p.key.name, type: runInfer(p.value, scope, c)});
+    }),
+    ObjectExpression: ret(function(node, scope, c, name) {
+      var obj = Obj.findByProps(node.properties);
+      if (!obj) {
+        obj = new Obj(true, name);
+        obj.origin = node;
       }
-      return Obj.fromInitializer(props, name, node);
-    },
-    FunctionExpression: function(node, scope, c, name) {
+
+      for (var i = 0; i < node.properties.length; ++i) {
+        var prop = node.properties[i], val = obj.ensureProp(prop.key.name);
+        val.flags |= flag_initializer;
+        infer(prop.value, scope, c, val, prop.key.name);
+      }
+      return obj;
+    }),
+    FunctionExpression: ret(function(node, scope, c, name) {
       c(node.body, scope, "ScopeBody");
       var inner = node.body.scope, fn = inner.fnType;
       if (name && !fn.name) fn.name = name;
-      if (node.id)
-        assignVar(node.id.name, node.body.scope, fn);
+      if (node.id) inner.lookup(node.id.name, true).addType(fn);
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
       return fn;
-    },
-    SequenceExpression: function(node, scope, c) {
-      var v;
-      for (var i = 0; i < node.expressions.length; ++i)
-        v = runInfer(node.expressions[i], scope, c);
-      return v;
-    },
-    UnaryExpression: function(node, scope, c) {
-      runInfer(node.argument, scope, c);
+    }),
+    SequenceExpression: ret(function(node, scope, c) {
+      for (var i = 0, l = node.expressions.length - 1; i < l; ++i)
+        infer(node.expressions[i], scope, c, ANull);
+      return infer(node.expressions[l - 1], scope, c);
+    }),
+    UnaryExpression: ret(function(node, scope, c) {
+      infer(node.argument, scope, c, ANull);
       return unopResultType(node.operator);
-    },
-    UpdateExpression: function(node, scope, c) {
-      runInfer(node.argument, scope, c);
+    }),
+    UpdateExpression: ret(function(node, scope, c) {
+      infer(node.argument, scope, c, ANull);
       return cx.prim.num;
-    },
-    BinaryExpression: function(node, scope, c) {
-      var lhs = runInfer(node.left, scope, c);
-      var rhs = runInfer(node.right, scope, c);
+    }),
+    BinaryExpression: ret(function(node, scope, c) {
       if (node.operator == "+") {
+        var lhs = infer(node.left, scope, c);
+        var rhs = infer(node.right, scope, c);
         if (lhs.hasType(cx.prim.str) || rhs.hasType(cx.prim.str)) return cx.prim.str;
         if (lhs.hasType(cx.prim.num) && rhs.hasType(cx.prim.num)) return cx.prim.num;
         var result = new AVal;
         lhs.propagate(new IsAdded(rhs, result));
         rhs.propagate(new IsAdded(lhs, result));
         return result;
+      } else {
+        infer(node.left, scope, c, ANull);
+        infer(node.right, scope, c, ANull);
+        return binopIsBoolean(node.operator) ? cx.prim.bool : cx.prim.num;
       }
-      var isBool = binopIsBoolean(node.operator);
-      if (!isBool) { setHint(lhs, cx.prim.num); setHint(rhs, cx.prim.num); }
-      return isBool ? cx.prim.bool : cx.prim.num;
-    },
-    AssignmentExpression: function(node, scope, c) {
-      var rhs = runInfer(node.right, scope, c, lvalName(node.left));
-      if (node.operator != "=" && node.operator != "+=")
+    }),
+    AssignmentExpression: ret(function(node, scope, c) {
+      var rhs, name, pName;
+      if (node.left.type == "MemberExpression") {
+        pName = propName(node.left, scope, c);
+        if (node.left.object.type == "Identifier")
+          name = node.left.object.name + "." + pName;
+      } else {
+        name = node.left.name;
+      }
+
+      if (node.operator != "=" && node.operator != "+=") {
+        infer(node.right, scope, c, ANull, name);
         rhs = cx.prim.num;
+      } else {
+        rhs = infer(node.right, scope, c, null, name);
+      }
 
       if (node.left.type == "MemberExpression") {
-        var obj = runInfer(node.left.object, scope, c);
-        var pName = propName(node.left, scope, c);
-        obj.propagate(new PropHasSubset(pName, rhs));
+        var obj = infer(node.left.object, scope, c);
         if (pName == "prototype") maybeTypeManipulator(scope, 20);
         if (pName == "<i>" && node.right.type == "MemberExpression" && node.right.computed) {
           // This is a hack to recognize for/in loops that copy
@@ -708,93 +719,93 @@
             if (local && prop != "prototype" && prop != "<i>")
               obj.propagate(new PropHasSubset(prop, val));
           });
+        } else {
+          obj.propagate(new PropHasSubset(pName, rhs));
         }
       } else { // Identifier
-        assignVar(node.left.name, scope, rhs);
+        rhs.propagate(scope.lookup(node.left.name, true));
       }
       return rhs;
-    },
-    LogicalExpression: function(node, scope, c) {
-      return join(runInfer(node.left, scope, c),
-                  runInfer(node.right, scope, c));
-    },
-    ConditionalExpression: function(node, scope, c) {
-      runInfer(node.test, scope, c);
-      return join(runInfer(node.consequent, scope, c),
-                  runInfer(node.alternate, scope, c));
-    },
-    NewExpression: function(node, scope, c) {
+    }),
+    LogicalExpression: fill(function(node, scope, c, out) {
+      infer(node.left, scope, c, fill);
+      infer(node.right, scope, c, fill);
+    }),
+    ConditionalExpression: fill(function(node, scope, c, out) {
+      infer(node.test, scope, c, out);
+      infer(node.consequent, scope, c, out);
+      infer(node.alternate, scope, c, out);
+    }),
+    NewExpression: fill(function(node, scope, c, out) {
       if (node.callee.type == "Identifier" && hop(scope.props, node.callee.name))
         maybeTypeManipulator(scope, 20);
 
       for (var i = 0, args = []; i < node.arguments.length; ++i)
-        args.push(runInfer(node.arguments[i], scope, c));
-      var callee = runInfer(node.callee, scope, c);
-      var self = new AVal, retval = new AVal;
+        args.push(infer(node.arguments[i], scope, c));
+      var callee = infer(node.callee, scope, c);
+      var self = new AVal;
       callee.getProp("prototype").propagate(new IsProto(self, callee));
-      callee.propagate(new IsCallee(self, args, retval));
-      retval.propagate(new IfObjType(self));
-      return self;
-    },
-    CallExpression: function(node, scope, c, _name) {
+      callee.propagate(new IsCallee(self, args, out));
+      self.propagate(out);
+    }),
+    CallExpression: fill(function(node, scope, c, out) {
       for (var i = 0, args = []; i < node.arguments.length; ++i)
-        args.push(runInfer(node.arguments[i], scope, c));
+        args.push(infer(node.arguments[i], scope, c));
       if (node.callee.type == "MemberExpression") {
-        var self = runInfer(node.callee.object, scope, c);
-        var retval = new AVal;
-        self.propagate(new HasMethodCall(propName(node.callee, scope, c), args, retval));
-        return retval;
+        var self = infer(node.callee.object, scope, c);
+        self.propagate(new HasMethodCall(propName(node.callee, scope, c), args, out));
       } else {
-        var callee = runInfer(node.callee, scope, c);
-        var retval = new AVal;
-        callee.propagate(new IsCallee(ANull, args, retval));
-        return retval;
+        var callee = infer(node.callee, scope, c);
+        callee.propagate(new IsCallee(ANull, args, out));
       }
-    },
-    MemberExpression: function(node, scope, c) {
-      return runInfer(node.object, scope, c).getProp(propName(node, scope, c));
-    },
-    Identifier: function(node, scope) {
+    }),
+    MemberExpression: ret(function(node, scope, c) {
+      return infer(node.object, scope, c).getProp(propName(node, scope, c));
+    }),
+    Identifier: ret(function(node, scope) {
       if (node.name == "arguments" && !scope.props.arguments)
         scope.ensureProp(node.name).addType(new Arr);
       return scope.lookup(node.name, true);
-    },
-    ThisExpression: function(node, scope, c) {
+    }),
+    ThisExpression: ret(function(node, scope) {
       return scope.fnType ? scope.fnType.self : ANull;
-    },
-    Literal: function(node, scope) {
+    }),
+    Literal: ret(function(node, scope) {
       return literalType(node.value);
-    }
+    })
   };
 
-  function runInfer(node, scope, c, name) {
-    return inferExprVisitor[node.type](node, scope, c, name);
+  function infer(node, scope, c, out, name) {
+    return inferExprVisitor[node.type](node, scope, c, out, name);
   }
 
   var inferWrapper = walk.make({
-    Expression: runInfer,
+    Expression: function(node, scope, c) {
+      infer(node, scope, c, ANull);
+    },
     
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope, fn = inner.fnType;
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
-      assignVar(node.id.name, scope, fn);
+      scope.lookup(node.id.name, true).addType(fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
       for (var i = 0; i < node.declarations.length; ++i) {
         var decl = node.declarations[i];
-        if (decl.init) assignVar(decl.id.name, scope, runInfer(decl.init, scope, c, decl.id.name));
+        if (decl.init)
+          infer(decl.init, scope, c, scope.lookup(decl.id.name, true), decl.id.name);
       }
     },
 
     ReturnStatement: function(node, scope, c) {
       if (node.argument && scope.fnType)
-        runInfer(node.argument, scope, c).propagate(scope.fnType.retval);
+        infer(node.argument, scope, c, scope.fnType.retval);
     },
 
     ForInStatement: function(node, scope, c) {
-      var source = runInfer(node.right, scope, c);
+      var source = infer(node.right, scope, c);
       if ((node.right.type == "Identifier" && hop(scope.props, node.right.name)) ||
           (node.right.type == "MemberExpression" && node.right.property.name == "prototype")) {
         maybeTypeManipulator(scope, 5);
@@ -847,12 +858,8 @@
       return new Arr(eltval);
     },
     ObjectExpression: function(node, scope) {
-      var props = [];
-      for (var i = 0; i < node.properties.length; ++i) {
-        var p = node.properties[i];
-        props.push({name: p.key.name, type: findType(p.value, scope)});
-      }
-      return Obj.fromInitializer(props, null, node);
+      if (node.properties.length) return Obj.findByProps(node.properties);
+      else return new Obj(true);
     },
     FunctionExpression: function(node) {
       return node.body.scope.fnType;
