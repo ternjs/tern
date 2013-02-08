@@ -23,38 +23,58 @@
     for (var i = 0; i < this.args.length; ++i) {
       if (i) out += ", ";
       var name = this.argNames[i];
+      if (name && typeof name != "string") name = name.name;
       if (name && name != "?") out += name + ": ";
       out += desc(this.args[i], state);
     }
     out += ")";
     if (this.computeRetSource) {
       out += " -> " + this.computeRetSource;
-    } else {
+    } else if (!this.retval.isEmpty()) {
       var rettype = this.retval.getType();
       if (rettype) out += " -> " + rettype.getDesc(state);
+    }
+
+    var obj;
+    for (var p in this.props) {
+      if (!obj) obj = out = {"!type": out};
+      obj[p] = desc(this.props[p], state);
     }
     return out;
   };
 
+  function setProps(source, target, state) {
+    for (var prop in source.props) {
+      var val = source.props[prop];
+      if (val.flags & tern.flag_definite)
+        target[prop] = desc(val, state);
+    }
+  }
+
   tern.Obj.prototype.getDesc = function(state) {
     if (state.sources.indexOf(this.origin) == -1) return this.originTag() || "?";
+    if (this._fromProto) return this.proto.name;
 
     if (!this.name)
       this.name = "__obj" + Math.floor(Math.random(0xffffffff)).toString(16);
 
-    var known = state.tags[this.name];
+    var known = state.tags[this.name], proto;
     if (known) {
       known.refs++;
     } else {
-      var structure = {};
-      state.tags[this.name] = {refs: 1, structure: structure};
-      if (this.proto && this.proto != state.cx.protos.Object)
-        structure["!proto"] = this.proto.getDesc(state);
-      for (var prop in this.props) {
-        var val = this.props[prop];
-        if (val.flags & tern.flag_definite)
-          structure[prop] = desc(val, state);
+      if (this.proto && this.proto != state.cx.protos.Object) {
+        proto = this.proto.getDesc(state);
+        if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
+            !/\.prototype$/.test(this.name)) {
+          this._fromProto = true;
+          setProps(this, state.tags[this.proto.name].structure, state);
+          return this.proto.name;
+        }
       }
+      var structure = {};
+      if (proto) structure["!proto"] = proto;
+      state.tags[this.name] = {refs: 1, structure: structure};
+      setProps(this, structure, state);
     }
     return "%" + this.name + "%";
   };
@@ -62,7 +82,7 @@
   function sanitize(desc, state) {
     if (typeof desc == "string") return sanitizeString(desc, state);
 
-    for (var v in desc) if (v.charAt(0) != "!")
+    for (var v in desc) if (v.charAt(0) != "!" || v == "!proto")
       desc[v] = sanitize(desc[v], state);
     return desc;
   }
@@ -70,17 +90,13 @@
   function sanitizeString(desc, state) {
     if (/^%[^%]+%$/.test(desc)) {
       var tag = desc.slice(1, -1), obj = state.tags[tag];
-      if (obj.refs == 1) return obj.structure;
-      else return tag;
+      if (obj.refs == 1) {
+        obj.inlined = true;
+        return obj.structure;
+      } else return tag;
     }
 
-    return desc.replace(/%([^%]+)%/g, function(m, tag) {
-      var obj = state.tags[tag];
-      // Must serialize the obj separately if its referenced from
-      // inside a bigger string.
-      if (obj.refs == 1) obj.refs = 2;
-      return tag;
-    });
+    return desc.replace(/%([^%]+)%/g, function(m, tag) { return tag; });
   }
 
   exports.condense = function(sources, name) {
@@ -102,7 +118,7 @@
 
     for (var tag in state.tags) {
       var obj = state.tags[tag];
-      if (obj.refs == 1) continue; // Inlined
+      if (obj.inlined) continue;
       types[tag] = obj.structure;
       haveType = true;
     }

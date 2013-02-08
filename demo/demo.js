@@ -6,7 +6,8 @@ CodeMirror.on(window, "load", function() {
     extraKeys: {"Ctrl-I": findType,
                 "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, complete); },
                 "Alt-.": jumpToDef,
-                "Ctrl-Q": condense}
+                "Ctrl-Q": condense},
+    autofocus: true
   });
   editor.on("cursorActivity", updateArgumentHints);
 });
@@ -29,6 +30,7 @@ function findType(cm) {
     var expr = tern.findExpression(data.ast, start, end);
     if (!expr) return;
     var tp = tern.expressionType(expr);
+    window.tp = tp;
     out.innerHTML = tp ? tern.toString(tp.getType()) : "not found";
   });
 }

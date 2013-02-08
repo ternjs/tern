@@ -104,7 +104,10 @@
       var props = Object.create(null), foundProp = null;
       for (var i = 0; i < this.forward.length; ++i) {
         var fw = this.forward[i], prop = fw.propHint && fw.propHint();
-        if (prop) { props[prop] = true; foundProp = prop; }
+        if (prop && prop != "length" && prop != "<i>") {
+          props[prop] = true;
+          foundProp = prop;
+        }
       }
       if (!foundProp) return null;
 
@@ -1096,30 +1099,34 @@
         return function(self, args) { return new Arr(inner(self, args)); };
       } else if (this.eat("$")) {
         var arg = this.word(/\d/);
-        if (arg) { arg = Number(arg); return function(self, args) {return args[arg];}; }
-        if (this.eat("this")) return function(self) {return self;};
-        if (this.eat("Object_create")) return function(self, args) {
-          var result = new AVal;
-          if (args[0]) args[0].propagate({addType: function(tp) {
-            if (tp.isEmpty()) {
-              result.addType(new Obj());
-            } else if (tp instanceof Obj) {
-              var derived = new Obj(tp), spec = args[1];
-              if (spec instanceof AVal) spec = spec.types[0];
-              if (spec instanceof Obj) for (var prop in spec.props) {
-                var cur = spec.props[prop].types[0];
-                var p = derived.ensureProp(prop);
-                if (cur && cur instanceof Obj && cur.props.value) {
-                  var vtp = cur.props.value.getType();
-                  if (vtp) p.addType(vtp);
+        if (arg) {
+          arg = Number(arg);
+          return function(self, args) {return args[arg] || ANull;};
+        } else if (this.eat("this")) {
+          return function(self) {return self;};
+        } else if (this.eat("Object_create")) {
+          return function(self, args) {
+            var result = new AVal;
+            if (args[0]) args[0].propagate({addType: function(tp) {
+              if (tp.isEmpty()) {
+                result.addType(new Obj());
+              } else if (tp instanceof Obj) {
+                var derived = new Obj(tp), spec = args[1];
+                if (spec instanceof AVal) spec = spec.types[0];
+                if (spec instanceof Obj) for (var prop in spec.props) {
+                  var cur = spec.props[prop].types[0];
+                  var p = derived.ensureProp(prop);
+                  if (cur && cur instanceof Obj && cur.props.value) {
+                    var vtp = cur.props.value.getType();
+                    if (vtp) p.addType(vtp);
+                  }
                 }
+                result.addType(derived)
               }
-              result.addType(derived)
-            }
-          }});
-          return result;
-        };
-        else this.error();
+            }});
+            return result;
+          };
+        } else this.error();
       }
       var t = this.parseType();
       return function(){return t;};
