@@ -17,7 +17,7 @@
 
   function AVal(type) {
     this.types = [];
-    this.forward = [];
+    this.forward = null;
     this.flags = 0;
     if (type) type.propagate(this);
   }
@@ -25,12 +25,12 @@
     addType: function(type) {
       for (var i = 0; i < this.types.length; ++i) if (this.types[i] == type) return;
       this.types.push(type);
-      for (var i = 0; i < this.forward.length; ++i)
+      if (this.forward) for (var i = 0; i < this.forward.length; ++i)
         this.forward[i].addType(type);
     },
 
     propagate: function(c) {
-      this.forward.push(c);
+      (this.forward || (this.forward = [])).push(c);
       for (var i = 0; i < this.types.length; ++i)
         c.addType(this.types[i]);
     },
@@ -97,6 +97,7 @@
     makeupType: function() {
       if (this.hint) return this.hint;
 
+      if (!this.forward) return null;
       for (var i = 0; i < this.forward.length; ++i) {
         var fw = this.forward[i], hint = fw.typeHint && fw.typeHint();
         if (hint && !hint.isEmpty()) return hint;
