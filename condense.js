@@ -9,13 +9,17 @@
   function desc(type, state) {
     var actual = type.getType();
     if (!actual) return "?";
-    return actual.getDesc(state);
+    if (state.seen.indexOf(type) > -1) return (type.name && state.tags[type.name]) || "?";
+    state.seen.push(type);
+    var d = actual.getDesc(state);
+    state.seen.pop();
+    return d;
   }
 
   tern.Prim.prototype.getDesc = function() { return this.name; };
 
   tern.Arr.prototype.getDesc = function(state) {
-    return "[" + desc(type.getProp("<i>"), state) + "]";
+    return "[" + desc(this.getProp("<i>"), state) + "]";
   };
 
   tern.Fn.prototype.getDesc = function(state) {
@@ -32,7 +36,7 @@
       out += " -> " + this.computeRetSource;
     } else if (!this.retval.isEmpty()) {
       var rettype = this.retval.getType();
-      if (rettype) out += " -> " + rettype.getDesc(state);
+      if (rettype) out += " -> " + desc(rettype, state);
     }
 
     var obj;
@@ -56,14 +60,16 @@
     if (this._fromProto) return this.proto.name;
 
     if (!this.name)
-      this.name = "__obj" + Math.floor(Math.random(0xffffffff)).toString(16);
+      this.name = "__obj" + (state.objId++);
 
-    var known = state.tags[this.name], proto;
+    var known = state.tags[this.name];
     if (known) {
       known.refs++;
     } else {
+      var structure = {}, proto;
+      state.tags[this.name] = {refs: 1, structure: structure, obj: this};
       if (this.proto && this.proto != state.cx.protos.Object) {
-        proto = this.proto.getDesc(state);
+        proto = desc(this.proto, state);
         if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
             !/\.prototype$/.test(this.name)) {
           this._fromProto = true;
@@ -71,9 +77,7 @@
           return this.proto.name;
         }
       }
-      var structure = {};
       if (proto) structure["!proto"] = proto;
-      state.tags[this.name] = {refs: 1, structure: structure};
       setProps(this, structure, state);
     }
     return "%" + this.name + "%";
@@ -82,7 +86,7 @@
   function sanitize(desc, state) {
     if (typeof desc == "string") return sanitizeString(desc, state);
 
-    for (var v in desc) if (v.charAt(0) != "!" || v == "!proto")
+    for (var v in desc) if (v != "!types" && v != "!name")
       desc[v] = sanitize(desc[v], state);
     return desc;
   }
@@ -105,12 +109,16 @@
 
     var cx = tern.cx(), types = {}, haveType = false;
     var output = {"!name": name, "!types": types};
-    var state = {sources: sources, tags: Object.create(null), cx: cx};
+    var state = {sources: sources,
+                 tags: Object.create(null),
+                 cx: cx,
+                 seen: [],
+                 objId: 0};
 
     for (var v in cx.topScope.props) {
       var typ = cx.topScope.props[v].getType();
       if (typ && sources.indexOf(typ.origin) > -1)
-        output[v] = typ.getDesc(state);
+        output[v] = desc(typ, state);
     }
 
     for (var tag in state.tags) sanitize(state.tags[tag].structure, state);

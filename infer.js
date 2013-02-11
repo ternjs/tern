@@ -23,7 +23,7 @@
   }
   AVal.prototype = {
     addType: function(type) {
-      for (var i = 0; i < this.types.length; ++i) if (this.types[i] == type) return;
+      if (this.types.indexOf(type) > -1) return;
       this.types.push(type);
       if (this.forward) for (var i = 0; i < this.forward.length; ++i)
         this.forward[i].addType(type);
@@ -80,7 +80,7 @@
           score = tp.getProp("<i>").isEmpty() ? 1 : 2;
         } else if (fns && tp instanceof Fn) {
           score = 1;
-          for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].empty()) ++score;
+          for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].isEmpty()) ++score;
           if (!tp.retval.isEmpty()) ++score;
         } else if (objs && tp instanceof Obj) {
           score = tp.name ? 100 : 1;
@@ -488,7 +488,7 @@
     for (var s = this; ; s = s.proto) {
       var found = s.props[name];
       if (found) return found;
-      if (!s.proto) return s.ensureProp(name, !define);
+      if (s == cx.topScope) return s.ensureProp(name, !define);
     }
   };
   Scope.prototype.defVar = function(name) { return this.getVar(name, true); };
@@ -506,7 +506,9 @@
 
   function maybeTagAsTypeManipulator(node, scope) {
     if (scope.typeManipScore && scope.typeManipScore / (node.end - node.start) > .01) {
-      scope.fnType.computeRet = function(self, args) {
+      var computeRet = scope.fnType.computeRet = function(self, args) {
+        // Prevent recursion
+        this.computeRet = null;
         var scopeCopy = new Scope(scope.prev), fn = scope.fnType;
         for (var v in scope.props) {
           var local = scopeCopy.ensureProp(v);
@@ -517,6 +519,7 @@
         node.body.scope = scopeCopy;
         walk.recursive(node.body, scopeCopy, null, scopeGatherer);
         walk.recursive(node.body, scopeCopy, null, inferWrapper);
+        this.computeRet = computeRet;
         return scopeCopy.fnType.retval;
       };
       return true;
@@ -692,10 +695,10 @@
       return obj;
     }),
     FunctionExpression: ret(function(node, scope, c, name) {
-      c(node.body, scope, "ScopeBody");
       var inner = node.body.scope, fn = inner.fnType;
       if (name && !fn.name) fn.name = name;
       if (node.id) inner.defVar(node.id.name).addType(fn);
+      c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
       return fn;
     }),
@@ -767,8 +770,8 @@
       return rhs;
     }),
     LogicalExpression: fill(function(node, scope, c, out) {
-      infer(node.left, scope, c, fill);
-      infer(node.right, scope, c, fill);
+      infer(node.left, scope, c, out);
+      infer(node.right, scope, c, out);
     }),
     ConditionalExpression: fill(function(node, scope, c, out) {
       infer(node.test, scope, c, out);
@@ -825,9 +828,9 @@
     
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope, fn = inner.fnType;
+      scope.defVar(node.id.name).addType(fn);
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
-      scope.defVar(node.id.name).addType(fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
@@ -1079,7 +1082,7 @@
         var arr = new Arr(this.parseType());
         if (this.eat("]")) return arr;
       } else {
-        var word = this.word(/[<>\w$?]/);
+        var word = this.word(/[<>\w\.$?\/]/);
         switch (word) {
         case "number": return cx.num;
         case "string": return cx.str;
@@ -1087,6 +1090,7 @@
         case "<top>": return cx.topScope;
         case "?": return ANull;
         }
+        if (word.indexOf("/") > -1) return cx.tags[word] || ANull;
         if (word in cx.localProtos) return getInstance(cx.localProtos[word]);
         if (word in cx.protos) return getInstance(cx.protos[word]);
       }
