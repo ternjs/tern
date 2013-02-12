@@ -76,17 +76,21 @@
       var maxScore = 0, maxTp = null;
       for (var i = 0; i < this.types.length; ++i) {
         var tp = this.types[i], score = 0;
-        if (arrays && tp instanceof Arr) {
+        if (arrays) {
           score = tp.getProp("<i>").isEmpty() ? 1 : 2;
-        } else if (fns && tp instanceof Fn) {
+        } else if (fns) {
           score = 1;
           for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].isEmpty()) ++score;
           if (!tp.retval.isEmpty()) ++score;
-        } else if (objs && tp instanceof Obj) {
+        } else if (objs) {
           score = tp.name ? 100 : 1;
           // FIXME this heuristic is useless. maybe find overlapping properties?
           for (var prop in tp.props) if (hop(tp.props, prop) && tp.props[prop].flags & flag_definite) ++score;
-        } else if (prims && tp instanceof Prim) {
+          for (var o = tp; o; o = o.proto) if (o.provisionary) {
+            score = 1;
+            break;
+          }
+        } else if (prims) {
           score = 1;
         }
         if (score > maxScore) { maxScore = score; maxTp = tp; }
@@ -408,8 +412,11 @@
   Fn.prototype.ensureProp = function(prop, alsoProto) {
     var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
     var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
-    if (newProto && retval.isEmpty() && alsoProto)
-      retval.addType(new Obj(true, this.name + ".prototype"));
+    if (newProto && retval.isEmpty() && alsoProto) {
+      var proto = new Obj(true, this.name + ".prototype");
+      proto.provisionary = true;
+      retval.addType(proto);
+    }
     return retval;
   };
   Fn.prototype.getFunctionType = function() { return this; };
