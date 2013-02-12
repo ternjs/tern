@@ -84,7 +84,7 @@
           if (!tp.retval.isEmpty()) ++score;
         } else if (objs) {
           score = tp.name ? 100 : 1;
-          // FIXME this heuristic is useless. maybe find overlapping properties?
+          // FIXME this heuristic is far-fetched.
           for (var prop in tp.props) if (hop(tp.props, prop) && tp.props[prop].flags & flag_definite) ++score;
           for (var o = tp; o; o = o.proto) if (o.provisionary) {
             score = 1;
@@ -360,14 +360,7 @@
   };
 
   Obj.prototype.setOrigin = function(orig) {
-    if (!orig && !(orig = cx.curOrigin)) return;
-    this.origin = orig;
-    var tag = this.originTag();
-    if (tag && !(tag in cx.tags)) cx.tags[tag] = this;
-  };
-  Obj.prototype.originTag = function() {
-    if (!this.origin || !this.name) return null;
-    return this.origin + (this instanceof Fn ? "/fn/" : "/") + this.name;
+    if (orig || (orig = cx.curOrigin)) this.origin = orig;
   };
 
   Obj.findByProps = function(props) {
@@ -450,7 +443,6 @@
     this.props = Object.create(null);
     this.protos = Object.create(null);
     this.prim = Object.create(null);
-    this.tags = Object.create(null);
     this.curOrigin = "ecma5";
     this.localProtos = null;
 
@@ -1097,7 +1089,6 @@
         case "<top>": return cx.topScope;
         case "?": return ANull;
         }
-        if (word.indexOf("/") > -1) return cx.tags[word] || ANull;
         if (word in cx.localProtos) return getInstance(cx.localProtos[word]);
         if (word in cx.protos) return getInstance(cx.protos[word]);
       }

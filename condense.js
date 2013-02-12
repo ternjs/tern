@@ -6,10 +6,48 @@
     tern = exports;
   }
 
+  function pathLen(path) {
+    var len = 0, pos = 0, slash;
+    while ((slash = path.indexOf("/", pos)) != -1) {
+      ++len;
+      pos = slash + 1;
+      if (path.charAt(pos) == "!") len += .1;
+    }
+    return len;
+  }
+
+  function setPath(type, path) {
+    var actual = type.getType();
+    if (!actual || actual.path && pathLen(actual.path) <= pathLen(path)) return;
+    actual.setPath(path);
+  }
+
+  tern.Prim.prototype.setPath = function() {};
+
+  tern.Arr.prototype.setPath = function(path) {
+    this.path = path;
+    setPath(this.getProp("<i>"), path + "/<i>");
+  };
+
+  tern.Fn.prototype.setPath = function(path) {
+    tern.Obj.prototype.setPath.call(this, path);
+    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + "/!" + i);
+    setPath(this.retval, path + "/!ret");
+  };
+
+  tern.Obj.prototype.setPath = function(path) {
+    this.path = path || "/";
+    for (var prop in this.props)
+      setPath(this.props[prop], path + "/" + prop);
+    if (this.proto) setPath(this.proto, path + "/!proto");
+  };
+
   function desc(type, state) {
     var actual = type.getType();
     if (!actual) return "?";
-    if (state.seen.indexOf(type) > -1) return (type.name && state.tags[type.name]) || "?";
+    var found = type.path && state.paths[type.path];
+    if (found) return found.name;
+    if (state.seen.indexOf(type) > -1) return "?";
     state.seen.push(type);
     var d = actual.getDesc(state);
     state.seen.pop();
@@ -48,59 +86,59 @@
   };
 
   function setProps(source, target, state) {
+    var sawProp = false;
     for (var prop in source.props) {
       var val = source.props[prop];
-      if (val.flags & tern.flag_definite)
+      if (val.flags & tern.flag_definite) {
         target[prop] = desc(val, state);
+        sawProp = true;
+      }
     }
+    return sawProp;
   }
 
   tern.Obj.prototype.getDesc = function(state) {
-    if (state.sources.indexOf(this.origin) == -1) return this.originTag() || "?";
-    if (this._fromProto) return this.proto.name;
+    if (state.sources.indexOf(this.origin) == -1) return this.path;
+    if (this._fromProto) return this.proto.path;
 
-    if (!this.name)
-      this.name = "__obj" + (state.objId++);
-
-    var known = state.tags[this.name];
+    var known = state.paths[this.path];
     if (known) {
       known.refs++;
-    } else {
-      var structure = {}, proto;
-      state.tags[this.name] = {refs: 1, structure: structure, obj: this};
-      if (this.proto && this.proto != state.cx.protos.Object) {
-        proto = desc(this.proto, state);
-        if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
-            !/\.prototype$/.test(this.name)) {
-          this._fromProto = true;
-          setProps(this, state.tags[this.proto.name].structure, state);
-          return this.proto.name;
-        }
-      }
-      if (proto) structure["!proto"] = proto;
-      setProps(this, structure, state);
+      return this.path;
     }
-    return "%" + this.name + "%";
+
+    var structure = {};
+    if (this.proto && this.proto != state.cx.protos.Object) {
+      var proto = desc(this.proto, state);
+      if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
+          !/\.prototype$/.test(this.name)) {
+        this._fromProto = true;
+        setProps(this, state.paths[this.proto.path].structure, state);
+        return this.proto.path;
+      }
+      structure["!proto"] = proto;
+    }
+    if (setProps(this, structure, state) || (this.proto && this.proto != state.cx.protos.Object)) {
+      state.paths[this.path] = {refs: 1, structure: structure};
+      return this.path;
+    } else {
+      return "?";
+    }
   };
 
   function sanitize(desc, state) {
-    if (typeof desc == "string") return sanitizeString(desc, state);
+    if (typeof desc == "string") {
+      var found = state.paths[desc];
+      if (found && found.refs == 1) {
+        found.inlined = true;
+        return found.structure;
+      }
+      return desc;
+    }
 
     for (var v in desc) if (v != "!types" && v != "!name")
       desc[v] = sanitize(desc[v], state);
     return desc;
-  }
-
-  function sanitizeString(desc, state) {
-    if (/^%[^%]+%$/.test(desc)) {
-      var tag = desc.slice(1, -1), obj = state.tags[tag];
-      if (obj.refs == 1) {
-        obj.inlined = true;
-        return obj.structure;
-      } else return tag;
-    }
-
-    return desc.replace(/%([^%]+)%/g, function(m, tag) { return tag; });
   }
 
   exports.condense = function(sources, name) {
@@ -110,24 +148,24 @@
     var cx = tern.cx(), types = {}, haveType = false;
     var output = {"!name": name, "!types": types};
     var state = {sources: sources,
-                 tags: Object.create(null),
+                 paths: Object.create(null),
                  cx: cx,
-                 seen: [],
-                 objId: 0};
+                 seen: []};
 
+    setPath(cx.topScope, "");
     for (var v in cx.topScope.props) {
       var typ = cx.topScope.props[v].getType();
       if (typ && sources.indexOf(typ.origin) > -1)
         output[v] = desc(typ, state);
     }
 
-    for (var tag in state.tags) sanitize(state.tags[tag].structure, state);
+    for (var path in state.paths) sanitize(state.paths[path].structure, state);
     sanitize(output, state);
 
-    for (var tag in state.tags) {
-      var obj = state.tags[tag];
+    for (var path in state.paths) {
+      var obj = state.paths[path];
       if (obj.inlined) continue;
-      types[tag] = obj.structure;
+      types[path] = obj.structure;
       haveType = true;
     }
     if (!haveType) delete output["!types"];
