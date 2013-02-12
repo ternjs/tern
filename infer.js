@@ -403,12 +403,16 @@
     return str;
   };
   Fn.prototype.ensureProp = function(prop, alsoProto) {
-    var newProto = this.name && prop == "prototype" && !("prototype" in this.props);
+    var newProto = prop == "prototype" && !("prototype" in this.props);
     var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
-    if (newProto && retval.isEmpty() && alsoProto) {
-      var proto = new Obj(true, this.name + ".prototype");
-      proto.provisionary = true;
-      retval.addType(proto);
+    if (newProto) {
+      var name = (this.name || "?") + ".prototype";
+      retval.propagate({addType: function(t) {t.name = name;}});
+      if (retval.isEmpty() && alsoProto) {
+        var proto = new Obj(true);
+        proto.provisionary = true;
+        retval.addType(proto);
+      }
     }
     return retval;
   };

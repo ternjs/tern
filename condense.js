@@ -117,7 +117,7 @@
         setProps(this, protoDesc.structure, state);
         return "+" + this.proto.path;
       }
-      structure["!proto"] = proto;
+      if (proto != "?") structure["!proto"] = proto;
     }
     if (setProps(this, structure, state) || (this.proto && this.proto != state.cx.protos.Object)) {
       state.paths[this.path] = {refs: 1, structure: structure};
