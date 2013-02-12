@@ -697,9 +697,9 @@
     FunctionExpression: ret(function(node, scope, c, name) {
       var inner = node.body.scope, fn = inner.fnType;
       if (name && !fn.name) fn.name = name;
-      if (node.id) inner.defVar(node.id.name).addType(fn);
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
+      if (node.id) inner.defVar(node.id.name).addType(fn);
       return fn;
     }),
     SequenceExpression: ret(function(node, scope, c) {
@@ -828,9 +828,9 @@
     
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope, fn = inner.fnType;
-      scope.defVar(node.id.name).addType(fn);
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
+      scope.defVar(node.id.name).addType(fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
