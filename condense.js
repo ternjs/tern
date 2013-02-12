@@ -16,30 +16,36 @@
     return len;
   }
 
-  function setPath(type, path) {
+  function isTarget(state, type) {
+    return state.sources.indexOf(type.origin) > -1;
+  }
+
+  function setPath(type, path, state, target) {
     var actual = type.getType();
     if (!actual || actual.path && pathLen(actual.path) <= pathLen(path)) return;
-    actual.setPath(path);
+    var inTarget = isTarget(state, actual);
+    if (!inTarget && target) return;
+    actual.setPath(path, state, target || inTarget);
   }
 
   tern.Prim.prototype.setPath = function() {};
 
-  tern.Arr.prototype.setPath = function(path) {
+  tern.Arr.prototype.setPath = function(path, state, target) {
     this.path = path;
-    setPath(this.getProp("<i>"), path + "/<i>");
+    setPath(this.getProp("<i>"), path + "/<i>", state, target);
   };
 
-  tern.Fn.prototype.setPath = function(path) {
-    tern.Obj.prototype.setPath.call(this, path);
-    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + "/!" + i);
-    setPath(this.retval, path + "/!ret");
+  tern.Fn.prototype.setPath = function(path, state, target) {
+    tern.Obj.prototype.setPath.call(this, path, state, target);
+    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + "/!" + i, state, target);
+    setPath(this.retval, path + "/!ret", state, target);
   };
 
-  tern.Obj.prototype.setPath = function(path) {
+  tern.Obj.prototype.setPath = function(path, state, target) {
     this.path = path || "/";
     for (var prop in this.props)
-      setPath(this.props[prop], path + "/" + prop);
-    if (this.proto) setPath(this.proto, path + "/!proto");
+      setPath(this.props[prop], path + "/" + prop, state, target);
+    if (this.proto) setPath(this.proto, path + "/!proto", state, target);
   };
 
   function desc(type, state) {
@@ -98,7 +104,7 @@
   }
 
   tern.Obj.prototype.getDesc = function(state) {
-    if (state.sources.indexOf(this.origin) == -1) return this.path;
+    if (!isTarget(state, this)) return this.path;
     if (this._fromProto) return "+" + this.proto.path;
 
     var known = state.paths[this.path];
@@ -109,12 +115,12 @@
 
     var structure = {};
     if (this.proto && this.proto != state.cx.protos.Object) {
-      var proto = desc(this.proto, state), protoDesc;
+      var proto = desc(this.proto, state);
       if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
-          !/\.prototype$/.test(this.name) && (protoDesc = state.paths[this.proto.path])) {
+          !/\.prototype$/.test(this.name)) {
         this._fromProto = true;
-        if (!state.paths[this.proto.path]) console.log(this.proto, state.seen.indexOf(this.proto));
-        setProps(this, protoDesc.structure, state);
+        var protoDesc = state.paths[this.proto.path];
+        if (protoDesc) setProps(this, protoDesc.structure, state);
         return "+" + this.proto.path;
       }
       if (proto != "?") structure["!proto"] = proto;
@@ -153,7 +159,7 @@
                  cx: cx,
                  seen: []};
 
-    setPath(cx.topScope, "");
+    setPath(cx.topScope, "", state, false);
     for (var v in cx.topScope.props) {
       var typ = cx.topScope.props[v].getType();
       if (typ && sources.indexOf(typ.origin) > -1)

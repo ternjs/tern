@@ -223,7 +223,7 @@
         var cur = o.instances[i];
         if (cur.ctor == this.ctor) return this.other.addType(cur.instance);
       }
-      var instance = new Obj(o, null, o.origin || false);
+      var instance = new Obj(o);
       o.instances.push({ctor: this.ctor, instance: instance});
       this.other.addType(instance);
     }
@@ -259,7 +259,7 @@
   exports.Prim = Prim;
   Prim.prototype = Object.create(Type.prototype);
   Prim.prototype.toString = function() { return this.name; };
-  Prim.prototype.getProp = function(prop) { return this.proto.getProp(prop); };
+  Prim.prototype.getProp = function(prop) {return this.proto.props[prop] || ANull;};
   Prim.prototype.gatherProperties = function(prefix, direct, proto) {
     if (this.proto) this.proto.gatherProperties(prefix, direct, proto);
   };
