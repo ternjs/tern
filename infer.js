@@ -956,7 +956,7 @@
           args.push(findType(node.arguments[i], scope));
         var self = ANull;
         if (node.callee.type == "MemberExpression")
-          self = findType(node.callee.object);
+          self = findType(node.callee.object, scope);
         return f.computeRet(self, args);
       } else {
         return f.retval;
@@ -1007,7 +1007,8 @@
   });
 
   exports.findExpression = function(ast, start, end) {
-    var found = walk.findNodeAt(ast, start, end, null, searchVisitor, cx.topScope);
+    var test = function(node) {return typeFinder.hasOwnProperty(node.type);};
+    var found = walk.findNodeAt(ast, start, end, test, searchVisitor, cx.topScope);
     if (!found || !typeFinder.hasOwnProperty(found.node.type)) return null;
     return found;
   };
