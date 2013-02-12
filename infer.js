@@ -444,7 +444,8 @@
     this.protos = Object.create(null);
     this.prim = Object.create(null);
     this.curOrigin = "ecma5";
-    this.localProtos = null;
+    this.predefs = Object.create(null);
+    this.shorthands = null;
 
     exports.withContext(this, function() {
       this.curOrigin = "ecma5";
@@ -704,7 +705,7 @@
     SequenceExpression: ret(function(node, scope, c) {
       for (var i = 0, l = node.expressions.length - 1; i < l; ++i)
         infer(node.expressions[i], scope, c, ANull);
-      return infer(node.expressions[l - 1], scope, c);
+      return infer(node.expressions[l], scope, c);
     }),
     UnaryExpression: ret(function(node, scope, c) {
       infer(node.argument, scope, c, ANull);
@@ -773,7 +774,7 @@
       infer(node.right, scope, c, out);
     }),
     ConditionalExpression: fill(function(node, scope, c, out) {
-      infer(node.test, scope, c, out);
+      infer(node.test, scope, c, ANull);
       infer(node.consequent, scope, c, out);
       infer(node.alternate, scope, c, out);
     }),
@@ -1080,16 +1081,22 @@
       } else if (this.eat("[")) {
         var arr = new Arr(this.parseType());
         if (this.eat("]")) return arr;
+      } else if (this.eat("+")) {
+        var val = parsePath(this.word(/[<>\w$\/!]/));
+        if (val instanceof Obj) return getInstance(val);
+        else return val;
+      } else if (this.eat("/")) {
+        return parsePath("/" + this.word(/[<>\w$\/!]/));
+      } else if (this.eat("?")) {
+        return ANull;
       } else {
-        var word = this.word(/[<>\w\.$?\/]/);
+        var word = this.word(/[\w\.$]/);
         switch (word) {
         case "number": return cx.num;
         case "string": return cx.str;
         case "bool": return cx.bool;
-        case "<top>": return cx.topScope;
-        case "?": return ANull;
         }
-        if (word in cx.localProtos) return getInstance(cx.localProtos[word]);
+        if (word in cx.shorthands) return cx.shorthands[word];
         if (word in cx.protos) return getInstance(cx.protos[word]);
       }
       this.error();
@@ -1153,6 +1160,36 @@
     return new TypeParser(spec).parseType(name, true);
   }
 
+  function parsePath(path) {
+    var predef = cx.predefs[path];
+    if (predef) return predef;
+
+    var parts = path.split("/");
+    var cur = cx.topScope;
+    for (var i = 1; i < parts.length && cur != ANull; ++i) {
+      var part = parts[i];
+      if (!part) continue;
+      if (part.charAt(0) == "!") {
+        if (part == "!proto") {
+          cur = (cur instanceof Obj && cur.proto) || ANull;
+        } else {
+          var fn = cur.getFunctionType();
+          if (!fn) {
+            cur = ANull;
+          } else if (part == "!ret") {
+            cur = fn.retval.getType() || ANull;
+          } else {
+            var arg = fn.args[Number(part.slice(1))];
+            cur = (arg && arg.getType()) || ANull;
+          }
+        }
+      } else {
+        cur = cur.getProp(part).getType() || ANull;
+      }
+    }
+    return cur;
+  }
+
   function populate(obj, props, name) {
     for (var prop in props) if (hop(props, prop) && prop.charCodeAt(0) != 33) {
       var nm = name ? name + "." + prop : prop;
@@ -1168,17 +1205,32 @@
     var obj;
     if (spec["!type"]) obj = interpret(spec["!type"], name);
     else if (spec["!stdProto"]) obj = cx.protos[spec["!stdProto"]];
-    else if (spec["!isProto"]) obj = cx.localProtos[spec["!isProto"]];
+    else if (spec["!isDef"]) obj = interpret(spec["!isDef"]);
     else obj = new Obj(spec["!proto"] ? interpret(spec["!proto"]) : true, name);
     return populate(obj, spec, name);
   }
 
+  function pathToName(path) {
+    var parts = path.split("/");
+    var name = parts[parts.length - 1];
+    if (!name || name.charAt(0) == "!") return null;
+    var prev = parts[parts.length - 2];
+    if (prev && prev.charAt(0) != "!") name = prev + "." + name;
+    return name;
+  }
+
   function loadEnvironment(data) {
-    cx.localProtos = Object.create(null);
     cx.curOrigin = data["!name"];
-    var ps = data["!types"];
-    if (ps) for (var name in ps) if (hop(ps, name))
-      cx.localProtos[name] = interpret(ps[name], name + ".prototype");
+
+    var defs = data["!predef"];
+    if (defs) for (var name in defs) if (hop(defs, name))
+      cx.predefs[name] = interpret(defs[name], pathToName(name));
+
+    cx.shorthands = Object.create(null);
+    var shs = data["!shorthands"];
+    if (shs) for (var name in shs) if (hop(shs, name))
+      cx.shorthands[name] = interpret(shs[name]);
+
     populate(cx.topScope, data);
     cx.curOrigin = null;
   }

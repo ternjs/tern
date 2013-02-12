@@ -46,8 +46,8 @@
     var actual = type.getType();
     if (!actual) return "?";
     var found = type.path && state.paths[type.path];
-    if (found) return found.name;
-    if (state.seen.indexOf(type) > -1) return "?";
+    if (found) return type.path;
+    if (state.seen.indexOf(type) > -1) return type.path || "?";
     state.seen.push(type);
     var d = actual.getDesc(state);
     state.seen.pop();
@@ -99,7 +99,7 @@
 
   tern.Obj.prototype.getDesc = function(state) {
     if (state.sources.indexOf(this.origin) == -1) return this.path;
-    if (this._fromProto) return this.proto.path;
+    if (this._fromProto) return "+" + this.proto.path;
 
     var known = state.paths[this.path];
     if (known) {
@@ -109,12 +109,13 @@
 
     var structure = {};
     if (this.proto && this.proto != state.cx.protos.Object) {
-      var proto = desc(this.proto, state);
+      var proto = desc(this.proto, state), protoDesc;
       if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
-          !/\.prototype$/.test(this.name)) {
+          !/\.prototype$/.test(this.name) && (protoDesc = state.paths[this.proto.path])) {
         this._fromProto = true;
-        setProps(this, state.paths[this.proto.path].structure, state);
-        return this.proto.path;
+        if (!state.paths[this.proto.path]) console.log(this.proto, state.seen.indexOf(this.proto));
+        setProps(this, protoDesc.structure, state);
+        return "+" + this.proto.path;
       }
       structure["!proto"] = proto;
     }
@@ -136,7 +137,7 @@
       return desc;
     }
 
-    for (var v in desc) if (v != "!types" && v != "!name")
+    for (var v in desc) if (v != "!predef" && v != "!name")
       desc[v] = sanitize(desc[v], state);
     return desc;
   }
@@ -145,8 +146,8 @@
     if (typeof sources == "string") sources = [sources];
     if (!name) name = sources[0];
 
-    var cx = tern.cx(), types = {}, haveType = false;
-    var output = {"!name": name, "!types": types};
+    var cx = tern.cx(), predef = {}, haveType = false;
+    var output = {"!name": name, "!predef": predef};
     var state = {sources: sources,
                  paths: Object.create(null),
                  cx: cx,
@@ -165,10 +166,10 @@
     for (var path in state.paths) {
       var obj = state.paths[path];
       if (obj.inlined) continue;
-      types[path] = obj.structure;
+      predef[path] = obj.structure;
       haveType = true;
     }
-    if (!haveType) delete output["!types"];
+    if (!haveType) delete output["!predef"];
 
     return output;
   };
