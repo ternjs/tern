@@ -20,32 +20,36 @@
     return state.sources.indexOf(type.origin) > -1;
   }
 
-  function setPath(type, path, state, target) {
+  function setPath(type, path, state, maxOrigin) {
     var actual = type.getType();
-    if (!actual || actual.path && pathLen(actual.path) <= pathLen(path)) return;
-    var inTarget = isTarget(state, actual);
-    if (!inTarget && target) return;
-    actual.setPath(path, state, target || inTarget);
+    if (!actual) return;
+    if (actual.origin) {
+      var origPos = state.cx.origins.indexOf(actual.origin);
+      if (origPos < maxOrigin) return;
+      maxOrigin = origPos;
+    }
+    if (actual.path && pathLen(actual.path) <= pathLen(path)) return;
+    actual.setPath(path, state, maxOrigin);
   }
 
   tern.Prim.prototype.setPath = function() {};
 
-  tern.Arr.prototype.setPath = function(path, state, target) {
+  tern.Arr.prototype.setPath = function(path, state, maxOrigin) {
     this.path = path;
-    setPath(this.getProp("<i>"), path + "/<i>", state, target);
+    setPath(this.getProp("<i>"), path + "/<i>", state, maxOrigin);
   };
 
-  tern.Fn.prototype.setPath = function(path, state, target) {
-    tern.Obj.prototype.setPath.call(this, path, state, target);
-    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + "/!" + i, state, target);
-    setPath(this.retval, path + "/!ret", state, target);
+  tern.Fn.prototype.setPath = function(path, state, maxOrigin) {
+    tern.Obj.prototype.setPath.call(this, path, state, maxOrigin);
+    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + "/!" + i, state, maxOrigin);
+    setPath(this.retval, path + "/!ret", state, maxOrigin);
   };
 
-  tern.Obj.prototype.setPath = function(path, state, target) {
+  tern.Obj.prototype.setPath = function(path, state, maxOrigin) {
     this.path = path || "/";
     for (var prop in this.props)
-      setPath(this.props[prop], path + "/" + prop, state, target);
-    if (this.proto) setPath(this.proto, path + "/!proto", state, target);
+      setPath(this.props[prop], path + "/" + prop, state, maxOrigin);
+    if (this.proto) setPath(this.proto, path + "/!proto", state, maxOrigin);
   };
 
   function desc(type, state, flag) {
@@ -67,6 +71,8 @@
   };
 
   tern.Fn.prototype.getDesc = function(state) {
+    if (this.path && !isTarget(state, this)) return this.path;
+
     var out = "fn(";
     for (var i = 0; i < this.args.length; ++i) {
       if (i) out += ", ";
@@ -85,8 +91,12 @@
 
     var obj;
     for (var p in this.props) {
-      if (!obj) obj = out = {"!type": out};
+      if (!obj) obj = {"!type": out};
       obj[p] = desc(this.props[p], state);
+    }
+    if (obj) {
+      state.paths[this.path] = {refs: 1, structure: obj};
+      return this.path;
     }
     return out;
   };
@@ -156,14 +166,14 @@
     if (typeof sources == "string") sources = [sources];
     if (!name) name = sources[0];
 
-    var cx = tern.cx(), predef = {}, haveType = false;
+    var cx = tern.cx(), predef = {};
     var output = {"!name": name, "!predef": predef};
     var state = {sources: sources,
                  paths: Object.create(null),
                  cx: cx,
                  seen: []};
 
-    setPath(cx.topScope, "", state, false);
+    setPath(cx.topScope, "", state, 0);
     for (var v in cx.topScope.props) {
       var typ = cx.topScope.props[v].getType();
       if (typ && sources.indexOf(typ.origin) > -1)
@@ -173,6 +183,7 @@
     for (var path in state.paths) sanitize(state.paths[path].structure, state);
     sanitize(output, state);
 
+    var haveType = false;
     for (var path in state.paths) {
       var obj = state.paths[path];
       if (obj.inlined) continue;

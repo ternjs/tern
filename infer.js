@@ -460,6 +460,7 @@
     this.props = Object.create(null);
     this.protos = Object.create(null);
     this.prim = Object.create(null);
+    this.origins = [];
     this.curOrigin = "ecma5";
     this.predefs = Object.create(null);
     this.shorthands = null;
@@ -887,7 +888,10 @@
   });
 
   exports.analyze = function(text, file) {
+    if (!file) file = "file#" + cx.origins.length;
     cx.curOrigin = file;
+    cx.origins.push(file);
+
     var ast;
     try {
         ast = acorn.parse(text);
@@ -1241,7 +1245,8 @@
   }
 
   function loadEnvironment(data) {
-    cx.curOrigin = data["!name"];
+    cx.curOrigin = data["!name"] || "env#" + cx.origins.length;
+    cx.origins.push(cx.curOrigin);
 
     var defs = data["!predef"];
     if (defs) for (var name in defs) if (hop(defs, name))
