@@ -1258,6 +1258,15 @@
       cx.shorthands[name] = interpret(shs[name]);
 
     populate(cx.topScope, data);
+
+    var added = data["!added"];
+    if (added) for (var path in added) {
+      var lastSlash = path.lastIndexOf("/");
+      if (lastSlash < 1) continue;
+      var obj = parsePath(path.slice(0, lastSlash));
+      interpret(added[path]).propagate(obj.getProp(path.slice(lastSlash + 1)));
+    }
+
     cx.curOrigin = null;
   }
 

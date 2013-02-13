@@ -18,11 +18,12 @@ function load(file) {
   xhr.send();
   return xhr.responseText;
 }
-var ecma5 = JSON.parse(load("../ecma5.json")), browser = JSON.parse(load("../browser.json"));
+
+var environment = [JSON.parse(load("../ecma5.json")), JSON.parse(load("../browser.json"))];
 
 function findType(cm) {
   var out = document.getElementById("out");
-  var cx = new tern.Context([ecma5, browser]);
+  var cx = new tern.Context(environment);
   tern.withContext(cx, function() {
     var data = tern.analyze(cm.getValue());
     var end = cm.indexFromPos(cm.getCursor()), start = null;
@@ -36,7 +37,7 @@ function findType(cm) {
 }
 
 function complete(cm) {
-  var cx = new tern.Context([ecma5, browser]);
+  var cx = new tern.Context(environment);
   var cur = cm.getCursor(), token = cm.getTokenAt(cur);
   var isProp = false, name, pos = cur, start = cur, end = cur;
   if (token.string == ".") {
@@ -75,7 +76,7 @@ function complete(cm) {
 }
 
 function jumpToDef(cm) {
-  var cx = new tern.Context([ecma5, browser]);
+  var cx = new tern.Context(environment);
   tern.withContext(cx, function() {
     var data = tern.analyze(cm.getValue());
     var expr = tern.findExpression(data.ast, null, cm.indexFromPos(cm.getCursor())), def;
@@ -118,7 +119,7 @@ function updateArgumentHints(cm) {
   if (cache.line != line || cache.ch != ch) {
     cache.line = line; cache.ch = ch; cache.bad = true;
 
-    var cx = new tern.Context([ecma5, browser]);
+    var cx = new tern.Context(environment);
     if (tern.withContext(cx, function() {
       var data = tern.analyze(cm.getValue());
       var callee = tern.findExpression(data.ast, null, cm.indexFromPos({line: line, ch: ch}));
@@ -164,7 +165,7 @@ function updateArgumentHints(cm) {
 }
 
 function condense(cm) {
-  var cx = new tern.Context([ecma5, browser]);
+  var cx = new tern.Context(environment);
   tern.withContext(cx, function() {
     var data = tern.analyze(cm.getValue(), "local");
     console.log(JSON.stringify(tern.condense("local"), null, 2));

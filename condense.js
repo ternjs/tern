@@ -26,6 +26,9 @@
     if (actual.origin) {
       var origPos = state.cx.origins.indexOf(actual.origin);
       if (origPos < maxOrigin) return;
+      if (maxOrigin < state.minOrigin && isTarget(state, actual) && path.indexOf("!") < 0 &&
+          state.addedToForeign.indexOf(actual) < 0)
+        state.addedToForeign.push(actual);
       maxOrigin = origPos;
     }
     if (actual.path && pathLen(actual.path) <= pathLen(path)) return;
@@ -55,6 +58,9 @@
   function desc(type, state, flag) {
     var actual = type.getType();
     if (!actual) return "?";
+    var inForeign = state.addedToForeign.indexOf(actual);
+    if (inForeign >= 0) state.addedToForeign.splice(inForeign, 1);
+
     var found = type.path && state.paths[type.path];
     if (found) return type.path;
     if (state.seen.indexOf(type) > -1) return type.path || "?";
@@ -166,18 +172,32 @@
     if (typeof sources == "string") sources = [sources];
     if (!name) name = sources[0];
 
-    var cx = tern.cx(), predef = {};
+    var cx = tern.cx(), predef = {}, minOrigin = Infinity;
+    for (var i = 0; i < sources.length; ++i)
+      minOrigin = Math.min(cx.origins.indexOf(sources[i]), minOrigin);
     var output = {"!name": name, "!predef": predef};
     var state = {sources: sources,
                  paths: Object.create(null),
                  cx: cx,
+                 minOrigin: minOrigin,
+                 addedToForeign: [],
                  seen: []};
 
     setPath(cx.topScope, "", state, 0);
+
     for (var v in cx.topScope.props) {
       var typ = cx.topScope.props[v].getType();
       if (typ && sources.indexOf(typ.origin) > -1)
         output[v] = desc(typ, state);
+    }
+    if (state.addedToForeign.length > 0) {
+      var foreign = {}, haveForeign = false, list = state.addedToForeign;
+      state.addedToForeign = [];
+      for (var i = 0; i < list.length; ++i) {
+        var val = desc(list[i], state);
+        if (val != "?") haveForeign = foreign[list[i].path] = val;
+      }
+      if (haveForeign) output["!added"] = foreign;
     }
 
     for (var path in state.paths) sanitize(state.paths[path].structure, state);
