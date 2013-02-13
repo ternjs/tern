@@ -48,14 +48,14 @@
     if (this.proto) setPath(this.proto, path + "/!proto", state, target);
   };
 
-  function desc(type, state) {
+  function desc(type, state, flag) {
     var actual = type.getType();
     if (!actual) return "?";
     var found = type.path && state.paths[type.path];
     if (found) return type.path;
     if (state.seen.indexOf(type) > -1) return type.path || "?";
     state.seen.push(type);
-    var d = actual.getDesc(state);
+    var d = actual.getDesc(state, flag);
     state.seen.pop();
     return d;
   }
@@ -91,19 +91,22 @@
     return out;
   };
 
-  function setProps(source, target, state) {
-    var sawProp = false;
-    for (var prop in source.props) {
-      var val = source.props[prop];
-      if (val.flags & tern.flag_definite) {
-        target[prop] = desc(val, state);
-        sawProp = true;
-      }
+  function hasProps(obj) {
+    for (var prop in obj.props) {
+      var val = obj.props[prop];
+      if (val.flags & tern.flag_definite) return true;
     }
-    return sawProp;
   }
 
-  tern.Obj.prototype.getDesc = function(state) {
+  function setProps(source, target, state) {
+    for (var prop in source.props) {
+      var val = source.props[prop];
+      if (val.flags & tern.flag_definite)
+        target[prop] = desc(val, state);
+    }
+  }
+
+  tern.Obj.prototype.getDesc = function(state, flag) {
     if (!isTarget(state, this)) return this.path;
     if (this._fromProto) return "+" + this.proto.path;
 
@@ -113,24 +116,25 @@
       return this.path;
     }
 
-    var structure = {};
+    var structure = {}, proto;
     if (this.proto && this.proto != state.cx.protos.Object) {
-      var proto = desc(this.proto, state);
       if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
           !/\.prototype$/.test(this.name)) {
+        proto = desc(this.proto, state, "force");
         this._fromProto = true;
         var protoDesc = state.paths[this.proto.path];
         if (protoDesc) setProps(this, protoDesc.structure, state);
         return "+" + this.proto.path;
+      } else {
+        proto = desc(this.proto, state);
+        if (proto == "?") proto = null;
       }
-      if (proto != "?") structure["!proto"] = proto;
     }
-    if (setProps(this, structure, state) || (this.proto && this.proto != state.cx.protos.Object)) {
-      state.paths[this.path] = {refs: 1, structure: structure};
-      return this.path;
-    } else {
-      return "?";
-    }
+    if (flag != "force" && !proto && !hasProps(this)) return "?";
+    if (proto) structure["!proto"] = proto;
+    setProps(this, structure, state);
+    state.paths[this.path] = {refs: 1, structure: structure};
+    return this.path;
   };
 
   function sanitize(desc, state) {

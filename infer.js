@@ -61,41 +61,7 @@
     getType: function() {
       if (this.types.length == 0) return this.makeupType();
       if (this.types.length == 1) return this.types[0];
-
-      var arrays = 0, fns = 0, objs = 0, prims = 0;
-      for (var i = 0; i < this.types.length; ++i) {
-        var tp = this.types[i];
-        if (tp instanceof Arr) ++arrays;
-        else if (tp instanceof Fn) ++fns;
-        else if (tp instanceof Obj) ++objs;
-        else if (tp instanceof Prim) ++prims;
-      }
-      var kinds = (arrays && 1) + (fns && 1) + (objs && 1) + (prims && 1);
-      if (kinds > 1) return null;
-
-      var maxScore = 0, maxTp = null;
-      for (var i = 0; i < this.types.length; ++i) {
-        var tp = this.types[i], score = 0;
-        if (arrays) {
-          score = tp.getProp("<i>").isEmpty() ? 1 : 2;
-        } else if (fns) {
-          score = 1;
-          for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].isEmpty()) ++score;
-          if (!tp.retval.isEmpty()) ++score;
-        } else if (objs) {
-          score = tp.name ? 100 : 1;
-          // FIXME this heuristic is far-fetched.
-          for (var prop in tp.props) if (hop(tp.props, prop) && tp.props[prop].flags & flag_definite) ++score;
-          for (var o = tp; o; o = o.proto) if (o.provisionary) {
-            score = 1;
-            break;
-          }
-        } else if (prims) {
-          score = 1;
-        }
-        if (score > maxScore) { maxScore = score; maxTp = tp; }
-      }
-      return maxTp;
+      return canonicalType(this.types);
     },
 
     makeupType: function() {
@@ -116,17 +82,21 @@
       if (!foundProp) return null;
 
       var objs = objsWithProp(foundProp);
-      if (objs) search: for (var i = 0; i < objs.length; ++i) {
-        var obj = objs[i];
-        for (var prop in props) {
-          var match = obj.props[prop];
-          if (!match || !(match.flags & flag_definite)) continue search;
+      if (objs) {
+        var matches = [];
+        search: for (var i = 0; i < objs.length; ++i) {
+          var obj = objs[i];
+          for (var prop in props) {
+            var match = obj.props[prop];
+            if (!match || !(match.flags & flag_definite)) continue search;
+          }
+          matches.push(obj);
         }
-        return obj;
+        return canonicalType(matches);
       }
     },
 
-    typeHint: function() { return this.types.length ? this.types[0] : null; },
+    typeHint: function() { return this.types.length ? this.getType() : null; },
     propagatesTo: function() { return this; },
 
     gatherProperties: function(prefix, direct, proto) {
@@ -134,6 +104,43 @@
         this.types[i].gatherProperties(prefix, direct, proto);
     }
   };
+
+  function canonicalType(types) {
+    var arrays = 0, fns = 0, objs = 0, prims = 0;
+    for (var i = 0; i < types.length; ++i) {
+      var tp = types[i];
+      if (tp instanceof Arr) ++arrays;
+      else if (tp instanceof Fn) ++fns;
+      else if (tp instanceof Obj) ++objs;
+      else if (tp instanceof Prim) ++prims;
+    }
+    var kinds = (arrays && 1) + (fns && 1) + (objs && 1) + (prims && 1);
+    if (kinds > 1) return null;
+
+    var maxScore = 0, maxTp = null;
+    for (var i = 0; i < types.length; ++i) {
+      var tp = types[i], score = 0;
+      if (arrays) {
+        score = tp.getProp("<i>").isEmpty() ? 1 : 2;
+      } else if (fns) {
+        score = 1;
+        for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].isEmpty()) ++score;
+        if (!tp.retval.isEmpty()) ++score;
+      } else if (objs) {
+        score = tp.name ? 100 : 1;
+        // FIXME this heuristic is far-fetched.
+        for (var prop in tp.props) if (hop(tp.props, prop) && tp.props[prop].flags & flag_definite) ++score;
+        for (var o = tp; o; o = o.proto) if (o.provisionary) {
+          score = 1;
+          break;
+        }
+      } else if (prims) {
+        score = 1;
+      }
+      if (score > maxScore) { maxScore = score; maxTp = tp; }
+    }
+    return maxTp;
+  }
 
   // A variant of AVal used for unknown, dead-end values
   var ANull = {
@@ -213,6 +220,7 @@
   HasMethodCall.prototype.addType = function(obj) {
     obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.retval));
   };
+  HasMethodCall.prototype.propHint = function() { return this.propName; };
 
   function IsProto(other, ctor) { this.other = other; this.ctor = ctor; }
   IsProto.prototype = {
@@ -755,19 +763,22 @@
       if (node.left.type == "MemberExpression") {
         var obj = infer(node.left.object, scope, c);
         if (pName == "prototype") maybeTypeManipulator(scope, 20);
-        if (pName == "<i>" && node.right.type == "MemberExpression" && node.right.computed) {
+        if (pName == "<i>") {
           // This is a hack to recognize for/in loops that copy
           // properties, and do the copying ourselves, insofar as we
           // manage, because such loops tend to be relevant for type
           // information.
-          var local = scope.props[node.right.property.name], over = local && local.iteratesOver;
-          if (over) over.forAllProps(function(prop, val, local) {
-            if (local && prop != "prototype" && prop != "<i>")
-              obj.propagate(new PropHasSubset(prop, val));
-          });
-        } else {
-          obj.propagate(new PropHasSubset(pName, rhs));
+          var v = node.left.property.name, local = scope.props[v], over = local && local.iteratesOver;
+          if (over) {
+            var fromRight = node.right.type == "MemberExpression" && node.right.computed && node.right.property.name == v;
+            over.forAllProps(function(prop, val, local) {
+              if (local && prop != "prototype" && prop != "<i>")
+                obj.propagate(new PropHasSubset(prop, fromRight ? val : ANull));
+            });
+            return rhs;
+          }
         }
+        obj.propagate(new PropHasSubset(pName, rhs));
       } else { // Identifier
         rhs.propagate(scope.defVar(node.left.name));
       }

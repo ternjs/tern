@@ -30,7 +30,7 @@ function findType(cm) {
     var expr = tern.findExpression(data.ast, start, end);
     if (!expr) return;
     var tp = tern.expressionType(expr);
-    window.tp = tp;
+    window.tp = tp; window.cx = cx; window.scope = expr.state;
     out.innerHTML = tp ? tern.toString(tp.getType()) : "not found";
   });
 }
