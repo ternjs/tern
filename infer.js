@@ -222,19 +222,24 @@
   };
   HasMethodCall.prototype.propHint = function() { return this.propName; };
 
-  function IsProto(other, ctor) { this.other = other; this.ctor = ctor; }
-  IsProto.prototype = {
-    addType: function(o) {
-      if (!(o instanceof Obj)) return;
-      if (!o.instances) o.instances = [];
-      for (var i = 0; i < o.instances.length; ++i) {
-        var cur = o.instances[i];
-        if (cur.ctor == this.ctor) return this.other.addType(cur.instance);
-      }
-      var instance = new Obj(o);
-      o.instances.push({ctor: this.ctor, instance: instance});
-      this.other.addType(instance);
+  function IsCtor(target) { this.target = target; }
+  IsCtor.prototype.addType = function(f) {
+    if (!(f instanceof Fn)) return;
+    f.getProp("prototype").propagate(new IsProto(f, this.target));
+  };
+
+  function IsProto(ctor, target) { this.ctor = ctor; this.target = target; }
+  IsProto.prototype.addType = function(o) {
+    if (!(o instanceof Obj)) return;
+
+    if (!o.instances) o.instances = [];
+    for (var i = 0; i < o.instances.length; ++i) {
+      var cur = o.instances[i];
+      if (cur.ctor == this.ctor) return this.target.addType(cur.instance);
     }
+    var instance = new Obj(o);
+    o.instances.push({ctor: this.ctor, instance: instance});
+    this.target.addType(instance);
   };
 
   function IsAdded(other, target) {
@@ -801,7 +806,7 @@
         args.push(infer(node.arguments[i], scope, c));
       var callee = infer(node.callee, scope, c);
       var self = new AVal;
-      callee.getProp("prototype").propagate(new IsProto(self, callee));
+      callee.propagate(new IsCtor(self));
       callee.propagate(new IsCallee(self, args, out));
       self.propagate(out);
     }),
