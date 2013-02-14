@@ -1045,7 +1045,9 @@
     type.gatherProperties(prefix, direct, proto);
     direct.sort();
     proto.sort();
-    return direct.concat(proto);
+    if (direct.length || proto.length || prefix.length < 2) return direct.concat(proto);
+    for (var prop in cx.props) if (prop.indexOf(prefix) == 0) direct.push(prop);
+    return direct;
   };
 
   // LOCAL-VARIABLE QUERIES
