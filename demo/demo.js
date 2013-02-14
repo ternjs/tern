@@ -3,7 +3,10 @@ var editor;
 CodeMirror.on(window, "load", function() {
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
-    extraKeys: {"Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); }},
+    extraKeys: {
+      "Ctrl-I": findType,
+      "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); }
+    },
     autofocus: true
   });
   editor.setValue(load("../node_modules/codemirror/lib/codemirror.js"));
@@ -30,24 +33,9 @@ Tern.addEnvironment(JSON.parse(load("../ecma5.json")));
 Tern.addEnvironment(JSON.parse(load("../browser.json")));
 Tern.addFile("local");
 
-/*function findType(cm) {
-  var out = document.getElementById("out");
-  var cx = new tern.Context(environment);
-  tern.withContext(cx, function() {
-    var data = tern.analyze(cm.getValue());
-    var end = cm.indexFromPos(cm.getCursor()), start = null;
-    if (cm.somethingSelected()) start = cm.indexFromPos(cm.getCursor("anchor"));
-    var expr = tern.findExpression(data.ast, start, end);
-    if (!expr) return;
-    var tp = tern.expressionType(expr);
-    window.tp = tp; window.cx = cx; window.scope = expr.state;
-    out.innerHTML = tp ? tern.toString(tp.getType()) : "not found";
-  });
-}*/
-
-function getFragmentAtCursor(cm) {
-  var curLine = cm.getCursor().line, minIndent = null, minLine = null;
-  for (var p = curLine - 1, end = Math.max(0, curLine - 50); p >= end; --p) {
+function getFragmentAround(cm, start, end) {
+  var minIndent = null, minLine = null;
+  for (var p = start.line - 1, min = Math.max(0, start.line - 50); p >= min; --p) {
     var line = cm.getLine(p), fn = line.search(/\bfunction\b/);
     if (fn < 0) continue;
     var indent = CodeMirror.countColumn(line, null, cm.getOption("tabSize"));
@@ -56,36 +44,65 @@ function getFragmentAtCursor(cm) {
     minIndent = indent;
     minLine = p;
   }
-  if (minLine == null) minLine = end;
-  var start = CodeMirror.Pos(minLine, 0);
+  if (minLine == null) minLine = min;
+  var from = CodeMirror.Pos(minLine, 0);
   return {type: "part",
           name: "local",
-          offset: cm.indexFromPos(start),
-          text: cm.getRange(start, CodeMirror.Pos(curLine))};
+          offset: cm.indexFromPos(from),
+          text: cm.getRange(from, CodeMirror.Pos(end.line))};
 }
 
-function ternHints(cm, c) {
-  var files, position = cm.indexFromPos(cm.getCursor()), file, offset = 0;
+function buildRequest(cm, query, asRange) {
+  var files, offset = 0, startPos, endPos;
+  if (typeof query == "string") query = {type: query};
+  if (asRange) {
+    query.end = cm.indexFromPos(endPos = cm.getCursor("end"));
+    if (cm.somethingSelected())
+      query.start = cm.indexFromPos(startPos = cm.getCursor("start"));
+    else
+      startPos = endPos;
+  } else {
+    query.position = cm.indexFromPos(startPos = endPos = cm.getCursor());
+  }
   if (!cm.isClean()) {
     if (cm.lineCount() > 100) {
-      files = [getFragmentAtCursor(cm)];
-      file = "#0";
-      position -= (offset = files[0].offset);
+      files = [getFragmentAround(cm, startPos, endPos)];
+      query.file = "#0";
+      offset = files[0].offset;
+      if (asRange) {
+        if (query.start != null) query.start -= offset;
+        query.end -= offset;
+      } else {
+        query.position -= offset;
+      }
     } else {
       files = [{type: "full",
                 name: "local",
                 text: cm.getValue()}];
-      file = "local";
+      query.file = "local";
       cm.markClean();
     }
   }
-  var query = {query: {type: "completions", position: position, file: file},
-               files: files};
+  return {request: {query: query, files: files},
+          offset: offset};
+}
 
-  Tern.request(query, function(error, data) {
+function findType(cm) {
+  Tern.request(buildRequest(cm, "type", true).request, function(error, data) {
     if (error) throw new Error(error);
-    c({from: cm.posFromIndex(data.from + offset),
-       to: cm.posFromIndex(data.to + offset),
+    var out = document.getElementById("out");
+    out.innerHTML = "";
+    out.appendChild(document.createTextNode(data.typeName || "not found"));
+  });
+}
+
+function ternHints(cm, c) {
+  var req = buildRequest(cm, "completions");
+
+  Tern.request(req.request, function(error, data) {
+    if (error) throw new Error(error);
+    c({from: cm.posFromIndex(data.from + req.offset),
+       to: cm.posFromIndex(data.to + req.offset),
        list: data.completions});
   });
 }

@@ -45,6 +45,9 @@
           case "completions":
             c(null, findCompletions(resolveFile(self, files, doc.query.file), doc.query));
             break;
+          case "type":
+            c(null, findTypeAt(resolveFile(self, files, doc.query.file), doc.query));
+            break;
           default:
             c("Unsupported query type: " + doc.query.type);
           }
@@ -161,6 +164,13 @@
       completions = infer.localsAt(file.ast, query.position, word);
     }
     return {from: wordStart, to: wordEnd, completions: completions};
+  }
+
+  function findTypeAt(file, query) {
+    var expr = infer.findExpression(file.ast, query.start, query.end);
+    if (!expr) return {typeName: null, message: "No expression at the given position"};
+    var type = infer.expressionType(expr);
+    return {typeName: infer.toString(type.getType(), query.depth)};
   }
 
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
