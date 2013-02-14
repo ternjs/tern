@@ -287,7 +287,7 @@
   function Obj(proto, name, origin) {
     this.props = Object.create(null);
     this.proto = proto === true ? cx.protos.Object : proto;
-    if (proto && !name && proto.name) {
+    if (proto && !name && proto.name && !(this instanceof Fn)) {
       var match = /^(.*)\.prototype$/.exec(proto.name);
       this.name = match ? match[1] : proto.name;
     } else {
@@ -504,7 +504,7 @@
 
   function Scope(prev) {
     this.prev = prev;
-    Obj.call(this, prev || true, true);
+    Obj.call(this, prev || true);
   }
   Scope.prototype = Object.create(Obj.prototype);
   Scope.prototype.getVar = function(name, define) {
@@ -1052,10 +1052,10 @@
 
   // LOCAL-VARIABLE QUERIES
 
-  var scopeAt = exports.scopeAt = function(ast, pos) {
+  var scopeAt = exports.scopeAt = function(ast, pos, defaultScope) {
     var found = walk.findNodeAround(ast, pos, "ScopeBody");
     if (found) return found.node.scope;
-    else return cx.topScope;
+    else return defaultScope || cx.topScope;
   };
 
   exports.localsAt = function(ast, pos, prefix) {

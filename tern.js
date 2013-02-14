@@ -139,10 +139,26 @@
     if (file.type == "part") {
       var realFile = findFile(tern.files, file.name);
       if (!realFile) throw new Error("Partial file provided for " + file.name + ", which is not known");
-      var pos = findFilePosition(firstLine(file.text), realFile.text, file.position);
+      var line = firstLine(file.text);
+      var pos = findFilePosition(line, realFile.text, file.position);
 
       var scope = infer.scopeAt(realFile.ast, pos);
       file.ast = infer.analyze(file.text, file.name, scope).ast;
+
+      // This is a kludge to tie together the function types (if any)
+      // outside and inside of the fragment, so that arguments and
+      // return values have some information known about them.
+      var inner = infer.scopeAt(realFile.ast, pos + line.length);
+      if (inner != scope && inner.fnType) {
+        var newInner = infer.scopeAt(file.ast, line.length, scope);
+        var fOld = inner.fnType, fNew = newInner.fnType;
+        if (fNew && (fNew.name == fOld.name || !fOld.name)) {
+          for (var i = 0, e = Math.min(fOld.args.length, fNew.args.length); i < e; ++i)
+            fOld.args[i].propagate(fNew.args[i]);
+          fOld.self.propagate(fNew.self);
+          fNew.retval.propagate(fOld.retval);
+        }
+      }
     }
     return file;
   }
