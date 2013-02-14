@@ -495,6 +495,10 @@
     finally { cx = old; }
   };
 
+  function addOrigin(origin) {
+    if (cx.origins.indexOf(origin) < 0) cx.origins.push(origin);
+  }
+
   // SCOPES
 
   function Scope(prev) {
@@ -887,10 +891,9 @@
     ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
   });
 
-  exports.analyze = function(text, file) {
+  exports.analyze = function(text, file, scope) {
     if (!file) file = "file#" + cx.origins.length;
-    cx.curOrigin = file;
-    cx.origins.push(file);
+    addOrigin(cx.curOrigin = file);
 
     var ast;
     try {
@@ -899,10 +902,11 @@
       if (e instanceof SyntaxError) ast = acorn.parse_dammit(text);
       else throw e;
     }
-    walk.recursive(ast, cx.topScope, null, scopeGatherer);
-    walk.recursive(ast, cx.topScope, null, inferWrapper);
+    if (!scope) scope = cx.topScope;
+    walk.recursive(ast, scope, null, scopeGatherer);
+    walk.recursive(ast, scope, null, inferWrapper);
     cx.curOrigin = null;
-    return {ast: ast, text: text, scope: cx.topScope, file: file};
+    return {ast: ast, text: text, file: file};
   };
 
   // EXPRESSION TYPE DETERMINATION
@@ -1028,9 +1032,7 @@
 
   exports.findExpression = function(ast, start, end) {
     var test = function(node) {return typeFinder.hasOwnProperty(node.type);};
-    var found = walk.findNodeAt(ast, start, end, test, searchVisitor, cx.topScope);
-    if (!found || !typeFinder.hasOwnProperty(found.node.type)) return null;
-    return found;
+    return walk.findNodeAt(ast, start, end, test, searchVisitor, cx.topScope);
   };
 
   exports.expressionType = function(found) {
@@ -1047,9 +1049,14 @@
 
   // LOCAL-VARIABLE QUERIES
 
-  exports.localsAt = function(ast, pos, prefix) {
+  var scopeAt = exports.scopeAt = function(ast, pos) {
     var found = walk.findNodeAround(ast, pos, "ScopeBody");
-    var scope = found ? found.node.scope : cx.topScope, locals = [];
+    if (found) return found.node.scope;
+    else return cx.topScope;
+  };
+
+  exports.localsAt = function(ast, pos, prefix) {
+    var scope = scopeAt(ast, pos), locals = [];
     scope.gatherProperties(prefix, locals, locals);
     locals.sort();
     return locals;
@@ -1245,8 +1252,7 @@
   }
 
   function loadEnvironment(data) {
-    cx.curOrigin = data["!name"] || "env#" + cx.origins.length;
-    cx.origins.push(cx.curOrigin);
+    addOrigin(cx.curOrigin = data["!name"] || "env#" + cx.origins.length);
 
     var defs = data["!predef"];
     if (defs) for (var name in defs) if (hop(defs, name))
@@ -1270,4 +1276,4 @@
     cx.curOrigin = null;
   }
 
-})(typeof exports == "undefined" ? (window.tern = {}) : exports);
+})(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);

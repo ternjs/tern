@@ -3,13 +3,10 @@ var editor;
 CodeMirror.on(window, "load", function() {
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
-    extraKeys: {"Ctrl-I": findType,
-                "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, complete); },
-                "Alt-.": jumpToDef,
-                "Ctrl-Q": condense},
+    extraKeys: {"Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); }},
     autofocus: true
   });
-  editor.on("cursorActivity", updateArgumentHints);
+//  editor.on("cursorActivity", updateArgumentHints);
 });
 
 function load(file) {
@@ -19,9 +16,17 @@ function load(file) {
   return xhr.responseText;
 }
 
-var environment = [JSON.parse(load("../ecma5.json")), JSON.parse(load("../browser.json"))];
+var Tern = new tern.Tern({
+  getFile: function(name, c) {
+    if (name != "local") throw new Error("Why are you trying to fetch " + name + "?");
+    c(null, editor.getValue());
+  }
+});
+Tern.addEnvironment(JSON.parse(load("../ecma5.json")));
+Tern.addEnvironment(JSON.parse(load("../browser.json")));
+Tern.addFile("local");
 
-function findType(cm) {
+/*function findType(cm) {
   var out = document.getElementById("out");
   var cx = new tern.Context(environment);
   tern.withContext(cx, function() {
@@ -34,47 +39,27 @@ function findType(cm) {
     window.tp = tp; window.cx = cx; window.scope = expr.state;
     out.innerHTML = tp ? tern.toString(tp.getType()) : "not found";
   });
-}
+}*/
 
-function complete(cm) {
-  var cx = new tern.Context(environment);
-  var cur = cm.getCursor(), token = cm.getTokenAt(cur);
-  var isProp = false, name, pos = cur, start = cur, end = cur;
-  if (token.string == ".") {
-    isProp = true;
-    name = "";
-    pos = {line: cur.line, ch: cur.ch - 1};
-  } else if (cm.getLine(cur.line).charAt(token.start - 1) == ".") {
-    isProp = true; name = token.string;
-    pos = {line: cur.line, ch: token.start - 1};
-    start = {line: cur.line, ch: token.start};
-    end = {line: cur.line, ch: token.end};
-  } else if (/^[\w$]+$/.test(token.string)) {
-    name = token.string;
-    start = {line: cur.line, ch: token.start};
-    end = {line: cur.line, ch: token.end};
-  } else {
-    name = "";
+function ternHints(cm, c) {
+  var query = {query: {type: "completions",
+                       position: cm.indexFromPos(cm.getCursor()),
+                       file: "local"}};
+  if (!cm.isClean()) {
+    query.files = [{type: "full",
+                    name: "local",
+                    text: cm.getValue()}];
+    cm.markClean();
   }
-  var index = cm.indexFromPos(pos);
-
-  return tern.withContext(cx, function() {
-    var data = tern.analyze(cm.getValue());
-    if (isProp) {
-      var found = tern.findExpression(data.ast, null, index);
-      var tp = found && tern.expressionType(found);
-      if (tp) return {
-        list: tern.propertiesOf(tp, name),
-        from: start, to: end
-      };
-    }
-    return {
-      list: tern.localsAt(data.ast, index, name),
-      from: start, to: end
-    };
+  Tern.request(query, function(error, data) {
+    if (error) throw new Error(error);
+    else c({from: cm.posFromIndex(data.from),
+            to: cm.posFromIndex(data.to),
+            list: data.completions});
   });
 }
 
+/*
 function jumpToDef(cm) {
   var cx = new tern.Context(environment);
   tern.withContext(cx, function() {
@@ -171,3 +156,4 @@ function condense(cm) {
     console.log(JSON.stringify(tern.condense("local"), null, 2));
   });
 }
+*/

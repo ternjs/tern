@@ -21,13 +21,14 @@ function runTests() {
   fs.readdirSync("test/").forEach(function(file) {
     ++files;
     var data = getFile("test/" + file);
-    infer.withContext(new infer.Context(data.env), function() {
+    var cx = new infer.Context(data.env);
+    infer.withContext(cx, function() {
       var info = infer.analyze(data.text, data.file);
       var assertion = /\/\/ (\w+)(?:\((\d+)\))?: (.*)\n/g, m;
 
       while (m = assertion.exec(info.text)) {
         ++tests;
-        var v = info.scope.findVar(m[1]);
+        var v = cx.topScope.findVar(m[1]);
         if (!v) {
           console.log(file + ": variable " + m[1] + " not defined");
           ++failed;
@@ -47,10 +48,11 @@ function runTests() {
 
 function outputInfo(file) {
   var data = getFile(file);
-  infer.withContext(new infer.Context(data.env), function() {
-    var info = infer.analyze(data.text, data.file);
+  var cx = new infer.Context(data.env);
+  infer.withContext(cx, function() {
+    infer.analyze(data.text, data.file);
     for (var i = 3; i < process.argv.length; ++i) {
-      var v = process.argv[i], found = info.scope.findVar(v);
+      var v = process.argv[i], found = cx.topScope.findVar(v);
       console.log(v + ": " + infer.toString(found && found.getType(), 2));
     }
   });
