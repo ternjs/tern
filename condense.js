@@ -214,4 +214,4 @@
 
     return output;
   };
-})(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
+})(typeof exports == "undefined" ? window.tern : exports);

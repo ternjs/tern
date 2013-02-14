@@ -6,6 +6,10 @@ CodeMirror.on(window, "load", function() {
     extraKeys: {"Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); }},
     autofocus: true
   });
+  editor.setValue(load("../node_modules/codemirror/lib/codemirror.js"));
+  editor.setCursor(CodeMirror.Pos(5129));
+  editor.replaceSelection("\n      st", "end");
+
 //  editor.on("cursorActivity", updateArgumentHints);
 });
 
@@ -41,21 +45,48 @@ Tern.addFile("local");
   });
 }*/
 
-function ternHints(cm, c) {
-  var query = {query: {type: "completions",
-                       position: cm.indexFromPos(cm.getCursor()),
-                       file: "local"}};
-  if (!cm.isClean()) {
-    query.files = [{type: "full",
-                    name: "local",
-                    text: cm.getValue()}];
-    cm.markClean();
+function getFragmentAtCursor(cm) {
+  var curLine = cm.getCursor().line, minIndent = null, minLine = null;
+  for (var p = curLine - 1, end = Math.max(0, curLine - 50); p >= end; --p) {
+    var line = cm.getLine(p), fn = line.search(/\bfunction\b/);
+    if (fn < 0) continue;
+    var indent = CodeMirror.countColumn(line, null, cm.getOption("tabSize"));
+    if (minIndent != null && minIndent <= indent) continue;
+    if (cm.getTokenAt({line: p, ch: fn + 1}).type != "keyword") continue;
+    minIndent = indent;
+    minLine = p;
   }
+  if (minLine == null) minLine = end;
+  var start = CodeMirror.Pos(minLine, 0);
+  return {type: "part",
+          name: "local",
+          offset: cm.indexFromPos(start),
+          text: cm.getRange(start, CodeMirror.Pos(curLine))};
+}
+
+function ternHints(cm, c) {
+  var files, position = cm.indexFromPos(cm.getCursor()), file, offset = 0;
+  if (!cm.isClean()) {
+    if (cm.lineCount() > 100) {
+      files = [getFragmentAtCursor(cm)];
+      file = "#0";
+      position -= (offset = files[0].offset);
+    } else {
+      files = [{type: "full",
+                name: "local",
+                text: cm.getValue()}];
+      file = "local";
+      cm.markClean();
+    }
+  }
+  var query = {query: {type: "completions", position: position, file: file},
+               files: files};
+
   Tern.request(query, function(error, data) {
     if (error) throw new Error(error);
-    else c({from: cm.posFromIndex(data.from),
-            to: cm.posFromIndex(data.to),
-            list: data.completions});
+    c({from: cm.posFromIndex(data.from + offset),
+       to: cm.posFromIndex(data.to + offset),
+       list: data.completions});
   });
 }
 

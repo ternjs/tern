@@ -376,6 +376,7 @@
     if (orig || (orig = cx.curOrigin)) this.origin = orig;
   };
 
+  // FIXME this is too easily confused. Use types again (or give up on it entirely?)
   Obj.findByProps = function(props) {
     if (!props.length) return null;
     var types = objsWithProp(props[0].key.name);
@@ -1031,7 +1032,7 @@
   });
 
   exports.findExpression = function(ast, start, end) {
-    var test = function(node) {return typeFinder.hasOwnProperty(node.type);};
+    var test = function(_t, node) {return typeFinder.hasOwnProperty(node.type);};
     return walk.findNodeAt(ast, start, end, test, searchVisitor, cx.topScope);
   };
 

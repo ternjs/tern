@@ -39,6 +39,7 @@
       }
 
       infer.withContext(this.cx, function() {
+// FIXME reinstate this when the code stops crashing all the time
 //        try {
           switch (doc.query.type) {
           case "completions":
@@ -107,19 +108,21 @@
     return str.slice(0, end);
   }
 
+  function endOfLine(text, pos) {
+    return Math.m
+  }
+
   function findFilePosition(line, file, near) {
     var pos = 0, closest = null;
-    for (;;) {
+    if (!/^\s*$/.test(line)) for (;;) {
       var found = file.indexOf(line, pos);
       if (found < 0) break;
       if (closest == null || Math.abs(closest - near) > Math.abs(found - near))
         closest = found;
       pos = found + line.length;
     }
-    if (closest != null) return closest + line.length;
-    var endOfLine = file.indexOf("\n", near);
-    if (endOfLine < 0) return file.length;
-    return endOfLine + 1;
+    if (closest != null) return closest;
+    return Math.max(0, file.lastIndexOf("\n", near));
   }
 
   function resolveFile(tern, localFiles, name) {
