@@ -10,8 +10,8 @@ CodeMirror.on(window, "load", function() {
     autofocus: true
   });
   editor.setValue(load("../node_modules/codemirror/lib/codemirror.js"));
-  editor.setCursor(CodeMirror.Pos(5129));
-  editor.replaceSelection("\n      st", "end");
+  editor.setCursor(CodeMirror.Pos(5218));
+  editor.replaceSelection("\n      str", "end");
 
 //  editor.on("cursorActivity", updateArgumentHints);
 });
@@ -34,22 +34,29 @@ Tern.addEnvironment(JSON.parse(load("../browser.json")));
 Tern.addFile("local");
 
 function getFragmentAround(cm, start, end) {
-  var minIndent = null, minLine = null;
-  for (var p = start.line - 1, min = Math.max(0, start.line - 50); p >= min; --p) {
+  var minIndent = null, minLine = null, endLine, tabSize = cm.getOption("tabSize");
+  for (var p = start.line - 1, min = Math.max(0, p - 50); p >= min; --p) {
     var line = cm.getLine(p), fn = line.search(/\bfunction\b/);
     if (fn < 0) continue;
-    var indent = CodeMirror.countColumn(line, null, cm.getOption("tabSize"));
+    var indent = CodeMirror.countColumn(line, null, tabSize);
     if (minIndent != null && minIndent <= indent) continue;
     if (cm.getTokenAt({line: p, ch: fn + 1}).type != "keyword") continue;
     minIndent = indent;
     minLine = p;
   }
   if (minLine == null) minLine = min;
+  var max = Math.min(cm.lastLine(), p + 20);
+  if (minIndent == null || minIndent == CodeMirror.countColumn(cm.getLine(start.line), null, tabSize))
+    endLine = max;
+  else for (endLine = start.line + 1; endLine < max; ++endLine) {
+    var indent = CodeMirror.countColumn(cm.getLine(endLine), null, tabSize);
+    if (indent <= minIndent) break;
+  }
   var from = CodeMirror.Pos(minLine, 0);
   return {type: "part",
           name: "local",
           offset: cm.indexFromPos(from),
-          text: cm.getRange(from, CodeMirror.Pos(end.line))};
+          text: cm.getRange(from, CodeMirror.Pos(endLine, 0))};
 }
 
 function buildRequest(cm, query, asRange) {

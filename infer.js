@@ -262,6 +262,7 @@
     propagate: function(c) { c.addType(this); },
     hasType: function(other) { return other == this; },
     isEmpty: function() { return false; },
+    typeHint: function() { return this; },
     getFunctionType: function() {},
     getType: function() { return this; },
     addType: function() {},
@@ -1031,9 +1032,9 @@
     }
   });
 
-  exports.findExpression = function(ast, start, end) {
+  exports.findExpression = function(ast, start, end, defaultScope) {
     var test = function(_t, node) {return typeFinder.hasOwnProperty(node.type);};
-    return walk.findNodeAt(ast, start, end, test, searchVisitor, cx.topScope);
+    return walk.findNodeAt(ast, start, end, test, searchVisitor, defaultScope || cx.topScope);
   };
 
   exports.expressionType = function(found) {

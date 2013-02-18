@@ -111,11 +111,7 @@
     return str.slice(0, end);
   }
 
-  function endOfLine(text, pos) {
-    return Math.m
-  }
-
-  function findFilePosition(line, file, near) {
+  function findMatchingPosition(line, file, near) {
     var pos = 0, closest = null;
     if (!/^\s*$/.test(line)) for (;;) {
       var found = file.indexOf(line, pos);
@@ -124,8 +120,7 @@
         closest = found;
       pos = found + line.length;
     }
-    if (closest != null) return closest;
-    return Math.max(0, file.lastIndexOf("\n", near));
+    return closest;
   }
 
   function resolveFile(tern, localFiles, name) {
@@ -140,16 +135,22 @@
       var realFile = findFile(tern.files, file.name);
       if (!realFile) throw new Error("Partial file provided for " + file.name + ", which is not known");
       var line = firstLine(file.text);
-      var pos = findFilePosition(line, realFile.text, file.position);
+      var foundPos = findMatchingPosition(line, realFile.text, file.position);
+      var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", file.position)) : foundPos;
 
-      var scope = infer.scopeAt(realFile.ast, pos);
+      var scope = file.scope = infer.scopeAt(realFile.ast, pos), text = file.text, m;
+      if (foundPos && (m = line.match(/^(.*?)\bfunction\b/))) {
+        var cut = m[1].length, white = "";
+        for (var i = 0; i < cut; ++i) white += " ";
+        text = white + text.slice(cut);
+      }
       file.ast = infer.analyze(file.text, file.name, scope).ast;
 
       // This is a kludge to tie together the function types (if any)
       // outside and inside of the fragment, so that arguments and
       // return values have some information known about them.
       var inner = infer.scopeAt(realFile.ast, pos + line.length);
-      if (inner != scope && inner.fnType) {
+      if (m && inner != scope && inner.fnType) {
         var newInner = infer.scopeAt(file.ast, line.length, scope);
         var fOld = inner.fnType, fNew = newInner.fnType;
         if (fNew && (fNew.name == fOld.name || !fOld.name)) {
@@ -183,9 +184,10 @@
   }
 
   function findTypeAt(file, query) {
-    var expr = infer.findExpression(file.ast, query.start, query.end);
+    var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
     if (!expr) return {typeName: null, message: "No expression at the given position"};
     var type = infer.expressionType(expr);
+    window.tp = type;
     return {typeName: infer.toString(type.getType(), query.depth)};
   }
 
