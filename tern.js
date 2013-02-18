@@ -169,6 +169,7 @@
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
     var word = text.slice(wordStart, wordEnd), completions;
+
     // FIXME deal with whitespace before/after dot
     if (text.charAt(wordStart - 1) == ".") { // Property completion
       var expr = infer.findExpression(file.ast, null, wordStart - 1);
@@ -185,10 +186,25 @@
 
   function findTypeAt(file, query) {
     var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
-    if (!expr) return {typeName: null, message: "No expression at the given position"};
+    if (!expr) return {type: null, name: null, message: "No expression at the given position"};
     var type = infer.expressionType(expr);
     window.tp = type;
-    return {typeName: infer.toString(type.getType(), query.depth)};
+    if (query.preferFunction)
+      type = type.getFunctionType() || type.getType();
+    else
+      type = type.getType();
+
+    if (expr.node.type == "Identifier")
+      var exprName = expr.node.name;
+    else if (expr.node.type == "MemberExpression" && !expr.node.computed)
+      var exprName = expr.node.property.name;
+
+    var name = type && type.name;
+    if (name && typeof name != "string") name = name.name;
+
+    return {type: infer.toString(type, query.depth),
+            name: name || null,
+            exprName: exprName || null};
   }
 
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
