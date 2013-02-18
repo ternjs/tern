@@ -2,22 +2,22 @@
   "!name": "browser",
   "!predef": {
     "/Node/prototype": {},
-    "/Element/prototype": {},
-    "/Text/prototype": {},
-    "/Document/prototype": {},
+    "/Element/prototype": {"!proto": "/Node/prototype"},
+    "/Text/prototype": {"!proto": "/Node/prototype"},
+    "/Document/prototype": {"!proto": "/Node/prototype"},
     "/Attr/prototype": {},
     "/NodeList/prototype": {},
     "/NamedNodeMap/prototype": {},
     "/HTMLCollection/prototype": {},
     "/DOMTokenList/prototype": {},
     "/TreeWalker/prototype": {},
-    "/DocumentFragment/prototype": {},
+    "/DocumentFragment/prototype": {"!proto": "/Node/prototype"},
     "/ClientRect/prototype": {},
     "/Worker/prototype": {},
     "/XPathResult/prototype": {},
     "/FileList/prototype": {},
-    "/File/prototype": {},
     "/Blob/prototype": {},
+    "/File/prototype": {"!proto": "/Blob/prototype"},
     "/Selection/prototype": {},
     "/Range/prototype": {},
     "/Event/prototype": {},
@@ -247,6 +247,7 @@
   "Node": {
     "!type": "fn()",
     "prototype": {
+      "!isDef": "/Node/prototype",
       "parentElement": "Element",
       "textContent": "string",
       "baseURI": "string",
@@ -308,7 +309,6 @@
     "!type": "fn()",
     "prototype": {
       "!isDef": "/Element/prototype",
-      "!proto": "/Node/prototype",
       "getAttribute": "fn(name: string) -> string",
       "setAttribute": "fn(name: string, value: string)",
       "removeAttribute": "fn(name: string)",
@@ -376,7 +376,6 @@
     "!type": "fn()",
     "prototype": {
       "!isDef": "/Text/prototype",
-      "!proto": "/Node/prototype",
       "wholeText": "string",
       "splitText": "fn(offset: number) -> +/Text/prototype"
     }
@@ -386,7 +385,6 @@
     "!type": "fn()",
     "prototype": {
       "!isDef": "/Document/prototype",
-      "!proto": "/Node/prototype",
       "activeElement": "Element",
       "compatMode": "string",
       "designMode": "string",
@@ -520,8 +518,7 @@
   "DocumentFragment": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/DocumentFragment/prototype",
-      "!proto": "/Node/prototype"
+      "!isDef": "/DocumentFragment/prototype"
     }
   },
 
@@ -682,7 +679,6 @@
     "!type": "fn()",
     "prototype": {
       "!isDef": "/File/prototype",
-      "!proto": "/Blob/prototype",
       "fileName": "string",
       "fileSize": "number",
       "lastModifiedDate": "?",
