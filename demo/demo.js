@@ -99,6 +99,8 @@ function buildRequest(cm, how, query) {
       query.file = "local";
       cm.markClean();
     }
+  } else {
+    query.file = "local";
   }
   return {request: {query: query, files: files},
           offset: offset};
