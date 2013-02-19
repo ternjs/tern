@@ -188,7 +188,7 @@
     var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
     if (!expr) return {type: null, name: null, message: "No expression at the given position"};
     var type = infer.expressionType(expr);
-    window.tp = type;
+    window.tp = type; // FIXME debug statement
     if (query.preferFunction)
       type = type.getFunctionType() || type.getType();
     else

@@ -23,7 +23,7 @@
   }
   AVal.prototype = {
     addType: function(type) {
-      if (this.types.indexOf(type) > -1) return;
+      if (type == ANull || this.types.indexOf(type) > -1) return;
       this.types.push(type);
       if (this.forward) for (var i = 0; i < this.forward.length; ++i)
         this.forward[i].addType(type);
@@ -74,7 +74,7 @@
       var props = Object.create(null), foundProp = null;
       for (var i = 0; i < this.forward.length; ++i) {
         var fw = this.forward[i], prop = fw.propHint && fw.propHint();
-        if (prop && prop != "length" && prop != "<i>") {
+        if (prop && prop != "length" && prop != "<i>" && prop != "✖") {
           props[prop] = true;
           foundProp = prop;
         }
@@ -381,12 +381,14 @@
   Obj.findByProps = function(props) {
     if (!props.length) return null;
     var types = objsWithProp(props[0].key.name);
-    if (types) for (var i = 0; i < types.length; ++i) {
+    if (types) outer: for (var i = 0; i < types.length; ++i) {
       var type = types[i], matching = 0;
       for (var p in type.props) {
         var prop = type.props[p];
-        if ((prop.flags & flag_initializer) && props.some(function(x) {return x.key.name == p;}))
+        if (prop.flags & flag_initializer) {
+          if (!props.some(function(x) {return x.key.name == p;})) continue outer;
           ++matching;
+        }
       }
       if (matching == props.length) return type;
     }
@@ -994,7 +996,7 @@
       return prop.isEmpty() && propN != "<i>" ? findByPropertyName(propN) : prop;
     },
     Identifier: function(node, scope) {
-      return scope.getVar(node.name, true);
+      return scope.findVar(node.name) || ANull;
     },
     ThisExpression: function(node, scope) {
       return scope.fnType ? scope.fnType.self : ANull;
@@ -1006,7 +1008,7 @@
 
   function findType(node, scope) {
     var found = typeFinder[node.type](node, scope);
-    if (found.isEmpty()) return found.getType() || found;
+    if (found.isEmpty()) found = found.getType() || found;
     return found;
   }
 
