@@ -12,8 +12,6 @@ CodeMirror.on(window, "load", function() {
     autofocus: true
   });
   editor.setValue(load("../node_modules/codemirror/lib/codemirror.js"));
-  editor.setCursor(Pos(5218));
-  editor.replaceSelection("\n      str", "end");
 
   editor.on("cursorActivity", updateArgumentHints);
 });
