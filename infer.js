@@ -899,16 +899,20 @@
     if (!file) file = "file#" + cx.origins.length;
     addOrigin(cx.curOrigin = file);
 
+    var jsDoc = [], options = {onComment: gatherJSDoc(jsDoc)};
     var ast;
     try {
-        ast = acorn.parse(text);
+      ast = acorn.parse(text, options);
     } catch (e) {
-      if (e instanceof SyntaxError) ast = acorn.parse_dammit(text);
+      jsDoc.length = 0;
+      if (e instanceof SyntaxError) ast = acorn.parse_dammit(text, options);
       else throw e;
     }
     if (!scope) scope = cx.topScope;
     walk.recursive(ast, scope, null, scopeGatherer);
     walk.recursive(ast, scope, null, inferWrapper);
+    for (var i = 0; i < jsDoc.length; ++i)
+      applyJSDocType(jsDoc[i], ast, scope);
     cx.curOrigin = null;
     return {ast: ast, text: text, file: file};
   };
@@ -1022,7 +1026,7 @@
     },
     TryStatement: function(node, st, c) {
       for (var i = 0; i < node.handlers.length; ++i)
-        c(node.handlers[i].param, st, c);
+        c(node.handlers[i].param, st);
       walk.base.TryStatement(node, st, c);
     },
     VariableDeclaration: function(node, st, c) {
@@ -1280,6 +1284,146 @@
     }
 
     cx.curOrigin = null;
+  }
+
+  // JSDOC PARSING
+
+  function gatherJSDoc(out) {
+    return function(block, text, _start, end) {
+      if (!block || !/^\*/.test(text)) return;
+      var decl = /(?:\n|\*)\s*@(type|param|return)\s+(.*)/g, m, found = [];
+      while (m = decl.exec(text))
+        found.push(m[1], m[2]);
+      if (found.length) out.push({decls: found, at: end + 2});
+    };
+  }
+
+  function skipSpace(str, pos) {
+    while (/\s/.test(str.charAt(pos))) ++pos;
+    return pos;
+  }
+
+  function parseJSDocLabelList(scope, str, pos, close) {
+    var labels = [], types = [];
+    for (var first = true; ; first = false) {
+      pos = skipSpace(str, pos);
+      if (first && str.charAt(pos) == close) break;
+      var colon = str.indexOf(":", pos);
+      if (colon < 0) return null;
+      var label = str.slice(pos, colon);
+      if (!/^[\w$]+$/.test(label)) return null;
+      labels.push(label);
+      pos = colon + 1;
+      var type = parseJSDocType(scope, str, pos);
+      if (!type) return null;
+      pos = type.end;
+      types.push(type.type);
+      pos = skipSpace(str, pos);
+      var next = str.charAt(pos);
+      ++pos;
+      if (next == close) break;
+      if (next != ",") return null;
+    }
+    return {labels: labels, types: types, end: pos};
+  }
+
+  function parseJSDocType(scope, str, pos) {
+    pos = skipSpace(str, pos || 0);
+    var type;
+
+    if (str.indexOf("function(", pos) == pos) {
+      var args = parseJSDocLabelList(scope, str, pos + 9, ")"), ret = ANull;
+      if (!args) return null;
+      pos = skipSpace(str, args.end);
+      if (str.charAt(pos) == ":") {
+        ++pos;
+        var retType = parseJSDocType(scope, str, pos + 1);
+        if (!retType) return null;
+        pos = retType.end;
+        ret = retType.type;
+      }
+      type = new Fn(null, ANull, args.labels, args.types, ret);
+    } else if (str.charAt(pos) == "[") {
+      var inner = parseJSDocType(scope, str, pos + 1);
+      if (!inner) return null;
+      pos = skipSpace(str, inner.end);
+      if (str.charAt(pos) != "]") return null;
+      ++pos;
+      type = new Arr(inner.type);
+    } else if (str.charAt(pos) == "{") {
+      var fields = parseJSDocLabelList(scope, str, pos + 1, "}");
+      if (!fields) return null;
+      type = new Obj(true);
+      for (var i = 0; i < fields.types.length; ++i) {
+        var field = type.ensureProp(fields.labels[i]);
+        field.flags |= flag_initializer;
+        fields.types[i].propagate(field);
+      }
+    } else {
+      var start = pos;
+      while (/[\w$]/.test(str.charAt(pos))) ++pos;
+      if (start == pos) return null;
+      var word = str.slice(start, pos);
+      if (/^(number|integer)$/i.test(word)) type = cx.num;
+      else if (/^bool(ean)?$/i.test(word)) type = cx.bool;
+      else if (/^string$/i.test(word)) type = cx.str;
+      else {
+        var found = scope.findVar(word);
+        if (found) found = found.getType();
+        if (!found) {
+          type = ANull;
+        } else if (found instanceof Fn && /^[A-Z]/.test(word)) {
+          var proto = found.getProp("prototype").getType();
+          if (proto instanceof Obj) type = getInstance(proto);
+        } else {
+          type = found;
+        }
+      }
+    }
+    return {type: type, end: pos};
+  }
+
+  function applyJSDocType(annotation, ast, scope) {
+    function isDecl(node) { return /^(Variable|Function)Declaration/.test(node.type); }
+    var found = walk.findNodeAfter(ast, annotation.at, isDecl, searchVisitor, scope);
+    if (!found) return;
+    scope = found.state;
+    var node = found.node;
+
+    var type, args, ret, decls = annotation.decls;
+    for (var i = 0; i < decls.length; i += 2) {
+      var parsed = parseJSDocType(scope, decls[i + 1]);
+      if (!parsed) continue;
+      switch (decls[i]) {
+      case "return": ret = parsed.type; break;
+      case "type": type = parsed.type; break;
+      case "param":
+        var name = decls[i + 1].slice(parsed.end).match(/^\s*([\w$]+)/);
+        if (!name) continue;
+        (args || (args = {}))[name[1]] = parsed.type;
+        break;
+      }
+    }
+
+    var varName, fn;
+    if (node.type == "VariableDeclaration" && node.declarations.length == 1) {
+      var decl = node.declarations[0];
+      varName = decl.id.name;
+      if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.body.scope.fnType;
+    } else {
+      varName = node.id.name;
+      fn = node.body.scope.fnType;
+    }
+
+    if (fn && (args || ret)) {
+      if (args) for (var i = 0; i < fn.argNames.length; ++i) {
+        var name = fn.argNames[i].name, known = args[name];
+        if (known) known.propagate(fn.args[i]);
+      }
+      if (ret) ret.propagate(fn.retval);
+    } else if (type) {
+      type.propagate(scope.findVar(varName));
+    }
   }
 
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
