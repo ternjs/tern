@@ -1,6 +1,6 @@
 {
   "!name": "ecma5",
-  "!predef": {"/Date/prototype": {}},
+  "!predef": {"Date.prototype": {}},
   "Infinity": "number",
   "undefined": "?",
   "NaN": "number",
@@ -123,11 +123,11 @@
   },
   "Date": {
     "!type": "fn(ms: number)",
-    "parse": "fn(source: string) -> +/Date/prototype",
+    "parse": "fn(source: string) -> +Date.prototype",
     "UTC": "fn(year: number, month: number, date: number, hour?: number, min?: number, sec?: number, ms?: number) -> number",
     "now": "fn() -> number",
     "prototype": {
-      "!isDef": "+/Date/prototype",
+      "!isDef": "+Date.prototype",
       "toUTCString": "fn() -> string",
       "toISOString": "fn() -> string",
       "toDateString": "fn() -> string",
@@ -152,7 +152,7 @@
       "getMilliseconds": "fn() -> number",
       "getUTCMilliseconds": "fn() -> number",
       "getTimezoneOffset": "fn() -> number",
-      "setTime": "fn(date: +/Date/prototype) -> number",
+      "setTime": "fn(date: +Date.prototype) -> number",
       "setFullYear": "fn(year: number) -> number",
       "setUTCFullYear": "fn(year: number) -> number",
       "setMonth": "fn(month: number) -> number",

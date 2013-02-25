@@ -7,10 +7,10 @@
   }
 
   function pathLen(path) {
-    var len = 0, pos = 0, slash;
-    while ((slash = path.indexOf("/", pos)) != -1) {
+    var len = 1, pos = 0, dot;
+    while ((dot = path.indexOf(".", pos)) != -1) {
       ++len;
-      pos = slash + 1;
+      pos = dot + 1;
       if (path.charAt(pos) == "!") len += .1;
     }
     return len;
@@ -39,20 +39,21 @@
 
   tern.Arr.prototype.setPath = function(path, state, maxOrigin) {
     this.path = path;
-    setPath(this.getProp("<i>"), path + "/<i>", state, maxOrigin);
+    setPath(this.getProp("<i>"), path + ".<i>", state, maxOrigin);
   };
 
   tern.Fn.prototype.setPath = function(path, state, maxOrigin) {
     tern.Obj.prototype.setPath.call(this, path, state, maxOrigin);
-    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + "/!" + i, state, maxOrigin);
-    setPath(this.retval, path + "/!ret", state, maxOrigin);
+    for (var i = 0; i < this.args.length; ++i) setPath(this.args[i], path + ".!" + i, state, maxOrigin);
+    setPath(this.retval, path + ".!ret", state, maxOrigin);
   };
 
   tern.Obj.prototype.setPath = function(path, state, maxOrigin) {
-    this.path = path || "/";
+    this.path = path || "<top>";
+    var start = path ? path + "." : "";
     for (var prop in this.props)
-      setPath(this.props[prop], path + "/" + prop, state, maxOrigin);
-    if (this.proto) setPath(this.proto, path + "/!proto", state, maxOrigin);
+      setPath(this.props[prop], start + prop, state, maxOrigin);
+    if (this.proto) setPath(this.proto, start + "!proto", state, maxOrigin);
   };
 
   function desc(type, state, flag) {

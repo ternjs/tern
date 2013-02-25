@@ -212,3 +212,12 @@ function showArgumentHints(cache, out, pos) {
   out.appendChild(document.createTextNode(tp.rettype ? ") -> " : ")"));
   if (tp.rettype) out.appendChild(elt("span", tp.rettype, "Tern-type"));
 }
+
+// Debug code used to test the condenser
+function condense(cm) {
+  var cx = new tern.Context(Tern.environment);
+  tern.withContext(cx, function() {
+    var data = tern.analyze(cm.getValue(), "local");
+    console.log(JSON.stringify(tern.condense("local"), null, 2));
+  });
+}

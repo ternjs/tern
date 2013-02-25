@@ -1,29 +1,29 @@
 {
   "!name": "browser",
   "!predef": {
-    "/Node/prototype": {},
-    "/Element/prototype": {"!proto": "/Node/prototype"},
-    "/Text/prototype": {"!proto": "/Node/prototype"},
-    "/Document/prototype": {"!proto": "/Node/prototype"},
-    "/Attr/prototype": {},
-    "/NodeList/prototype": {},
-    "/NamedNodeMap/prototype": {},
-    "/HTMLCollection/prototype": {},
-    "/DOMTokenList/prototype": {},
-    "/TreeWalker/prototype": {},
-    "/DocumentFragment/prototype": {"!proto": "/Node/prototype"},
-    "/ClientRect/prototype": {},
-    "/Worker/prototype": {},
-    "/XPathResult/prototype": {},
-    "/FileList/prototype": {},
-    "/Blob/prototype": {},
-    "/File/prototype": {"!proto": "/Blob/prototype"},
-    "/Selection/prototype": {},
-    "/Range/prototype": {},
-    "/Event/prototype": {},
-    "/location": {},
+    "Node.prototype": {},
+    "Element.prototype": {"!proto": "Node.prototype"},
+    "Text.prototype": {"!proto": "Node.prototype"},
+    "Document.prototype": {"!proto": "Node.prototype"},
+    "Attr.prototype": {},
+    "NodeList.prototype": {},
+    "NamedNodeMap.prototype": {},
+    "HTMLCollection.prototype": {},
+    "DOMTokenList.prototype": {},
+    "TreeWalker.prototype": {},
+    "DocumentFragment.prototype": {"!proto": "Node.prototype"},
+    "ClientRect.prototype": {},
+    "Worker.prototype": {},
+    "XPathResult.prototype": {},
+    "FileList.prototype": {},
+    "Blob.prototype": {},
+    "File.prototype": {"!proto": "Blob.prototype"},
+    "Selection.prototype": {},
+    "Range.prototype": {},
+    "Event.prototype": {},
+    "location": {},
 
-    "/Element/prototype/style": {
+    "Element.prototype.style": {
       "cssText": "string",
       "alignmentBaseline": "string",
       "background": "string",
@@ -218,18 +218,18 @@
   },
 
   "!shorthands": {
-    "Node": "+/Node/prototype",
-    "Element": "+/Element/prototype",
-    "Document": "+/Document/prototype",
-    "Attr": "+/Attr/prototype",
-    "NodeList": "+/NodeList/prototype",
-    "HTMLCollection": "+/HTMLCollection/prototype",
-    "Range": "+/Range/prototype",
-    "Event": "+/Event/prototype"
+    "Node": "+Node.prototype",
+    "Element": "+Element.prototype",
+    "Document": "+Document.prototype",
+    "Attr": "+Attr.prototype",
+    "NodeList": "+NodeList.prototype",
+    "HTMLCollection": "+HTMLCollection.prototype",
+    "Range": "+Range.prototype",
+    "Event": "+Event.prototype"
   },
 
   "location": {
-    "!isDef": "/location",
+    "!isDef": "location",
     "assign": "fn(url: string)",
     "replace": "fn(url: string)",
     "reload": "fn()",
@@ -247,7 +247,7 @@
   "Node": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Node/prototype",
+      "!isDef": "Node.prototype",
       "parentElement": "Element",
       "textContent": "string",
       "baseURI": "string",
@@ -255,7 +255,7 @@
       "prefix": "string",
       "namespaceURI": "string",
       "ownerDocument": "Document",
-      "attributes": "+/NamedNodeMap/prototype",
+      "attributes": "+NamedNodeMap.prototype",
       "nextSibling": "Element",
       "previousSibling": "Element",
       "lastChild": "Element",
@@ -308,7 +308,7 @@
   "Element": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Element/prototype",
+      "!isDef": "Element.prototype",
       "getAttribute": "fn(name: string) -> string",
       "setAttribute": "fn(name: string, value: string)",
       "removeAttribute": "fn(name: string)",
@@ -329,8 +329,8 @@
       "getElementsByClassName": "fn(name: string) -> NodeList",
       "querySelector": "fn(selectors: string) -> Node",
       "querySelectorAll": "fn(selectors: string) -> NodeList",
-      "getClientRects": "fn() -> [+/ClientRect/prototype]",
-      "getBoundingClientRect": "fn() -> +/ClientRect/prototype",
+      "getClientRects": "fn() -> [+ClientRect.prototype]",
+      "getBoundingClientRect": "fn() -> +ClientRect.prototype",
       "setAttributeNode": "fn(attr: Attr) -> Attr",
       "removeAttributeNode": "fn(attr: Attr) -> Attr",
       "setAttributeNodeNS": "fn(attr: Attr) -> Attr",
@@ -338,8 +338,8 @@
       "children": "HTMLCollection",
       "childElementCount": "number",
       "className": "string",
-      "style": "+/Element/prototype/style",
-      "classList": "+/DOMTokenList/prototype",
+      "style": "+Element.prototype.style",
+      "classList": "+DOMTokenList.prototype",
       "contentEditable": "bool",
       "firstElementChild": "Element",
       "lastElementChild": "Element",
@@ -375,16 +375,16 @@
   "Text": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Text/prototype",
+      "!isDef": "Text.prototype",
       "wholeText": "string",
-      "splitText": "fn(offset: number) -> +/Text/prototype"
+      "splitText": "fn(offset: number) -> +Text.prototype"
     }
   },
 
   "Document": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Document/prototype",
+      "!isDef": "Document.prototype",
       "activeElement": "Element",
       "compatMode": "string",
       "designMode": "string",
@@ -395,7 +395,7 @@
       "readyState": "string",
       "defaultCharset": "string",
       "charset": "string",
-      "location": "/location",
+      "location": "location",
       "lastModified": "string",
       "head": "Element",
       "body": "Element",
@@ -427,8 +427,8 @@
       "hasFocus": "fn() -> bool",
       "createElement": "fn(tagName: string) -> Element",
       "createElementNS": "fn(ns: string, tagName: string) -> Element",
-      "createDocumentFragment": "fn() -> +/DocumentFragment/prototype",
-      "createTextNode": "fn(content: string) -> +/Text/prototype",
+      "createDocumentFragment": "fn() -> +DocumentFragment.prototype",
+      "createTextNode": "fn(content: string) -> +Text.prototype",
       "createComment": "fn(content: string) -> Node",
       "createCDATASection": "fn(content: string) -> Node",
       "createProcessingInstruction": "fn(content: string) -> Node",
@@ -440,7 +440,7 @@
       "getElementsByTagNameNS": "fn(ns: string, tagName: string) -> NodeList",
       "createEvent": "fn(type: string) -> Event",
       "createRange": "fn() -> Range",
-      "evaluate": "fn(expr: ?) -> +/XPathResult/prototype",
+      "evaluate": "fn(expr: ?) -> +XPathResult.prototype",
       "execCommand": "fn(cmd: string)",
       "queryCommandEnabled": "fn(cmd: string) -> bool",
       "queryCommandIndeterm": "fn(cmd: string) -> bool",
@@ -449,9 +449,9 @@
       "queryCommandValue": "fn(cmd: string) -> string",
       "getElementsByName": "fn(name: string) -> HTMLCollection",
       "elementFromPoint": "fn(x: number, y: number) -> Element",
-      "getSelection": "fn() -> +/Selection/prototype",
+      "getSelection": "fn() -> +Selection.prototype",
       "adoptNode": "fn(node: Node) -> Element",
-      "createTreeWalker": "fn(root: Node, mask: number) -> +/TreeWalker/prototype",
+      "createTreeWalker": "fn(root: Node, mask: number) -> +TreeWalker.prototype",
       "createExpression": "fn(text: string) -> ?",
       "createNSResolver": "fn(node: Node)",
       "scripts": "HTMLCollection",
@@ -472,7 +472,7 @@
   "Attr": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Attr/prototype",
+      "!isDef": "Attr.prototype",
       "isId": "bool",
       "name": "string",
       "value": "string"
@@ -482,7 +482,7 @@
   "NodeList": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/NodeList/prototype",
+      "!isDef": "NodeList.prototype",
       "length": "number",
       "item": "fn(i: number) -> Element",
       "<i>": "Element"
@@ -491,7 +491,7 @@
   "HTMLCollection": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/HTMLCollection/prototype",
+      "!isDef": "HTMLCollection.prototype",
       "length": "number",
       "item": "fn(i: number) -> Element",
       "namedItem": "fn(name: string) -> Element",
@@ -502,7 +502,7 @@
   "NamedNodeMap": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/NamedNodeMap/prototype",
+      "!isDef": "NamedNodeMap.prototype",
       "length": "number",
       "getNamedItem": "fn(name: string) -> Node",
       "setNamedItem": "fn(node: Node) -> Node",
@@ -518,14 +518,14 @@
   "DocumentFragment": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/DocumentFragment/prototype"
+      "!isDef": "DocumentFragment.prototype"
     }
   },
 
   "DOMTokenList": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/DOMTokenList/prototype",
+      "!isDef": "DOMTokenList.prototype",
       "length": "number",
       "item": "fn(i: number) -> string",
       "contains": "fn(token: string) -> bool",
@@ -539,7 +539,7 @@
   "XPathResult": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/XPathResult/prototype",
+      "!isDef": "XPathResult.prototype",
       "boolValue": "bool",
       "invalidIteratorState": "bool",
       "numberValue": "number",
@@ -566,7 +566,7 @@
   "ClientRect": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/ClientRect/prototype",
+      "!isDef": "ClientRect.prototype",
       "top": "number", "left": "number", "bottom": "number", "right": "number"
     }
   },
@@ -574,7 +574,7 @@
   "Event": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Event/prototype",
+      "!isDef": "Event.prototype",
       "stopPropagation": "fn()",
       "preventDefault": "fn()",
       "initEvent": "fn(type: string, bubbles: bool, cancelable: bool)",
@@ -608,7 +608,7 @@
       "dataTransfer": {
         "dropEffect": "string",
         "effectAllowed": "string",
-        "files": "+/FileList/prototype",
+        "files": "+FileList.prototype",
         "types": "[string]",
         "addElement": "fn(element: Element)",
         "clearData": "fn()",
@@ -618,14 +618,14 @@
       }
     }
   },
-  "TouchEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "WheelEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "MouseEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "KeyboardEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "HashChangeEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "ErrorEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "CustomEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
-  "BeforeLoadEvent": {"!type": "fn()", "prototype": "/Event/prototype"},
+  "TouchEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "WheelEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "MouseEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "KeyboardEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "HashChangeEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "ErrorEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "CustomEvent": {"!type": "fn()", "prototype": "Event.prototype"},
+  "BeforeLoadEvent": {"!type": "fn()", "prototype": "Event.prototype"},
   
   "WebSocket": {
     "!type": "fn(url: string)",
@@ -645,7 +645,7 @@
   "Worker": {
     "!type": "fn(scriptURL: string)",
     "prototype": {
-      "!isDef": "/Worker/prototype",
+      "!isDef": "Worker.prototype",
       "postMessage": "fn(message: ?)",
       "terminate": "fn()",
       "onmessage": "?", "onerror": "?"
@@ -654,7 +654,7 @@
 
   "SharedWorker": {
     "!type": "fn(scriptURL: string)",
-    "prototype": "/Worker/prototype"
+    "prototype": "Worker.prototype"
   },
 
   "localStorage": {
@@ -669,16 +669,16 @@
   "FileList": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/FileList/prototype",
+      "!isDef": "FileList.prototype",
       "length": "number",
-      "item": "fn(i: number) -> +/File/prototype",
-      "<i>": "+/File/prototype"
+      "item": "fn(i: number) -> +File.prototype",
+      "<i>": "+File.prototype"
     }
   },
   "File": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/File/prototype",
+      "!isDef": "File.prototype",
       "fileName": "string",
       "fileSize": "number",
       "lastModifiedDate": "?",
@@ -688,20 +688,20 @@
   "Blob": {
     "!type": "fn(parts: [?], properties?: ?)",
     "prototype": {
-      "!isDef": "/Blob/prototype",
+      "!isDef": "Blob.prototype",
       "size": "number",
       "type": "string",
-      "slice": "fn(start: number, end?: number, type?: string) -> +/Blob/prototype"
+      "slice": "fn(start: number, end?: number, type?: string) -> +Blob.prototype"
     }
   },
   "FileReader": {
     "!type": "fn()",
     "prototype": {
       "abort": "fn()",
-      "readAsArrayBuffer": "fn(blob: +/Blob/prototype)",
-      "readAsBinaryString": "fn(blob: +/Blob/prototype)",
-      "readAsDataURL": "fn(blob: +/Blob/prototype)",
-      "readAsText": "fn(blob: +/Blob/prototype, encoding?: string)",
+      "readAsArrayBuffer": "fn(blob: +Blob.prototype)",
+      "readAsBinaryString": "fn(blob: +Blob.prototype)",
+      "readAsDataURL": "fn(blob: +Blob.prototype)",
+      "readAsText": "fn(blob: +Blob.prototype, encoding?: string)",
       "EMPTY": "number", "LOADING": "number", "DONE": "number",
       "error": "?",
       "readyState": "number",
@@ -714,7 +714,7 @@
   "Range": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Range/prototype",
+      "!isDef": "Range.prototype",
       "collapsed": "bool",
       "commonAncestorContainer": "Element",
       "endContainer": "Element",
@@ -730,9 +730,9 @@
       "selectNode": "fn(node: Element)",
       "selectNodeContents": "fn(node: Element)",
       "collapse": "fn(toStart: bool)",
-      "cloneContents": "fn() -> +/DocumentFragment/prototype",
+      "cloneContents": "fn() -> +DocumentFragment.prototype",
       "deleteContents": "fn()",
-      "extractContents": "fn() -> +/DocumentFragment/prototype",
+      "extractContents": "fn() -> +DocumentFragment.prototype",
       "insertNode": "fn(node: Element)",
       "surroundContents": "fn(node: Element)",
       "compareBoundaryPoints": "fn(how: number, other: Range) -> number",
@@ -772,7 +772,7 @@
   "Selection": {
     "!type": "fn()",
     "prototype": {
-      "!isDef": "/Selection/prototype",
+      "!isDef": "Selection.prototype",
       "anchorNode": "Element",
       "anchorOffset": "number",
       "focusNode": "Element",
@@ -801,11 +801,11 @@
     "warn": "fn(text: string)"
   },
 
-  "top": "/",
-  "parent": "/",
-  "window": "/",
-  "opener": "/",
-  "self": "/",
+  "top": "<top>",
+  "parent": "<top>",
+  "window": "<top>",
+  "opener": "<top>",
+  "self": "<top>",
   
   "devicePixelRatio": "number",
 
@@ -889,7 +889,7 @@
   "onbeforeunload": "?",
   "onabort": "?",
 
-  "getSelection": "fn() -> +/Selection/prototype",
+  "getSelection": "fn() -> +Selection.prototype",
 
   "alert": "fn(message: string)",
   "confirm": "fn(message: string) -> bool",
@@ -911,5 +911,5 @@
   "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
   "dispatchEvent": "fn(event: Event) -> bool",
 
-  "getComputedStyle": "fn(node: Element, pseudo?: string) -> +/Element/prototype/style"
+  "getComputedStyle": "fn(node: Element, pseudo?: string) -> +Element.prototype.style"
 }

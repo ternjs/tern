@@ -24,6 +24,7 @@
   AVal.prototype = {
     addType: function(type) {
       if (this.types.indexOf(type) > -1) return;
+
       this.types.push(type);
       if (this.forward) for (var i = 0; i < this.forward.length; ++i)
         this.forward[i].addType(type);
@@ -1131,22 +1132,22 @@
         var arr = new Arr(this.parseType());
         if (this.eat("]")) return arr;
       } else if (this.eat("+")) {
-        var val = parsePath(this.word(/[<>\w$\/!]/));
-        if (val instanceof Obj) return getInstance(val);
-        else return val;
-      } else if (this.eat("/")) {
-        return parsePath("/" + this.word(/[<>\w$\/!]/));
+        var base = this.parseType();
+        if (base instanceof Obj) return getInstance(base);
+        else return base;
       } else if (this.eat("?")) {
         return ANull;
       } else {
-        var word = this.word(/[\w\.$]/);
+        var word = this.word(/[\w\.$\!<>]/);
         switch (word) {
         case "number": return cx.num;
         case "string": return cx.str;
         case "bool": return cx.bool;
+        case "<top>": return cx.topScope;
         }
         if (word in cx.shorthands) return cx.shorthands[word];
         if (word in cx.protos) return getInstance(cx.protos[word]);
+        return parsePath(word);
       }
       this.error();
     },
@@ -1213,11 +1214,10 @@
     var predef = cx.predefs[path];
     if (predef) return predef;
 
-    var parts = path.split("/");
+    var parts = path.split(".");
     var cur = cx.topScope;
-    for (var i = 1; i < parts.length && cur != ANull; ++i) {
+    for (var i = 0; i < parts.length && cur != ANull; ++i) {
       var part = parts[i];
-      if (!part) continue;
       if (part.charAt(0) == "!") {
         if (part == "!proto") {
           cur = (cur instanceof Obj && cur.proto) || ANull;
@@ -1260,7 +1260,7 @@
   }
 
   function pathToName(path) {
-    var parts = path.split("/");
+    var parts = path.split(".");
     var name = parts[parts.length - 1];
     if (!name || name.charAt(0) == "!") return null;
     var prev = parts[parts.length - 2];
@@ -1284,10 +1284,10 @@
 
     var added = data["!added"];
     if (added) for (var path in added) {
-      var lastSlash = path.lastIndexOf("/");
-      if (lastSlash < 1) continue;
-      var obj = parsePath(path.slice(0, lastSlash));
-      interpret(added[path]).propagate(obj.getProp(path.slice(lastSlash + 1)));
+      var lastDot = path.lastIndexOf(".");
+      if (lastDot < 1) continue;
+      var obj = parsePath(path.slice(0, lastDot));
+      interpret(added[path]).propagate(obj.getProp(path.slice(lastDot + 1)));
     }
 
     cx.curOrigin = null;
