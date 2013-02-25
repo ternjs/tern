@@ -23,7 +23,7 @@
   }
   AVal.prototype = {
     addType: function(type) {
-      if (type == ANull || this.types.indexOf(type) > -1) return;
+      if (this.types.indexOf(type) > -1) return;
       this.types.push(type);
       if (this.forward) for (var i = 0; i < this.forward.length; ++i)
         this.forward[i].addType(type);
@@ -87,8 +87,12 @@
         search: for (var i = 0; i < objs.length; ++i) {
           var obj = objs[i];
           for (var prop in props) {
-            var match = obj.props[prop];
-            if (!match || !(match.flags & flag_definite)) continue search;
+            var found = false;
+            for (var o = obj; o; o = o.proto) {
+              var match = o.props[prop];
+              if (match && (match.flags & flag_definite)) { found = true; break; }
+            }
+            if (!found) continue search;
           }
           matches.push(obj);
         }
@@ -193,14 +197,13 @@
   IsCallee.prototype = {
     addType: function(fn) {
       if (!(fn instanceof Fn)) return;
-      if (fn.computeRet) {
+      for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
+        this.args[i].propagate(fn.args[i]);
+      this.self.propagate(fn.self);
+      if (fn.computeRet)
         fn.computeRet(this.self, this.args).propagate(this.retval);
-      } else {
-        for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
-          this.args[i].propagate(fn.args[i]);
-        this.self.propagate(fn.self);
+      else
         fn.retval.propagate(this.retval);
-      }
     },
     typeHint: function() {
       var names = [];
@@ -532,10 +535,14 @@
 
   function maybeTagAsTypeManipulator(node, scope) {
     if (scope.typeManipScore && scope.typeManipScore / (node.end - node.start) > .01) {
-      var computeRet = scope.fnType.computeRet = function(self, args) {
+      var fn = scope.fnType;
+      // Disconnect the arg avals, so that we can add info to them without side effects
+      for (var i = 0; i < fn.args.length; ++i) fn.args[i] = new AVal;
+      fn.self = new AVal;
+      var computeRet = fn.computeRet = function(self, args) {
         // Prevent recursion
         this.computeRet = null;
-        var scopeCopy = new Scope(scope.prev), fn = scope.fnType;
+        var scopeCopy = new Scope(scope.prev);
         for (var v in scope.props) {
           var local = scopeCopy.ensureProp(v);
           for (var i = 0; i < fn.argNames.length; ++i) if (fn.argNames[i].name == v && i < args.length)
