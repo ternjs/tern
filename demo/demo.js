@@ -153,7 +153,7 @@ function parseFnType(text) {
   }
 
   // Parse arguments
-  for (;;) {
+  if (text.charAt(pos) != ")") for (;;) {
     var name = text.slice(pos).match(/^([\w?$]+): /);
     if (name) {
       pos += name[0].length;
