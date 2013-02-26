@@ -1349,9 +1349,13 @@
   function gatherJSDoc(out) {
     return function(block, text, _start, end) {
       if (!block || !/^\*/.test(text)) return;
-      var decl = /(?:\n|\*)\s*@(type|param|return)\s+(.*)/g, m, found = [];
-      while (m = decl.exec(text))
-        found.push(m[1], m[2]);
+      var decl = /(?:\n|\*)\s*@(type|param|arg(?:ument)?|returns?)\s+(.*)/g, m, found = [];
+      while (m = decl.exec(text)) {
+        var type = m[1];
+        if (/^arg/.test(type)) type = "param";
+        if (type == "return") type = "returns";
+        found.push(type, m[2]);
+      }
       if (found.length) out.push({decls: found, at: end + 2});
     };
   }
@@ -1386,7 +1390,7 @@
   }
 
   function parseJSDocType(scope, str, pos) {
-    pos = skipSpace(str, pos || 0);
+    pos = skipSpace(str, pos);
     var type;
 
     if (str.indexOf("function(", pos) == pos) {
@@ -1417,6 +1421,7 @@
         field.flags |= flag_initializer;
         fields.types[i].propagate(field);
       }
+      pos = fields.end;
     } else {
       var start = pos;
       while (/[\w$]/.test(str.charAt(pos))) ++pos;
@@ -1441,6 +1446,15 @@
     return {type: type, end: pos};
   }
 
+  function parseJSDocTypeOuter(scope, str, pos) {
+    pos = skipSpace(str, pos || 0);
+    if (str.charAt(pos) != "{") return null;
+    var result = parseJSDocType(scope, str, pos + 1);
+    if (!result || str.charAt(result.end) != "}") return null;
+    ++result.end;
+    return result;
+  }
+
   function applyJSDocType(annotation, ast, scope) {
     function isDecl(node) { return /^(Variable|Function)Declaration/.test(node.type); }
     var found = walk.findNodeAfter(ast, annotation.at, isDecl, searchVisitor, scope);
@@ -1450,10 +1464,10 @@
 
     var type, args, ret, decls = annotation.decls;
     for (var i = 0; i < decls.length; i += 2) {
-      var parsed = parseJSDocType(scope, decls[i + 1]);
+      var parsed = parseJSDocTypeOuter(scope, decls[i + 1]);
       if (!parsed) continue;
       switch (decls[i]) {
-      case "return": ret = parsed.type; break;
+      case "returns": ret = parsed.type; break;
       case "type": type = parsed.type; break;
       case "param":
         var name = decls[i + 1].slice(parsed.end).match(/^\s*([\w$]+)/);
