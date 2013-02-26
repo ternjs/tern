@@ -362,6 +362,10 @@
     }
   };
   Obj.prototype.gatherProperties = function(prefix, out) {
+    // 'hasOwnProperty' and such are usually just noise, leave them
+    // out when no prefix is provided.
+    if (this == cx.protos.Object && !prefix) return;
+
     for (var prop in this.props) {
       if (prefix && prop.indexOf(prefix) != 0 || prop == "<i>") continue;
       var val = this.props[prop];
