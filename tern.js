@@ -172,7 +172,7 @@
 
     // FIXME deal with whitespace before/after dot
     if (text.charAt(wordStart - 1) == ".") { // Property completion
-      var expr = infer.findExpression(file.ast, null, wordStart - 1);
+      var expr = infer.findExpression(file.ast, null, wordStart - 1, file.scope);
       var tp = expr && infer.expressionType(expr);
       if (tp)
         completions = infer.propertiesOf(tp, word);
@@ -208,18 +208,3 @@
   }
 
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
-
-/*
-{
-  query: {type: "completions",
-          position: 100,
-          file: "foobar.js" | "#0"},
-  files: [{type: "full",
-           name: "foobar.js",
-           text: "....."},
-          {type: "part",
-           name: "baz.js",
-           text: "function foo(x) {....",
-           offset: 88}]
-}
-*/

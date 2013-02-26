@@ -1159,7 +1159,7 @@
       }
       this.error();
     },
-    parseRetTypeInner: function() {
+    parseBaseRetType: function() {
       if (this.eat("[")) {
         var inner = this.parseRetType();
         this.eat("]") || this.error();
@@ -1198,19 +1198,21 @@
       var t = this.parseType();
       return function(){return t;};
     },
+    extendRetType: function(base) {
+      var propName = this.word(/[\w<>$]/) || this.error();
+      if (propName == "$ret") return function(self, args) {
+        var lhs = base(self, args);
+        if (lhs.retval) return lhs.retval;
+        var rv = new AVal;
+        lhs.propagate(new IsCallee(ANull, [], rv));
+        return rv;
+      };
+      return function(self, args) {return base(self, args).getProp(propName);};
+    },
     parseRetType: function() {
-      var inner = this.parseRetTypeInner();
-      if (this.eat(".")) {
-        var propName = this.word(/[\w<>$]/) || this.error();
-        if (propName == "$ret") return function(self, args) {
-          var lhs = inner(self, args);
-          if (lhs.retval) return lhs.retval;
-          var rv = new AVal;
-          lhs.propagate(new IsCallee(ANull, [], rv));
-          return rv;
-        };
-        return function(self, args) {return inner(self, args).getProp(propName);};
-      } else return inner;
+      var tp = this.parseBaseRetType();
+      while (this.eat(".")) tp = this.extendRetType(tp);
+      return tp;
     }
   }
 
