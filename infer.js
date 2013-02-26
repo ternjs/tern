@@ -1067,10 +1067,9 @@
   };
 
   function compareProps(a, b) {
-    a = a.toLowerCase();
-    b = b.toLowerCase();
-    if (a < b) return -1;
-    return a == b ? 0 : 1;
+    var aUp = /^[A-Z]/.test(a), bUp = /^[A-Z]/.test(b);
+    if (aUp == bUp) return a < b ? -1 : a == b ? 0 : 1;
+    else return aUp ? 1 : -1;
   }
 
   exports.propertiesOf = function(type, prefix) {
