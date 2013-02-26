@@ -277,7 +277,10 @@
       "lookupPrefix": "fn(uri: string) -> string",
       "isDefaultNamespace": "fn(uri: string) -> bool",
       "lookupNamespaceURI": "fn(uri: string) -> string",
-      "addEventListener": "fn(type: string, listener: fn(e: Event), capture: bool)",
+      "addEventListener": {
+        "!type": "fn(type: string, listener: fn(e: Event), capture: bool)",
+        "!effects": ["call $1 Event"]
+      },
       "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
       "isSameNode": "fn(other: Node) -> bool",
       "isEqualNode": "fn(other: Node) -> bool",
@@ -907,7 +910,10 @@
   "atob": "fn(encoded: string) -> string",
   "btoa": "fn(data: string) -> string",
 
-  "addEventListener": "fn(type: string, listener: fn(e: Event), capture: bool)",
+  "addEventListener": {
+    "!type": "fn(type: string, listener: fn(e: Event), capture: bool)",
+    "!effects": ["call $1 Event"]
+  },
   "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
   "dispatchEvent": "fn(event: Event) -> bool",
 

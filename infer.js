@@ -111,16 +111,20 @@
   };
 
   function canonicalType(types) {
-    var arrays = 0, fns = 0, objs = 0, prims = 0;
+    var arrays = 0, fns = 0, objs = 0, prim = null;
     for (var i = 0; i < types.length; ++i) {
       var tp = types[i];
       if (tp instanceof Arr) ++arrays;
       else if (tp instanceof Fn) ++fns;
       else if (tp instanceof Obj) ++objs;
-      else if (tp instanceof Prim) ++prims;
+      else if (tp instanceof Prim) {
+        if (prim && tp.name != prim.name) return null;
+        prim = tp;
+      }
     }
-    var kinds = (arrays && 1) + (fns && 1) + (objs && 1) + (prims && 1);
+    var kinds = (arrays && 1) + (fns && 1) + (objs && 1) + (prim && 1);
     if (kinds > 1) return null;
+    if (prim) return prim;
 
     var maxScore = 0, maxTp = null;
     for (var i = 0; i < types.length; ++i) {
@@ -561,22 +565,25 @@
   }
 
   function maybeTagAsGeneric(node, fn) {
-    if (!fn.retval.isEmpty()) return;
+    var target = fn.retval, targetInner, asArray;
+    if (!target.isEmpty() && (targetInner = target.getType()) instanceof Arr)
+      target = asArray = targetInner.getProp("<i>");
+    if (!target.isEmpty()) return;
 
     function explore(aval, path, depth) {
       if (depth > 6 || !aval.forward) return;
       for (var i = 0; i < aval.forward.length; ++i) {
         var fw = aval.forward[i], prop = fw.propagatesTo && fw.propagatesTo();
         if (!prop) continue;
-        var newPath = path, target;
+        var newPath = path, dest;
         if (prop instanceof AVal) {
-          target = prop;
+          dest = prop;
         } else if (prop.target instanceof AVal) {
           newPath += prop.pathExt;
-          target = prop.target;
+          dest = prop.target;
         } else continue;
-        if (target == fn.retval) throw {foundPath: newPath};
-        explore(target, newPath, depth + 1);
+        if (dest == target) throw {foundPath: newPath};
+        explore(dest, newPath, depth + 1);
       }
     }
 
@@ -590,6 +597,7 @@
     }
 
     if (foundPath) {
+      if (asArray) foundPath = "[" + foundPath + "]";
       var p = new TypeParser(foundPath);
       fn.computeRet = p.parseRetType();
       fn.computeRetSource = foundPath;
@@ -1082,8 +1090,8 @@
 
   // CONTEXT POPULATING
 
-  function TypeParser(spec) {
-    this.pos = 0; this.spec = spec;
+  function TypeParser(spec, start) {
+    this.pos = start || 0; this.spec = spec;
   }
   TypeParser.prototype = {
     eat: function(str) {
@@ -1098,7 +1106,7 @@
       return word;
     },
     error: function() {
-      throw new Error("Unrecognized type spec: " + this.spec + " " + this.pos);
+      throw new Error("Unrecognized type spec: " + this.spec + " (at " + this.pos + ")");
     },
     parseFnType: function(name, top) {
       for (var args = [], names = [], i = 0; !this.eat(")"); ++i) {
@@ -1210,6 +1218,34 @@
     return new TypeParser(spec).parseType(name, true);
   }
 
+  function parseEffect(effect, fn) {
+    var oldCmp = fn.computeRet, rv = fn.retval;
+    if (effect.indexOf("propagate ") == 0) {
+      var p = new TypeParser(effect, 10);
+      var getOrigin = p.parseRetType();
+      if (!p.eat(" ")) p.error();
+      var getTarget = p.parseRetType();
+      fn.computeRet = function(self, args) {
+        getOrigin(self, args).propagate(getTarget(self, args));
+        return oldCmp ? oldCmp(self, args) : rv;
+      };
+    } else if (effect.indexOf("call ") == 0) {
+      var p = new TypeParser(effect, 5);
+      var getCallee = p.parseRetType(), getSelf = null, getArgs = [];
+      if (p.eat(" this=")) getSelf = p.parseRetType();
+      while (p.eat(" ")) getArgs.push(p.parseRetType());
+      fn.computeRet = function(self, args) {
+        var callee = getCallee(self, args);
+        var slf = getSelf ? getSelf(self, args) : ANull, as = [];
+        for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
+        callee.propagate(new IsCallee(slf, as, ANull));
+        return oldCmp ? oldCmp(self, args) : rv;
+      };
+    } else {
+      throw new Error("Unknown effect type: " + effect);
+    }
+  }
+
   function parsePath(path) {
     var predef = cx.predefs[path];
     if (predef) return predef;
@@ -1256,6 +1292,11 @@
     else if (spec["!stdProto"]) obj = cx.protos[spec["!stdProto"]];
     else if (spec["!isDef"]) obj = interpret(spec["!isDef"]);
     else obj = new Obj(spec["!proto"] ? interpret(spec["!proto"]) : true, name);
+
+    var effects = spec["!effects"];
+    if (effects && obj instanceof Fn) for (var i = 0; i < effects.length; ++i)
+      parseEffect(effects[i], obj);
+
     return populate(obj, spec, name);
   }
 

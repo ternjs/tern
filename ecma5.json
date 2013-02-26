@@ -31,7 +31,10 @@
     "prototype": {
       "!stdProto": "Function",
       "apply": "fn(this: ?, args: [?]) -> $this.$ret",
-      "call": "fn(this: ?, args?: ?) -> $this.$ret",
+      "call": {
+        "!type": "fn(this: ?, args?: ?) -> $this.$ret",
+        "!effects": ["call $this this=$0 $1 $2 $3 $4"]
+      },
       "bind": "fn(this: ?) -> fn()"
     }
   },
@@ -45,21 +48,51 @@
       "join": "fn(separator?: string) -> string",
       "splice": "fn(pos: number, amount: number)",
       "pop": "fn() -> $this.<i>",
-      "push": "fn(newelt: ?) -> number",
+      "push": {
+        "!type": "fn(newelt: ?) -> number",
+        "!effects": ["propagate $0 $this.<i>"]
+      },
       "shift": "fn() -> $this.<i>",
-      "unshift": "fn(newelt: ?) -> number",
+      "unshift": {
+        "!type": "fn(newelt: ?) -> number",
+        "!effects": ["propagate $0 $this.<i>"]
+      },
       "slice": "fn(from: number, to?: number) -> $this",
       "reverse": "fn()",
-      "sort": "fn(compare?: fn(a: ?, b: ?) -> number)",
+      "sort": {
+        "!type": "fn(compare?: fn(a: ?, b: ?) -> number)",
+        "!effects": ["call $0 $this.<i> $this.<i>"]
+      },
       "indexOf": "fn(elt: ?, from?: number) -> number",
       "lastIndexOf": "fn(elt: ?, from?: number) -> number",
-      "every": "fn(test: fn(elt: ?, i: number) -> bool) -> bool",
-      "some": "fn(test: fn(elt: ?, i: number) -> bool) -> bool",
-      "filter": "fn(test: fn(elt: ?, i: number) -> bool) -> $this",
-      "forEach": "fn(f: fn(elt: ?, i: number))",
-      "map": "fn(f: fn(elt: ?, i: number) -> ?) -> [$0.$ret]",
-      "reduce": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> $0.$ret",
-      "reduceRight": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> $0.$ret"
+      "every": {
+        "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> bool",
+        "!effects": ["call $0 this=$1 $this.<i> number"]
+      },
+      "some": {
+        "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> bool",
+        "!effects": ["call $0 this=$1 $this.<i> number"]
+      },
+      "filter": {
+        "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> $this",
+        "!effects": ["call $0 this=$1 $this.<i> number"]
+      },
+      "forEach": {
+        "!type": "fn(f: fn(elt: ?, i: number), context?: ?)",
+        "!effects": ["call $0 this=$1 $this.<i> number"]
+      },
+      "map": {
+        "!type": "fn(f: fn(elt: ?, i: number) -> ?, context?: ?) -> [$0.$ret]",
+        "!effects": ["call $0 this=$1 $this.<i> number"]
+      },
+      "reduce": {
+        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> $0.$ret",
+        "!effects": ["call $0 $1 $this.<i> number"]
+      },
+      "reduceRight": {
+        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> $0.$ret",
+        "!effects": ["call $0 $1 $this.<i> number"]
+      }
     }
   },
   "String": {
