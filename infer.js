@@ -104,9 +104,9 @@
     typeHint: function() { return this.types.length ? this.getType() : null; },
     propagatesTo: function() { return this; },
 
-    gatherProperties: function(prefix, direct, proto) {
+    gatherProperties: function(prefix, out) {
       for (var i = 0; i < this.types.length; ++i)
-        this.types[i].gatherProperties(prefix, direct, proto);
+        this.types[i].gatherProperties(prefix, out);
     }
   };
 
@@ -282,8 +282,8 @@
   Prim.prototype = Object.create(Type.prototype);
   Prim.prototype.toString = function() { return this.name; };
   Prim.prototype.getProp = function(prop) {return this.proto.props[prop] || ANull;};
-  Prim.prototype.gatherProperties = function(prefix, direct, proto) {
-    if (this.proto) this.proto.gatherProperties(prefix, direct, proto);
+  Prim.prototype.gatherProperties = function(prefix, out) {
+    if (this.proto) this.proto.gatherProperties(prefix, out);
   };
 
   function hop(obj, prop) {
@@ -361,15 +361,14 @@
       this.broadcastProp(prop, val, false);
     }
   };
-  Obj.prototype.gatherProperties = function(prefix, direct, proto) {
+  Obj.prototype.gatherProperties = function(prefix, out) {
     for (var prop in this.props) {
       if (prefix && prop.indexOf(prefix) != 0 || prop == "<i>") continue;
       var val = this.props[prop];
-      if (!(val.flags & flag_definite)) continue;
-      if (direct.indexOf(prop) > -1 || proto.indexOf(prop) > -1) continue;
-      direct.push(prop);
+      if (!(val.flags & flag_definite) || out.indexOf(prop) > -1) continue;
+      out.push(prop);
     }
-    if (this.proto) this.proto.gatherProperties(prefix, proto, proto);
+    if (this.proto) this.proto.gatherProperties(prefix, out);
   };
   Obj.prototype.forAllProps = function(c) {
     (this.onNewProp || (this.onNewProp = [])).push(c);
@@ -1063,14 +1062,20 @@
     return findType(found.node, found.state);
   };
 
+  function compareProps(a, b) {
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+    if (a < b) return -1;
+    return a == b ? 0 : 1;
+  }
+
   exports.propertiesOf = function(type, prefix) {
-    var direct = [], proto = [];
-    type.gatherProperties(prefix, direct, proto);
-    direct.sort();
-    proto.sort();
-    if (direct.length || proto.length || prefix.length < 2) return direct.concat(proto);
-    for (var prop in cx.props) if (prop.indexOf(prefix) == 0) direct.push(prop);
-    return direct;
+    var props = [];
+    type.gatherProperties(prefix, props);
+    if (!props.length && prefix.length >= 2)
+      for (var prop in cx.props) if (prop.indexOf(prefix) == 0) props.push(prop);
+    props.sort(compareProps);
+    return props;
   };
 
   // LOCAL-VARIABLE QUERIES
@@ -1083,8 +1088,8 @@
 
   exports.localsAt = function(ast, pos, prefix) {
     var scope = scopeAt(ast, pos), locals = [];
-    scope.gatherProperties(prefix, locals, locals);
-    locals.sort();
+    scope.gatherProperties(prefix, locals);
+    locals.sort(compareProps);
     return locals;
   };
 
