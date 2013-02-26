@@ -100,8 +100,16 @@ of type inference along with a lot of heuristics and dirty tricks to
 approximate the types of the variables and expressions in the
 program.</p>
 
-<p>It can then use these types to provide completions and context
-information that is more precise than what is usually possible.</p>
+<p>The type inference algorithm is roughly based on
+the <a href="http://rfrn.org/~shu/drafts/ti.pdf">algorithm</a> used in
+Mozilla's SpiderMonkey engine. It deviates from their approach in
+several ways, because, on the one hand, it does not have access to
+run-time information, and, on the other hand, it does not have to be
+entirely precise, and can use approximations in some cases.</p>
+
+<p>Once you know the type of a thing, it is easy to provide a
+meaningful list of property completions, or display a function type as
+a set of parameter hints.</p>
 
 <p>Tern can be run in two ways — as a JavaScript library, for
 integration in JavaScript-based systems like the demo above, or as an
@@ -109,6 +117,46 @@ HTTP server, for use with desktop editor plug-ins.</p>
 
 <h2>Is this new?</h2>
 
+<p>I am under the impression that the approach I'm taking here has
+never before been applied to JavaScript editing assistance.</p>
 
+<p>Microsoft's Visual Studio's JavaScript Intellisense comes the
+closest, in terms of power. It uses a completely different approach
+(actually running the code, instead of doing type inference), and has
+some different strengths and weaknesses.</p>
+
+<p>But that is a proprietary system tied to a single IDE. If the
+crowd-funding succeeds, Tern will be an open system that can (and
+will) be plugged into a variety of editors and IDEs.</p>
+
+<h2>But does it scale?</h2>
+
+<p>So is this a clever toy that works in a little text input like the
+one above, or something that can be applied when working on real, big,
+multi-file, multi-dependency projects?</p>
+
+<p>I've tried to keep big codebases in mind as I built this. These are
+the strategies Tern uses to stay responsive in the face of huge bulks
+of code:</p>
+
+<ul>
+  <li>The parser it uses
+  (<a href="http://marijnhaverbeke.nl/acorn/">Acorn</a>) is heavily
+  optimized.</li>
+  <li>The type inference algorithm is designed to be lightweight (its
+  other use, in the SpiderMonkey compiler, is similarly
+  performance-critical).</li>
+  <li>Tern runs as a server (or instance) which reuses as much
+  information as possible between queries, and tries to time
+  recomputation work so that it doesn't hold up the interface.</li>
+  <li>When editing large files, there is a mechanism for re-evaluating
+  only a small slice of the file, using information from a previous
+  evaluation run as context.</li>
+  <li>It is possible to automatically 'condense' a JavaScript library
+  to a simple JSON document that holds its type information, and then
+  load only that information when analysing code that uses the
+  library. (You can hand-edit such documents to fix inference mistakes
+  or add information.)</li>
+</ul>
 
 </div>

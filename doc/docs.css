@@ -47,6 +47,12 @@ h2 {
   font-size: 22pt;
 }
 
+ul, ol {
+  margin-left: 0; padding-left: 0;
+}
+
+li { margin-bottom: 1em; }
+
 button {
   font-family: inherit;
   font-size: 14pt;
