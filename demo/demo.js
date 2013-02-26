@@ -9,10 +9,11 @@ CodeMirror.on(window, "load", function() {
       "Ctrl-I": findType,
       "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); }
     },
-    autofocus: true
+    autofocus: true,
+    matchBrackets: true
   });
-  editor.setValue(load("../node_modules/codemirror/lib/codemirror.js"));
 
+  initTern();
   editor.on("cursorActivity", updateArgumentHints);
 });
 
@@ -23,15 +24,21 @@ function load(file) {
   return xhr.responseText;
 }
 
-var Tern = new tern.Tern({
-  getFile: function(name, c) {
-    if (name != "local") throw new Error("Why are you trying to fetch " + name + "?");
-    c(null, editor.getValue());
-  }
-});
-Tern.addEnvironment(JSON.parse(load("../ecma5.json")));
-Tern.addEnvironment(JSON.parse(load("../browser.json")));
-Tern.addFile("local");
+var ecma5 = JSON.parse(load("ecma5.json"));
+var browser = JSON.parse(load("browser.json"));
+var Tern;
+
+function initTern() {
+  Tern = new tern.Tern({
+    getFile: function(name, c) {
+      if (name != "local") throw new Error("Why are you trying to fetch " + name + "?");
+      c(null, editor.getValue());
+    }
+  });
+  Tern.addEnvironment(ecma5);
+  Tern.addEnvironment(browser);
+  Tern.addFile("local");
+}
 
 function getFragmentAround(cm, start, end) {
   var minIndent = null, minLine = null, endLine, tabSize = cm.getOption("tabSize");
@@ -147,7 +154,7 @@ function parseFnType(text) {
 
   // Parse arguments
   for (;;) {
-    var name = text.slice(pos).match(/^(\w+): /);
+    var name = text.slice(pos).match(/^([\w?$]+): /);
     if (name) {
       pos += name[0].length;
       name = name[1];
@@ -220,4 +227,9 @@ function condense(cm) {
     var data = tern.analyze(cm.getValue(), "local");
     console.log(JSON.stringify(tern.condense("local"), null, 2));
   });
+}
+
+function loadCode(url) {
+  editor.setValue(load(url));
+  initTern();
 }

@@ -1,0 +1,114 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <script src="node_modules/codemirror/lib/codemirror.js"></script>
+  <script src="demo/javascript_tern.js"></script>
+  <link rel=stylesheet href="node_modules/codemirror/lib/codemirror.css">
+  <script src="node_modules/codemirror/addon/hint/show-hint.js"></script>
+  <link rel="stylesheet" href="node_modules/codemirror/addon/hint/show-hint.css">
+  <script src="node_modules/codemirror/addon/dialog/dialog.js"></script>
+  <link rel="stylesheet" href="node_modules/codemirror/addon/dialog/dialog.css">
+  <script src="node_modules/codemirror/addon/search/searchcursor.js"></script>
+  <script src="node_modules/codemirror/addon/search/search.js"></script>
+  <script src="node_modules/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="node_modules/acorn/acorn.js"></script>
+  <script src="node_modules/acorn/acorn_loose.js"></script>
+  <script src="node_modules/acorn/util/walk.js"></script>
+  <script src="tern.js"></script>
+  <script src="infer.js"></script>
+  <script src="demo/demo.js"></script>
+
+  <link rel=stylesheet href="doc/docs.css">
+  <title>Tern.js</title>
+</head>
+
+<div id=head>
+  <h1>Tern.js <span>intelligent JavaScript editing</span></h1>
+  <img id=head-image src="doc/header.png">
+</div>
+
+<div id=main>
+
+<p>A tern is a small sea bird. It darts over the waves, looking for
+fish below the surface. When it spots a target, it dives into the
+water, vanishes for an instant, and bursts out again with its prey in
+its beak.</p>
+
+<p>Tern.js is a piece of software. It dives into the muddy depths of a
+JavaScript system, locates the information that it wants, and surfaces
+with a type or set of completion hints.</p>
+
+<h2>Demo</h2>
+
+<p>In the editor below, press <code>ctrl-space</code> to activate
+autocompletion, or <code>ctrl-i</code> to query the type of the
+expression before the cursor (or the selected expression). Put the
+cursor inside a function call's argument list to automatically get a
+description of the function's arguments.</p>
+
+<div>
+  <form><textarea id=code name=code>// Type some code, see if Tern can figure out the types
+
+var foo = ["array", "of", "strings"];
+var bar = foo.slice(0, 2).join("").split("a")[0];
+
+function CTor() { this.size = 10; }
+CTor.prototype.hallo = "hallo";
+
+var baz = new CTor;
+var quux = baz.hallo + baz.size;
+
+// And a little more advanced
+
+(function(exports) {
+  exports.randomElt = function(arr) {
+    return arr[Math.floor(arr.length * Math.random())];
+  };
+  exports.strList = "foo".split("");
+  exports.intList = exports.strList.map(function(s) { return s.charCodeAt(0); });
+})(window.myMod = {});
+
+var randomStr = myMod.randomElt(myMod.strList);
+var randomInt = myMod.randomElt(myMod.intList);
+</textarea></form>
+  <pre id=out class=output>&nbsp;</pre>
+</div>
+
+<p>
+  <button onclick="loadCode('node_modules/codemirror/lib/codemirror.js')">Load editor library</button>
+  <button onclick="loadCode('demo/underscore.js')">Load underscore.js</button>
+</p>
+
+<h2>What is the status of the project?</h2>
+
+<p>Tern is <em>not</em> currently open source. I'd like it to be, but
+I have to pay my bills. So I'm running
+a <a href="FIXME">crowd-funder</a> where interested parties can pledge
+money. If successful, Tern will be released under
+an <a href="https://github.com/marijnh/CodeMirror/blob/master/LICENSE">MIT</a>
+license.</p>
+
+<p>The project is not finished — the core works well enough to be
+useful, but a lot of work is still to be done: testing, documenting,
+fixing bugs, and writing editor plug-ins.</p>
+
+<h2>How does it work?</h2>
+
+<p>Tern parses and analyzes a program on the fly, using a simple form
+of type inference along with a lot of heuristics and dirty tricks to
+approximate the types of the variables and expressions in the
+program.</p>
+
+<p>It can then use these types to provide completions and context
+information that is more precise than what is usually possible.</p>
+
+<p>Tern can be run in two ways — as a JavaScript library, for
+integration in JavaScript-based systems like the demo above, or as an
+HTTP server, for use with desktop editor plug-ins.</p>
+
+<h2>Is this new?</h2>
+
+
+
+</div>
