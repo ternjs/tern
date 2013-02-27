@@ -1179,28 +1179,9 @@
           return function(self, args) {return args[arg] || ANull;};
         } else if (this.eat("this")) {
           return function(self) {return self;};
-        } else if (this.eat("Object_create")) {
-          return function(self, args) {
-            var result = new AVal;
-            if (args[0]) args[0].propagate({addType: function(tp) {
-              if (tp.isEmpty()) {
-                result.addType(new Obj());
-              } else if (tp instanceof Obj) {
-                var derived = new Obj(tp), spec = args[1];
-                if (spec instanceof AVal) spec = spec.types[0];
-                if (spec instanceof Obj) for (var prop in spec.props) {
-                  var cur = spec.props[prop].types[0];
-                  var p = derived.ensureProp(prop);
-                  if (cur && cur instanceof Obj && cur.props.value) {
-                    var vtp = cur.props.value.getType();
-                    if (vtp) p.addType(vtp);
-                  }
-                }
-                result.addType(derived)
-              }
-            }});
-            return result;
-          };
+        } else if (this.eat("custom:")) {
+          var fname = this.word(/[\w$]/);
+          return customFunctions[fname] || function() { return ANull; };
         } else this.error();
       }
       var t = this.parseType();
@@ -1249,6 +1230,12 @@
         var slf = getSelf ? getSelf(self, args) : ANull, as = [];
         for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
         callee.propagate(new IsCallee(slf, as, ANull));
+        return oldCmp ? oldCmp(self, args) : rv;
+      };
+    } else if (effect.indexOf("custom ") == 0) {
+      var customFunc = customFunctions[effect.slice(7).trim()];
+      fn.computeRet = function(self, args) {
+        if (customFunc) customFunc(self, args);
         return oldCmp ? oldCmp(self, args) : rv;
       };
     } else {
@@ -1343,6 +1330,33 @@
 
     cx.curOrigin = null;
   }
+
+  // Used to register custom logic for more involved effect or type
+  // computation.
+  var customFunctions = Object.create(null);
+  exports.registerFunction = function(name, f) { customFunctions[name] = f; };
+
+  exports.registerFunction("Object_create", function(self, args) {
+    var result = new AVal;
+    if (args[0]) args[0].propagate({addType: function(tp) {
+      if (tp.isEmpty()) {
+        result.addType(new Obj());
+      } else if (tp instanceof Obj) {
+        var derived = new Obj(tp), spec = args[1];
+        if (spec instanceof AVal) spec = spec.types[0];
+        if (spec instanceof Obj) for (var prop in spec.props) {
+          var cur = spec.props[prop].types[0];
+          var p = derived.ensureProp(prop);
+          if (cur && cur instanceof Obj && cur.props.value) {
+            var vtp = cur.props.value.getType();
+            if (vtp) p.addType(vtp);
+          }
+        }
+        result.addType(derived)
+      }
+    }});
+    return result;
+  });
 
   // JSDOC PARSING
 

@@ -7,7 +7,7 @@
   "Object": {
     "!type": "fn()",
     "getPrototypeOf": "fn(obj: ?) -> ?",
-    "create": "fn(proto: ?) -> $Object_create",
+    "create": "fn(proto: ?) -> $custom:Object_create",
     "defineProperty": "fn(obj: ?, prop: string, desc: ?)",
     "defineProperties": "fn(obj: ?, props: ?)",
     "getOwnPropertyDescriptor": "fn(obj: ?, prop: string) -> ?",
