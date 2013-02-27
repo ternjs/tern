@@ -196,8 +196,8 @@
     type.forAllProps(this.c);
   };
 
-  function IsCallee(self, args, retval) {
-    this.self = self; this.args = args; this.retval = retval;
+  function IsCallee(self, args, argNodes, retval) {
+    this.self = self; this.args = args; this.argNodes = argNodes; this.retval = retval;
   }
   IsCallee.prototype = {
     addType: function(fn) {
@@ -206,7 +206,7 @@
         this.args[i].propagate(fn.args[i]);
       this.self.propagate(fn.self);
       if (fn.computeRet)
-        fn.computeRet(this.self, this.args).propagate(this.retval);
+        fn.computeRet(this.self, this.args, this.argNodes).propagate(this.retval);
       else
         fn.retval.propagate(this.retval);
     },
@@ -222,11 +222,11 @@
     if (obj instanceof Obj) this.other.addType(obj);
   };
 
-  function HasMethodCall(propName, args, retval) {
-    this.propName = propName; this.args = args; this.retval = retval;
+  function HasMethodCall(propName, args, argNodes, retval) {
+    this.propName = propName; this.args = args; this.argNodes = argNodes; this.retval = retval;
   }
   HasMethodCall.prototype.addType = function(obj) {
-    obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.retval));
+    obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.argNodes, this.retval));
   };
   HasMethodCall.prototype.propHint = function() { return this.propName; };
 
@@ -835,7 +835,7 @@
       var callee = infer(node.callee, scope, c);
       var self = new AVal;
       callee.propagate(new IsCtor(self));
-      callee.propagate(new IsCallee(self, args, out));
+      callee.propagate(new IsCallee(self, args, node.arguments, out));
       self.propagate(out);
     }),
     CallExpression: fill(function(node, scope, c, out) {
@@ -843,10 +843,10 @@
         args.push(infer(node.arguments[i], scope, c));
       if (node.callee.type == "MemberExpression") {
         var self = infer(node.callee.object, scope, c);
-        self.propagate(new HasMethodCall(propName(node.callee, scope, c), args, out));
+        self.propagate(new HasMethodCall(propName(node.callee, scope, c), args, node.arguments, out));
       } else {
         var callee = infer(node.callee, scope, c);
-        callee.propagate(new IsCallee(ANull, args, out));
+        callee.propagate(new IsCallee(ANull, args, node.arguments, out));
       }
     }),
     MemberExpression: ret(function(node, scope, c) {
@@ -1008,7 +1008,7 @@
         var self = ANull;
         if (node.callee.type == "MemberExpression")
           self = findType(node.callee.object, scope);
-        return f.computeRet(self, args);
+        return f.computeRet(self, args, node.arguments);
       } else {
         return f.retval;
       }
@@ -1193,7 +1193,7 @@
         var lhs = base(self, args);
         if (lhs.retval) return lhs.retval;
         var rv = new AVal;
-        lhs.propagate(new IsCallee(ANull, [], rv));
+        lhs.propagate(new IsCallee(ANull, [], null, rv));
         return rv;
       };
       return function(self, args) {return base(self, args).getProp(propName);};
@@ -1229,7 +1229,7 @@
         var callee = getCallee(self, args);
         var slf = getSelf ? getSelf(self, args) : ANull, as = [];
         for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
-        callee.propagate(new IsCallee(slf, as, ANull));
+        callee.propagate(new IsCallee(slf, as, null, ANull));
         return oldCmp ? oldCmp(self, args) : rv;
       };
     } else if (effect.indexOf("custom ") == 0) {
