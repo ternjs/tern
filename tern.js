@@ -9,11 +9,13 @@
 
   var Tern = exports.Tern = function(callbacks) {
     this.cx = null;
-    this.uses = 0;
     this.callbacks = callbacks;
     this.environment = [];
     this.filesToLoad = [];
-    this.files = null;
+    this.handlers = {};
+
+    this.pendingFiles = [];
+    this.files = this.uses = 0;
   };
   Tern.prototype = {
     addEnvironment: function(data) {
@@ -23,82 +25,103 @@
       if (this.filesToLoad.indexOf(file) < 0) this.filesToLoad.push(file);
     },
 
-    request: function(doc, c, clean) {
+    // Used from inside the analyzer to load, for example, a
+    // `require`-d file.
+    ensureDependencyLoaded: function(filename) {
+      this.pendingFiles.push(filename);
+    },
+
+    request: function(doc, c) {
       // FIXME somehow validate doc's structure
 
       var self = this, files = doc.files || [];
       // FIXME better heuristic for when to reset. And try to reset when the client is not waiting
-      if (!this.cx || this.uses > 20)
-        return reset(this, files, function() {self.request(doc, c, true);});
-      ++this.uses;
+      if (!this.cx || this.uses > 20) reset(this);
+      ++this.cx.uses;
+      doRequest(this, doc, c);
+    },
 
-      for (var i = 0; i < files.length; ++i) {
-        var file = files[i];
-        if (file.type == "full" && (!clean || !findFile(this.files, file.name)))
-          loadFile(this, file.name, file.text);
-      }
+    findFile: function(name) {
+      return this.files && findFile(this.files, name);
+    },
 
-      infer.withContext(this.cx, function() {
-// FIXME reinstate this when the code stops crashing all the time
-//        try {
-          switch (doc.query.type) {
-          case "completions":
-            c(null, findCompletions(resolveFile(self, files, doc.query.file), doc.query));
-            break;
-          case "type":
-            c(null, findTypeAt(resolveFile(self, files, doc.query.file), doc.query));
-            break;
-          default:
-            c("Unsupported query type: " + doc.query.type);
-          }
-  /*      } catch (e) {
-          c(e.message || e);
-        }*/
-      });
+    on: function(type, f) {
+      (this.handlers[type] || (this.handlers[type] = [])).push(f);
+    },
+    off: function(type, f) {
+      var arr = this.handlers[type];
+      if (arr) for (var i = 0; i < arr.length; ++i)
+        if (arr[i] == f) { arr.splice(i, 1); break; }
+    },
+    signal: function(type, v1, v2, v3, v4) {
+      var arr = this.handlers[type];
+      if (arr) for (var i = 0; i < arr.length; ++i) arr[i].call(this, v1, v2, v3, v4);
     }
   };
 
-  function reset(tern, replacements, c) {
-    tern.cx = new infer.Context(tern.environment);
+  function reset(tern) {
+    var cx = tern.cx = new infer.Context(tern.environment, tern);
     tern.uses = 0;
     tern.files = [];
-
-    function step(i) {
-      if (i >= tern.filesToLoad.length) return c(); 
-      var file = tern.filesToLoad[i], repl;
-      if (replacements) for (var j = 0; j < replacements.length; ++j) {
-        var cur = replacements[j];
-        if (cur.name == file && cur.type == "full") {
-          repl = cur.content;
-          break;
-        }
-      }
-      if (repl) {
-        loadFile(tern, file, repl);
-        step(i + 1);
-      } else {
-        tern.callbacks.getFile(file, function(err, content) {
-          if (err) return c(err);
-          loadFile(tern, file, content);
-          step(i + 1);
-        });
-      }
-    }
-    step(0);
+    tern.pendingFiles = tern.filesToLoad.slice(0);
+    tern.signal("reset");
   }
 
-  function loadFile(tern, filename, data) {
+  function doRequest(tern, doc, c) {
+    var files = doc.files || [];
+    for (var i = 0; i < files.length; ++i) {
+      var file = files[i];
+      if (file.type == "full") tern.loadFile(file.name, file.text);
+    }
+
+    finishPending(tern, function(err) {
+      if (err) return c(err);
+      var file = resolveFile(tern, files, doc.query.file);
+      infer.withContext(tern.cx, function() {
+        // FIXME reinstate this when the code stops crashing all the time
+        // try {
+        switch (doc.query.type) {
+        case "completions":
+          c(null, findCompletions(file, doc.query));
+          break;
+        case "type":
+          c(null, findTypeAt(file, doc.query));
+          break;
+        default:
+          c("Unsupported query type: " + doc.query.type);
+        }
+        // } catch (e) { c(e.message || e); }
+      });
+    });
+  }
+
+  loadFile: function(tern, filename, text) {
     infer.withContext(tern.cx, function() {
-      var result = infer.analyze(data, filename);
+      var file = {name: filename, text: text};
+      tern.signal("beforeLoad", file);
+      var result = infer.analyze(file.text, filename);
       var known = findFile(tern.files, filename);
       if (!known) tern.files.push(known = {name: filename});
-      known.text = data;
+      known.text = file.text;
       known.ast = result.ast;
+      tern.signal("afterLoad", known);
+    });
+  },
+
+  function finishPending(tern, c) {
+    var next;
+    while (next = tern.pendingFiles.pop())
+      if (!findFile(tern.files, next)) break;
+    if (!next) return c();
+
+    tern.callbacks.getFile(next, function(err, text) {
+      if (err) return c(err);
+      tern.loadFile(next, text);
+      finishPending(tern, c);
     });
   }
 
   function findFile(arr, name) {
-    if (!arr) debugger;
     for (var i = 0; i < arr.length; ++i) {
       var file = arr[i];
       if (file.name == name && file.type != "part") return file;
@@ -206,5 +229,4 @@
             name: name || null,
             exprName: exprName || null};
   }
-
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);

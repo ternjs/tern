@@ -15,12 +15,12 @@
 
   // ABSTRACT VALUES
 
-  function AVal(type) {
+  var AVal = exports.AVal = function(type) {
     this.types = [];
     this.forward = null;
     this.flags = 0;
     if (type) type.propagate(this);
-  }
+  };
   AVal.prototype = {
     addType: function(type) {
       if (this.types.indexOf(type) > -1) return;
@@ -152,7 +152,7 @@
   }
 
   // A variant of AVal used for unknown, dead-end values
-  var ANull = {
+  var ANull = exports.ANull = {
     addType: function() {},
     propagate: function() {},
     getProp: function() { return ANull; },
@@ -265,7 +265,7 @@
 
   // TYPE OBJECTS
 
-  function Type() {}
+  var Type = exports.Type = function() {};
   Type.prototype = {
     propagate: function(c) { c.addType(this); },
     hasType: function(other) { return other == this; },
@@ -277,8 +277,7 @@
     forAllProps: function() {}
   };
 
-  function Prim(proto, name) { this.name = name; this.proto = proto; }
-  exports.Prim = Prim;
+  var Prim = exports.Prim = function(proto, name) { this.name = name; this.proto = proto; };
   Prim.prototype = Object.create(Type.prototype);
   Prim.prototype.toString = function() { return this.name; };
   Prim.prototype.getProp = function(prop) {return this.proto.props[prop] || ANull;};
@@ -293,7 +292,7 @@
   var flag_initializer = exports.flag_initializer = 1;
   var flag_definite = exports.flag_definite = 2;
 
-  function Obj(proto, name, origin) {
+  var Obj = exports.Obj = function(proto, name, origin) {
     this.props = Object.create(null);
     this.proto = proto === true ? cx.protos.Object : proto;
     if (proto && !name && proto.name && !(this instanceof Fn)) {
@@ -305,8 +304,7 @@
     if (origin !== false) this.setOrigin(origin);
 
     if (this.proto && !this.prev) this.proto.forAllProps(this.onProtoProp.bind(this));
-  }
-  exports.Obj = Obj;
+  };
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
@@ -405,15 +403,14 @@
     }
   };
 
-  function Fn(name, self, args, argNames, retval) {
+  var Fn = exports.Fn = function(name, self, args, argNames, retval) {
     Obj.call(this, cx.protos.Function, name, false);
     this.self = self;
     this.args = args;
     this.argNames = argNames;
     this.retval = retval;
     this.setOrigin();
-  }
-  exports.Fn = Fn;
+  };
   Fn.prototype = Object.create(Obj.prototype);
   Fn.prototype.toString = function(maxDepth) {
     if (maxDepth) maxDepth--;
@@ -446,12 +443,11 @@
   };
   Fn.prototype.getFunctionType = function() { return this; };
 
-  function Arr(contentType) {
+  var Arr = exports.Arr = function(contentType) {
     Obj.call(this, cx.protos.Array, false);
     var content = this.ensureProp("<i>");
     if (contentType) contentType.propagate(content);
-  }
-  exports.Arr = Arr;
+  };
   Arr.prototype = Object.create(Obj.prototype);
   Arr.prototype.toString = function(maxDepth) {
     if (maxDepth) maxDepth--;
@@ -471,7 +467,8 @@
 
   // INFERENCE CONTEXT
 
-  var Context = exports.Context = function(environment) {
+  var Context = exports.Context = function(environment, parent) {
+    this.parent = parent;
     this.props = Object.create(null);
     this.protos = Object.create(null);
     this.prim = Object.create(null);
