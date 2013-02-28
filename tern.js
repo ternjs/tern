@@ -76,8 +76,8 @@
 
     finishPending(srv, function(err) {
       if (err) return c(err);
-      var file = resolveFile(srv, files, doc.query.file);
       infer.withContext(srv.cx, function() {
+        var file = resolveFile(srv, files, doc.query.file);
         // FIXME reinstate this when the code stops crashing all the time
         // try {
         switch (doc.query.type) {

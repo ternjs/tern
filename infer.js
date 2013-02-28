@@ -59,8 +59,8 @@
         if (this.types[i] instanceof Fn) return this.types[i];
     },
 
-    getType: function() {
-      if (this.types.length == 0) return this.makeupType();
+    getType: function(guess) {
+      if (this.types.length == 0 && guess !== false) return this.makeupType();
       if (this.types.length == 1) return this.types[0];
       return canonicalType(this.types);
     },
@@ -1504,9 +1504,11 @@
       var decl = node.declarations[0];
       varName = decl.id.name;
       if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.body.scope.fnType;
-    } else {
+    } else if (node.type == "FunctionDeclaration") {
       varName = node.id.name;
       fn = node.body.scope.fnType;
+    } else {
+      return;
     }
 
     if (fn && (args || ret)) {
