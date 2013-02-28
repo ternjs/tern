@@ -51,8 +51,11 @@
   infer.Obj.prototype.setPath = function(path, state, maxOrigin) {
     this.path = path || "<top>";
     var start = path ? path + "." : "";
-    for (var prop in this.props)
-      setPath(this.props[prop], start + prop, state, maxOrigin);
+    for (var prop in this.props) {
+      var val = this.props[prop];
+      if (val.flags & infer.flag_definite)
+        setPath(val, start + prop, state, maxOrigin);
+    }
     if (this.proto) setPath(this.proto, start + "!proto", state, maxOrigin);
   };
 
@@ -63,7 +66,10 @@
     if (inForeign >= 0) state.addedToForeign.splice(inForeign, 1);
 
     var found = type.path && state.paths[type.path];
-    if (found) return type.path;
+    if (found) {
+      ++found.refs;
+      return type.path;
+    }
     if (state.seen.indexOf(type) > -1) return type.path || "?";
     state.seen.push(type);
     var d = actual.getDesc(state, flag);
@@ -96,24 +102,12 @@
       if (rettype) out += " -> " + desc(rettype, state);
     }
 
-    var obj;
-    for (var p in this.props) {
-      if (!obj) {
-        var known = state.paths[this.path];
-        if (known) {
-          known.refs++;
-          return this.path;
-        } else {
-          obj = {"!type": out};
-        }
-      }
-      obj[p] = desc(this.props[p], state);
-    }
-    if (obj) {
-      state.paths[this.path] = {refs: 1, structure: obj};
-      return this.path;
-    }
-    return out;
+    if (!hasProps(this)) return out;
+
+    var obj = {"!type": out};
+    state.paths[this.path] = {refs: 1, structure: obj};
+    setProps(this, obj, state);
+    return this.path;
   };
 
   function hasProps(obj) {
@@ -135,11 +129,6 @@
     if (!isTarget(state, this)) return this.path;
     if (this._fromProto) return "+" + this.proto.path;
 
-    var known = state.paths[this.path];
-    if (known) {
-      known.refs++;
-      return this.path;
-    }
     var structure = {}, proto;
     state.paths[this.path] = {refs: 1, structure: structure};
 
