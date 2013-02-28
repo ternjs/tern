@@ -7,6 +7,9 @@
     infer = condense = exports;
   }
 
+  var plugins = Object.create(null);
+  exports.registerPlugin = function(name, init) { plugins[name] = init; };
+
   var Server = exports.Server = function(callbacks) {
     this.cx = null;
     this.callbacks = callbacks;
@@ -20,6 +23,8 @@
   Server.prototype = {
     addEnvironment: function(data) {
       this.environment.push(data);
+      var plugin = data["!plugin"];
+      if (plugin && plugin in plugins) plugins[plugin](this);
     },
     addFile: function(file) {
       if (this.filesToLoad.indexOf(file) < 0) this.filesToLoad.push(file);

@@ -3,10 +3,12 @@ var infer = require("./infer");
 var tern = require("./tern");
 var acorn = require("acorn");
 var walk = require("acorn/util/walk.js");
+require("./plugin/requirejs/requirejs.js");
 
 var ecma5 = JSON.parse(fs.readFileSync("ecma5.json"));
 var envData = {
-  browser: JSON.parse(fs.readFileSync("browser.json"))
+  browser: JSON.parse(fs.readFileSync("browser.json")),
+  requireJS: JSON.parse(fs.readFileSync("plugin/requirejs/requirejs.json"))
 };
 
 function getFile(file) {
@@ -16,18 +18,27 @@ function getFile(file) {
   return {text: text, name: file, env: env, ast: acorn.parse(text)};
 }
 
-function fetchFile(name, c) {
-  return c(null, fs.readFileSync(name, "utf8"));
+function callbacks(context) {
+  return {
+    getFile: function(name, c) {
+      c(null, fs.readFileSync(context + name, "utf8"));
+    }
+  };
 }
 
 function runTests() {
   var files = 0, tests = 0, failed = 0;
   fs.readdirSync("test/").forEach(function(name) {
     ++files;
-    var file = getFile("test/" + name);
+    var fname = name, context = "test/";
+    if (fs.statSync(context + name).isDirectory()) {
+      context += name + "/";
+      fname = "main.js";
+    }
+    var file = getFile(context + fname);
 
-    var server = new tern.Server({getFile: fetchFile});
-    server.addFile(file.name);
+    var server = new tern.Server(callbacks(context));
+    server.addFile(fname);
     server.addEnvironment(ecma5);
     for (var i = 0; i < file.env.length; ++i) server.addEnvironment(file.env[i]);
 
@@ -42,7 +53,7 @@ function runTests() {
       }
       var query = {type: "type",
                    start: expr.node.start, end: expr.node.end,
-                   file: file.name,
+                   file: fname,
                    depth: m[1] ? 2 : null};
       server.request({query: query}, function(err, resp) {
         if (err) throw new Error(err);
