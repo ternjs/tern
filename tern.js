@@ -191,25 +191,29 @@
     var wordStart = query.position, wordEnd = wordStart, text = file.text;
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
-    var word = text.slice(wordStart, wordEnd), completions;
+    var word = text.slice(wordStart, wordEnd), completions, guessing = false;
 
+    infer.resetGuessing();
     // FIXME deal with whitespace before/after dot
     if (text.charAt(wordStart - 1) == ".") { // Property completion
       var expr = infer.findExpression(file.ast, null, wordStart - 1, file.scope);
       var tp = expr && infer.expressionType(expr);
       if (tp)
-        completions = infer.propertiesOf(tp, word);
+        completions = infer.propertiesOf(tp.type, word);
       else
         completions = [];
     } else {
       completions = infer.localsAt(file.ast, query.position, word);
     }
-    return {from: wordStart, to: wordEnd, completions: completions};
+    return {from: wordStart, to: wordEnd,
+            completions: completions,
+            guess: infer.didGuess()};
   }
 
   function findTypeAt(file, query) {
     var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
     if (!expr) return {type: null, name: null, message: "No expression at the given position"};
+    infer.resetGuessing();
     var type = infer.expressionType(expr);
     if (typeof window != "undefined") window.tp = type; // FIXME debug statement
     if (query.preferFunction)
@@ -227,6 +231,7 @@
 
     return {type: infer.toString(type, query.depth),
             name: name || null,
-            exprName: exprName || null};
+            exprName: exprName || null,
+            guess: infer.didGuess()};
   }
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);

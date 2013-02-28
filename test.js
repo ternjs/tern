@@ -31,7 +31,7 @@ function runTests() {
     server.addEnvironment(ecma5);
     for (var i = 0; i < file.env.length; ++i) server.addEnvironment(file.env[i]);
 
-    var typedef = /\/\/:(:)?\s+([^\n]*)/g, m;
+    var typedef = /\/\/:(:)?(\?)?\s+([^\n]*)/g, m;
     while (m = typedef.exec(file.text)) {
       ++tests;
       var expr = walk.findNodeBefore(file.ast, m.index, "Expression");
@@ -46,9 +46,10 @@ function runTests() {
                    depth: m[1] ? 2 : null};
       server.request({query: query}, function(err, resp) {
         if (err) throw new Error(err);
-        if (resp.type != m[2]) {
+        var type = resp.guess && !m[2] ? "?" : resp.type || "?";
+        if (type != m[3]) {
           console.log(name + ": Expression at line " + acorn.getLineInfo(file.text, m.index).line +
-                      " has type\n  " + resp.type + "\ninstead of expected type\n  " + m[2]);
+                      " has type\n  " + resp.type + "\ninstead of expected type\n  " + m[3]);
           ++failed;
         }
       });

@@ -66,6 +66,7 @@
     },
 
     makeupType: function() {
+      guessing = true;
       if (!this.forward) return null;
       for (var i = 0; i < this.forward.length; ++i) {
         var fw = this.forward[i], hint = fw.typeHint && fw.typeHint();
@@ -936,6 +937,7 @@
   // EXPRESSION TYPE DETERMINATION
 
   function findByPropertyName(name) {
+    guessing = true;
     var found = objsWithProp(name);
     if (found) for (var i = 0; i < found.length; ++i) {
       var val = found[i].getProp(name);
@@ -1063,6 +1065,13 @@
     return findType(found.node, found.state);
   };
 
+  // Flag used to indicate that some wild guessing was used to produce
+  // a type or set of completions.
+  var guessing = false;
+
+  exports.resetGuessing = function() { guessing = false; };
+  exports.didGuess = function() { return guessing; };
+
   function compareProps(a, b) {
     var aUp = /^[A-Z]/.test(a), bUp = /^[A-Z]/.test(b);
     if (aUp == bUp) return a < b ? -1 : a == b ? 0 : 1;
@@ -1072,8 +1081,10 @@
   exports.propertiesOf = function(type, prefix) {
     var props = [];
     type.gatherProperties(prefix, props);
-    if (!props.length && prefix.length >= 2)
+    if (!props.length && prefix.length >= 2) {
+      guessing = true;
       for (var prop in cx.props) if (prop.indexOf(prefix) == 0) props.push(prop);
+    }
     props.sort(compareProps);
     return props;
   };
