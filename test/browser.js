@@ -1,14 +1,11 @@
 // environment=browser
 
-// body(0): Element
-var body = window.document.body;
+window.document.body; //: Element
 
-// newElt(0): Element
-var newElt = document.createElement("div");
+var newElt = document.createElement("div"); //: Element
 
-// newElt_style_border: string
-var newElt_style_border = newElt.style.border;
+newElt.style.border; //: string
 
-// e_which: number
 var e_which;
 window.addEventListener("mousemove", function(e) { e_which = e.which; });
+e_which; //: number

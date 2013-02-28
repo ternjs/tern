@@ -1,5 +1,3 @@
-// arguments: string
-var arguments = "foo";
+var arguments = 1; //: number
 
-// argLen: number
-var argLen = (function() { return arguments.length; })();
+(function() { return arguments.length; })(); //: number

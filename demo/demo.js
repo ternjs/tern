@@ -13,7 +13,7 @@ CodeMirror.on(window, "load", function() {
     matchBrackets: true
   });
 
-  initTern();
+  initServer();
   editor.on("cursorActivity", updateArgumentHints);
 });
 
@@ -26,18 +26,18 @@ function load(file) {
 
 var ecma5 = JSON.parse(load("ecma5.json"));
 var browser = JSON.parse(load("browser.json"));
-var Tern;
+var server;
 
-function initTern() {
-  Tern = new tern.Tern({
+function initServer() {
+  server = new tern.Server({
     getFile: function(name, c) {
       if (name != "local") throw new Error("Why are you trying to fetch " + name + "?");
       c(null, editor.getValue());
     }
   });
-  Tern.addEnvironment(ecma5);
-  Tern.addEnvironment(browser);
-  Tern.addFile("local");
+  server.addEnvironment(ecma5);
+  server.addEnvironment(browser);
+  server.addFile("local");
 }
 
 function getFragmentAround(cm, start, end) {
@@ -112,7 +112,7 @@ function buildRequest(cm, how, query) {
 }
 
 function findType(cm) {
-  Tern.request(buildRequest(cm, "range", "type").request, function(error, data) {
+  server.request(buildRequest(cm, "range", "type").request, function(error, data) {
     if (error) throw new Error(error);
     var out = document.getElementById("out");
     out.innerHTML = "";
@@ -123,7 +123,7 @@ function findType(cm) {
 function ternHints(cm, c) {
   var req = buildRequest(cm, "pos", "completions");
 
-  Tern.request(req.request, function(error, data) {
+  server.request(req.request, function(error, data) {
     if (error) throw new Error(error);
     c({from: cm.posFromIndex(data.from + req.offset),
        to: cm.posFromIndex(data.to + req.offset),
@@ -188,7 +188,7 @@ function updateArgumentHints(cm) {
     cache.line = line; cache.ch = ch; cache.bad = true;
 
     var query = {type: "type", preferFunction: true, end: Pos(line, ch)}
-    Tern.request(buildRequest(cm, "from", query).request, function(error, data) {
+    server.request(buildRequest(cm, "from", query).request, function(error, data) {
       if (error) throw new Error(error);
       if (!data.type || !/^fn\(/.test(data.type)) return;
     
@@ -222,7 +222,7 @@ function showArgumentHints(cache, out, pos) {
 
 // Debug code used to test the condenser
 function condense(cm) {
-  var cx = new tern.Context(Tern.environment);
+  var cx = new tern.Context(server.environment);
   tern.withContext(cx, function() {
     var data = tern.analyze(cm.getValue(), "local");
     console.log(JSON.stringify(tern.condense("local"), null, 2));
@@ -231,5 +231,5 @@ function condense(cm) {
 
 function loadCode(url) {
   editor.setValue(load(url));
-  initTern();
+  initServer();
 }

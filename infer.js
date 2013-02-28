@@ -196,8 +196,8 @@
     type.forAllProps(this.c);
   };
 
-  function IsCallee(self, args, argNodes, retval) {
-    this.self = self; this.args = args; this.argNodes = argNodes; this.retval = retval;
+  var IsCallee = exports.IsCallee = function(self, args, argNodes, retval) {
+    this.self = self; this.args = args; this.argNodes = argNodes; this.retval = retval || ANull;
   }
   IsCallee.prototype = {
     addType: function(fn) {
@@ -1226,7 +1226,7 @@
         var callee = getCallee(self, args);
         var slf = getSelf ? getSelf(self, args) : ANull, as = [];
         for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
-        callee.propagate(new IsCallee(slf, as, null, ANull));
+        callee.propagate(new IsCallee(slf, as));
         return oldCmp ? oldCmp(self, args) : rv;
       };
     } else if (effect.indexOf("custom ") == 0) {
@@ -1367,7 +1367,7 @@
         if (type == "return") type = "returns";
         found.push(type, m[2]);
       }
-      if (found.length) out.push({decls: found, at: end + 2});
+      if (found.length) out.push({decls: found, at: end});
     };
   }
 
@@ -1467,7 +1467,7 @@
   }
 
   function applyJSDocType(annotation, ast, scope) {
-    function isDecl(node) { return /^(Variable|Function)Declaration/.test(node.type); }
+    function isDecl(_type, node) { return /^(Variable|Function)Declaration/.test(node.type); }
     var found = walk.findNodeAfter(ast, annotation.at, isDecl, searchVisitor, scope);
     if (!found) return;
     scope = found.state;

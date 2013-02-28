@@ -1,37 +1,24 @@
-// x: number
-// y: number
-var x = Math.PI, y = Math.cos(x);
+var x = Math.PI; //: number
+Math.cos(x); //: number
 
-// a: [number]
-var a = [1, 2, 3];
-// b: [number]
-var b = a.slice(2);
+var a = [1, 2, 3]; //: [number]
+a.slice(2); //: [number]
+a.pop(); //: number
 
-// c: number
-var c = a.pop()
+["x"].concat(["hi"]); //: [string]
 
-// d: [string]
-var d = ["x"].concat(["hi"]);
+[true, false, true].filter(function(x){return x;}); //: [bool]
 
-// e: [bool]
-var e = [true, false, true].filter(function(x){return x;});
+[].map(function() {return "x";}); //: [string]
 
-// f: [string]
-var f = [].map(function() {return "x";});
+[].reduce(function(a, b) { return a - 2; }, 0); //: number
 
-// g: number
-var g = [].reduce(function(a, b) { return a - 2; }, 0);
+Math.cos.call(null, 10); //: number
 
-// h: number
-var h = Math.cos.call(null, 10);
+(10).toFixed; //: fn(digits: number) -> string
 
-// i: fn(digits: number) -> string
-var i = (10).toFixed;
+"foo bar baz".split(" "); //: [string]
 
-// j: [string]
-var j = "foo bar baz".split(" ");
+toString; //: fn() -> string
 
-// toString: fn() -> string
-
-// k(0): Date
-var k = new Date;
+new Date; //: Date

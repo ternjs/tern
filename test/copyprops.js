@@ -4,5 +4,4 @@ function buildCopy(o) {
   return oo;
 }
 
-// copy: {xx: number, yy: number}
-var copy = buildCopy({xx: 10, yy: 20});
+buildCopy({xx: 10, yy: 20}); //:: {xx: number, yy: number}

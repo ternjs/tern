@@ -6,36 +6,26 @@ base.baz = 30;
 gen1.quux = 50;
 gen2.kaka = 10;
 
-// a: number
-var a = gen1.foo;
+gen1.foo; //: number
 
-// b: number
-var b = gen2.foo;
+gen2.foo; //: number
 
-// c: number
-var c = gen1.baz;
+gen1.baz; //: number
 
-// d: number
-var d = gen2.baz;
+gen2.baz; //: number
 
-// e: number
-var e = gen1.quux;
+gen1.quux; //: number
 
-// f: number
-var f = gen2.quux;
+gen2.quux; //: number
 
-// g: ?
-var g = gen1.kaka;
+gen1.kaka; //: ?
 
 var extend = Object.create(base, {prop1: {value: "hi"}, prop2: {}});
 
-// h: string
-var h = extend.prop1;
+extend.prop1; //: string
 
-// i: number
-var i = extend.bar;
+extend.bar; //: number
 
 var empty = Object.create(null);
 
-// hop: ?
-var hop = empty.hasOwnProperty;
+empty.hasOwnProperty; //: ?

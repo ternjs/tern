@@ -1,13 +1,12 @@
 /** @type {Date} */
-// a(0): Date
 var a = getSomething();
+a; //: Date
 
-// b: fn() -> number
-var b = a.getTime;
+a.getTime; //: fn() -> number
 
 /** @type {{x: Integer, y: [String]}} */
-// c: {x: number, y: [string]}
 var c = somethingElse();
+c; //:: {x: number, y: [string]}
 
 /**
  * This is a function
@@ -15,14 +14,14 @@ var c = somethingElse();
  * @param {Number} a
  * @param {String} b
  */
-// foo: fn(a: number, b: string) -> [number]
 function foo(a, b) { return hohoho(); }
+foo; //: fn(a: number, b: string) -> [number]
 
 /**
  * This is also a function
  * @returns {string}
  * @arg {Number} a
  */
-// bar: fn(a: number, b: number) -> string
 var bar = function(a, b) { return goop(); };
 bar(gulp(), 10);
+bar; //: fn(a: number, b: number) -> string

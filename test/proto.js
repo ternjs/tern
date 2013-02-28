@@ -1,19 +1,16 @@
-// Foo: fn(x: bool)
 function Foo(x) {
   this.x = x;
   this.y = [1];
 }
+Foo; //: fn(x: bool)
 
 Foo.prototype = {
   makeString: function() { return "hi"; },
   bar: 13
 };
 
-// z: {x: bool, y: [number]}
-var z = new Foo(true);
+var z = new Foo(true); //:: {x: bool, y: [number]}
 
-// z_makeString: fn() -> string
-var z_makeString = z.toString;
+z.toString; //: fn() -> string
 
-// z_bar: number
-var z_bar = z.bar;
+z.bar; //: number

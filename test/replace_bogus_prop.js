@@ -1,7 +1,6 @@
 var x = new Type();
 
-// y: string
-var y = x.foo;
+x.foo; //: string
 
 function Type() {}
 Type.prototype.foo = "hi";

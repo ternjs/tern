@@ -7,7 +7,7 @@
     infer = condense = exports;
   }
 
-  var Tern = exports.Tern = function(callbacks) {
+  var Server = exports.Server = function(callbacks) {
     this.cx = null;
     this.callbacks = callbacks;
     this.environment = [];
@@ -17,7 +17,7 @@
     this.pendingFiles = [];
     this.files = this.uses = 0;
   };
-  Tern.prototype = {
+  Server.prototype = {
     addEnvironment: function(data) {
       this.environment.push(data);
     },
@@ -27,7 +27,7 @@
 
     // Used from inside the analyzer to load, for example, a
     // `require`-d file.
-    ensureDependencyLoaded: function(filename) {
+    require: function(filename) {
       this.pendingFiles.push(filename);
     },
 
@@ -59,25 +59,25 @@
     }
   };
 
-  function reset(tern) {
-    var cx = tern.cx = new infer.Context(tern.environment, tern);
-    tern.uses = 0;
-    tern.files = [];
-    tern.pendingFiles = tern.filesToLoad.slice(0);
-    tern.signal("reset");
+  function reset(srv) {
+    srv.cx = new infer.Context(srv.environment, srv);
+    srv.uses = 0;
+    srv.files = [];
+    srv.pendingFiles = srv.filesToLoad.slice(0);
+    srv.signal("reset");
   }
 
-  function doRequest(tern, doc, c) {
+  function doRequest(srv, doc, c) {
     var files = doc.files || [];
     for (var i = 0; i < files.length; ++i) {
       var file = files[i];
-      if (file.type == "full") tern.loadFile(file.name, file.text);
+      if (file.type == "full") loadFile(srv, file.name, file.text);
     }
 
-    finishPending(tern, function(err) {
+    finishPending(srv, function(err) {
       if (err) return c(err);
-      var file = resolveFile(tern, files, doc.query.file);
-      infer.withContext(tern.cx, function() {
+      var file = resolveFile(srv, files, doc.query.file);
+      infer.withContext(srv.cx, function() {
         // FIXME reinstate this when the code stops crashing all the time
         // try {
         switch (doc.query.type) {
@@ -95,29 +95,29 @@
     });
   }
 
-  loadFile: function(tern, filename, text) {
-    infer.withContext(tern.cx, function() {
+  function loadFile(srv, filename, text) {
+    infer.withContext(srv.cx, function() {
       var file = {name: filename, text: text};
-      tern.signal("beforeLoad", file);
+      srv.signal("beforeLoad", file);
       var result = infer.analyze(file.text, filename);
-      var known = findFile(tern.files, filename);
-      if (!known) tern.files.push(known = {name: filename});
+      var known = findFile(srv.files, filename);
+      if (!known) srv.files.push(known = {name: filename});
       known.text = file.text;
       known.ast = result.ast;
-      tern.signal("afterLoad", known);
+      srv.signal("afterLoad", known);
     });
-  },
+  }
 
-  function finishPending(tern, c) {
+  function finishPending(srv, c) {
     var next;
-    while (next = tern.pendingFiles.pop())
-      if (!findFile(tern.files, next)) break;
+    while (next = srv.pendingFiles.pop())
+      if (!findFile(srv.files, next)) break;
     if (!next) return c();
 
-    tern.callbacks.getFile(next, function(err, text) {
+    srv.callbacks.getFile(next, function(err, text) {
       if (err) return c(err);
-      tern.loadFile(next, text);
-      finishPending(tern, c);
+      loadFile(srv, next, text);
+      finishPending(srv, c);
     });
   }
 
@@ -146,16 +146,16 @@
     return closest;
   }
 
-  function resolveFile(tern, localFiles, name) {
+  function resolveFile(srv, localFiles, name) {
     var file, isRef = name.match(/^#(\d+)$/);
     if (isRef)
       file = localFiles[isRef[1]];
     else
-      file = findFile(tern.files, name);
+      file = findFile(srv.files, name);
     if (!file) throw new Error("Reference to unknown file " + name);
 
     if (file.type == "part") {
-      var realFile = findFile(tern.files, file.name);
+      var realFile = findFile(srv.files, file.name);
       if (!realFile) throw new Error("Partial file provided for " + file.name + ", which is not known");
       var line = firstLine(file.text);
       var foundPos = findMatchingPosition(line, realFile.text, file.position);
@@ -211,7 +211,7 @@
     var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
     if (!expr) return {type: null, name: null, message: "No expression at the given position"};
     var type = infer.expressionType(expr);
-    window.tp = type; // FIXME debug statement
+    if (typeof window != "undefined") window.tp = type; // FIXME debug statement
     if (query.preferFunction)
       type = type.getFunctionType() || type.getType();
     else

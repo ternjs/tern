@@ -1,16 +1,15 @@
-// a: [number]
-var a = ["foo", "bar"].map(function(s) { return s.charCodeAt(0); });
+["foo", "bar"].map(function(s) { return s.charCodeAt(0); }); //: [number]
 
-// b: [bool]
 var b = [];
 b.push(true);
+b; //: [bool]
 
-// c: [?]
 var c = [];
 c.push("hi");
 c.push(10);
+c; //: [?]
 
-// d: number
 var d;
 function setD(a) { d = a; }
 setD.call(null, 55);
+d; //: number

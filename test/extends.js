@@ -37,35 +37,24 @@ var SubEleven = (function(_super) {
 
 var top = new Top, one = new SubOne(true), two = new SubTwo(false), elf = new SubEleven(true);
 
-// a: fn() -> string
-var a = one.topMethod;
+one.topMethod; //: fn() -> string
 
-// b: fn() -> number
-var b = one.methodOne;
+one.methodOne; //: fn() -> number
 
-// c: bool
-var c = one.argOne;
+one.argOne; //: bool
 
-// d: ?
-var d = one.argTwo;
+one.argTwo; //: ?
 
-// e: bool
-var e = two.argTwo;
+two.argTwo; //: bool
 
-// f: ?
-var f = one.methodTwo;
+one.methodTwo; //: ?
 
-// g: ?
-var g = one.methodEleven;
+one.methodEleven; //: ?
 
-// h: number
-var h = SubEleven.topStatic;
+SubEleven.topStatic; //: number
 
-// i: fn() -> number
-var i = elf.methodOne;
+elf.methodOne; //: fn() -> number
 
-// j: string
-var j = elf.methodEleven();
+elf.methodEleven(); //: string
 
-// k: ?
-var k = two.methodEleven;
+two.methodEleven; //: ?
