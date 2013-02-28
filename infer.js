@@ -419,8 +419,7 @@
     for (var i = 0; i < this.args.length; ++i) {
       if (i) str += ", ";
       var name = this.argNames[i];
-      if (name && typeof name != "string") name = name.name;
-      if (name) str += name + ": ";
+      if (name && name != "?") str += name + ": ";
       str += toString(this.args[i].getType(), maxDepth);
     }
     str += ")";
@@ -551,7 +550,7 @@
         var scopeCopy = new Scope(scope.prev);
         for (var v in scope.props) {
           var local = scopeCopy.ensureProp(v);
-          for (var i = 0; i < fn.argNames.length; ++i) if (fn.argNames[i].name == v && i < args.length)
+          for (var i = 0; i < fn.argNames.length; ++i) if (fn.argNames[i] == v && i < args.length)
             args[i].propagate(local);
         }
         scopeCopy.fnType = new Fn(fn.name, self, args, fn.argNames, new AVal);
@@ -614,7 +613,7 @@
       var argVals = [], argNames = [];
       for (var i = 0; i < node.params.length; ++i) {
         var param = node.params[i];
-        argNames.push(param);
+        argNames.push(param.name);
         var val = inner.ensureProp(param.name);
         argVals.push(val);
         val.name = param;
@@ -1513,7 +1512,7 @@
 
     if (fn && (args || ret)) {
       if (args) for (var i = 0; i < fn.argNames.length; ++i) {
-        var name = fn.argNames[i].name, known = args[name];
+        var name = fn.argNames[i], known = args[name];
         if (known) known.propagate(fn.args[i]);
       }
       if (ret) ret.propagate(fn.retval);

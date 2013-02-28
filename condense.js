@@ -90,7 +90,6 @@
     for (var i = 0; i < this.args.length; ++i) {
       if (i) out += ", ";
       var name = this.argNames[i];
-      if (name && typeof name != "string") name = name.name;
       if (name && name != "?") out += name + ": ";
       out += desc(this.args[i], state);
     }
