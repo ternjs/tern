@@ -1,4 +1,4 @@
-var server, editor, ecma5_meta, browser_meta, requirejs_meta;
+var server, editor, environment = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
@@ -12,16 +12,14 @@ function load(file, c) {
 }
 
 CodeMirror.on(window, "load", function() {
-  load("ecma5.json", function(json) {
-    ecma5_meta = JSON.parse(json);
-    load("browser.json", function(json) {
-      browser_meta = JSON.parse(json);
-      load("plugin/requirejs/requirejs.json", function(json) {
-        requirejs_meta = JSON.parse(json);
-        initEditor();
-      });
+  var files = ["ecma5.json", "browser.json", "plugin/requirejs/requirejs.json", "jquery.json"];
+  var loaded = 0;
+  for (var i = 0; i < files.length; ++i) (function(i) {
+    load(files[i], function(json) {
+      environment[i] = JSON.parse(json);
+      if (++loaded == files.length) initEditor();
     });
-  });
+  })(i);
 });
 
 function initEditor() {
@@ -36,16 +34,13 @@ function initEditor() {
     autofocus: true,
     matchBrackets: true
   });
+  server = new tern.Server({getFile: getFile}, environment);
   registerDoc("test.js", editor.getDoc());
-  initServer();
   editor.on("cursorActivity", updateArgumentHints);
 
-  load("node_modules/codemirror/lib/codemirror.js", function(body) {
-    registerDoc("codemirror.js", new CodeMirror.Doc(body, "javascript"));
-    load("demo/underscore.js", function(body) {
-      registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
-      registerDoc("require_test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
-    });
+  registerDoc("test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
+  load("demo/underscore.js", function(body) {
+    registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
   });
 
   CodeMirror.on(document.getElementById("docs"), "click", function(e) {
@@ -83,6 +78,7 @@ function registerDoc(name, doc) {
     setSelectedDoc(docs.length - 1);
     curDoc = docs[docs.length - 1];
   }
+  server.addFile(name);
 }
 
 function setSelectedDoc(pos) {
@@ -95,13 +91,6 @@ function selectDoc(pos) {
   setSelectedDoc(pos);
   curDoc = docs[pos];
   editor.swapDoc(curDoc.doc);
-}
-
-function initServer() {
-  server = new tern.Server({getFile: getFile});
-  server.addEnvironment(ecma5_meta);
-  server.addEnvironment(browser_meta);
-  server.addEnvironment(requirejs_meta);
 }
 
 function getFragmentAround(cm, start, end) {
@@ -307,4 +296,12 @@ function jumpBack(cm) {
     if (i == docs.length) return;
   }
   cm.setSelection(pos.start, pos.end);
+}
+
+function condense(cm) {
+  var cx = new tern.Context(server.environment);
+  tern.withContext(cx, function() {
+    var data = tern.analyze(cm.getValue(), "local");
+    console.log(JSON.stringify(tern.condense("local"), null, 2));
+  });
 }

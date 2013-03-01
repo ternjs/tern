@@ -17,6 +17,7 @@
   <script src="node_modules/acorn/util/walk.js"></script>
   <script src="tern.js"></script>
   <script src="infer.js"></script>
+  <script src="condense.js"></script>
   <script src="demo/demo.js"></script>
   <script src="plugin/requirejs/requirejs.js"></script>
 
@@ -77,7 +78,7 @@ var randomInt = myMod.randomElt(myMod.intList);
 
 // A test of the requirejs plug-in
 
-requirejs(["require_test_dep.js"], function(test) {
+requirejs(["test_dep.js"], function(test) {
   var word = test.capitalize(test.garble("coconut"));
   console.log(word);
 });

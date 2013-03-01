@@ -10,7 +10,7 @@
   var plugins = Object.create(null);
   exports.registerPlugin = function(name, init) { plugins[name] = init; };
 
-  var Server = exports.Server = function(callbacks) {
+  var Server = exports.Server = function(callbacks, environment) {
     this.cx = null;
     this.callbacks = callbacks;
     this.environment = [];
@@ -19,6 +19,8 @@
 
     this.pendingFiles = [];
     this.files = this.uses = 0;
+    if (environment) for (var i = 0; i < environment.length; ++i)
+      this.addEnvironment(environment[i]);
   };
   Server.prototype = {
     addEnvironment: function(data) {

@@ -157,6 +157,7 @@
     addType: function() {},
     propagate: function() {},
     getProp: function() { return ANull; },
+    forAllProps: function() {},
     hasType: function() { return false; },
     isEmpty: function() { return true; },
     getFunctionType: function() {},
@@ -844,7 +845,7 @@
         self.propagate(new HasMethodCall(propName(node.callee, scope, c), args, node.arguments, out));
       } else {
         var callee = infer(node.callee, scope, c);
-        callee.propagate(new IsCallee(ANull, args, node.arguments, out));
+        callee.propagate(new IsCallee(cx.topScope, args, node.arguments, out));
       }
     }),
     MemberExpression: ret(function(node, scope, c) {
@@ -856,7 +857,7 @@
       return scope.getVar(node.name);
     }),
     ThisExpression: ret(function(node, scope) {
-      return scope.fnType ? scope.fnType.self : ANull;
+      return scope.fnType ? scope.fnType.self : cx.topScope;
     }),
     Literal: ret(function(node, scope) {
       return literalType(node.value);
@@ -1021,7 +1022,7 @@
       return scope.findVar(node.name) || ANull;
     },
     ThisExpression: function(node, scope) {
-      return scope.fnType ? scope.fnType.self : ANull;
+      return scope.fnType ? scope.fnType.self : cx.topScope;
     },
     Literal: function(node) {
       return literalType(node.value);
@@ -1133,7 +1134,8 @@
       throw new Error("Unrecognized type spec: " + this.spec + " (at " + this.pos + ")");
     },
     parseFnType: function(name, top) {
-      for (var args = [], names = [], i = 0; !this.eat(")"); ++i) {
+      var args = [], names = [];
+      if (!this.eat(")")) for (var i = 0; ; ++i) {
         var colon = this.spec.indexOf(": ", this.pos), argname, aval;
         if (colon != -1) {
           argname = this.spec.slice(this.pos, colon);
@@ -1144,7 +1146,10 @@
         }
         names.push(argname);
         args.push(this.parseType());
-        this.eat(", ");
+        if (!this.eat(", ")) {
+          this.eat(")") || this.error();
+          break;
+        }
       }
       var retType, computeRet;
       if (this.eat(" -> ")) {
@@ -1165,6 +1170,10 @@
         if (this.eat("]")) return arr;
       } else if (this.eat("+")) {
         var base = this.parseType();
+        if (base instanceof Fn) {
+          var proto = base.getProp("prototype").getType();
+          if (proto instanceof Obj) return getInstance(proto);
+        }
         if (base instanceof Obj) return getInstance(base);
         else return base;
       } else if (this.eat("?")) {
@@ -1177,7 +1186,7 @@
         case "bool": return cx.bool;
         case "<top>": return cx.topScope;
         }
-        if (word in cx.shorthands) return cx.shorthands[word];
+        if (cx.shorthands && word in cx.shorthands) return cx.shorthands[word];
         if (word in cx.protos) return getInstance(cx.protos[word]);
         return parsePath(word);
       }
@@ -1225,35 +1234,49 @@
     return new TypeParser(spec).parseType(name, true);
   }
 
-  function parseEffect(effect, fn) {
+  function addEffect(fn, handler) {
     var oldCmp = fn.computeRet, rv = fn.retval;
+    fn.computeRet = function(self, args) {
+      handler(self, args);
+      return oldCmp ? oldCmp(self, args) : rv;
+    };
+  }
+
+  function parseEffect(effect, fn) {
     if (effect.indexOf("propagate ") == 0) {
       var p = new TypeParser(effect, 10);
       var getOrigin = p.parseRetType();
       if (!p.eat(" ")) p.error();
       var getTarget = p.parseRetType();
-      fn.computeRet = function(self, args) {
+      addEffect(fn, function(self, args) {
         getOrigin(self, args).propagate(getTarget(self, args));
-        return oldCmp ? oldCmp(self, args) : rv;
-      };
+      });
     } else if (effect.indexOf("call ") == 0) {
       var p = new TypeParser(effect, 5);
       var getCallee = p.parseRetType(), getSelf = null, getArgs = [];
       if (p.eat(" this=")) getSelf = p.parseRetType();
       while (p.eat(" ")) getArgs.push(p.parseRetType());
-      fn.computeRet = function(self, args) {
+      addEffect(fn, function(self, args) {
         var callee = getCallee(self, args);
         var slf = getSelf ? getSelf(self, args) : ANull, as = [];
         for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
         callee.propagate(new IsCallee(slf, as));
-        return oldCmp ? oldCmp(self, args) : rv;
-      };
+      });
     } else if (effect.indexOf("custom ") == 0) {
       var customFunc = customFunctions[effect.slice(7).trim()];
-      fn.computeRet = function(self, args) {
-        if (customFunc) customFunc(self, args);
-        return oldCmp ? oldCmp(self, args) : rv;
-      };
+      if (customFunc) addEffect(fn, customFunc);
+    } else if (effect.indexOf("copy ") == 0) {
+      var p = new TypeParser(effect, 5);
+      var getFrom = p.parseRetType();
+      p.eat(" ");
+      var getTo = p.parseRetType();
+      addEffect(fn, function(self, args) {
+        var from = getFrom(self, args), to = getTo(self, args);
+        from.forAllProps(function(prop, val, local) {
+          if (local && prop != "<i>")
+            to.propagate(new PropHasSubset(prop, val));
+        });
+      });
     } else {
       throw new Error("Unknown effect type: " + effect);
     }
@@ -1298,8 +1321,22 @@
   }
 
   function interpret(spec, name) {
-    if (typeof spec == "string") return parseType(spec, name);
-    // Else, it is an object spec
+    if (typeof spec == "string") {
+      if (/^\*fn\(/.test(spec)) {
+        var type = parseType(spec.slice(1));
+        for (var i = 0; i < type.args.length; ++i) (function(i) {
+          var arg = type.args[i];
+          if (arg instanceof Fn) addEffect(type, function(_self, fArgs) {
+            var fArg = fArgs[i];
+            if (fArg) fArg.propagate(new IsCallee(cx.topScope, arg.args));
+          });
+        })(i);
+        return type;
+      } else {
+        return parseType(spec, name);
+      }
+    }
+
     var obj;
     if (spec["!type"]) obj = interpret(spec["!type"], name);
     else if (spec["!stdProto"]) obj = cx.protos[spec["!stdProto"]];
@@ -1324,15 +1361,14 @@
 
   function loadEnvironment(data) {
     addOrigin(cx.curOrigin = data["!name"] || "env#" + cx.origins.length);
-
-    var defs = data["!predef"];
-    if (defs) for (var name in defs) if (hop(defs, name))
-      cx.predefs[name] = interpret(defs[name], pathToName(name));
-
     cx.shorthands = Object.create(null);
     var shs = data["!shorthands"];
     if (shs) for (var name in shs) if (hop(shs, name))
       cx.shorthands[name] = interpret(shs[name]);
+
+    var defs = data["!predef"];
+    if (defs) for (var name in defs) if (hop(defs, name))
+      cx.predefs[name] = interpret(defs[name], pathToName(name));
 
     populate(cx.topScope, data);
 
