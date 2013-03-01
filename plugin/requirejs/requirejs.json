@@ -3,7 +3,7 @@
   "!plugin": "requireJS",
   "!predef": {
     "requirejs": {
-      "!type": "fn(deps: ?, callback: ?, errback: ?, optional: ?) -> $custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> $custom:requireJS",
       "onError": "fn(err: +Error.prototype)",
       "load": "fn(context: ?, moduleName: string, url: string)",
       "config": "fn(config: ?)",
@@ -14,7 +14,7 @@
   "requirejs": "requirejs",
   "require": "requirejs",
   "define": {
-    "!type": "fn(deps: [string], callback: ?) -> $custom:requireJS",
+    "!type": "fn(deps: [string], callback: fn()) -> $custom:requireJS",
     "amd": {
       "jQuery": "bool"
     }

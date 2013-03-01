@@ -213,7 +213,7 @@
       var expr = infer.findExpressionAt(file.ast, null, wordStart - 1, file.scope);
       var tp = expr && infer.expressionType(expr);
       if (tp)
-        completions = infer.propertiesOf(tp.type, word);
+        completions = infer.propertiesOf(tp, word);
       else
         completions = [];
     } else {

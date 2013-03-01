@@ -18,6 +18,7 @@
   <script src="tern.js"></script>
   <script src="infer.js"></script>
   <script src="demo/demo.js"></script>
+  <script src="plugin/requirejs/requirejs.js"></script>
 
   <link rel=stylesheet href="doc/docs.css">
   <title>Tern.js</title>
@@ -73,9 +74,29 @@ var quux = baz.hallo + baz.size;
 
 var randomStr = myMod.randomElt(myMod.strList);
 var randomInt = myMod.randomElt(myMod.intList);
+
+// A test of the requirejs plug-in
+
+requirejs(["require_test_dep.js"], function(test) {
+  var word = test.capitalize(test.garble("coconut"));
+  console.log(word);
+});
 </textarea></form>
   <pre id=out class=output>&nbsp;</pre>
 </div>
+
+<pre style="display: none" id="requirejs_test_dep">define(function() {
+  return {
+    capitalize: function(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    },
+    garble: function(word) {
+      return word.replace(/[auiyoe]/g, function() {
+        return "auiyoe".charAt(Math.floor(Math.random() * 6));
+      });
+    }
+  };
+});</pre>
 
 <h2>What is the status of the project?</h2>
 

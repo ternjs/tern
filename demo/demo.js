@@ -1,4 +1,4 @@
-var server, editor, ecma5_meta, browser_meta;
+var server, editor, ecma5_meta, browser_meta, requirejs_meta;
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
@@ -16,7 +16,10 @@ CodeMirror.on(window, "load", function() {
     ecma5_meta = JSON.parse(json);
     load("browser.json", function(json) {
       browser_meta = JSON.parse(json);
-      initEditor();
+      load("plugin/requirejs/requirejs.json", function(json) {
+        requirejs_meta = JSON.parse(json);
+        initEditor();
+      });
     });
   });
 });
@@ -40,6 +43,7 @@ function initEditor() {
     registerDoc("codemirror.js", new CodeMirror.Doc(body, "javascript"));
     load("demo/underscore.js", function(body) {
       registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
+      registerDoc("require_test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
     });
   });
 
@@ -96,6 +100,7 @@ function initServer() {
   server = new tern.Server({getFile: getFile});
   server.addEnvironment(ecma5_meta);
   server.addEnvironment(browser_meta);
+  server.addEnvironment(requirejs_meta);
 }
 
 function getFragmentAround(cm, start, end) {
@@ -278,7 +283,11 @@ function showArgumentHints(cache, out, pos) {
 function jumpToDef(cm) {
   server.request(buildRequest(cm, "definition", false).request, function(error, data) {
     if (error) return displayError(cm, error);
-    // FIXME handle multiple buffers
+    if (data.file != curDoc.name) {
+      for (var i = 0; i < docs.length; ++i)
+        if (docs[i].name == data.file) { selectDoc(i); break; }
+      if (i == docs.length) return displayError("Definition is not in a local buffer");
+    }
     cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
   });
 }
