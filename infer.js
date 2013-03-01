@@ -475,7 +475,7 @@
     this.prim = Object.create(null);
     this.origins = [];
     this.curOrigin = "ecma5";
-    this.shorthands = null;
+    this.paths = Object.create(null);
 
     exports.withContext(this, function() {
       this.curOrigin = "ecma5";
@@ -1317,13 +1317,17 @@
     }
   }
 
-  // FIXME detect overdeep recursion
   function parsePath(path) {
+    var cached = cx.paths[path];
+    if (cached != null) return cached;
+    cx.paths[path] = ANull;
+
     var isdate = /^Date.prototype/.test(path);
     var parts = path.split(".");
     var cur = cx.topScope;
     for (var i = 0; i < parts.length && cur != ANull; ++i)
       cur = enterPathProp(cur, parts[i], path, i);
+    cx.paths[path] = cur == ANull ? null : cur;
     return cur;
   }
 

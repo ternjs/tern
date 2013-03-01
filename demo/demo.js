@@ -16,7 +16,7 @@ function load(file, c) {
 }
 
 CodeMirror.on(window, "load", function() {
-  var files = ["ecma5.json", "browser.json", "plugin/requirejs/requirejs.json"];
+  var files = ["ecma5.json", "browser.json", "plugin/requirejs/requirejs.json", "jquery.json"];
   var loaded = 0;
   for (var i = 0; i < files.length; ++i) (function(i) {
     load(files[i], function(json) {
