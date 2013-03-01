@@ -7,7 +7,8 @@ CodeMirror.on(window, "load", function() {
     lineNumbers: true,
     extraKeys: {
       "Ctrl-I": findType,
-      "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); }
+      "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
+      "Alt-.": jumpToDef
     },
     autofocus: true,
     matchBrackets: true
@@ -67,6 +68,12 @@ function getFragmentAround(cm, start, end) {
           text: cm.getRange(from, Pos(endLine, 0))};
 }
 
+function displayError(cm, err) {
+  var out = document.getElementById("out");
+  out.innerHTML = "";
+  out.appendChild(document.createTextNode(err.message || err.toString()));
+}
+
 function buildRequest(cm, how, query) {
   var files, offset = 0, startPos, endPos;
   if (typeof query == "string") query = {type: query};
@@ -113,7 +120,7 @@ function buildRequest(cm, how, query) {
 
 function findType(cm) {
   server.request(buildRequest(cm, "range", "type").request, function(error, data) {
-    if (error) throw new Error(error);
+    if (error) return displayError(cm, error);
     var out = document.getElementById("out");
     out.innerHTML = "";
     out.appendChild(document.createTextNode(data.type || "not found"));
@@ -124,7 +131,7 @@ function ternHints(cm, c) {
   var req = buildRequest(cm, "pos", "completions");
 
   server.request(req.request, function(error, data) {
-    if (error) throw new Error(error);
+    if (error) return displayError(cm, error);
     c({from: cm.posFromIndex(data.from + req.offset),
        to: cm.posFromIndex(data.to + req.offset),
        list: data.completions});
@@ -218,6 +225,14 @@ function showArgumentHints(cache, out, pos) {
   }
   out.appendChild(document.createTextNode(tp.rettype ? ") -> " : ")"));
   if (tp.rettype) out.appendChild(elt("span", tp.rettype, "Tern-type"));
+}
+
+function jumpToDef(cm) {
+  server.request(buildRequest(cm, "range", "definition").request, function(error, data) {
+    if (error) return displayError(cm, error);
+    // FIXME handle multiple buffers
+    cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
+  });
 }
 
 // Debug code used to test the condenser

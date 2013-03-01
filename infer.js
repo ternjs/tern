@@ -617,6 +617,7 @@
         var val = inner.ensureProp(param.name);
         argVals.push(val);
         val.name = param;
+        val.origin = cx.curOrigin;
       }
       inner.fnType = new Fn(node.id && node.id.name, new AVal, argVals, argNames, new AVal);
       inner.fnType.originNode = node;

@@ -87,11 +87,12 @@
         // try {
         switch (doc.query.type) {
         case "completions":
-          c(null, findCompletions(file, doc.query));
-          break;
+          return c(null, findCompletions(file, doc.query));
         case "type":
-          c(null, findTypeAt(file, doc.query));
-          break;
+          return c(null, findTypeAt(file, doc.query));
+        case "definition":
+          if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
+          return c(null, findDef(file, doc.query));
         default:
           c("Unsupported query type: " + doc.query.type);
         }
@@ -217,7 +218,7 @@
 
   function findTypeAt(file, query) {
     var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
-    if (!expr) return {type: null, name: null, message: "No expression at the given position"};
+    if (!expr) throw new Error("No expression at the given position");
     infer.resetGuessing();
     var type = infer.expressionType(expr);
     if (typeof window != "undefined") window.tp = type; // FIXME debug statement
@@ -238,5 +239,30 @@
             name: name || null,
             exprName: exprName || null,
             guess: infer.didGuess()};
+  }
+
+  function findDef(file, query) {
+    var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
+    var def, file;
+    if (!expr) throw new Error("No expression at the given position");
+    if (expr.node.type == "Identifier") {
+      var found = expr.state.findVar(expr.node.name);
+      if (found && typeof found.name == "object") {
+        def = found.name;
+        file = found.origin;
+      }
+    }
+    if (!def) {
+      var type = tern.expressionType(expr);
+      if (type.types) for (var i = 0; i < type.types.length; ++i) {
+        var tp = type.types[i];
+        if (tp.originNode) { type = tp; break; }
+      }
+      def = type.originNode;
+      if (/^Function/.test(def.type) && def.id) def = def.id;
+      file = type.origin;
+    }
+    if (!def) throw new Error("Could not find a definition for the given expression");
+    return {start: def.start, end: def.end, file: file};
   }
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
