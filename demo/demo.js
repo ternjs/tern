@@ -30,7 +30,8 @@ function initEditor() {
     extraKeys: {
       "Ctrl-I": findType,
       "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
-      "Alt-.": jumpToDef
+      "Alt-.": jumpToDef,
+      "Alt-,": jumpBack
     },
     autofocus: true,
     matchBrackets: true
@@ -280,9 +281,14 @@ function showArgumentHints(cache, out, pos) {
   if (tp.rettype) out.appendChild(elt("span", tp.rettype, "Tern-type"));
 }
 
+var jumpStack = [];
+
 function jumpToDef(cm) {
   server.request(buildRequest(cm, "definition", false).request, function(error, data) {
     if (error) return displayError(cm, error);
+    jumpStack.push({file: curDoc.name,
+                    start: cm.getCursor("from"),
+                    end: cm.getCursor("to")});
     if (data.file != curDoc.name) {
       for (var i = 0; i < docs.length; ++i)
         if (docs[i].name == data.file) { selectDoc(i); break; }
@@ -290,4 +296,15 @@ function jumpToDef(cm) {
     }
     cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
   });
+}
+
+function jumpBack(cm) {
+  var pos = jumpStack.pop();
+  if (!pos) return;
+  if (pos.file != curDoc.name) {
+    for (var i = 0; i < docs.length; ++i)
+      if (docs[i].name == pos.file) { selectDoc(i); break; }
+    if (i == docs.length) return;
+  }
+  cm.setSelection(pos.start, pos.end);
 }
