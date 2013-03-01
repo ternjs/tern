@@ -283,7 +283,9 @@ function jumpToDef(cm) {
         if (docs[i].name == data.file) { selectDoc(i); break; }
       if (i == docs.length) return displayError("Definition is not in a local buffer");
     }
-    cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
+    setTimeout(function() {
+      cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
+    }, 20);
   });
 }
 
@@ -295,13 +297,7 @@ function jumpBack(cm) {
       if (docs[i].name == pos.file) { selectDoc(i); break; }
     if (i == docs.length) return;
   }
-  cm.setSelection(pos.start, pos.end);
-}
-
-function condense(cm) {
-  var cx = new tern.Context(server.environment);
-  tern.withContext(cx, function() {
-    var data = tern.analyze(cm.getValue(), "local");
-    console.log(JSON.stringify(tern.condense("local"), null, 2));
-  });
+  setTimeout(function() {
+    cm.setSelection(pos.start, pos.end);
+  }, 20);
 }
