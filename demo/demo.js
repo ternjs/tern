@@ -2,6 +2,10 @@ var server, editor, environment = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
+function findDoc(name) {
+  for (var i = 0; i < docs.length; ++i) if (docs[i].name == name) return docs[i];
+}
+
 function load(file, c) {
   var xhr = new XMLHttpRequest();
   xhr.open("get", file, true);
@@ -20,6 +24,15 @@ CodeMirror.on(window, "load", function() {
       if (++loaded == files.length) initEditor();
     });
   })(i);
+
+  var cmds = document.getElementById("commands");
+  CodeMirror.on(cmds, "change", function() {
+    if (!editor || cmds.selectedIndex == 0) return;
+    var found = commands[cmds.value];
+    cmds.selectedIndex = 0;
+    editor.focus();
+    if (found) found(editor);
+  });
 });
 
 function initEditor() {
@@ -61,11 +74,8 @@ function getFile(name, c) {
       c(null, body);
     });
   } else {
-    for (var i = 0; i < docs.length; ++i) {
-      var doc = docs[i];
-      if (doc.name == name) return c(null, doc.doc.getValue());
-    }
-    return c(null, "");
+    var doc = findDoc(name);
+    return c(null, doc ? doc.doc.getValue() : "");
   }
 }
 
@@ -301,3 +311,27 @@ function jumpBack(cm) {
     cm.setSelection(pos.start, pos.end);
   }, 20);
 }
+
+var commands = {
+  complete: function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
+  jumptodef: jumpToDef,
+  findtype: findType,
+  addfile: function() {
+    var name = prompt("Name of the new buffer", "");
+    if (name == null) return;
+    if (!name) name = "test";
+    var i = 0;
+    while (findDoc(name + (i || ""))) ++i;
+    registerDoc(name + (i || ""), new CodeMirror.Doc("", "javascript"));
+    selectDoc(docs.length - 1);
+  },
+  delfile: function() {
+    if (docs.length == 1) return;
+    server.delFile(curDoc.name);
+    for (var i = 0; i < docs.length && curDoc != docs[i]; ++i) {}
+    docs.splice(i, 1);
+    var docList = document.getElementById("docs");
+    docList.removeChild(docList.childNodes[i]);
+    selectDoc(Math.max(0, i - 1));
+  }
+};

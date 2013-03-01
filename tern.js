@@ -31,6 +31,10 @@
     addFile: function(file) {
       if (this.filesToLoad.indexOf(file) < 0) this.filesToLoad.push(file);
     },
+    delFile: function(file) {
+      var found = this.filesToLoad.indexOf(file);
+      if (found > -1) this.filesToLoad.splice(found, 1);
+    },
 
     // Used from inside the analyzer to load, for example, a
     // `require`-d file.

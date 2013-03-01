@@ -146,3 +146,12 @@ ul.tabs li.selected:before {
 ul.tabs li.selected:after {
   box-shadow: -2px 2px 0 white;
 }
+
+#commands {
+  font-family: "Ubuntu Mono";
+  font-size: 11pt;
+  position: absolute;
+  right: 0;
+  top: 3px;
+  max-width: 10em;
+}

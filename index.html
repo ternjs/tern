@@ -48,7 +48,15 @@ expression before the cursor (or the selected expression). Put the
 cursor inside a function call's argument list to automatically get a
 description of the function's arguments.</p>
 
-<div>
+<div style="position: relative">
+  <select id="commands">
+    <option>commands...</option>
+    <option value=complete>Autocomplete (ctrl-space)</option>
+    <option value=jumptodef>Jump to definition (alt-.)</option>
+    <option value=findtype>Find type of (ctrl-i)</option>
+    <option value=addfile>Add a new file</option>
+    <option value=delfile>Remove this file</option>
+  </select>
   <form>
     <ul class="tabs" id="docs"></ul>
     <textarea id=code name=code>// Type some code, see if Tern can figure out the types
