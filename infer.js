@@ -475,7 +475,6 @@
     this.prim = Object.create(null);
     this.origins = [];
     this.curOrigin = "ecma5";
-    this.predefs = Object.create(null);
     this.shorthands = null;
 
     exports.withContext(this, function() {
@@ -992,6 +991,7 @@
       var lhs = findType(node.consequent, scope);
       return lhs.isEmpty() ? findType(node.alternate, scope) : lhs;
     },
+    // FIXME this doesn't work, for some reason
     NewExpression: function(node, scope) {
       var f = findType(node.callee, scope).getFunctionType();
       var proto = f && f.getProp("prototype").getType();
@@ -1169,9 +1169,11 @@
         var arr = new Arr(this.parseType());
         if (this.eat("]")) return arr;
       } else if (this.eat("+")) {
-        var base = this.parseType();
+        var path = this.word(/[\w\.$\!<>]/);
+        var base = parsePath(path);
         if (base instanceof Fn) {
-          var proto = base.getProp("prototype").getType();
+          path += ".prototype";
+          var proto = enterPathProp(base, "prototype", path, path.split(".").length - 1);
           if (proto instanceof Obj) return getInstance(proto);
         }
         if (base instanceof Obj) return getInstance(base);
@@ -1186,8 +1188,7 @@
         case "bool": return cx.bool;
         case "<top>": return cx.topScope;
         }
-        if (cx.shorthands && word in cx.shorthands) return cx.shorthands[word];
-        if (word in cx.protos) return getInstance(cx.protos[word]);
+        if (cx.localDefs && word in cx.localDefs) return cx.localDefs[word];
         return parsePath(word);
       }
       this.error();
@@ -1282,32 +1283,47 @@
     }
   }
 
-  function parsePath(path) {
-    var predef = cx.predefs[path];
-    if (predef) return predef;
+  function enterPathProp(base, prop, fullPath, i) {
+    if (prop.charAt(0) == "!") {
+      if (prop == "!proto") {
+        return (base instanceof Obj && base.proto) || ANull;
+      } else {
+        var fn = base.getFunctionType();
+        if (!fn) {
+          return ANull;
+        } else if (prop == "!ret") {
+          return fn.retval.getType() || ANull;
+        } else {
+          var arg = fn.args[Number(prop.slice(1))];
+          return (arg && arg.getType()) || ANull;
+        }
+      }
+    } else if (base instanceof Obj) {
+      var propVal = base.props[prop];
+      if (!propVal || !(propVal.flags & flag_definite) || propVal.isEmpty()) {
+        var parts = fullPath.split(".");
+        for (var j = 0, load = cx.loading; load && j <= i; ++j) {
+          if (!load || typeof load == "string") load = null;
+          else load = load[parts[j]];
+        }
+        if (!load) return ANull;
+        var outer = interpretOuter(load, parts[i]);
+        propVal = base.props[prop];
+        if (!propVal || !(propVal.flags & flag_definite))
+          outer.propagate(base.ensureProp(prop));
+        return outer;
+      }
+      return propVal.types[0];
+    }
+  }
 
+  // FIXME detect overdeep recursion
+  function parsePath(path) {
+    var isdate = /^Date.prototype/.test(path);
     var parts = path.split(".");
     var cur = cx.topScope;
-    for (var i = 0; i < parts.length && cur != ANull; ++i) {
-      var part = parts[i];
-      if (part.charAt(0) == "!") {
-        if (part == "!proto") {
-          cur = (cur instanceof Obj && cur.proto) || ANull;
-        } else {
-          var fn = cur.getFunctionType();
-          if (!fn) {
-            cur = ANull;
-          } else if (part == "!ret") {
-            cur = fn.retval.getType() || ANull;
-          } else {
-            var arg = fn.args[Number(part.slice(1))];
-            cur = (arg && arg.getType()) || ANull;
-          }
-        }
-      } else {
-        cur = cur.getProp(part).getType() || ANull;
-      }
-    }
+    for (var i = 0; i < parts.length && cur != ANull; ++i)
+      cur = enterPathProp(cur, parts[i], path, i);
     return cur;
   }
 
@@ -1315,12 +1331,12 @@
     for (var prop in props) if (hop(props, prop) && prop.charCodeAt(0) != 33) {
       var nm = name ? name + "." + prop : prop;
       var v = obj.ensureProp(prop);
-      interpret(props[prop], nm).propagate(v);
+      interpret(props[prop], nm, v.getType(false)).propagate(v);
     }
     return obj;
   }
 
-  function interpret(spec, name) {
+  function interpretOuter(spec, name) {
     if (typeof spec == "string") {
       if (/^\*fn\(/.test(spec)) {
         var type = parseType(spec.slice(1));
@@ -1337,11 +1353,15 @@
       }
     }
 
-    var obj;
-    if (spec["!type"]) obj = interpret(spec["!type"], name);
-    else if (spec["!stdProto"]) obj = cx.protos[spec["!stdProto"]];
-    else if (spec["!isDef"]) obj = interpret(spec["!isDef"]);
-    else obj = new Obj(spec["!proto"] ? interpret(spec["!proto"]) : true, name);
+    if (spec["!type"]) return interpret(spec["!type"], name);
+    else if (spec["!stdProto"]) return cx.protos[spec["!stdProto"]];
+    else if (spec["!isDef"]) return interpret(spec["!isDef"]);
+    else return new Obj(spec["!proto"] ? interpret(spec["!proto"]) : true, name);
+  }
+
+  function interpret(spec, name, existing) {
+    var obj = existing || interpretOuter(spec, name);
+    if (typeof spec == "string") return obj;
 
     var effects = spec["!effects"];
     if (effects && obj instanceof Fn) for (var i = 0; i < effects.length; ++i)
@@ -1361,26 +1381,15 @@
 
   function loadEnvironment(data) {
     addOrigin(cx.curOrigin = data["!name"] || "env#" + cx.origins.length);
-    cx.shorthands = Object.create(null);
-    var shs = data["!shorthands"];
-    if (shs) for (var name in shs) if (hop(shs, name))
-      cx.shorthands[name] = interpret(shs[name]);
+    cx.loading = data;
+    cx.localDefs = Object.create(null);
 
-    var defs = data["!predef"];
-    if (defs) for (var name in defs) if (hop(defs, name))
-      cx.predefs[name] = interpret(defs[name], pathToName(name));
+    var def = data["!define"];
+    for (var name in def) cx.localDefs[name] = interpret(def[name], name);
 
     populate(cx.topScope, data);
 
-    var added = data["!added"];
-    if (added) for (var path in added) {
-      var lastDot = path.lastIndexOf(".");
-      if (lastDot < 1) continue;
-      var obj = parsePath(path.slice(0, lastDot));
-      interpret(added[path]).propagate(obj.getProp(path.slice(lastDot + 1)));
-    }
-
-    cx.curOrigin = null;
+    cx.curOrigin = cx.loading = cx.localDefs = null;
   }
 
   // Used to register custom logic for more involved effect or type

@@ -1,31 +1,18 @@
 {
   "!name": "jQuery",
-  "!predef": {
-    "jQuery.fn": {},
-    "jQuery": "fn(selector: ?, context: frameElement) -> jQuery.fn",
-    "jQuery.Event.prototype": {},
-    "jQuery.Event": {
-      "!type": "fn()",
-      "prototype": "jQuery.Event.prototype"
-    },
-    "jQuery.Deferred.prototype": {},
-    "jQuery.Deferred": {
-      "!type": "fn()",
-      "prototype": "jQuery.Deferred.prototype"
-    },
-    "jQuery.fn.offset.!ret": {
+  "!define": {
+    "offset": {
       "top": "number",
       "left": "number"
     },
-    "jQuery.fn.serializeArray.!ret.<i>": {
+    "keyvalue": {
       "name": "string",
       "value": "string"
     }
   },
   "jQuery": {
-    "!isDef": "jQuery",
+    "!type": "fn(selector: ?, context: frameElement) -> jQuery.fn",
     "fn": {
-      "!isDef": "jQuery.fn",
       "add": "fn(selector: string) -> jQuery.fn",
       "addBack": "fn(selector?: string) -> jQuery.fn",
       "addClass": "fn(className: string) -> jQuery.fn",
@@ -108,7 +95,7 @@
       "nextUntil": "fn(selector?: string, filter?: string) -> jQuery.fn",
       "not": "fn(selector: string) -> jQuery.fn",
       "off": "*fn(events: string, selector?: string, handler: fn(+jQuery.Event)) -> jQuery.fn",
-      "offset": "fn() -> jQuery.fn.offset.!ret",
+      "offset": "fn() -> offset",
       "offsetParent": "fn() -> jQuery.fn",
       "on": "*fn(events: string, selector?: string, data?: ?, handler: fn(+jQuery.Event)) -> jQuery.fn",
       "one": "*fn(events: string, data?: ?, handler: fn(+jQuery.Event)) -> jQuery.fn",
@@ -117,7 +104,7 @@
       "parent": "fn(selector?: string) -> jQuery.fn",
       "parents": "fn(selector?: string) -> jQuery.fn",
       "parentsUntil": "fn(selector?: string, filter?: string) -> jQuery.fn",
-      "position": "fn() -> jQuery.fn.offset.!ret",
+      "position": "fn() -> offset",
       "prepend": "fn(content: ?) -> jQuery.fn",
       "prependTo": "fn(target: ?) -> jQuery.fn",
       "prev": "fn(selector?: string) -> jQuery.fn",
@@ -142,7 +129,7 @@
       "select": "*fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
       "selector": "string",
       "serialize": "fn() -> string",
-      "serializeArray": "fn() -> [jQuery.fn.serializeArray.!ret.<i>]",
+      "serializeArray": "fn() -> [keyvalue]",
       "show": "fn() -> jQuery.fn",
       "siblings": "fn(selector?: string) -> jQuery.fn",
       "size": "fn() -> number",
@@ -182,9 +169,7 @@
     "cssHooks": {},
     "data": "fn(element: +Element, key: string, value: ?) -> $2",
     "Event": {
-      "!isDef": "jQuery.Event",
       "prototype": {
-        "!isDef": "jQuery.Event.prototype",
         "currentTarget": "+Element",
         "data": "?",
         "delegateTarget": "+Element",
@@ -207,9 +192,7 @@
       }
     },
     "Deferred": {
-      "!isDef": "jQuery.Deferred",
       "prototype": {
-        "!isDef": "jQuery.Deferred.prototype",
         "when": "fn(deferred: +jQuery.Deferred) -> +jQuery.Deferred",
         "always": "fn(callback: fn()) -> +jQuery.Deferred",
         "done": "fn(callback: fn()) -> +jQuery.Deferred",
