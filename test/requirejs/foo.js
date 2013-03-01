@@ -1,3 +1,1 @@
-define({
-  aString: "hello"
-});
+define({aString: "hello"});

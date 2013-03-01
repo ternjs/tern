@@ -38,7 +38,6 @@ function runTests() {
     var file = getFile(context + fname);
 
     var server = new tern.Server(callbacks(context));
-    server.addFile(fname);
     server.addEnvironment(ecma5);
     for (var i = 0; i < file.env.length; ++i) server.addEnvironment(file.env[i]);
 
@@ -60,7 +59,7 @@ function runTests() {
         var type = resp.guess && !m[2] ? "?" : resp.type || "?";
         if (type != m[3]) {
           console.log(name + ": Expression at line " + acorn.getLineInfo(file.text, m.index).line +
-                      " has type\n  " + resp.type + "\ninstead of expected type\n  " + m[3]);
+                      " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
           ++failed;
         }
       });

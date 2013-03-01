@@ -1,8 +1,27 @@
-var editor;
-
+var server, editor, ecma5_meta, browser_meta;
 var Pos = CodeMirror.Pos;
+var docs = [], curDoc;
+
+function load(file, c) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("get", file, true);
+  xhr.send();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) c(xhr.responseText, xhr.status);
+  };
+}
 
 CodeMirror.on(window, "load", function() {
+  load("ecma5.json", function(json) {
+    ecma5_meta = JSON.parse(json);
+    load("browser.json", function(json) {
+      browser_meta = JSON.parse(json);
+      initEditor();
+    });
+  });
+});
+
+function initEditor() {
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     extraKeys: {
@@ -13,32 +32,70 @@ CodeMirror.on(window, "load", function() {
     autofocus: true,
     matchBrackets: true
   });
-
+  registerDoc("test.js", editor.getDoc());
   initServer();
   editor.on("cursorActivity", updateArgumentHints);
-});
 
-function load(file) {
-  var xhr = new XMLHttpRequest();
-  xhr.open("get", file, false);
-  xhr.send();
-  return xhr.responseText;
+  load("node_modules/codemirror/lib/codemirror.js", function(body) {
+    registerDoc("codemirror.js", new CodeMirror.Doc(body, "javascript"));
+    load("demo/underscore.js", function(body) {
+      registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
+    });
+  });
+
+  CodeMirror.on(document.getElementById("docs"), "click", function(e) {
+    var target = e.target || e.srcElement;
+    if (target.nodeName.toLowerCase() != "li") return;
+    for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling))
+      if (c == target) return selectDoc(i);
+  });
 }
 
-var ecma5 = JSON.parse(load("ecma5.json"));
-var browser = JSON.parse(load("browser.json"));
-var server;
+var httpCache = {};
+function getFile(name, c) {
+  if (/^https?:\/\//.test(name)) {
+    if (httpCache[name]) return c(null, httpCache[name]);
+    load(name, function(body, status) {
+      if (status >= 400) body = "";
+      httpCache[name] = body;
+      c(null, body);
+    });
+  } else {
+    for (var i = 0; i < docs.length; ++i) {
+      var doc = docs[i];
+      if (doc.name == name) return c(null, doc.doc.getValue());
+    }
+    return c(null, "");
+  }
+}
+
+function registerDoc(name, doc) {
+  docs.push({name: name, doc: doc});
+  var docTabs = document.getElementById("docs");
+  var li = docTabs.appendChild(document.createElement("li"));
+  li.appendChild(document.createTextNode(name));
+  if (editor.getDoc() == doc) {
+    setSelectedDoc(docs.length - 1);
+    curDoc = docs[docs.length - 1];
+  }
+}
+
+function setSelectedDoc(pos) {
+  var docTabs = document.getElementById("docs");
+  for (var i = 0; i < docTabs.childNodes.length; ++i)
+    docTabs.childNodes[i].className = pos == i ? "selected" : "";
+}
+
+function selectDoc(pos) {
+  setSelectedDoc(pos);
+  curDoc = docs[pos];
+  editor.swapDoc(curDoc.doc);
+}
 
 function initServer() {
-  server = new tern.Server({
-    getFile: function(name, c) {
-      if (name != "local") throw new Error("Why are you trying to fetch " + name + "?");
-      c(null, editor.getValue());
-    }
-  });
-  server.addEnvironment(ecma5);
-  server.addEnvironment(browser);
-  server.addFile("local");
+  server = new tern.Server({getFile: getFile});
+  server.addEnvironment(ecma5_meta);
+  server.addEnvironment(browser_meta);
 }
 
 function getFragmentAround(cm, start, end) {
@@ -63,7 +120,7 @@ function getFragmentAround(cm, start, end) {
   var from = Pos(minLine, 0);
 
   return {type: "part",
-          name: "local",
+          name: curDoc.name,
           offset: cm.indexFromPos(from),
           text: cm.getRange(from, Pos(endLine, 0))};
 }
@@ -97,13 +154,13 @@ function buildRequest(cm, query, allowFragments) {
       query.end -= offset;
     } else {
       files = [{type: "full",
-                name: "local",
+                name: curDoc.name,
                 text: cm.getValue()}];
-      query.file = "local";
+      query.file = curDoc.name;
       cm.markClean();
     }
   } else {
-    query.file = "local";
+    query.file = curDoc.name;
   }
   return {request: {query: query, files: files},
           offset: offset};
@@ -224,18 +281,4 @@ function jumpToDef(cm) {
     // FIXME handle multiple buffers
     cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
   });
-}
-
-// Debug code used to test the condenser
-function condense(cm) {
-  var cx = new tern.Context(server.environment);
-  tern.withContext(cx, function() {
-    var data = tern.analyze(cm.getValue(), "local");
-    console.log(JSON.stringify(tern.condense("local"), null, 2));
-  });
-}
-
-function loadCode(url) {
-  editor.setValue(load(url));
-  initServer();
 }

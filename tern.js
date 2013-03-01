@@ -79,30 +79,32 @@
       if (file.type == "full") loadFile(srv, file.name, file.text);
     }
 
-    finishPending(srv, function(err) {
-      if (err) return c(err);
-      infer.withContext(srv.cx, function() {
-        var file = resolveFile(srv, files, doc.query.file);
-        // FIXME reinstate this when the code stops crashing all the time
-        // try {
-        switch (doc.query.type) {
-        case "completions":
-          return c(null, findCompletions(file, doc.query));
-        case "type":
-          return c(null, findTypeAt(file, doc.query));
-        case "definition":
-          if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
-          return c(null, findDef(file, doc.query));
-        default:
-          c("Unsupported query type: " + doc.query.type);
-        }
-        // } catch (e) { c(e.message || e); }
+    infer.withContext(srv.cx, function() {
+      resolveFile(srv, files, doc.query.file, function(err, file) {
+        if (err) return c(err);
+        finishPending(srv, function(err) {
+          if (err) return c(err);
+          // FIXME reinstate this when the code stops crashing all the time
+          // try {
+          switch (doc.query.type) {
+          case "completions":
+            return c(null, findCompletions(file, doc.query));
+          case "type":
+            return c(null, findTypeAt(file, doc.query));
+          case "definition":
+            if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
+            return c(null, findDef(file, doc.query));
+          default:
+            c("Unsupported query type: " + doc.query.type);
+          }
+          // } catch (e) { c(e.message || e); }
+        });
       });
     });
   }
 
   function loadFile(srv, filename, text) {
-    infer.withContext(srv.cx, function() {
+    return infer.withContext(srv.cx, function() {
       var file = {name: filename, text: text};
       srv.signal("beforeLoad", file);
       var result = infer.analyze(file.text, filename);
@@ -111,6 +113,7 @@
       known.text = file.text;
       known.ast = result.ast;
       srv.signal("afterLoad", known);
+      return known;
     });
   }
 
@@ -152,13 +155,18 @@
     return closest;
   }
 
-  function resolveFile(srv, localFiles, name) {
+  function resolveFile(srv, localFiles, name, c) {
     var file, isRef = name.match(/^#(\d+)$/);
-    if (isRef)
+    if (isRef) {
       file = localFiles[isRef[1]];
-    else
+      if (!file) c("Reference to unknown file " + name);
+    } else {
       file = findFile(srv.files, name);
-    if (!file) throw new Error("Reference to unknown file " + name);
+      if (!file) return srv.callbacks.getFile(name, function(err, text) {
+        if (err) return c(err);
+        c(null, loadFile(srv, name, text));
+      });
+    }
 
     if (file.type == "part") {
       var realFile = findFile(srv.files, file.name);
@@ -190,7 +198,7 @@
         }
       }
     }
-    return file;
+    c(null, file);
   }
 
   function findCompletions(file, query) {

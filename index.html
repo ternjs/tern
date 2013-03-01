@@ -48,7 +48,9 @@ cursor inside a function call's argument list to automatically get a
 description of the function's arguments.</p>
 
 <div>
-  <form><textarea id=code name=code>// Type some code, see if Tern can figure out the types
+  <form>
+    <ul class="tabs" id="docs"></ul>
+    <textarea id=code name=code>// Type some code, see if Tern can figure out the types
 
 var foo = ["array", "of", "strings"];
 var bar = foo.slice(0, 2).join("").split("a")[0];
@@ -74,11 +76,6 @@ var randomInt = myMod.randomElt(myMod.intList);
 </textarea></form>
   <pre id=out class=output>&nbsp;</pre>
 </div>
-
-<p>
-  <button onclick="loadCode('node_modules/codemirror/lib/codemirror.js')">Load editor library</button>
-  <button onclick="loadCode('demo/underscore.js')">Load underscore.js</button>
-</p>
 
 <h2>What is the status of the project?</h2>
 
