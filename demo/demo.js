@@ -74,36 +74,27 @@ function displayError(cm, err) {
   out.appendChild(document.createTextNode(err.message || err.toString()));
 }
 
-function buildRequest(cm, how, query) {
+function buildRequest(cm, query, allowFragments) {
   var files, offset = 0, startPos, endPos;
   if (typeof query == "string") query = {type: query};
-  if (how == "range") {
+  if (query.end == null && query.start == null) {
     query.end = cm.indexFromPos(endPos = cm.getCursor("end"));
     if (cm.somethingSelected())
       query.start = cm.indexFromPos(startPos = cm.getCursor("start"));
-  } else if (how == "pos") {
-    query.position = cm.indexFromPos(endPos = cm.getCursor());
-  } else if (how == "from") {
-    if (query.position != null) {
-      query.position = cm.indexFromPos(endPos = query.position);
-    } else {
-      query.end = cm.indexFromPos(endPos = query.end);
-      if (query.start) query.start = cm.indexFromPos(startPos = query.start);
-    }
+  } else {
+    query.end = cm.indexFromPos(endPos = query.end);
+    if (query.start != null)
+      query.start = cm.indexFromPos(startPos = query.start);
   }
   if (!startPos) startPos = endPos;
 
   if (!cm.isClean()) {
-    if (cm.lineCount() > 100) {
+    if (cm.lineCount() > 100 && allowFragments !== false) {
       files = [getFragmentAround(cm, startPos, endPos)];
       query.file = "#0";
       offset = files[0].offset;
-      if (query.position != null) {
-        query.position -= offset;
-      } else {
-        if (query.start != null) query.start -= offset;
-        query.end -= offset;
-      }
+      if (query.start != null) query.start -= offset;
+      query.end -= offset;
     } else {
       files = [{type: "full",
                 name: "local",
@@ -119,7 +110,7 @@ function buildRequest(cm, how, query) {
 }
 
 function findType(cm) {
-  server.request(buildRequest(cm, "range", "type").request, function(error, data) {
+  server.request(buildRequest(cm, "type").request, function(error, data) {
     if (error) return displayError(cm, error);
     var out = document.getElementById("out");
     out.innerHTML = "";
@@ -128,7 +119,7 @@ function findType(cm) {
 }
 
 function ternHints(cm, c) {
-  var req = buildRequest(cm, "pos", "completions");
+  var req = buildRequest(cm, "completions");
 
   server.request(req.request, function(error, data) {
     if (error) return displayError(cm, error);
@@ -195,7 +186,7 @@ function updateArgumentHints(cm) {
     cache.line = line; cache.ch = ch; cache.bad = true;
 
     var query = {type: "type", preferFunction: true, end: Pos(line, ch)}
-    server.request(buildRequest(cm, "from", query).request, function(error, data) {
+    server.request(buildRequest(cm, query).request, function(error, data) {
       if (error) throw new Error(error);
       if (!data.type || !/^fn\(/.test(data.type)) return;
     
@@ -228,7 +219,7 @@ function showArgumentHints(cache, out, pos) {
 }
 
 function jumpToDef(cm) {
-  server.request(buildRequest(cm, "range", "definition").request, function(error, data) {
+  server.request(buildRequest(cm, "definition", false).request, function(error, data) {
     if (error) return displayError(cm, error);
     // FIXME handle multiple buffers
     cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));

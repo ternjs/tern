@@ -194,7 +194,7 @@
   }
 
   function findCompletions(file, query) {
-    var wordStart = query.position, wordEnd = wordStart, text = file.text;
+    var wordStart = query.end, wordEnd = wordStart, text = file.text;
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
     var word = text.slice(wordStart, wordEnd), completions, guessing = false;
@@ -202,23 +202,31 @@
     infer.resetGuessing();
     // FIXME deal with whitespace before/after dot
     if (text.charAt(wordStart - 1) == ".") { // Property completion
-      var expr = infer.findExpression(file.ast, null, wordStart - 1, file.scope);
+      var expr = infer.findExpressionAt(file.ast, null, wordStart - 1, file.scope);
       var tp = expr && infer.expressionType(expr);
       if (tp)
         completions = infer.propertiesOf(tp.type, word);
       else
         completions = [];
     } else {
-      completions = infer.localsAt(file.ast, query.position, word);
+      completions = infer.localsAt(file.ast, query.end, word);
     }
     return {from: wordStart, to: wordEnd,
             completions: completions,
             guess: infer.didGuess()};
   }
 
+  function findExpr(file, query) {
+    var expr = infer.findExpressionAt(file.ast, query.start, query.end, file.scope);
+    if (expr) return expr;
+    expr = infer.findExpressionAround(file.ast, query.start, query.end, file.scope);
+    if (expr && (query.start == null || query.start - expr.node.start < 10) &&
+        expr.node.end - query.end < 10) return expr;
+    throw new Error("No expression at the given position.");
+  }
+
   function findTypeAt(file, query) {
-    var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
-    if (!expr) throw new Error("No expression at the given position");
+    var expr = findExpr(file, query);
     infer.resetGuessing();
     var type = infer.expressionType(expr);
     if (typeof window != "undefined") window.tp = type; // FIXME debug statement
@@ -242,9 +250,7 @@
   }
 
   function findDef(file, query) {
-    var expr = infer.findExpression(file.ast, query.start, query.end, file.scope);
-    var def, file;
-    if (!expr) throw new Error("No expression at the given position");
+    var expr = findExpr(file, query), def, file, guess = false;
     if (expr.node.type == "Identifier") {
       var found = expr.state.findVar(expr.node.name);
       if (found && typeof found.name == "object") {
@@ -253,6 +259,7 @@
       }
     }
     if (!def) {
+      infer.resetGuessing();
       var type = tern.expressionType(expr);
       if (type.types) for (var i = 0; i < type.types.length; ++i) {
         var tp = type.types[i];
@@ -261,8 +268,9 @@
       def = type.originNode;
       if (/^Function/.test(def.type) && def.id) def = def.id;
       file = type.origin;
+      guess = infer.didGuess();
     }
     if (!def) throw new Error("Could not find a definition for the given expression");
-    return {start: def.start, end: def.end, file: file};
+    return {start: def.start, end: def.end, file: file, guess: guess};
   }
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
