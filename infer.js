@@ -1,4 +1,6 @@
 (function(exports) {
+  "strict mode";
+
   var acorn, walk;
   if (typeof require != "undefined") {
     acorn = require("acorn");

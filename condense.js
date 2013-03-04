@@ -1,4 +1,6 @@
 (function(exports) {
+  "strict mode";
+
   var infer;
   if (typeof require != "undefined") {
     infer = require("./infer");

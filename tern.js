@@ -1,4 +1,8 @@
+// FIXME needs re-entrancy when using this for HTTP
+
 (function(exports) {
+  "strict mode";
+
   var infer, condense;
   if (typeof require != "undefined") {
     infer = require("./infer.js");
@@ -50,13 +54,18 @@
     },
 
     request: function(doc, c) {
-      // FIXME somehow validate doc's structure
+      // FIXME somehow validate doc's structure (at least for HTTP reqs)
 
       var self = this, files = doc.files || [];
-      // FIXME better heuristic for when to reset. And try to reset when the client is not waiting
-      if (!this.cx || this.uses > 20) this.reset();
-      ++this.cx.uses;
-      doRequest(this, doc, c);
+      if (!this.cx) this.reset();
+      doRequest(this, doc, function(err, data) {
+        c(err, data);
+        // FIXME better heuristic for when to reset
+        if (++self.cx.uses > 20) {
+          self.reset();
+          finishPending(self, function(){});
+        }
+      });
     },
 
     findFile: function(name) {

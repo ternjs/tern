@@ -1,3 +1,5 @@
+// FIXME put the server in a webworker
+
 var server, editor, environment = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
