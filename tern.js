@@ -35,6 +35,13 @@
       var found = this.filesToLoad.indexOf(file);
       if (found > -1) this.filesToLoad.splice(found, 1);
     },
+    reset: function() {
+      this.cx = new infer.Context(this.environment, this);
+      this.uses = 0;
+      this.files = [];
+      this.pendingFiles = this.filesToLoad.slice(0);
+      this.signal("reset");
+    },
 
     // Used from inside the analyzer to load, for example, a
     // `require`-d file.
@@ -47,7 +54,7 @@
 
       var self = this, files = doc.files || [];
       // FIXME better heuristic for when to reset. And try to reset when the client is not waiting
-      if (!this.cx || this.uses > 20) reset(this);
+      if (!this.cx || this.uses > 20) this.reset();
       ++this.cx.uses;
       doRequest(this, doc, c);
     },
@@ -69,14 +76,6 @@
       if (arr) for (var i = 0; i < arr.length; ++i) arr[i].call(this, v1, v2, v3, v4);
     }
   };
-
-  function reset(srv) {
-    srv.cx = new infer.Context(srv.environment, srv);
-    srv.uses = 0;
-    srv.files = [];
-    srv.pendingFiles = srv.filesToLoad.slice(0);
-    srv.signal("reset");
-  }
 
   function doRequest(srv, doc, c) {
     var files = doc.files || [];

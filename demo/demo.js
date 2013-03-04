@@ -80,15 +80,39 @@ function getFile(name, c) {
 }
 
 function registerDoc(name, doc) {
-  docs.push({name: name, doc: doc});
+  var data = {name: name, doc: doc, changed: null};
+  docs.push(data);
   var docTabs = document.getElementById("docs");
   var li = docTabs.appendChild(document.createElement("li"));
   li.appendChild(document.createTextNode(name));
   if (editor.getDoc() == doc) {
     setSelectedDoc(docs.length - 1);
-    curDoc = docs[docs.length - 1];
+    curDoc = data;
   }
   server.addFile(name);
+  CodeMirror.on(doc, "change", trackChange);
+}
+
+function trackChange(doc, change) {
+  for (var i = 0; i < docs.length; ++i) {var data = docs[i]; if (data.doc == doc) break;}
+  var changed = data.changed;
+  if (changed == null)
+    data.changed = changed = {from: change.from.line, to: change.from.line};
+  var end = change.from.line + (change.text.length - 1);
+  if (change.from.line < changed.to) changed.to = changed.to - (change.to.line - end);
+  if (end >= changed.to) changed.to = end + 1;
+  if (changed.from > change.from.line) changed.from = change.from.line;
+}
+
+function unregisterDoc(doc) {
+  server.delFile(doc.name);
+  for (var i = 0; i < docs.length && doc != docs[i]; ++i) {}
+  docs.splice(i, 1);
+  var docList = document.getElementById("docs");
+  docList.removeChild(docList.childNodes[i]);
+  selectDoc(Math.max(0, i - 1));
+  CodeMirror.off(doc.doc, "change", trackChange);
+  if (server) server.reset();
 }
 
 function setSelectedDoc(pos) {
@@ -137,7 +161,7 @@ function displayError(cm, err) {
 }
 
 function buildRequest(cm, query, allowFragments) {
-  var files, offset = 0, startPos, endPos;
+  var files = [], offset = 0, startPos, endPos;
   if (typeof query == "string") query = {type: query};
   if (query.end == null && query.start == null) {
     query.end = cm.indexFromPos(endPos = cm.getCursor("end"));
@@ -150,23 +174,33 @@ function buildRequest(cm, query, allowFragments) {
   }
   if (!startPos) startPos = endPos;
 
-  if (!cm.isClean()) {
-    if (cm.lineCount() > 100 && allowFragments !== false) {
-      files = [getFragmentAround(cm, startPos, endPos)];
+  if (curDoc.changed) {
+    if (cm.lineCount() > 100 && allowFragments !== false &&
+        curDoc.changed.to - curDoc.changed.from < 100 &&
+        curDoc.changed.from <= startPos.line && curDoc.changed.to > endPos.line) {
+      files.push(getFragmentAround(cm, startPos, endPos));
       query.file = "#0";
       offset = files[0].offset;
       if (query.start != null) query.start -= offset;
       query.end -= offset;
     } else {
-      files = [{type: "full",
-                name: curDoc.name,
-                text: cm.getValue()}];
+      files.push({type: "full",
+                  name: curDoc.name,
+                  text: cm.getValue()});
       query.file = curDoc.name;
-      cm.markClean();
+      curDoc.changed = null;
     }
   } else {
     query.file = curDoc.name;
   }
+  for (var i = 0; i < docs.length; ++i) {
+    var doc = docs[i];
+    if (doc.changed && doc != curDoc) {
+      files.push({type: "full", name: doc.name, text: doc.doc.getValue()});
+      doc.changed = null;
+    }
+  }
+
   return {request: {query: query, files: files},
           offset: offset};
 }
@@ -327,11 +361,6 @@ var commands = {
   },
   delfile: function() {
     if (docs.length == 1) return;
-    server.delFile(curDoc.name);
-    for (var i = 0; i < docs.length && curDoc != docs[i]; ++i) {}
-    docs.splice(i, 1);
-    var docList = document.getElementById("docs");
-    docList.removeChild(docList.childNodes[i]);
-    selectDoc(Math.max(0, i - 1));
+    unregisterDoc(curDoc);
   }
 };
