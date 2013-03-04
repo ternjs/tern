@@ -98,23 +98,22 @@
         if (err) return c(err);
         finishPending(srv, function(err) {
           if (err) return c(err);
-          // FIXME reinstate this when the code stops crashing all the time
-          // try {
-          switch (doc.query.type) {
-          case "completions":
-            return c(null, findCompletions(file, doc.query));
-          case "type":
-            return c(null, findTypeAt(file, doc.query));
-          case "definition":
-            if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
-            return c(null, findDef(file, doc.query));
-          case "refs":
-            if (file.type == "part") throw new Error("Can't run a uses query on a file fragment");
-            return c(null, findRefs(srv, file, doc.query));
-          default:
-            c("Unsupported query type: " + doc.query.type);
-          }
-          // } catch (e) { c(e.message || e); }
+          try {
+            switch (doc.query.type) {
+            case "completions":
+              return c(null, findCompletions(file, doc.query));
+            case "type":
+              return c(null, findTypeAt(file, doc.query));
+            case "definition":
+              if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
+              return c(null, findDef(file, doc.query));
+            case "refs":
+              if (file.type == "part") throw new Error("Can't run a uses query on a file fragment");
+              return c(null, findRefs(srv, file, doc.query));
+            default:
+              c("Unsupported query type: " + doc.query.type);
+            }
+          } catch (e) { c(e.message || String(e)); }
         });
       });
     });

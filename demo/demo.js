@@ -160,7 +160,7 @@ function getFragmentAround(cm, start, end) {
 function displayError(err) {
   var out = document.getElementById("out");
   out.innerHTML = "";
-  out.appendChild(document.createTextNode(err.message || err.toString()));
+  out.appendChild(document.createTextNode(err.message || String(err)));
 }
 
 function buildRequest(cm, query, allowFragments) {
