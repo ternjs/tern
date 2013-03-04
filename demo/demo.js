@@ -44,7 +44,8 @@ function initEditor() {
       "Ctrl-I": findType,
       "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
       "Alt-.": jumpToDef,
-      "Alt-,": jumpBack
+      "Alt-,": jumpBack,
+      "Ctrl-Q": renameVar
     },
     autofocus: true,
     matchBrackets: true
@@ -156,7 +157,7 @@ function getFragmentAround(cm, start, end) {
           text: cm.getRange(from, Pos(endLine, 0))};
 }
 
-function displayError(cm, err) {
+function displayError(err) {
   var out = document.getElementById("out");
   out.innerHTML = "";
   out.appendChild(document.createTextNode(err.message || err.toString()));
@@ -209,7 +210,7 @@ function buildRequest(cm, query, allowFragments) {
 
 function findType(cm) {
   server.request(buildRequest(cm, "type").request, function(error, data) {
-    if (error) return displayError(cm, error);
+    if (error) return displayError(error);
     var out = document.getElementById("out");
     out.innerHTML = "";
     out.appendChild(document.createTextNode(data.type || "not found"));
@@ -220,7 +221,7 @@ function ternHints(cm, c) {
   var req = buildRequest(cm, "completions");
 
   server.request(req.request, function(error, data) {
-    if (error) return displayError(cm, error);
+    if (error) return displayError(error);
     c({from: cm.posFromIndex(data.from + req.offset),
        to: cm.posFromIndex(data.to + req.offset),
        list: data.completions});
@@ -320,7 +321,7 @@ var jumpStack = [];
 
 function jumpToDef(cm) {
   server.request(buildRequest(cm, "definition", false).request, function(error, data) {
-    if (error) return displayError(cm, error);
+    if (error) return displayError(error);
     jumpStack.push({file: curDoc.name,
                     start: cm.getCursor("from"),
                     end: cm.getCursor("to")});
@@ -348,10 +349,31 @@ function jumpBack(cm) {
   }, 20);
 }
 
+function renameVar(cm) {
+  server.request(buildRequest(cm, "refs", false).request, function(error, data) {
+    if (error) return displayError(error);
+    cm.openDialog("New name for " + data.name + ": <input type=text>", function(newName) {
+
+      var perFile = Object.create(null);
+      for (var i = 0; i < data.refs.length; ++i) {
+        var use = data.refs[i];
+        (perFile[use.file] || (perFile[use.file] = [])).push(use);
+      }
+      for (var file in perFile) {
+        var refs = perFile[file], doc = findDoc(file).doc;
+        refs.sort(function(a, b) { return b.start - a.start; });
+        for (var i = 0; i < refs.length; ++i)
+          doc.replaceRange(newName, doc.posFromIndex(refs[i].start), doc.posFromIndex(refs[i].end));
+      }
+    });
+  });
+}
+
 var commands = {
   complete: function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
   jumptodef: jumpToDef,
   findtype: findType,
+  rename: renameVar,
   addfile: function() {
     var name = prompt("Name of the new buffer", "");
     if (name == null) return;

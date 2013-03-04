@@ -1100,6 +1100,19 @@
     return props;
   };
 
+  var refFindWalker = walk.make({}, searchVisitor);
+
+  exports.findRefs = function(ast, name, scope, f) {
+    refFindWalker.Identifier = function(node, sc) {
+      if (node.name != name) return;
+      for (; sc; sc = sc.prev) {
+        if (sc == scope) f(node);
+        if (name in sc.props) return;
+      }
+    };
+    walk.recursive(ast, cx.topScope, null, refFindWalker);
+  };
+
   // LOCAL-VARIABLE QUERIES
 
   var scopeAt = exports.scopeAt = function(ast, pos, defaultScope) {

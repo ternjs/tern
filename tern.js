@@ -108,6 +108,9 @@
           case "definition":
             if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
             return c(null, findDef(file, doc.query));
+          case "refs":
+            if (file.type == "part") throw new Error("Can't run a uses query on a file fragment");
+            return c(null, findRefs(srv, file, doc.query));
           default:
             c("Unsupported query type: " + doc.query.type);
           }
@@ -295,4 +298,29 @@
     if (!def) throw new Error("Could not find a definition for the given expression");
     return {start: def.start, end: def.end, file: file, guess: guess};
   }
+
+  function findRefs(srv, file, query) {
+    var expr = findExpr(file, query);
+    if (!expr || expr.node.type != "Identifier") throw new Error("Not at a variable.");
+    var name = expr.node.name;
+
+    for (var scope = expr.state; scope && !(name in scope.props); scope = scope.prev) {}
+    if (!scope) throw new Error("Could not find a definition for " + name);
+
+    var type, refs = [];
+    function findRefsIn(file) {
+      infer.findRefs(file.ast, name, scope, function(node) {
+        refs.push({file: file.name, start: node.start, end: node.end});
+      });
+    }
+    if (scope.prev) {
+      type = "local";
+      findRefsIn(file);
+    } else {
+      type = "global";
+      for (var i = 0; i < srv.files.length; ++i) findRefsIn(srv.files[i]);
+    }
+    return {refs: refs, type: type, name: name};
+  }
+
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
