@@ -1,12 +1,7 @@
 (function(exports) {
   "strict mode";
 
-  var infer;
-  if (typeof require != "undefined") {
-    infer = require("./infer");
-  } else {
-    infer = exports;
-  }
+  var infer = typeof require != "undefined" ? require("./infer") : exports;
 
   function pathLen(path) {
     var len = 1, pos = 0, dot;
