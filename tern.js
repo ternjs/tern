@@ -285,14 +285,16 @@
     if (!def) {
       infer.resetGuessing();
       var type = tern.expressionType(expr);
-      if (type.types) for (var i = 0; i < type.types.length; ++i) {
+      if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
         var tp = type.types[i];
         if (tp.originNode) { type = tp; break; }
       }
       def = type.originNode;
-      if (/^Function/.test(def.type) && def.id) def = def.id;
-      file = type.origin;
-      guess = infer.didGuess();
+      if (def) {
+        if (/^Function/.test(def.type) && def.id) def = def.id;
+        file = type.origin;
+        guess = infer.didGuess();
+      }
     }
     if (!def) throw new Error("Could not find a definition for the given expression");
     return {start: def.start, end: def.end, file: file, guess: guess};

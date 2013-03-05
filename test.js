@@ -8,7 +8,8 @@ require("./plugin/requirejs/requirejs.js");
 var ecma5 = JSON.parse(fs.readFileSync("ecma5.json"));
 var envData = {
   browser: JSON.parse(fs.readFileSync("browser.json")),
-  requireJS: JSON.parse(fs.readFileSync("plugin/requirejs/requirejs.json"))
+  requireJS: JSON.parse(fs.readFileSync("plugin/requirejs/requirejs.json")),
+  jquery: JSON.parse(fs.readFileSync("jquery.json"))
 };
 
 function getFile(file) {
@@ -26,9 +27,11 @@ function callbacks(context) {
   };
 }
 
-function runTests() {
+function runTests(filter) {
   var files = 0, tests = 0, failed = 0;
   fs.readdirSync("test/").forEach(function(name) {
+    if (filter && name.indexOf(filter) == -1) return;
+
     ++files;
     var fname = name, context = "test/";
     if (fs.statSync(context + name).isDirectory()) {
@@ -69,4 +72,4 @@ function runTests() {
   console.log(failed ? failed + " failures!" : "All passed.");
 }
 
-runTests();
+runTests(process.argv[2]);

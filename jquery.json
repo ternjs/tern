@@ -11,7 +11,7 @@
     }
   },
   "jQuery": {
-    "!type": "fn(selector: ?, context: frameElement) -> jQuery.fn",
+    "!type": "fn(selector: string, context: frameElement) -> jQuery.fn",
     "fn": {
       "add": "fn(selector: string) -> jQuery.fn",
       "addBack": "fn(selector?: string) -> jQuery.fn",

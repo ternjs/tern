@@ -155,3 +155,7 @@ ul.tabs li.selected:after {
   top: 3px;
   max-width: 10em;
 }
+
+.CodeMirror div.CodeMirror-cursor {
+  border-left: 2px solid #444;
+}

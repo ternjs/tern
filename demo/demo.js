@@ -45,7 +45,8 @@ function initEditor() {
       "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
       "Alt-.": jumpToDef,
       "Alt-,": jumpBack,
-      "Ctrl-Q": renameVar
+      "Ctrl-Q": renameVar,
+      "Ctrl-O": showOverlay
     },
     autofocus: true,
     matchBrackets: true
@@ -286,7 +287,7 @@ function updateArgumentHints(cm) {
 
     var query = {type: "type", preferFunction: true, end: Pos(line, ch)}
     server.request(buildRequest(cm, query).request, function(error, data) {
-      if (error) throw new Error(error);
+      if (error) return;
       if (!data.type || !/^fn\(/.test(data.type)) return;
     
       cache.type = parseFnType(data.type);
@@ -331,7 +332,7 @@ function jumpToDef(cm) {
       if (i == docs.length) return displayError("Definition is not in a local buffer");
     }
     setTimeout(function() {
-      cm.setSelection(cm.posFromIndex(data.start), cm.posFromIndex(data.end));
+      cm.setSelection(cm.posFromIndex(data.end), cm.posFromIndex(data.start));
     }, 20);
   });
 }
@@ -345,7 +346,7 @@ function jumpBack(cm) {
     if (i == docs.length) return;
   }
   setTimeout(function() {
-    cm.setSelection(pos.start, pos.end);
+    cm.setSelection(pos.end, pos.start);
   }, 20);
 }
 
@@ -388,3 +389,22 @@ var commands = {
     unregisterDoc(curDoc);
   }
 };
+
+function showOverlay() {
+  var overlay = document.createElement("div");
+  overlay.style.cssText = "background: url(doc/demo_pic.png); background-position: 80% 50%; background-repeat: no-repeat; position: absolute; left: 0; right: 0; top: 0; bottom: 0;";
+  overlay.innerHTML = "<h1>Tern</h1><h2>http://ternjs.net</h2>";
+  overlay.firstChild.style.cssText = "font-size: 80pt; position: absolute; top: 70px; left: 130px; color: #500;";
+  overlay.lastChild.style.cssText = "background: white; border: 2px solid black; border-radius: 10px; position: absolute; top: 240px; left: 120px; padding: 5px 20px";
+  editor.display.wrapper.appendChild(overlay);
+  editor.display.wrapper.style.position = "relative";
+  editor.display.scroller.style.opacity = ".4";
+
+  setTimeout(function() {
+    window.onkeydown = function() {
+      window.onkeydown = null;
+      overlay.parentNode.removeChild(overlay);
+      editor.display.scroller.style.opacity = "1";
+    };
+  }, 20);
+}

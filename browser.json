@@ -431,7 +431,7 @@
   "document": "+Document",
   "XMLDocument": {
     "!type": "fn()",
-    "prototype": "+Document"
+    "prototype": "Document.prototype"
   },
 
   "Attr": {

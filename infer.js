@@ -206,6 +206,7 @@
   IsCallee.prototype = {
     addType: function(fn) {
       if (!(fn instanceof Fn)) return;
+      if (!fn.args) console.log("escaped: ", fn.info);
       for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
         this.args[i].propagate(fn.args[i]);
       this.self.propagate(fn.self);
@@ -297,10 +298,10 @@
   var flag_definite = exports.flag_definite = 2;
 
   var Obj = exports.Obj = function(proto, name, origin) {
-    this.props = Object.create(null);
+    if (!this.props) this.props = Object.create(null);
     this.proto = proto === true ? cx.protos.Object : proto;
     if (proto && !name && proto.name && !(this instanceof Fn)) {
-      var match = /^(.*)\.prototype$/.exec(proto.name);
+      var match = /^(.*)\.prototype$/.exec(this.proto.name);
       this.name = match ? match[1] : proto.name;
     } else {
       this.name = name;
@@ -308,6 +309,7 @@
     if (origin !== false) this.setOrigin(origin);
 
     if (this.proto && !this.prev) this.proto.forAllProps(this.onProtoProp.bind(this));
+    return this;
   };
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
@@ -414,6 +416,7 @@
     this.argNames = argNames;
     this.retval = retval;
     this.setOrigin();
+    return this;
   };
   Fn.prototype = Object.create(Obj.prototype);
   Fn.prototype.toString = function(maxDepth) {
@@ -434,8 +437,10 @@
     var newProto = prop == "prototype" && !("prototype" in this.props);
     var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
     if (newProto) {
-      var name = (this.name || "?") + ".prototype";
-      retval.propagate({addType: function(t) {t.name = name;}});
+      if (this.name) {
+        name = this.name + ".prototype";
+        retval.propagate({addType: function(t) {if (!t.name) t.name = name;}});
+      }
       if (retval.isEmpty() && alsoProto) {
         var proto = new Obj(true);
         proto.provisionary = true;
@@ -450,6 +455,7 @@
     Obj.call(this, cx.protos.Array, false);
     var content = this.ensureProp("<i>");
     if (contentType) contentType.propagate(content);
+    return this;
   };
   Arr.prototype = Object.create(Obj.prototype);
   Arr.prototype.toString = function(maxDepth) {
@@ -609,6 +615,13 @@
 
   // SCOPE GATHERING PASS
 
+  function addVar(scope, name) {
+    var val = scope.ensureProp(name.name);
+    val.name = name;
+    val.origin = cx.curOrigin;
+    return val;
+  }
+
   var scopeGatherer = walk.make({
     Function: function(node, scope, c) {
       var inner = node.body.scope = new Scope(scope);
@@ -616,16 +629,13 @@
       for (var i = 0; i < node.params.length; ++i) {
         var param = node.params[i];
         argNames.push(param.name);
-        var val = inner.ensureProp(param.name);
-        argVals.push(val);
-        val.name = param;
-        val.origin = cx.curOrigin;
+        argVals.push(addVar(inner, param));
       }
       inner.fnType = new Fn(node.id && node.id.name, new AVal, argVals, argNames, new AVal);
       inner.fnType.originNode = node;
       if (node.id) {
         var decl = node.type == "FunctionDeclaration";
-        (decl ? scope : inner).ensureProp(node.id.name).name = node.id;
+        addVar(decl ? scope : inner, node.id);
       }
       c(node.body, inner, "ScopeBody");
     },
@@ -633,7 +643,7 @@
       c(node.block, scope, "Statement");
       for (var i = 0; i < node.handlers.length; ++i) {
         var handler = node.handlers[i], name = handler.param.name;
-        scope.ensureProp(name).name = handler.param;
+        addVar(scope, handler.param);
         c(handler.body, scope, "ScopeBody");
       }
       if (node.finalizer) c(node.finalizer, scope, "Statement");
@@ -641,7 +651,7 @@
     VariableDeclaration: function(node, scope, c) {
       for (var i = 0; i < node.declarations.length; ++i) {
         var decl = node.declarations[i];
-        scope.ensureProp(decl.id.name).name = decl.id;
+        addVar(scope, decl.id);
         if (decl.init) c(decl.init, scope, "Expression");
       }
     }
@@ -919,14 +929,8 @@
     addOrigin(cx.curOrigin = file);
 
     var jsDoc = [], options = {onComment: gatherJSDoc(jsDoc)};
-    var ast;
-    try {
-      ast = acorn.parse(text, options);
-    } catch (e) {
-      jsDoc.length = 0;
-      if (e instanceof SyntaxError) ast = acorn.parse_dammit(text, options);
-      else throw e;
-    }
+    var ast = acorn.parse_dammit(text, options);
+
     if (!scope) scope = cx.topScope;
     walk.recursive(ast, scope, null, scopeGatherer);
     walk.recursive(ast, scope, null, inferWrapper);
@@ -1130,8 +1134,8 @@
 
   // CONTEXT POPULATING
 
-  function TypeParser(spec, start) {
-    this.pos = start || 0; this.spec = spec;
+  function TypeParser(spec, start, base) {
+    this.pos = start || 0; this.spec = spec; this.base = base;
   }
   TypeParser.prototype = {
     eat: function(str) {
@@ -1166,14 +1170,17 @@
           break;
         }
       }
-      var retType, computeRet;
+      var retType, computeRet, fn;
       if (this.eat(" -> ")) {
         if (top && this.spec.indexOf("$", this.pos) > -1) {
           retType = ANull;
           computeRet = this.parseRetType();
         } else retType = this.parseType();
       } else retType = ANull;
-      var fn = new Fn(name, ANull, args, names, retType);
+      if (top && this.base)
+        fn = Fn.call(this.base, name, ANull, args, names, retType);
+      else
+        fn = new Fn(name, ANull, args, names, retType);
       if (computeRet) fn.computeRet = computeRet;
       return fn;
     },
@@ -1181,14 +1188,18 @@
       if (this.eat("fn(")) {
         return this.parseFnType(name, top);
       } else if (this.eat("[")) {
-        var arr = new Arr(this.parseType());
-        if (this.eat("]")) return arr;
+        var inner = this.parseType();
+        this.eat("]") || this.error();
+        if (top && this.base)
+          return Arr.call(this.base, inner);
+        else
+          return new Arr(inner);
       } else if (this.eat("+")) {
-        var path = this.word(/[\w\.$\!<>]/);
-        var base = parsePath(path);
+        var p = this.word(/[\w$<>\.!]/);
+        var base = parsePath(p);
         if (base instanceof Fn) {
-          path += ".prototype";
-          var proto = enterPathProp(base, "prototype", path, path.split(".").length - 1);
+          var proto = base.props.prototype;
+          if (proto) proto = proto.getType();
           if (proto instanceof Obj) return getInstance(proto);
         }
         if (base instanceof Obj) return getInstance(base);
@@ -1196,17 +1207,16 @@
       } else if (this.eat("?")) {
         return ANull;
       } else {
-        var word = this.word(/[\w\.$\!<>]/);
-        switch (word) {
+        var spec = this.word(/[\w$<>\.!]/);
+        switch (spec) {
         case "number": return cx.num;
         case "string": return cx.str;
         case "bool": return cx.bool;
         case "<top>": return cx.topScope;
         }
-        if (cx.localDefs && word in cx.localDefs) return cx.localDefs[word];
-        return parsePath(word);
+        if (cx.localDefs && spec in cx.localDefs) return cx.localDefs[spec];
+        return parsePath(spec);
       }
-      this.error();
     },
     parseBaseRetType: function() {
       if (this.eat("[")) {
@@ -1246,8 +1256,8 @@
     }
   }
 
-  function parseType(spec, name) {
-    return new TypeParser(spec).parseType(name, true);
+  function parseType(spec, name, base) {
+    return new TypeParser(spec, null, base).parseType(name, true);
   }
 
   function addEffect(fn, handler) {
@@ -1298,40 +1308,6 @@
     }
   }
 
-  function enterPathProp(base, prop, fullPath, i) {
-    if (prop.charAt(0) == "!") {
-      if (prop == "!proto") {
-        return (base instanceof Obj && base.proto) || ANull;
-      } else {
-        var fn = base.getFunctionType();
-        if (!fn) {
-          return ANull;
-        } else if (prop == "!ret") {
-          return fn.retval.getType() || ANull;
-        } else {
-          var arg = fn.args[Number(prop.slice(1))];
-          return (arg && arg.getType()) || ANull;
-        }
-      }
-    } else if (base instanceof Obj) {
-      var propVal = base.props[prop];
-      if (!propVal || !(propVal.flags & flag_definite) || propVal.isEmpty()) {
-        var parts = fullPath.split(".");
-        for (var j = 0, load = cx.loading; load && j <= i; ++j) {
-          if (!load || typeof load == "string") load = null;
-          else load = load[parts[j]];
-        }
-        if (!load) return ANull;
-        var outer = interpretOuter(load, parts[i]);
-        propVal = base.props[prop];
-        if (!propVal || !(propVal.flags & flag_definite))
-          outer.propagate(base.ensureProp(prop));
-        return outer;
-      }
-      return propVal.types[0];
-    }
-  }
-
   function parsePath(path) {
     var cached = cx.paths[path];
     if (cached != null) return cached;
@@ -1339,63 +1315,103 @@
 
     var isdate = /^Date.prototype/.test(path);
     var parts = path.split(".");
-    var cur = cx.topScope;
-    for (var i = 0; i < parts.length && cur != ANull; ++i)
-      cur = enterPathProp(cur, parts[i], path, i);
-    cx.paths[path] = cur == ANull ? null : cur;
-    return cur;
-  }
-
-  function populate(obj, props, name) {
-    for (var prop in props) if (hop(props, prop) && prop.charCodeAt(0) != 33) {
-      var nm = name ? name + "." + prop : prop;
-      var v = obj.ensureProp(prop);
-      interpret(props[prop], nm, v.getType(false)).propagate(v);
+    var base = cx.topScope;
+    for (var i = 0; i < parts.length && base != ANull; ++i) {
+      var prop = parts[i];
+      if (prop.charAt(0) == "!") {
+        if (prop == "!proto") {
+          base = (base instanceof Obj && base.proto) || ANull;
+        } else {
+          var fn = base.getFunctionType();
+          if (!fn) {
+            base = ANull;
+          } else if (prop == "!ret") {
+            base = fn.retval.getType() || ANull;
+          } else {
+            var arg = fn.args[Number(prop.slice(1))];
+            base = (arg && arg.getType()) || ANull;
+          }
+        }
+      } else if (base instanceof Obj) {
+        var propVal = base.props[prop];
+        if (!propVal || !(propVal.flags & flag_definite) || propVal.isEmpty())
+          base = ANull;
+        else
+          base = propVal.types[0];
+      }
     }
-    return obj;
+    cx.paths[path] = base == ANull ? null : base;
+    return base;
   }
 
-  function interpretOuter(spec, name) {
-    if (typeof spec == "string") {
-      if (/^\*fn\(/.test(spec)) {
-        var type = parseType(spec.slice(1));
-        for (var i = 0; i < type.args.length; ++i) (function(i) {
-          var arg = type.args[i];
-          if (arg instanceof Fn) addEffect(type, function(_self, fArgs) {
-            var fArg = fArgs[i];
-            if (fArg) fArg.propagate(new IsCallee(cx.topScope, arg.args));
-          });
-        })(i);
-        return type;
+  function emptyObj(ctor) {
+    var empty = Object.create(ctor.prototype);
+    empty.props = Object.create(null);
+    empty.isShell = true;
+    return empty;
+  }
+
+  function passOne(base, spec, path) {
+    if (!base) {
+      var tp = spec["!type"];
+      if (tp) {
+        if (/^\*?fn\(/.test(tp)) base = emptyObj(Fn);
+        else if (tp.charAt(0) == "[") base = emptyObj(Arr);
+        else throw new Error("Invalid !type spec: " + tp);
+      } else if (spec["!stdProto"]) {
+        base = cx.protos[spec["!stdProto"]];
       } else {
-        return parseType(spec, name);
+        base = emptyObj(Obj);
+      }
+      base.name = path;
+    }
+    
+    for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
+      var inner = spec[name];
+      if (typeof inner == "string") continue;
+      var prop = base.ensureProp(name);
+      passOne(prop.getType(), inner, path ? path + "." + name : name).propagate(prop);
+    }
+    return base;
+  }
+
+  function passTwo(base, spec, path) {
+    if (base.isShell) {
+      delete base.isShell;
+      var tp = spec["!type"];
+      if (tp) {
+        parseType(tp, path, base);
+      } else {
+        var proto = spec["!proto"];
+        Obj.call(base, proto ? parseType(proto) : true, path);
       }
     }
 
-    if (spec["!type"]) return interpret(spec["!type"], name);
-    else if (spec["!stdProto"]) return cx.protos[spec["!stdProto"]];
-    else if (spec["!isDef"]) return interpret(spec["!isDef"]);
-    else return new Obj(spec["!proto"] ? interpret(spec["!proto"]) : true, name);
-  }
-
-  function interpret(spec, name, existing) {
-    var obj = existing || interpretOuter(spec, name);
-    if (typeof spec == "string") return obj;
-
     var effects = spec["!effects"];
-    if (effects && obj instanceof Fn) for (var i = 0; i < effects.length; ++i)
-      parseEffect(effects[i], obj);
+    if (effects && base instanceof Fn) for (var i = 0; i < effects.length; ++i)
+      parseEffect(effects[i], base);
 
-    return populate(obj, spec, name);
+    for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
+      var inner = spec[name], known = base.ensureProp(name), innerPath = path ? path + "." + name : name;
+      if (typeof inner == "string") {
+        if (known.getType()) continue;
+        parseType(inner, innerPath).propagate(known);
+      } else {
+        passTwo(known.getType(), inner, innerPath);
+      }
+    }
   }
 
-  function pathToName(path) {
-    var parts = path.split(".");
-    var name = parts[parts.length - 1];
-    if (!name || name.charAt(0) == "!") return null;
-    var prev = parts[parts.length - 2];
-    if (prev && prev.charAt(0) != "!") name = prev + "." + name;
-    return name;
+  function parseDef(spec, path) {
+    var base, tp = spec["!type"];
+    if (tp) {
+      base = parseType(tp, path);
+    } else {
+      var proto = spec["!proto"];
+      base = new Obj(proto ? parseType(proto) : true, path);
+    }
+    passTwo(base, spec, path);
+    return base;
   }
 
   function loadEnvironment(data) {
@@ -1403,10 +1419,13 @@
     cx.loading = data;
     cx.localDefs = Object.create(null);
 
-    var def = data["!define"];
-    for (var name in def) cx.localDefs[name] = interpret(def[name], name);
+    passOne(cx.topScope, data);
 
-    populate(cx.topScope, data);
+    var def = data["!define"];
+    if (def) for (var name in def)
+      cx.localDefs[name] = parseDef(def[name], name);
+
+    passTwo(cx.topScope, data);
 
     cx.curOrigin = cx.loading = cx.localDefs = null;
   }
