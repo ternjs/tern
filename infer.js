@@ -1257,7 +1257,16 @@
   }
 
   function parseType(spec, name, base) {
-    return new TypeParser(spec, null, base).parseType(name, true);
+    var withCallbacks = /^\*fn\(/.test(spec) && (spec = spec.slice(1));
+    var type = new TypeParser(spec, null, base).parseType(name, true);
+    if (withCallbacks) for (var i = 0; i < type.args.length; ++i) (function(i) {
+      var arg = type.args[i];
+      if (arg instanceof Fn) addEffect(type, function(_self, fArgs) {
+        var fArg = fArgs[i];
+        if (fArg) fArg.propagate(new IsCallee(cx.topScope, arg.args));
+      });
+    })(i);
+    return type;
   }
 
   function addEffect(fn, handler) {
