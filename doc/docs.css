@@ -57,6 +57,7 @@ code, pre { font-family: "Ubuntu Mono"; }
   margin-top: 70px;
   overflow: hidden;
   border-radius: 15px;
+  box-shadow: 5px 5px 10px #aaa;
 }
 
 #head h1 {
