@@ -48,10 +48,7 @@
       "lookupPrefix": "fn(uri: string) -> string",
       "isDefaultNamespace": "fn(uri: string) -> bool",
       "lookupNamespaceURI": "fn(uri: string) -> string",
-      "addEventListener": {
-        "!type": "fn(type: string, listener: fn(e: +Event), capture: bool)",
-        "!effects": ["call $1 +Event"]
-      },
+      "addEventListener": "*fn(type: string, listener: fn(e: +Event), capture: bool)",
       "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
       "isSameNode": "fn(other: +Node) -> bool",
       "isEqualNode": "fn(other: +Node) -> bool",

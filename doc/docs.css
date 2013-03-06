@@ -1,10 +1,26 @@
-@import url(http://fonts.googleapis.com/css?family=Prosto+One|Belleza|Ubuntu+Mono);
+@font-face {
+  font-family: 'Prosto One';
+  font-style: normal;
+  font-weight: 400;
+  src: url('ProstoOne.woff') format('woff');
+}
+@font-face {
+  font-family: 'Museo Sans';
+  src: url('MuseoSans.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Ubuntu Mono';
+  font-style: normal;
+  font-weight: 500;
+  src: url('UbuntuMono-R.woff') format('woff');
+}
+
 
 html, body { height: 100%; }
 
 body {
-  font-family: Belleza;
-  font-size: 17pt;
+  font-family: 'Museo Sans';
+  font-size: 15pt;
   max-width: 900px;
   margin: 0 auto;
   padding: 0;
@@ -13,11 +29,30 @@ body {
 h1, h2, h3 { font-family: "Prosto One"; }
 code, pre { font-family: "Ubuntu Mono"; }
 
+#nag {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 10px 0 5px 0;
+  text-align: center;
+  color: #555;
+  background: -moz-linear-gradient(top, #fff549 0%, #fff770 22%, #fffcaf 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff549), color-stop(22%,#fff770), color-stop(100%,#fffcaf)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #fff549 0%,#fff770 22%,#fffcaf 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #fff549 0%,#fff770 22%,#fffcaf 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #fff549 0%,#fff770 22%,#fffcaf 100%); /* IE10+ */
+  background: linear-gradient(to bottom, #fff549 0%,#fff770 22%,#fffcaf 100%); /* W3C */
+  border-bottom: 1px solid #ccc;
+}
+
+#nag a {
+  color: #55e;
+}
+
 #head {
   position: relative;
-  background: #95c6fb;
+  background: #b5ddf4;
   padding-top: 1px;
-  margin-top: 20px;
+  margin-top: 70px;
   overflow: hidden;
   border-radius: 15px;
 }
@@ -81,6 +116,7 @@ button {
   font-size: 14pt;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
+  overflow: hidden;
 }
 .Tern-fname { color: black; }
 .Tern-farg { color: #70a; }
@@ -92,10 +128,10 @@ ul.tabs {
   list-style: none;
   margin: 0 0 -1px 0;
   padding: 0 0 0 37px;
+  font-family: "Ubuntu Mono";
   overflow: hidden;
 }
 ul.tabs li {
-  font-family: "Ubuntu Mono";
   font-size: 11pt;
   color: #777;
   cursor: pointer;
@@ -152,7 +188,7 @@ ul.tabs li.selected:after {
   font-size: 11pt;
   position: absolute;
   right: 0;
-  top: 3px;
+  top: 0;
   max-width: 10em;
 }
 

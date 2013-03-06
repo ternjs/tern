@@ -18,6 +18,9 @@ function load(file, c) {
 }
 
 CodeMirror.on(window, "load", function() {
+  if (!Object.create)
+    return document.getElementById("demospace").innerHTML = "<p><strong>Sorry!</strong> You seem to be using a browser that does not support ECMAScript version 5. Tern is using some ECMAScript 5 features, so it will not work on your browser. Try with a more modern one if you really want to see this.</p><p>(I may change the library to not depend on ECMAScript 5 in the future. It would not be all that hard, but I have not yet decided whether this is worthwhile.)</p>";
+
   var files = ["ecma5.json", "browser.json", "plugin/requirejs/requirejs.json", "jquery.json"];
   var loaded = 0;
   for (var i = 0; i < files.length; ++i) (function(i) {
@@ -38,16 +41,22 @@ CodeMirror.on(window, "load", function() {
 });
 
 function initEditor() {
+  var keyMap = {
+    "Ctrl-I": findType,
+    "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
+    "Alt-.": jumpToDef,
+    "Alt-,": jumpBack,
+    "Ctrl-Q": renameVar
+  };
+  for (var i = 1; i <= 9; ++i) (function(i) {
+    keyMap["Ctrl-" + i] = function(cm) {
+      if (i <= docs.length) selectDoc(i - 1);
+    };
+  })(i);
+
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
-    extraKeys: {
-      "Ctrl-I": findType,
-      "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
-      "Alt-.": jumpToDef,
-      "Alt-,": jumpBack,
-      "Ctrl-Q": renameVar,
-      "Ctrl-O": showOverlay
-    },
+    extraKeys: keyMap,
     autofocus: true,
     matchBrackets: true
   });
@@ -390,22 +399,3 @@ var commands = {
     unregisterDoc(curDoc);
   }
 };
-
-function showOverlay() {
-  var overlay = document.createElement("div");
-  overlay.style.cssText = "background: url(doc/demo_pic.png); background-position: 80% 50%; background-repeat: no-repeat; position: absolute; left: 0; right: 0; top: 0; bottom: 0;";
-  overlay.innerHTML = "<h1>Tern</h1><h2>http://ternjs.net</h2>";
-  overlay.firstChild.style.cssText = "font-size: 80pt; position: absolute; top: 70px; left: 130px; color: #500;";
-  overlay.lastChild.style.cssText = "background: white; border: 2px solid black; border-radius: 10px; position: absolute; top: 240px; left: 120px; padding: 5px 20px";
-  editor.display.wrapper.appendChild(overlay);
-  editor.display.wrapper.style.position = "relative";
-  editor.display.scroller.style.opacity = ".4";
-
-  setTimeout(function() {
-    window.onkeydown = function() {
-      window.onkeydown = null;
-      overlay.parentNode.removeChild(overlay);
-      editor.display.scroller.style.opacity = "1";
-    };
-  }, 20);
-}

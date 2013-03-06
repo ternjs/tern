@@ -23,24 +23,29 @@
   <script src="plugin/requirejs/requirejs.js"></script>
 
   <link rel=stylesheet href="doc/docs.css">
-  <title>Tern.js</title>
+  <title>Tern</title>
 </head>
 
+<div id=nag>
+  Please check out the <a href="https://www.indiegogo.com/projects/tern-intelligent-javascript-editing">crowd-funding campaign</a> to open-source Tern.
+</div>
+
 <div id=head>
-  <h1>Tern.js <span>intelligent JavaScript editing</span></h1>
+  <h1>Tern. <span>Intelligent JavaScript editing</span></h1>
   <img id=head-image src="doc/header.png">
 </div>
 
 <div id=main>
 
 <p>A tern is a small sea bird. It darts over the waves, looking for
-fish below the surface. When it spots a target, it dives into the
-water, vanishes for an instant, and bursts out again with its prey in
-its beak.</p>
+fish below the surface. When it spots one, it dives into the water,
+vanishes for an instant, and bursts out again with its prey in its
+beak.</p>
 
-<p>Tern.js is a piece of software. It dives into the muddy depths of a
-JavaScript system, locates the information that it wants, and surfaces
-with a type or set of completion hints.</p>
+<p>Tern is a piece of software. It dives into the muddy depths of a
+JavaScript system to locate the information that it was asked for.
+Combined with an editor plug-in, it can make the life of a JavaScript
+programmer a lot more pleasant.</p>
 
 <h2>Demo</h2>
 
@@ -50,7 +55,7 @@ expression before the cursor (or the selected expression). Put the
 cursor inside a function call's argument list to automatically get a
 description of the function's arguments.</p>
 
-<div style="position: relative">
+<div style="position: relative" id="demospace">
   <select id="commands">
     <option>commands...</option>
     <option value=complete>Autocomplete (ctrl-space)</option>
@@ -113,7 +118,7 @@ requirejs(["test_dep.js"], function(test) {
 
 <p>Tern is <em>not</em> currently open source. I'd like it to be, but
 I have to pay my bills. So I'm running
-a <a href="FIXME">crowd-funder</a> where interested parties can pledge
+a <a href="http://www.indiegogo.com/projects/tern-intelligent-javascript-editing">crowd-funder</a> where interested parties can pledge
 money. If successful, Tern will be released under
 an <a href="https://github.com/marijnh/CodeMirror/blob/master/LICENSE">MIT</a>
 license.</p>
@@ -158,7 +163,7 @@ some different strengths and weaknesses.</p>
 crowd-funding succeeds, Tern will be an open system that can (and
 will) be plugged into a variety of editors and IDEs.</p>
 
-<h2>But does it scale?</h2>
+<h2>Does it scale?</h2>
 
 <p>So is this a clever toy that works in a little text input like the
 one above, or something that can be applied when working on real, big,
