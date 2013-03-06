@@ -57,7 +57,6 @@ function initEditor() {
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     extraKeys: keyMap,
-    autofocus: true,
     matchBrackets: true
   });
   server = new tern.Server({getFile: getFile}, environment);

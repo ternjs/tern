@@ -5,8 +5,10 @@
   src: url('ProstoOne.woff') format('woff');
 }
 @font-face {
-  font-family: 'Museo Sans';
-  src: url('MuseoSans.ttf') format('truetype');
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('OpenSans.woff') format('woff');
 }
 @font-face {
   font-family: 'Ubuntu Mono';
@@ -19,8 +21,8 @@
 html, body { height: 100%; }
 
 body {
-  font-family: 'Museo Sans';
-  font-size: 15pt;
+  font-family: 'Open Sans';
+  font-size: 16pt;
   max-width: 900px;
   margin: 0 auto;
   padding: 0;
@@ -85,6 +87,7 @@ h2 {
 ul, ol {
   margin-left: 0; padding-left: 0;
 }
+ul { list-style-type: circle; }
 
 li { margin-bottom: 1em; }
 
