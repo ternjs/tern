@@ -224,10 +224,10 @@
     var word = text.slice(wordStart, wordEnd), completions, guessing = false;
 
     infer.resetGuessing();
-    // FIXME deal with whitespace before/after dot
-    if (text.charAt(wordStart - 1) == ".") { // Property completion
-      var expr = infer.findExpressionAt(file.ast, null, wordStart - 1, file.scope);
-      var tp = expr && infer.expressionType(expr);
+    var memberExpr = infer.findExpressionAround(file.ast, null, wordStart, file.scope, "MemberExpression");
+    if (memberExpr && !memberExpr.node.computed && memberExpr.node.object.end < wordStart) {
+      memberExpr.node = memberExpr.node.object;
+      var tp = infer.expressionType(memberExpr);
       if (tp)
         completions = infer.propertiesOf(tp, word);
       else
@@ -253,7 +253,6 @@
     var expr = findExpr(file, query);
     infer.resetGuessing();
     var type = infer.expressionType(expr);
-    if (typeof window != "undefined") window.tp = type; // FIXME debug statement
     if (query.preferFunction)
       type = type.getFunctionType() || type.getType();
     else

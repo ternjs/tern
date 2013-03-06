@@ -997,7 +997,6 @@
       var lhs = findType(node.consequent, scope);
       return lhs.isEmpty() ? findType(node.alternate, scope) : lhs;
     },
-    // FIXME this doesn't work, for some reason
     NewExpression: function(node, scope) {
       var f = findType(node.callee, scope).getFunctionType();
       var proto = f && f.getProp("prototype").getType();
@@ -1063,13 +1062,13 @@
     }
   });
 
-  exports.findExpressionAt = function(ast, start, end, defaultScope) {
-    var test = function(_t, node) {return typeFinder.hasOwnProperty(node.type);};
+  exports.findExpressionAt = function(ast, start, end, defaultScope, filter) {
+    var test = filter || function(_t, node) {return typeFinder.hasOwnProperty(node.type);};
     return walk.findNodeAt(ast, start, end, test, searchVisitor, defaultScope || cx.topScope);
   };
 
-  exports.findExpressionAround = function(ast, start, end, defaultScope) {
-    var test = function(_t, node) {
+  exports.findExpressionAround = function(ast, start, end, defaultScope, filter) {
+    var test = filter || function(_t, node) {
       if (start != null && node.start > start) return false;
       return typeFinder.hasOwnProperty(node.type);
     };
