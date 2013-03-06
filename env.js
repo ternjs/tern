@@ -68,15 +68,11 @@
         else
           return new infer.Arr(inner);
       } else if (this.eat("+")) {
-        var p = this.word(/[\w$<>\.!]/);
-        var base = parsePath(p);
-        if (base instanceof infer.Fn) {
-          var proto = base.props.prototype;
-          if (proto) proto = proto.getType();
-          if (proto instanceof infer.Obj) return infer.getInstance(proto);
-        }
+        var path = this.word(/[\w$<>\.!]/);
+        var base = parsePath(path + ".prototype");
+        if (!(base instanceof infer.Obj)) base = parsePath(path);
         if (base instanceof infer.Obj) return infer.getInstance(base);
-        else return base;
+        return base;
       } else if (this.eat("?")) {
         return infer.ANull;
       } else {

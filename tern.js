@@ -244,8 +244,8 @@
     var expr = infer.findExpressionAt(file.ast, query.start, query.end, file.scope);
     if (expr) return expr;
     expr = infer.findExpressionAround(file.ast, query.start, query.end, file.scope);
-    if (expr && (query.start == null || query.start - expr.node.start < 10) &&
-        expr.node.end - query.end < 10) return expr;
+    if (expr && (query.start == null || query.start - expr.node.start < 20) &&
+        expr.node.end - query.end < 20) return expr;
     throw new Error("No expression at the given position.");
   }
 

@@ -282,6 +282,7 @@ function updateArgumentHints(cm) {
   if (!found) return;
 
   var cache = cachedFunction;
+  // FIXME this is easy to confuse (change function name to something of the same length)
   if (cache.line != line || cache.ch != ch) {
     cache.line = line; cache.ch = ch; cache.bad = true;
 
