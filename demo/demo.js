@@ -17,6 +17,8 @@ function load(file, c) {
   };
 }
 
+var modKey = /Mac/.test(navigator.platform) ? "Cmd-" : "Ctrl-";
+
 CodeMirror.on(window, "load", function() {
   if (!Object.create)
     return document.getElementById("demospace").innerHTML = "<p><strong>Sorry!</strong> You seem to be using a browser that does not support ECMAScript version 5. Tern is using some ECMAScript 5 features, so it will not work on your browser. Try with a more modern one if you really want to see this.</p><p>(I may change the library to not depend on ECMAScript 5 in the future. It would not be all that hard, but I have not yet decided whether this is worthwhile.)</p>";
@@ -42,17 +44,12 @@ CodeMirror.on(window, "load", function() {
 
 function initEditor() {
   var keyMap = {
-    "Ctrl-I": findType,
-    "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
     "Alt-.": jumpToDef,
     "Alt-,": jumpBack,
-    "Ctrl-Q": renameVar
   };
-  for (var i = 1; i <= 9; ++i) (function(i) {
-    keyMap["Ctrl-" + i] = function(cm) {
-      if (i <= docs.length) selectDoc(i - 1);
-    };
-  })(i);
+  keyMap[modKey + "I"] = findType;
+  keyMap[modKey + "Space"] = function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); };
+  keyMap[modKey + "Q"] = renameVar;
 
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
@@ -74,6 +71,8 @@ function initEditor() {
     for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling))
       if (c == target) return selectDoc(i);
   });
+
+  if (modKey == "Cmd-") updateToCmd();
 }
 
 var httpCache = {};
@@ -398,3 +397,15 @@ var commands = {
     unregisterDoc(curDoc);
   }
 };
+
+function updateToCmd() {
+  var cmds = document.getElementById("commands");
+  for (var i = 0; i < cmds.options.length; ++i) {
+    var opt = cmds.options[i], txt = opt.removeChild(opt.firstChild);
+    opt.appendChild(document.createTextNode(txt.nodeValue.replace("ctrl", "cmd")));
+  }
+
+  var d = findDoc("test.js");
+  if (!d) return;
+  d.doc.setValue(d.doc.getValue().replace(/ctrl/g, "cmd"));
+}
