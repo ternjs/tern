@@ -76,7 +76,7 @@ document.body.a
 var foo = ["array", "of", "strings"];
 var bar = foo.slice(0, 2).join("").split("a")[0];
 
-// Works for locally defined types too
+// Works for locally defined types too.
 
 function CTor() { this.size = 10; }
 CTor.prototype.hallo = "hallo";
@@ -84,12 +84,13 @@ CTor.prototype.hallo = "hallo";
 var baz = new CTor;
 baz.
 
-// You can press ctrl-q when in the CTor variable to rename it.
+// You can press ctrl-q when the cursor is on a variable name to
+// rename it. Try it with CTor...
 
 // When the cursor is in an argument list, the arguments are
 // shown below the editor.
 
-[].reduce(  );
+[1].reduce(  );
 
 // And a little more advanced code...
 
