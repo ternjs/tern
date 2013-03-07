@@ -275,6 +275,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "operator") return cont(expression);
     if (type == "[") return cont(pushlex("]"), commasep(expression, "]"), poplex, maybeoperator);
     if (type == "{") return cont(pushlex("}"), commasep(objprop, "}"), poplex, maybeoperator);
+    if (type == "]" || type == "}" || type == ")") return pass();
     return cont();
   }
   function maybeexpression(type) {

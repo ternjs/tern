@@ -109,6 +109,10 @@ button {
 .CodeMirror pre {
   padding: 0 9px;
 }
+.CodeMirror-linenumber {
+  font-size: 80%;
+  padding-top: 2px;
+}
 
 .output {
   background: #eee;
