@@ -48,11 +48,6 @@ function initEditor() {
     "Alt-,": jumpBack,
     "Ctrl-Q": renameVar
   };
-  for (var i = 1; i <= 9; ++i) (function(i) {
-    keyMap["Ctrl-" + i] = function(cm) {
-      if (i <= docs.length) selectDoc(i - 1);
-    };
-  })(i);
 
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
