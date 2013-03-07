@@ -438,7 +438,7 @@
     var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
     if (newProto) {
       if (this.name) {
-        name = this.name + ".prototype";
+        var name = this.name + ".prototype";
         retval.propagate({addType: function(t) {if (!t.name) t.name = name;}});
       }
       if (retval.isEmpty() && alsoProto) {
