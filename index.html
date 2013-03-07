@@ -65,18 +65,33 @@ function argument hints will appear in the bar below the editor.</p>
   </select>
   <form>
     <ul class="tabs" id="docs"></ul>
-    <textarea id=code name=code>// Type some code, see if Tern can figure out the types
+    <textarea id=code name=code>
+// Use ctrl-space to complete something
+co
+document.body.a
+
+// Put the cursor in or after an expression, press ctrl-i to
+// find its type
 
 var foo = ["array", "of", "strings"];
 var bar = foo.slice(0, 2).join("").split("a")[0];
+
+// Works for locally defined types too
 
 function CTor() { this.size = 10; }
 CTor.prototype.hallo = "hallo";
 
 var baz = new CTor;
-var quux = baz.hallo + baz.size;
+baz.
 
-// And a little more advanced
+// You can press ctrl-q when in the CTor variable to rename it.
+
+// When the cursor is in an argument list, the arguments are
+// shown below the editor.
+
+[].reduce(  );
+
+// And a little more advanced code...
 
 (function(exports) {
   exports.randomElt = function(arr) {
@@ -89,7 +104,8 @@ var quux = baz.hallo + baz.size;
 var randomStr = myMod.randomElt(myMod.strList);
 var randomInt = myMod.randomElt(myMod.intList);
 
-// A test of the requirejs plug-in
+// A test of the requirejs plug-in. Check the 'test_dep.js' tab,
+// notice that the test variable.
 
 requirejs(["test_dep.js"], function(test) {
   var word = test.capitalize(test.garble("coconut"));
