@@ -486,7 +486,7 @@
     this.paths = Object.create(null);
 
     exports.withContext(this, function() {
-      this.curOrigin = "ecma5";
+      cx.curOrigin = "ecma5";
       cx.protos.Object = new Obj(null, "Object.prototype");
       cx.topScope = new Scope();
       cx.protos.Array = new Obj(true, "Array.prototype");
@@ -498,7 +498,7 @@
       cx.str = new Prim(cx.protos.String, "string");
       cx.bool = new Prim(cx.protos.Boolean, "bool");
       cx.num = new Prim(cx.protos.Number, "number");
-      this.curOrigin = null;
+      cx.curOrigin = null;
 
       if (environment) for (var i = 0; i < environment.length; ++i)
         env.loadEnvironment(environment[i]);
