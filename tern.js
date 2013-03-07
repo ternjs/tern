@@ -1,7 +1,7 @@
 // FIXME needs re-entrancy when using this for HTTP
 
 (function(exports) {
-  "strict mode";
+  "use strict";
 
   var infer, condense;
   if (typeof require != "undefined") {

@@ -1,5 +1,5 @@
 (function(exports) {
-  "strict mode";
+  "use strict";
 
   var infer = typeof require != "undefined" ? require("./infer") : exports;
 

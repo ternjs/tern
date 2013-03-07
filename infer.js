@@ -1,5 +1,5 @@
 (function(exports) {
-  "strict mode";
+  "use strict";
 
   var acorn, walk, env, jsdoc;
   if (typeof require != "undefined") {
