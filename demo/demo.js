@@ -221,14 +221,31 @@ function findType(cm) {
   });
 }
 
+function typeToIcon(type) {
+  var suffix;
+  if (type == "?") suffix = "unknown";
+  else if (type == "number" || type == "string" || type == "bool") suffix = type;
+  else if (/^fn\(/.test(type)) suffix = "fn";
+  else if (/^\[/.test(type)) suffix = "array";
+  else suffix = "object";
+  return "Tern-completion Tern-completion-" + suffix;
+}
+
 function ternHints(cm, c) {
   var req = buildRequest(cm, "completions");
 
   server.request(req.request, function(error, data) {
     if (error) return displayError(error);
+    var completions = [];
+    for (var i = 0; i < data.completions.length; ++i) {
+      var completion = data.completions[i], className = typeToIcon(completion.type);
+      if (data.guess) className += " Tern-completion-guess";
+      completions.push({text: completion.name, className: className});
+    }
+
     c({from: cm.posFromIndex(data.from + req.offset),
        to: cm.posFromIndex(data.to + req.offset),
-       list: data.completions});
+       list: completions});
   });
 }
 
@@ -297,6 +314,7 @@ function updateArgumentHints(cm) {
       cache.type = parseFnType(data.type);
       cache.name = data.exprName || data.name || "fn";
       cache.bad = false;
+      cache.guess = data.guess;
       showArgumentHints(cache, out, pos);
     });
   } else if (!cache.bad) {
@@ -305,6 +323,10 @@ function updateArgumentHints(cm) {
 }
 
 function showArgumentHints(cache, out, pos) {
+  if (cache.guess) {
+    out = out.appendChild(document.createElement("div"));
+    out.className = "Tern-fhint-guess";
+  }
   out.appendChild(elt("span", cache.name, "Tern-fname"));
   out.appendChild(document.createTextNode("("));
 

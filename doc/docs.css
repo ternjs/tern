@@ -130,6 +130,58 @@ button {
 .Tern-farg { color: #70a; }
 .Tern-farg-current { text-decoration: underline; }
 .Tern-type { color: #07c; }
+.Tern-fhint-guess { opacity: .7; }
+
+.Tern-completion {
+  padding-left: 22px;
+  position: relative;
+}
+.Tern-completion:before {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  height: 15px;
+  width: 15px;
+  line-height: 16px;
+  text-align: center;
+  color: white;
+  box-sizing: border-box;  
+}
+.Tern-completion-unknown:before {
+  content: "?";
+  background: #4bb;
+}
+.Tern-completion-object:before {
+  content: "O";
+  background: #77c;
+}
+.Tern-completion-fn:before {
+  content: "F";
+  background: #7c7;
+}
+.Tern-completion-array:before {
+  content: "A";
+  background: #c66;
+}
+.Tern-completion-number:before {
+  content: "1";
+  background: #999;
+}
+.Tern-completion-string:before {
+  content: "S";
+  background: #999;
+}
+.Tern-completion-bool:before {
+  content: "B";
+  background: #999;
+}
+
+.Tern-completion-guess {
+  color: #999;
+}
 .CodeMirror-hint { font-size: 12pt; }
 
 ul.tabs {

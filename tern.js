@@ -98,22 +98,24 @@
         if (err) return c(err);
         finishPending(srv, function(err) {
           if (err) return c(err);
+          var result;
           try {
             switch (doc.query.type) {
             case "completions":
-              return c(null, findCompletions(file, doc.query));
+              result = findCompletions(file, doc.query); break;
             case "type":
-              return c(null, findTypeAt(file, doc.query));
+              result = findTypeAt(file, doc.query); break;
             case "definition":
               if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
-              return c(null, findDef(file, doc.query));
+              result = findDef(file, doc.query); break;
             case "refs":
               if (file.type == "part") throw new Error("Can't run a uses query on a file fragment");
-              return c(null, findRefs(srv, file, doc.query));
+              result = findRefs(srv, file, doc.query); break;
             default:
-              c("Unsupported query type: " + doc.query.type);
+              throw new Error("Unsupported query type: " + doc.query.type);
             }
           } catch (e) { c(e.message || String(e)); }
+          return c(null, result);
         });
       });
     });

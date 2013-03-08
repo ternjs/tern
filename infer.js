@@ -370,11 +370,16 @@
     // out when no prefix is provided.
     if (this == cx.protos.Object && !prefix) return;
 
-    for (var prop in this.props) {
+    outer: for (var prop in this.props) {
       if (prefix && prop.indexOf(prefix) != 0 || prop == "<i>") continue;
+      for (var i = 0; i < out.length; ++i) if (out[i].name == prop) continue outer;
       var val = this.props[prop];
-      if (!(val.flags & flag_definite) || out.indexOf(prop) > -1) continue;
-      out.push(prop);
+      if (!(val.flags & flag_definite)) continue;
+      var oldGuessing = guessing;
+      guessing = false;
+      var type = toString(val.getType());
+      out.push({name: prop, type: type, guess: guessing});
+      guessing = oldGuessing;
     }
     if (this.proto) this.proto.gatherProperties(prefix, out);
   };
@@ -1087,8 +1092,8 @@
   exports.didGuess = function() { return guessing; };
 
   function compareProps(a, b) {
-    var aUp = /^[A-Z]/.test(a), bUp = /^[A-Z]/.test(b);
-    if (aUp == bUp) return a < b ? -1 : a == b ? 0 : 1;
+    var aUp = /^[A-Z]/.test(a.name), bUp = /^[A-Z]/.test(b.name);
+    if (aUp == bUp) return a.name < b.name ? -1 : a.name == b.name ? 0 : 1;
     else return aUp ? 1 : -1;
   }
 
@@ -1097,7 +1102,8 @@
     type.gatherProperties(prefix, props);
     if (!props.length && prefix.length >= 2) {
       guessing = true;
-      for (var prop in cx.props) if (prop.indexOf(prefix) == 0) props.push(prop);
+      for (var prop in cx.props) if (prop.indexOf(prefix) == 0)
+        props.push({name: prop, type: "?", guess: true});
     }
     props.sort(compareProps);
     return props;
