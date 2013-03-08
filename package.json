@@ -1,0 +1,18 @@
+{
+  "name": "tern",
+  "license": "MIT",
+  "version": "0.0.1",
+  "author": "Marijn Haverbeke <marijnh@gmail.com>",
+  "description": "A JavaScript code analyzer for deep, cross-editor language support",
+  "main": "tern.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/marijnh/tern.git"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "acorn": "git://github.com/marijnh/acorn.git"
+  }
+}
