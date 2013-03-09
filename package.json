@@ -13,6 +13,7 @@
     "test": "node test.js"
   },
   "dependencies": {
+    "codemirror": "git://github.com/marijnh/CodeMirror.git",
     "acorn": "git://github.com/marijnh/acorn.git"
   }
 }
