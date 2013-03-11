@@ -62,6 +62,8 @@
     },
 
     request: function(doc, c) {
+      if (!validDoc(doc, c)) return;
+
       var self = this, files = doc.files || [];
       if (!this.cx) this.reset();
       doRequest(this, doc, function(err, data) {
@@ -99,10 +101,10 @@
       if (file.type == "full") loadFile(srv, file.name, file.text);
     }
 
-    infer.withContext(srv.cx, function() {
-      resolveFile(srv, files, doc.query.file, function(err, file) {
-        if (err) return c(err);
-        finishPending(srv, function(err) {
+    resolveFile(srv, files, doc.query.file, function(err, file) {
+      if (err) return c(err);
+      finishPending(srv, function(err) {
+        infer.withContext(srv.cx, function() {
           if (err) return c(err);
           var result;
           try {
@@ -120,7 +122,10 @@
             default:
               throw new Error("Unsupported query type: " + doc.query.type);
             }
-          } catch (e) { return c(e.message || String(e)); }
+          } catch (e) {
+            if (srv.options.debug) console.log(e.stack);
+            return c(e.message || String(e));
+          }
           c(null, result);
         });
       });
@@ -225,8 +230,33 @@
     c(null, file);
   }
 
+  // Baseline query document validation
+  function validDoc(doc, c) {
+    var err;
+    if (!doc.query) err = "Missing query property";
+    else if (typeof doc.query.type != "string") err = ".query.type must be a string";
+    else if (typeof doc.query.file != "string") err = ".query.file must be a string";
+    else if (doc.query.start && typeof doc.query.start != "number") err = ".query.start must be a number";
+    else if (doc.query.end && typeof doc.query.end != "number") err = ".query.start must be a number";
+    else if (doc.files) {
+      if (!Array.isArray(doc.files)) err = "Files property must be an array";
+      for (var i = 0; i < doc.files.length && !err; ++i) {
+        var file = doc.files[i];
+        if (typeof file != "object") err = ".files[n] must be objects";
+        else if (typeof file.text != "string") err = ".files[n].text must be a string";
+        else if (typeof file.name != "string") err = ".files[n].name must be a string";
+        else if (file.type == "part") {
+          if (typeof file.offset != "number") err = ".files[n].offset must be a number";
+        } else if (file.type != "full") err = ".files[n].type must be \"full\" or \"part\"";
+      }
+    }
+    if (err) c(err);
+    else return true;
+  }
+
   function findCompletions(file, query) {
     var wordStart = query.end, wordEnd = wordStart, text = file.text;
+    if (wordStart == null) throw new Error("missing .query.end field");
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
     var word = text.slice(wordStart, wordEnd), completions, guessing = false;
@@ -249,6 +279,7 @@
   }
 
   function findExpr(file, query) {
+    if (query.end == null) throw new Error("missing .query.end field");
     var expr = infer.findExpressionAt(file.ast, query.start, query.end, file.scope);
     if (expr) return expr;
     expr = infer.findExpressionAround(file.ast, query.start, query.end, file.scope);
@@ -273,6 +304,8 @@
 
     var name = type && type.name;
     if (name && typeof name != "string") name = name.name;
+    if (query.depth != null && typeof query.depth != "number")
+      throw new Error(".query.depth must be a number");
 
     return {type: infer.toString(type, query.depth),
             name: name || null,
