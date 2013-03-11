@@ -54,7 +54,7 @@ function initEditor() {
     extraKeys: keyMap,
     matchBrackets: true
   });
-  server = new tern.Server({getFile: getFile}, environment);
+  server = new tern.Server({getFile: getFile, environment: environment});
   registerDoc("test.js", editor.getDoc());
   editor.on("cursorActivity", updateArgumentHints);
 

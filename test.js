@@ -19,8 +19,11 @@ function getFile(file) {
   return {text: text, name: file, env: env, ast: acorn.parse(text)};
 }
 
-function callbacks(context) {
+function serverOptions(context, env) {
+  var environment = [ecma5];
+  for (var i = 0; i < env.length; ++i) environment.push(env[i]);
   return {
+    environment: environment,
     getFile: function(name, c) {
       c(null, fs.readFileSync(context + name, "utf8"));
     }
@@ -40,9 +43,7 @@ function runTests(filter) {
     }
     var file = getFile(context + fname);
 
-    var server = new tern.Server(callbacks(context));
-    server.addEnvironment(ecma5);
-    for (var i = 0; i < file.env.length; ++i) server.addEnvironment(file.env[i]);
+    var server = new tern.Server(serverOptions(context, file.env));
 
     var typedef = /\/\/:(:)?(\?)?\s+([^\n]*)/g, m;
     while (m = typedef.exec(file.text)) {

@@ -14,17 +14,25 @@
   var plugins = Object.create(null);
   exports.registerPlugin = function(name, init) { plugins[name] = init; };
 
-  var Server = exports.Server = function(callbacks, environment) {
+  var defaultOptions = {
+    debug: false,
+    getFile: function(_f, c) { c(null, null); },
+    environment: []
+  };
+
+  var Server = exports.Server = function(options) {
     this.cx = null;
-    this.callbacks = callbacks;
+    this.options = options || {};
+    for (var o in defaultOptions) if (!options.hasOwnProperty(o))
+      options[o] = defaultOptions[o];
     this.environment = [];
     this.filesToLoad = [];
     this.handlers = {};
 
     this.pendingFiles = [];
     this.files = this.uses = 0;
-    if (environment) for (var i = 0; i < environment.length; ++i)
-      this.addEnvironment(environment[i]);
+    for (var i = 0; i < options.environment.length; ++i)
+      this.addEnvironment(options.environment[i]);
   };
   Server.prototype = {
     addEnvironment: function(data) {
@@ -112,8 +120,8 @@
             default:
               throw new Error("Unsupported query type: " + doc.query.type);
             }
-          } catch (e) { c(e.message || String(e)); }
-          return c(null, result);
+          } catch (e) { return c(e.message || String(e)); }
+          c(null, result);
         });
       });
     });
@@ -121,7 +129,7 @@
 
   function loadFile(srv, filename, text) {
     return infer.withContext(srv.cx, function() {
-      var file = {name: filename, text: text};
+      var file = {name: filename, text: text || ""};
       srv.signal("beforeLoad", file);
       var result = infer.analyze(file.text, filename);
       var known = findFile(srv.files, filename);
@@ -139,7 +147,7 @@
       if (!findFile(srv.files, next)) break;
     if (!next) return c();
 
-    srv.callbacks.getFile(next, function(err, text) {
+    srv.options.getFile(next, function(err, text) {
       if (err) return c(err);
       loadFile(srv, next, text);
       finishPending(srv, c);
@@ -178,7 +186,7 @@
       if (!file) c("Reference to unknown file " + name);
     } else {
       file = findFile(srv.files, name);
-      if (!file) return srv.callbacks.getFile(name, function(err, text) {
+      if (!file) return srv.options.getFile(name, function(err, text) {
         if (err) return c(err);
         c(null, loadFile(srv, name, text));
       });
