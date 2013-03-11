@@ -54,8 +54,6 @@
     },
 
     request: function(doc, c) {
-      // FIXME somehow validate doc's structure (at least for HTTP reqs)
-
       var self = this, files = doc.files || [];
       if (!this.cx) this.reset();
       doRequest(this, doc, function(err, data) {

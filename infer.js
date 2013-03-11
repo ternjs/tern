@@ -933,8 +933,12 @@
     if (!file) file = "file#" + cx.origins.length;
     exports.addOrigin(cx.curOrigin = file);
 
-    var jsDoc = [], options = {onComment: jsdoc.gather(jsDoc)};
-    var ast = acorn.parse_dammit(text, options);
+    var jsDoc = [], options = {onComment: jsdoc.gather(jsDoc)}, ast;
+    try { ast = acorn.parse(text, options); }
+    catch(e) {
+      jsDoc.length = 0;
+      ast = acorn.parse_dammit(text, options);
+    }
 
     if (!scope) scope = cx.topScope;
     walk.recursive(ast, scope, null, scopeGatherer);
