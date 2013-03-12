@@ -61,7 +61,8 @@ var url = require("url");
 
 var httpServer = require("http").createServer(function(req, resp) {
   var target = url.parse(req.url, true);
-  if (target.path != "/") respondError(resp, 404, "No service at " + target.path);
+  if (target.path == "/ping") return respondSimple(resp, 200, "pong"); // FIXME update ttl
+  if (target.path != "/") return respondSimple(resp, 404, "No service at " + target.path);
 
   if (req.method == "POST") {
     var body = "";
@@ -69,24 +70,24 @@ var httpServer = require("http").createServer(function(req, resp) {
     req.on("end", function() { respond(resp, body); });
   } else if (req.method == "GET") {
     if (target.query.doc) respond(resp, target.query.doc);
-    else respondError(resp, 400, "Missing query document");
+    else respondSimple(resp, 400, "Missing query document");
   }
 });
 httpServer.listen(0, "localhost", function() {
   fs.writeFileSync(path.resolve(dir, ".tern-port"), String(httpServer.address().port), "utf8");
 });
 
-function respondError(resp, status, text) {
+function respondSimple(resp, status, text) {
   resp.writeHead(status, {"content-type": "text/plain"});
   resp.end(text);
 }
 
 function respond(resp, doc) {
   try { var doc = JSON.parse(doc); }
-  catch(e) { return respondError(resp, 400, "JSON parse error: " + e.message); }
+  catch(e) { return respondSimple(resp, 400, "JSON parse error: " + e.message); }
 
   server.request(doc, function(err, data) {
-    if (err) return respondError(resp, 400, String(err));
+    if (err) return respondSimple(resp, 400, String(err));
     resp.writeHead(200, {"content-type": "application/json"});
     resp.end(JSON.stringify(data));
   });

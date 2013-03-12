@@ -244,7 +244,7 @@
     else if (typeof doc.query.type != "string") err = ".query.type must be a string";
     else if (typeof doc.query.file != "string") err = ".query.file must be a string";
     else if (doc.query.start && typeof doc.query.start != "number") err = ".query.start must be a number";
-    else if (doc.query.end && typeof doc.query.end != "number") err = ".query.start must be a number";
+    else if (doc.query.end && typeof doc.query.end != "number") err = ".query.end must be a number";
     else if (doc.files) {
       if (!Array.isArray(doc.files)) err = "Files property must be an array";
       for (var i = 0; i < doc.files.length && !err; ++i) {
