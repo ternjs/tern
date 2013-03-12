@@ -75,6 +75,7 @@ var httpServer = require("http").createServer(function(req, resp) {
 });
 httpServer.listen(0, "localhost", function() {
   fs.writeFileSync(path.resolve(dir, ".tern-port"), String(httpServer.address().port), "utf8");
+  console.log("Listening on port " + httpServer.address().port);
 });
 
 function respondSimple(resp, status, text) {
