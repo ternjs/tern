@@ -1,4 +1,11 @@
-// FIXME needs re-entrancy when using this for HTTP
+// The Tern server object
+
+// A server is a stateful object that manages the analysis for a
+// project, and defines an interface for querying the code in the
+// project.
+
+// FIXME there are re-entrancy problems in this.
+// FIXME support both sync and async in a more solid way
 
 (function(exports) {
   "use strict";

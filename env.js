@@ -1,3 +1,13 @@
+// Type description parser
+
+// Type description JSON files (such as ecma5.json and browser.json)
+// are used to
+//
+// A) describe types that come from native code
+
+// B) to cheaply load the types for big libraries, or libraries that
+//    can't be inferred well
+
 (function(exports) {
   "use strict";
 

@@ -1,3 +1,17 @@
+// Main type inference engine
+
+// Walks an AST, building up a graph of abstract values and contraints
+// that cause types to flow from one node to another. Also defines a
+// number of utilities for accessing ASTs and scopes.
+
+// Analysis is done in a context, which is tracked by the dynamically
+// bound cx variable. Use withContext to set the current context.
+
+// For memory-saving reasons, individual types export an interface
+// similar to abstract values (which can hold multiple types), and can
+// thus be used in place abstract values that only ever contain a
+// single type.
+
 (function(exports) {
   "use strict";
 
@@ -515,7 +529,7 @@
 
   exports.withContext = function(context, f) {
     var old = cx;
-    cx = context || new Context("browser");
+    cx = context;
     try { return f(); }
     finally { cx = old; }
   };

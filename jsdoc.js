@@ -1,3 +1,8 @@
+// JSDoc parser
+
+// Parses a subset of JSDoc-style comments in order to include the
+// explicitly defined types in the analysis.
+
 (function(exports) {
   "use strict";
 

@@ -1,3 +1,8 @@
+// HTTP server for desktop editors
+
+// Reads .tern-project files, wraps a Tern server in an HTTP wrapper
+// so that editor plug-ins can talk to it.
+
 var tern = require("./tern");
 var fs = require("fs"), path = require("path");
 
