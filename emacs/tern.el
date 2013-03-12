@@ -33,6 +33,7 @@
     (let ((dirs (split-string (buffer-file-name) "/" t))
           my-dir
           found)
+      ;; FIXME use built-in filename manipulation utils
       (loop for i from (1- (length dirs)) downto 0 do
             (let ((dir "/"))
               (loop for j from 0 below i do
@@ -41,11 +42,14 @@
               (if (or (file-exists-p (concat dir ".tern-project"))
                       (file-exists-p (concat dir ".tern-port")))
                   (progn (setf found dir) (return)))))
+      (setf tern-project-dir (or found my-dir))
       (if (and found (not ignore-port-file) (file-exists-p (concat found ".tern-port")))
-          (funcall c (string-to-number (with-temp-buffer
-                                         (insert-file-contents (concat found ".tern-port"))
-                                         (buffer-string))))
-        (tern-start-server (or found my-dir) c)))))
+          (let ((port (string-to-number (with-temp-buffer
+                                          (insert-file-contents (concat found ".tern-port"))
+                                          (buffer-string)))))
+            (setf tern-known-port port)
+            (funcall c port))
+        (tern-start-server tern-project-dir c)))))
 
 ;; FIXME this probably won't work on other systems...
 (defvar tern-command '("/usr/bin/node" "/home/marijn/src/js/tern/desktop.js"))
@@ -57,17 +61,23 @@
     (set-process-sentinel proc (lambda (_proc _event) (funcall c nil)))
     (set-process-filter proc (lambda (proc output)
                                (when (string-match "Listening on port \\([0-9][0-9]*\\)" output)
+                                 (setf tern-known-port (string-to-number (match-string 1 output)))
                                  (set-process-sentinel proc nil)
                                  (set-process-filter proc nil)
-                                 (funcall c (string-to-number (match-string 1 output))))))))
+                                 (funcall c tern-known-port))))))
 
 (defvar tern-command-generation 0)
 (defvar tern-activity-since-command -1)
 
+(defun tern-local-filepath ()
+  (substring (buffer-file-name) (length tern-project-dir)))
+
 (defun tern-complete ()
   (interactive)
   (tern-run-command #'tern-do-complete
-                    `((query . ((type . "completions") (file . "infer.js") (end . ,(1- (point))))))))
+                    `((query . ((type . "completions")
+                                (file . ,(tern-local-filepath))
+                                (end . ,(1- (point))))))))
 
 (defun tern-run-command (f doc)
   (let ((generation tern-command-generation)
@@ -87,28 +97,20 @@
                      (with-current-buffer buffer (funcall f data)))
                     ((and (eq (cadar err) 'connection-failed) (not retrying))
                      (setf retrying t)
+                     (setf tern-known-port nil)
                      (tern-find-server callback t))
-                    (t (message "Failed to start a Tern server"))))))
+                    (t (message "Request failed: %s" (cdr err)))))))
     (tern-find-server callback)))
   
 (defun tern-do-complete (data)
-  (let ((cs (cdr (assoc 'completions data))))
-    (when (> (length cs) 0)
-      (tern-complete-word (cdr (assoc 'name (elt cs 0)))))))
-
-(defun tern-complete-word (word)
-  (let (start end)
-    (save-excursion
-      (if (re-search-backward "[^a-zA-Z_$]" nil t)
-          (forward-char)
-        (goto-char 0))
-      (setf start (point) end start)
-      (when (re-search-forward "[^a-zA-Z_$]" nil t)
-        (setf end (1- (point))))
-      (delete-region start end)
-      (goto-char start)
-      (insert word))
-    (goto-char (+ start (length word)))))
+  (declare (special completion-extra-properties completion-in-region-mode-predicate))
+  (let ((cs (loop for elt across (cdr (assoc 'completions data)) collect (cdr (assoc 'name elt))))
+        (start (1+ (cdr (assoc 'from data))))
+        (end (1+ (cdr (assoc 'to data))))
+        (completion-extra-properties nil)
+        (completion-in-region-mode-predicate
+         (lambda () t))) ;; FIXME
+    (completion-in-region start end cs)))
 
 ;; Mode
 
@@ -122,11 +124,13 @@
   (if tern-mode (tern-mode-enable) (tern-mode-disable)))
 
 (defvar tern-known-port nil)
+(defvar tern-project-dir nil)
 
 (defun tern-completion-at-point () #'tern-complete)
 
 (defun tern-mode-enable ()
   (set (make-local-variable 'tern-known-port) nil)
+  (set (make-local-variable 'tern-project-dir) nil)
   (make-local-variable 'completion-at-point-functions)
   (push 'tern-completion-at-point completion-at-point-functions))
 
