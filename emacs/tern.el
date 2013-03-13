@@ -74,17 +74,19 @@
 
 (defvar tern-command-generation 0)
 (defvar tern-activity-since-command -1)
+(defvar tern-last-point-pos nil)
 
 (defvar tern-known-port nil)
 (defvar tern-project-dir nil)
 
 (defvar tern-last-completions nil)
+(defvar tern-last-argument-hints nil)
 (defvar tern-buffer-is-dirty nil)
 
 (defun tern-local-filepath ()
   (substring (buffer-file-name) (length tern-project-dir)))
 
-(defun tern-run-command (f query)
+(defun tern-run-command (f query &optional silent)
   (let ((generation (incf tern-command-generation))
         (buffer (current-buffer))
         (retrying nil)
@@ -111,7 +113,7 @@
                      (setf retrying t)
                      (setf tern-known-port nil)
                      (tern-find-server callback t))
-                    (t (message "Request failed: %s" (cdr err)))))))
+                    ((not silent) (message "Request failed: %s" (cdr err)))))))
     (tern-find-server callback)))
 
 (defun tern-do-complete (data)
@@ -145,10 +147,98 @@
                             (file . ,(tern-local-filepath))
                             (end . ,(1- (point))))))))
 
+(defun tern-update-argument-hints ()
+  (let ((opening-paren (cadr (syntax-ppss))))
+    (when (and opening-paren (equal (char-after opening-paren) ?\())
+      (if (and tern-last-argument-hints (eq (car tern-last-argument-hints) opening-paren))
+          (tern-show-argument-hints)
+        (tern-run-command (lambda (data)
+                            (let ((type (tern-parse-function-type data)))
+                              (when type
+                                (setf tern-last-argument-hints (cons opening-paren type))
+                                (tern-show-argument-hints))))
+                          `((type . "type")
+                            (file . ,(tern-local-filepath))
+                            (end . ,(1- opening-paren))
+                            (preferFunction . t))
+                          t)))))
+
+(defun tern-skip-matching-brackets (end-chars)
+  (let ((depth 0) (end (+ (point) 500)))
+    (loop while (< (point) (point-max)) do
+          (let ((next (char-after (point))))
+            (cond
+             ((and (<= depth 0) (find next end-chars)) (return t))
+             ((or (eq next ?\)) (eq next ?\]) (eq next ?\})) (decf depth))
+             ((or (eq next ?\() (eq next ?\[) (eq next ?\{)) (incf depth))
+             ((> (point) end) (return nil)))
+            (forward-char)))))
+
+(defun tern-parse-function-type (data)
+  (let ((type (cdr (assoc 'type data)))
+        (name (or (cdr (assoc 'exprName data)) (cdr (assoc 'name data)) "fn")))
+    (when (string-match-p "^fn(" type)
+      (with-temp-buffer
+        (insert type)
+        (goto-char 4)
+        (let (args retval)
+          (loop until (eq (char-after (point)) ?\)) do
+                (let ((name (when (looking-at "\\([a-zA-Z_$?]*\\):\\s-*")
+                              (goto-char (match-end 0))
+                              (match-string 1)))
+                      (typestart (point)))
+                  (tern-skip-matching-brackets '(?\) ?\,))
+                  (push (cons name (buffer-substring typestart (point))) args))
+                (when (eq (char-after (point)) ?\,) (forward-char 2)))
+          (when (looking-at ") -> ")
+            (setf retval (buffer-substring (+ (point) 5) (point-max))))
+          (list name (nreverse args) retval))))))
+
+(defun tern-find-current-arg (start)
+  (when (< (point) (+ start 500))
+    (save-excursion
+      (let ((cur-point (point)))
+        (goto-char (1+ start))
+        (loop for i from 0 do
+              (let ((found-end (tern-skip-matching-brackets '(?\) ?\,))))
+                (when (>= (point) cur-point) (return i))
+                (when (or (not found-end) (looking-at ")")) (return nil))
+                (forward-char 1)))))))
+
+(defun tern-show-argument-hints ()
+  (declare (special message-log-max))
+  (destructuring-bind (paren . type) tern-last-argument-hints
+    (let ((parts ())
+          (current-arg (tern-find-current-arg paren)))
+      (destructuring-bind (name args ret) type
+        (push (propertize name 'face 'font-lock-function-name-face) parts)
+        (push "(" parts)
+        (loop for arg in args for i from 0 do
+              (unless (zerop i) (push ", " parts))
+              (when (car arg)
+                (push (if (eq i current-arg) (propertize (car arg) 'face 'highlight) (car arg)) parts)
+                (push ": " parts))
+              (push (propertize (cdr arg) 'face 'font-lock-type-face) parts))
+        (push ")" parts)
+        (when ret
+          (push " -> " parts)
+          (push (propertize ret 'face 'font-lock-type-face) parts)))
+      (let (message-log-max)
+        (message (apply #'concat (nreverse parts)))))))
+
 ;; Mode
 
-(defun tern-after-change-function (_start _end _len)
-  (setf tern-buffer-is-dirty t))
+(defun tern-after-change (_start _end _len)
+  (setf tern-buffer-is-dirty t)
+  (setf tern-last-point-pos nil)
+  (when (and tern-last-argument-hints (<= (point) (car tern-last-argument-hints)))
+    (setf tern-last-argument-hints nil)))
+
+(defun tern-post-command ()
+  (unless (eq (point) tern-last-point-pos)
+    (setf tern-last-point-pos (point))
+    (setf tern-activity-since-command tern-command-generation)
+    (tern-update-argument-hints)))
 
 (defvar tern-mode-keymap (make-sparse-keymap))
 
@@ -162,13 +252,17 @@
 (defun tern-mode-enable ()
   (set (make-local-variable 'tern-known-port) nil)
   (set (make-local-variable 'tern-project-dir) nil)
+  (set (make-local-variable 'tern-last-point-pos) nil)
   (set (make-local-variable 'tern-last-completions) nil)
+  (set (make-local-variable 'tern-last-argument-hints) nil)
   (set (make-local-variable 'tern-buffer-is-dirty) (buffer-modified-p))
   (make-local-variable 'completion-at-point-functions)
   (push 'tern-completion-at-point completion-at-point-functions)
-  (add-hook 'after-change-functions 'tern-after-change-function t t))
+  (add-hook 'after-change-functions 'tern-after-change t t)
+  (add-hook 'post-command-hook 'tern-post-command t t))
 
 (defun tern-mode-disable ()
   (setf completion-at-point-functions
         (remove 'tern-completion-at-point completion-at-point-functions))
-  (remove-hook 'after-change-functions 'tern-after-change-function t))
+  (remove-hook 'after-change-functions 'tern-after-change t)
+  (remove-hook 'post-command-hook 'tern-post-command t))
