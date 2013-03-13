@@ -86,7 +86,9 @@
 (defun tern-local-filepath ()
   (substring (buffer-file-name) (length tern-project-dir)))
 
-(defun tern-run-command (f query &optional silent)
+;; FIXME send partial files when in a big file
+
+(defun tern-run-request (f query &optional silent)
   (let ((generation (incf tern-command-generation))
         (buffer (current-buffer))
         (retrying nil)
@@ -116,6 +118,16 @@
                     ((not silent) (message "Request failed: %s" (cdr err)))))))
     (tern-find-server callback)))
 
+;; Completion
+
+(defun tern-completion-at-point ()
+  (or (tern-completion-matches-last)
+      (lambda ()
+        (tern-run-request #'tern-do-complete
+                          `((type . "completions")
+                            (file . ,(tern-local-filepath))
+                            (end . ,(1- (point))))))))
+
 (defun tern-do-complete (data)
   (let ((cs (loop for elt across (cdr (assoc 'completions data)) collect (cdr (assoc 'name elt))))
         (start (1+ (cdr (assoc 'from data))))
@@ -139,20 +151,14 @@
                                 when (eq (compare-strings word 0 (length word) new-word 0 (length word)) t)
                                 collect elt)))))))))
 
-(defun tern-completion-at-point ()
-  (or (tern-completion-matches-last)
-      (lambda ()
-        (tern-run-command #'tern-do-complete
-                          `((type . "completions")
-                            (file . ,(tern-local-filepath))
-                            (end . ,(1- (point))))))))
+;; Argument hints
 
 (defun tern-update-argument-hints ()
   (let ((opening-paren (cadr (syntax-ppss))))
     (when (and opening-paren (equal (char-after opening-paren) ?\())
       (if (and tern-last-argument-hints (eq (car tern-last-argument-hints) opening-paren))
           (tern-show-argument-hints)
-        (tern-run-command (lambda (data)
+        (tern-run-request (lambda (data)
                             (let ((type (tern-parse-function-type data)))
                               (when type
                                 (setf tern-last-argument-hints (cons opening-paren type))
@@ -226,7 +232,33 @@
       (let (message-log-max)
         (message (apply #'concat (nreverse parts)))))))
 
-;; Mode
+;; Jump-to-definition
+
+(defvar tern-find-definition-stack ())
+
+(defun tern-find-definition ()
+  (interactive)
+  (tern-run-request (lambda (data)
+                      (push (cons (tern-local-filepath) (point)) tern-find-definition-stack)
+                      (let ((too-long (nthcdr 20 tern-find-definition-stack)))
+                        (when too-long (setf (cdr too-long) nil)))
+                      (tern-go-to-position (cdr (assoc 'file data))
+                                           (1+ (cdr (assoc 'start data)))))
+                    `((type . "definition")
+                      (file . ,(tern-local-filepath))
+                      (end . ,(1- (point))))))
+
+(defun tern-pop-find-definition ()
+  (interactive)
+  (when tern-find-definition-stack
+    (destructuring-bind (file . pos) (pop tern-find-definition-stack)
+      (tern-go-to-position file pos))))
+
+(defun tern-go-to-position (file pos)
+  (find-file (concat tern-project-dir file))
+  (goto-char (min pos (point-max))))
+
+;; Mode plumbing
 
 (defun tern-after-change (_start _end _len)
   (setf tern-buffer-is-dirty t)
@@ -241,6 +273,8 @@
     (tern-update-argument-hints)))
 
 (defvar tern-mode-keymap (make-sparse-keymap))
+(define-key tern-mode-keymap [(meta ?.)] 'tern-find-definition)
+(define-key tern-mode-keymap [(meta ?,)] 'tern-pop-find-definition)
 
 (define-minor-mode tern-mode
   "Minor mode binding to the Tern JavaScript analyzer"

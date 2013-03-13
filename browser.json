@@ -36,6 +36,7 @@
       "nodeType": "number",
       "nodeValue": "string",
       "nodeName": "string",
+      "tagName": "string",
       "insertBefore": "fn(newElt: +Element, before: +Element) -> +Element",
       "replaceChild": "fn(newElt: +Element, oldElt: +Element) -> +Element",
       "removeChild": "fn(oldElt: +Element) -> +Element",

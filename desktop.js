@@ -5,6 +5,9 @@
 // Reads .tern-project files, wraps a Tern server in an HTTP wrapper
 // so that editor plug-ins can talk to it.
 
+// FIXME auto-shutdown after a given period of inactivity (unless
+// given a command-line switch)
+
 var tern = require("./tern");
 var fs = require("fs"), path = require("path");
 
