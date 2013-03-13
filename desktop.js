@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // HTTP server for desktop editors
 
 // Reads .tern-project files, wraps a Tern server in an HTTP wrapper
@@ -6,7 +8,7 @@
 var tern = require("./tern");
 var fs = require("fs"), path = require("path");
 
-var projectFileName = ".tern-project";
+var projectFileName = ".tern-project", portFileName = ".tern-port";
 
 function findProjectDir() {
   var dir = process.cwd();
@@ -74,7 +76,10 @@ var httpServer = require("http").createServer(function(req, resp) {
   }
 });
 httpServer.listen(0, "localhost", function() {
-  fs.writeFileSync(path.resolve(dir, ".tern-port"), String(httpServer.address().port), "utf8");
+  var portFile = path.resolve(dir, portFileName);
+  fs.writeFileSync(portFile, String(httpServer.address().port), "utf8");
+  process.on("exit", function() { try { fs.unlinkSync(portFile); } catch(e) {} });
+  process.on("SIGINT", function() { process.exit(); });
   console.log("Listening on port " + httpServer.address().port);
 });
 
