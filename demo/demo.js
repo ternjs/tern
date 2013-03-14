@@ -309,7 +309,7 @@ function updateArgumentHints(cm) {
     var query = {type: "type", preferFunction: true, end: Pos(line, ch)}
     server.request(buildRequest(cm, query).request, function(error, data) {
       if (error) return;
-      if (!data.type || !/^fn\(/.test(data.type)) return;
+      if (!data.type || !(/^fn\(/).test(data.type)) return;
     
       cache.type = parseFnType(data.type);
       cache.name = data.exprName || data.name || "fn";
