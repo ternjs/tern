@@ -22,9 +22,6 @@ and it has bugs. But it just might occasionally work.)
  1. Clone this repository somewhere. Do `npm install` to get the
     dependencies.
 
- 1. Somehow make `bin/tern` visible in your path. You'll probably want
-    to symlink it into your `~/bin` directory.
-
  1. Make Emacs aware of `emacs/tern.el`. For example by adding this to
     your `.emacs` file:
 
