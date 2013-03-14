@@ -376,22 +376,29 @@ function jumpBack(cm) {
   }, 20);
 }
 
-function renameVar(cm) {
-  server.request(buildRequest(cm, "refs", false).request, function(error, data) {
-    if (error) return displayError(error);
-    cm.openDialog("New name for " + data.name + ": <input type=text>", function(newName) {
+function applyChanges(changes) {
+  var perFile = Object.create(null);
+  for (var i = 0; i < changes.length; ++i) {
+    var ch = changes[i];
+    (perFile[ch.file] || (perFile[ch.file] = [])).push(ch);
+  }
+  for (var file in perFile) {
+    var chs = perFile[file], doc = findDoc(file).doc;
+    chs.sort(function(a, b) { return b.start - a.start; });
+    for (var i = 0; i < chs.length; ++i) {
+      var ch = chs[i];
+      doc.replaceRange(ch.text, doc.posFromIndex(ch.start), doc.posFromIndex(ch.end));
+    }
+  }
+}
 
-      var perFile = Object.create(null);
-      for (var i = 0; i < data.refs.length; ++i) {
-        var use = data.refs[i];
-        (perFile[use.file] || (perFile[use.file] = [])).push(use);
-      }
-      for (var file in perFile) {
-        var refs = perFile[file], doc = findDoc(file).doc;
-        refs.sort(function(a, b) { return b.start - a.start; });
-        for (var i = 0; i < refs.length; ++i)
-          doc.replaceRange(newName, doc.posFromIndex(refs[i].start), doc.posFromIndex(refs[i].end));
-      }
+function renameVar(cm) {
+  var token = cm.getTokenAt(cm.getCursor());
+  if (!/^variable|^def$/.test(token.type)) return displayError("Not at a variable name");
+  cm.openDialog("New name for " + token.string + ": <input type=text>", function(newName) {
+    server.request(buildRequest(cm, {type: "rename", newName: newName}, false).request, function(error, data) {
+      if (error) return displayError(error);
+      applyChanges(data.changes);
     });
   });
 }

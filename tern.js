@@ -101,6 +101,11 @@
     }
   };
 
+  function ensureFull(file, doc) {
+    if (file.type == "part")
+      throw new Error("Can't run a " + doc.query.type + " query on a file fragment");
+  }
+
   function doRequest(srv, doc, c) {
     var files = doc.files || [];
     for (var i = 0; i < files.length; ++i) {
@@ -121,11 +126,14 @@
             case "type":
               result = findTypeAt(file, doc.query); break;
             case "definition":
-              if (file.type == "part") throw new Error("Can't run a definition query on a file fragment");
+              ensureFull(file, doc);
               result = findDef(file, doc.query); break;
             case "refs":
-              if (file.type == "part") throw new Error("Can't run a uses query on a file fragment");
+              ensureFull(file, doc);
               result = findRefs(srv, file, doc.query); break;
+            case "rename":
+              ensureFull(file, doc);
+              result = buildRename(srv, file, doc.query); break;
             default:
               throw new Error("Unsupported query type: " + doc.query.type);
             }
@@ -378,5 +386,19 @@
     }
     return {refs: refs, type: type, name: name};
   }
+
+  function buildRename(srv, file, query) {
+    if (typeof query.newName != "string") throw new Error(".query.newName should be a string");
+    var data = findRefs(srv, file, query), refs = data.refs;
+
+    var changes = data.changes = [];
+    for (var i = 0; i < refs.length; ++i) {
+      var use = refs[i];
+      use.text = query.newName;
+      changes.push(use);
+    }
+
+    return data;
+  }    
 
 })(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
