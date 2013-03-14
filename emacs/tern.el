@@ -39,20 +39,21 @@
                 (return (setf project-dir cur))))
         (setf tern-project-dir project-dir))))
 
-(defun tern-find-server (c &optional ignore-port-file)
+(defun tern-find-server (c &optional ignore-port)
   (block nil
     (when tern-known-port
       (return (funcall c tern-known-port)))
     (unless (buffer-file-name)
       (return (funcall c nil)))
-    (let ((port-file (and (not ignore-port-file) (concat (tern-project-dir) ".tern-port"))))
-      (if (and port-file (file-exists-p port-file))
-          (let ((port (string-to-number (with-temp-buffer
-                                          (insert-file-contents port-file)
-                                          (buffer-string)))))
+    (let ((port-file (concat (tern-project-dir) ".tern-port")))
+      (when (file-exists-p port-file)
+        (let ((port (string-to-number (with-temp-buffer
+                                        (insert-file-contents port-file)
+                                        (buffer-string)))))
+          (unless (eq port ignore-port)
             (setf tern-known-port port)
-            (funcall c port))
-        (tern-start-server c)))))
+            (return (funcall c port))))))
+    (tern-start-server c)))
 
 (defvar tern-command
   (let* ((script-file (or load-file-name
@@ -171,8 +172,9 @@ list of strings, giving the binary name and arguments.")
                        (funcall f data offset))
                       ((and (eq (cadar err) 'connection-failed) (not retrying))
                        (setf retrying t)
-                       (setf tern-known-port nil)
-                       (tern-find-server callback t))
+                       (let ((old-port tern-known-port))
+                         (setf tern-known-port nil)
+                         (tern-find-server callback old-port)))
                       ((not (eq mode :silent)) (message "Request failed: %s" (cdr err))))))))
     (tern-find-server callback)))
 
