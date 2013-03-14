@@ -331,3 +331,5 @@
         (remove 'tern-completion-at-point completion-at-point-functions))
   (remove-hook 'after-change-functions 'tern-after-change t)
   (remove-hook 'post-command-hook 'tern-post-command t))
+
+(provide 'tern)
