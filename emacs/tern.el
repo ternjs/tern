@@ -116,6 +116,19 @@ list of strings, giving the binary name and arguments.")
       (offset . ,(1- start-pos))
       (text . ,(buffer-substring-no-properties start-pos end-pos)))))
 
+(defun tern-modified-sibling-buffers ()
+  (let (found)
+    (dolist (buf (buffer-list))
+      (when (and (not (eq buf (current-buffer)))
+                 (buffer-local-value 'tern-mode buf)
+                 (buffer-local-value 'tern-buffer-is-dirty buf)
+                 (equal tern-project-dir (buffer-local-value 'tern-project-dir buf)))
+        (with-current-buffer buf
+          (push `((type . "full")
+                  (name . ,(tern-project-relative-file))
+                  (text . ,(buffer-string))) found))))
+    (nreverse found)))
+
 (defun tern-run-request (f query pos &optional mode)
   (when (stringp query) (setf query `((type . ,query))))
   (let ((generation (incf tern-command-generation))
@@ -124,24 +137,23 @@ list of strings, giving the binary name and arguments.")
         runner
         callback
         (doc `((query . ,query)))
-        (sending-file nil)
+        (files (and (eq mode :full-file) (tern-modified-sibling-buffers)))
+        file-name
         (offset 0)
         (pos pos))
-    (let (file file-name)
-      (cond
-       ((not tern-buffer-is-dirty) (setf file-name (tern-project-relative-file)))
-       ((and (not (eq mode :full-file)) (> (buffer-size) 8000))
-        (setf file (tern-get-partial-file pos)
-              offset (cdr (assoc 'offset file))
-              file-name "#0")
-        (decf pos offset))
-       (t
-        (setf file `((type . "full") (text . ,(buffer-string)) (name . ,(tern-project-relative-file)))
-              sending-file t
-              file-name (tern-project-relative-file))))
-      (when file (push `(files . [, file]) doc))
-      (push `(file . ,file-name) (cdr (assoc 'query doc)))
-      (push `(end . ,(1- pos)) (cdr (assoc 'query doc))))
+    (cond
+     ((not tern-buffer-is-dirty) (setf file-name (tern-project-relative-file)))
+     ((and (not (eq mode :full-file)) (> (buffer-size) 8000))
+      (push (tern-get-partial-file pos) files)
+      (setf offset (cdr (assoc 'offset (car files)))
+            file-name "#0")
+      (decf pos offset))
+     (t
+      (push `((type . "full") (text . ,(buffer-string)) (name . ,(tern-project-relative-file))) files)
+      (setf file-name (tern-project-relative-file))))
+    (when files (push `(files . ,(apply #'vector files)) doc))
+    (push `(file . ,file-name) (cdr (assoc 'query doc)))
+    (push `(end . ,(1- pos)) (cdr (assoc 'query doc)))
     (setf callback
           (lambda (port)
             (if port
@@ -152,7 +164,10 @@ list of strings, giving the binary name and arguments.")
             (when (< tern-activity-since-command generation)
               (with-current-buffer buffer
                 (cond ((not err)
-                       (when sending-file (setf tern-buffer-is-dirty nil))
+                       (dolist (file files)
+                         (when (equal (cdr (assoc 'type file)) "full")
+                           (with-current-buffer (find-file-noselect (concat tern-project-dir (cdr (assoc 'name file))))
+                             (setf tern-buffer-is-dirty nil))))
                        (funcall f data offset))
                       ((and (eq (cadar err) 'connection-failed) (not retrying))
                        (setf retrying t)
