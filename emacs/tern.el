@@ -27,37 +27,34 @@
         (kill-buffer (current-buffer))
         (funcall c nil json)))))
 
+(defun tern-project-dir ()
+  (or tern-project-dir
+      (let ((project-dir (file-name-directory (buffer-file-name))))
+        (loop for cur = project-dir then (file-name-directory (substring cur 0 (1- (length cur))))
+              while cur do
+              (when (file-exists-p (concat cur ".tern-project"))
+                (return (setf project-dir cur))))
+        (setf tern-project-dir project-dir))))
+
 (defun tern-find-server (c &optional ignore-port-file)
   (block nil
     (when tern-known-port
       (return (funcall c tern-known-port)))
     (unless (buffer-file-name)
       (return (funcall c nil)))
-    (let ((dirs (split-string (buffer-file-name) "/" t))
-          my-dir
-          found)
-      ;; FIXME use built-in filename manipulation utils
-      (loop for i from (1- (length dirs)) downto 0 do
-            (let ((dir "/"))
-              (loop for j from 0 below i do
-                    (setf dir (concat dir (nth j dirs) "/")))
-              (unless my-dir (setf my-dir dir))
-              (if (or (file-exists-p (concat dir ".tern-project"))
-                      (file-exists-p (concat dir ".tern-port")))
-                  (progn (setf found dir) (return)))))
-      (setf tern-project-dir (or found my-dir))
-      (if (and found (not ignore-port-file) (file-exists-p (concat found ".tern-port")))
+    (let ((port-file (and (not ignore-port-file) (concat (tern-project-dir) ".tern-port"))))
+      (if (and port-file (file-exists-p port-file))
           (let ((port (string-to-number (with-temp-buffer
-                                          (insert-file-contents (concat found ".tern-port"))
+                                          (insert-file-contents port-file)
                                           (buffer-string)))))
             (setf tern-known-port port)
             (funcall c port))
-        (tern-start-server tern-project-dir c)))))
+        (tern-start-server c)))))
 
 (defvar tern-command '("tern"))
 
-(defun tern-start-server (dir c)
-  (let* ((default-directory dir)
+(defun tern-start-server (c)
+  (let* ((default-directory tern-project-dir)
          (proc (apply #'start-process "Tern" nil tern-command)))
     (set-process-query-on-exit-flag proc nil)
     (set-process-sentinel proc (lambda (_proc _event)
@@ -83,8 +80,8 @@
 (defvar tern-last-argument-hints nil)
 (defvar tern-buffer-is-dirty nil)
 
-(defun tern-local-filepath ()
-  (substring (buffer-file-name) (length tern-project-dir)))
+(defun tern-project-relative-file ()
+  (substring (buffer-file-name) (length (tern-project-dir))))
 
 ;; FIXME send partial files when in a big file
 
@@ -98,7 +95,7 @@
         (sending-file nil))
     (when tern-buffer-is-dirty
       (setf sending-file t)
-      (push `(files . [((type . "full") (text . ,(buffer-string)) (name . ,(tern-local-filepath)))])
+      (push `(files . [((type . "full") (text . ,(buffer-string)) (name . ,(tern-project-relative-file)))])
             doc))
     (setf callback
           (lambda (port)
@@ -108,14 +105,15 @@
     (setf runner
           (lambda (err data)
             (when (< tern-activity-since-command generation)
-              (cond ((not err)
-                     (when sending-file (setf tern-buffer-is-dirty nil))
-                     (with-current-buffer buffer (funcall f data)))
-                    ((and (eq (cadar err) 'connection-failed) (not retrying))
-                     (setf retrying t)
-                     (setf tern-known-port nil)
-                     (tern-find-server callback t))
-                    ((not silent) (message "Request failed: %s" (cdr err)))))))
+              (with-current-buffer buffer
+                (cond ((not err)
+                       (when sending-file (setf tern-buffer-is-dirty nil))
+                       (funcall f data))
+                      ((and (eq (cadar err) 'connection-failed) (not retrying))
+                       (setf retrying t)
+                       (setf tern-known-port nil)
+                       (tern-find-server callback t))
+                      ((not silent) (message "Request failed: %s" (cdr err))))))))
     (tern-find-server callback)))
 
 ;; Completion
@@ -125,7 +123,7 @@
       (lambda ()
         (tern-run-request #'tern-do-complete
                           `((type . "completions")
-                            (file . ,(tern-local-filepath))
+                            (file . ,(tern-project-relative-file))
                             (end . ,(1- (point))))))))
 
 (defun tern-do-complete (data)
@@ -164,7 +162,7 @@
                                 (setf tern-last-argument-hints (cons opening-paren type))
                                 (tern-show-argument-hints))))
                           `((type . "type")
-                            (file . ,(tern-local-filepath))
+                            (file . ,(tern-project-relative-file))
                             (end . ,(1- opening-paren))
                             (preferFunction . t))
                           t)))))
@@ -239,13 +237,13 @@
 (defun tern-find-definition ()
   (interactive)
   (tern-run-request (lambda (data)
-                      (push (cons (tern-local-filepath) (point)) tern-find-definition-stack)
+                      (push (cons (buffer-file-name) (point)) tern-find-definition-stack)
                       (let ((too-long (nthcdr 20 tern-find-definition-stack)))
                         (when too-long (setf (cdr too-long) nil)))
-                      (tern-go-to-position (cdr (assoc 'file data))
+                      (tern-go-to-position (concat (tern-project-dir) (cdr (assoc 'file data)))
                                            (1+ (cdr (assoc 'start data)))))
                     `((type . "definition")
-                      (file . ,(tern-local-filepath))
+                      (file . ,(tern-project-relative-file))
                       (end . ,(1- (point))))))
 
 (defun tern-pop-find-definition ()
@@ -255,7 +253,7 @@
       (tern-go-to-position file pos))))
 
 (defun tern-go-to-position (file pos)
-  (find-file (concat tern-project-dir file))
+  (find-file file)
   (goto-char (min pos (point-max))))
 
 ;; Mode plumbing
