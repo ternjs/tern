@@ -3,13 +3,13 @@
 // Reads .tern-project files, wraps a Tern server in an HTTP wrapper
 // so that editor plug-ins can talk to it.
 
-// FIXME auto-shutdown after a given period of inactivity (unless
-// given a command-line switch)
-
 var tern = require("./tern");
-var fs = require("fs"), path = require("path");
+var fs = require("fs"), path = require("path"), url = require("url");
 
 var projectFileName = ".tern-project", portFileName = ".tern-port";
+var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
+
+var persistent = process.argv.indexOf("--persistent") > -1;
 
 function findProjectDir() {
   var dir = process.cwd();
@@ -60,11 +60,20 @@ function startServer(dir, config) {
   return new tern.Server({getFile: getFile, environment: env, debug: true});
 }
 
-var url = require("url");
+function doShutdown() {
+  if (persistent) return;
+  console.log("Was idle for " + Math.floor(maxIdleTime / 6e4) + " minutes. Shutting down.");
+  process.exit();
+}
+
+var shutdown = setTimeout(doShutdown, maxIdleTime);
 
 var httpServer = require("http").createServer(function(req, resp) {
+  clearTimeout(shutdown);
+  shutdown = setTimeout(doShutdown, maxIdleTime);
+
   var target = url.parse(req.url, true);
-  if (target.path == "/ping") return respondSimple(resp, 200, "pong"); // FIXME update ttl
+  if (target.path == "/ping") return respondSimple(resp, 200, "pong");
   if (target.path != "/") return respondSimple(resp, 404, "No service at " + target.path);
 
   if (req.method == "POST") {
