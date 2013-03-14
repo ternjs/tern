@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // HTTP server for desktop editors
 
 // Reads .tern-project files, wraps a Tern server in an HTTP wrapper
