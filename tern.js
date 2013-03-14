@@ -390,6 +390,8 @@
   function buildRename(srv, file, query) {
     if (typeof query.newName != "string") throw new Error(".query.newName should be a string");
     var data = findRefs(srv, file, query), refs = data.refs;
+    delete data.refs;
+    data.files = srv.files.map(function(f){return f.name;});
 
     var changes = data.changes = [];
     for (var i = 0; i < refs.length; ++i) {

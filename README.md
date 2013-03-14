@@ -40,5 +40,8 @@ activates Tern's completion. So, unless you rebound the command,
 When the point is in an argument list, Tern will show argument names
 and types at the bottom of the screen.
 
-The `M-.` key combination will be bound to `tern-find-definition`, and
-`M-,` brings you back to last place you were when you pressed `M-.`.
+The following keys are bound:
+
+ * `M-.` to jump to the definition of the thing under the cursor.
+ * `M-,` brings you back to last place you were when you pressed `M-.`.
+ * `C-c C-r` to rename the variable under the cursor.

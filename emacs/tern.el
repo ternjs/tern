@@ -31,6 +31,7 @@
 
 (defun tern-project-dir ()
   (or tern-project-dir
+      (and (not (buffer-file-name)) (setf tern-project-dir ""))
       (let ((project-dir (file-name-directory (buffer-file-name))))
         (loop for cur = project-dir then (file-name-directory (substring cur 0 (1- (length cur))))
               while cur do
@@ -270,6 +271,31 @@ list of strings, giving the binary name and arguments.")
       (let (message-log-max)
         (message (apply #'concat (nreverse parts)))))))
 
+;; Refactoring ops
+
+(defun tern-do-refactor (data _offset)
+  (let ((per-file ())
+        (orig-buffer (current-buffer)))
+    (loop for change across (cdr (assoc 'changes data)) do
+          (let ((found (assoc-string (cdr (assoc 'file change)) per-file)))
+            (unless found (setf found (list (cdr (assoc 'file change)))) (push found per-file))
+            (push change (cdr found))))
+    (loop for (file . changes) in per-file do
+          (setf changes (sort changes (lambda (a b) (> (cdr (assoc 'start a)) (cdr (assoc 'start b))))))
+          (find-file (concat (tern-project-dir) file))
+          (loop for change in changes do
+                (let ((start (1+ (cdr (assoc 'start change))))
+                      (end (1+ (cdr (assoc 'end change)))))
+                (delete-region start end)
+                (save-excursion
+                  (goto-char start)
+                  (insert (cdr (assoc 'text change)))))))
+    (switch-to-buffer orig-buffer)))
+
+(defun tern-rename-variable (new-name)
+  (interactive "MNew variable name: ")
+  (tern-run-request #'tern-do-refactor `((type . "rename") (newName . ,new-name)) (point) :full-file))
+
 ;; Jump-to-definition
 
 (defvar tern-find-definition-stack ())
@@ -313,6 +339,7 @@ list of strings, giving the binary name and arguments.")
 (defvar tern-mode-keymap (make-sparse-keymap))
 (define-key tern-mode-keymap [(meta ?.)] 'tern-find-definition)
 (define-key tern-mode-keymap [(meta ?,)] 'tern-pop-find-definition)
+(define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
 
 (define-minor-mode tern-mode
   "Minor mode binding to the Tern JavaScript analyzer"
