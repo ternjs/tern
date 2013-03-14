@@ -339,7 +339,7 @@
     }
     if (!def) {
       infer.resetGuessing();
-      var type = tern.expressionType(expr);
+      var type = infer.expressionType(expr);
       if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
         var tp = type.types[i];
         if (tp.originNode) { type = tp; break; }

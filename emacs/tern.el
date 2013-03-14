@@ -108,7 +108,8 @@
       (offset . ,(1- start-pos))
       (text . ,(buffer-substring-no-properties start-pos end-pos)))))
 
-(defun tern-run-request (f query &optional silent)
+(defun tern-run-request (f query pos &optional mode)
+  (when (stringp query) (setf query `((type . ,query))))
   (let ((generation (incf tern-command-generation))
         (buffer (current-buffer))
         (retrying nil)
@@ -116,21 +117,23 @@
         callback
         (doc `((query . ,query)))
         (sending-file nil)
-        (offset 0))
-      (let (file file-name)
-        (cond
-         ((not tern-buffer-is-dirty) (setf file-name (tern-project-relative-file)))
-         ((> (buffer-size) 8000)
-          (setf file (tern-get-partial-file (1+ (cdr (assoc 'end query))))
-                offset (cdr (assoc 'offset file))
-                file-name "#0")
-          (decf (cdr (assoc 'end query)) offset))
-         (t
-          (setf file `((type . "full") (text . ,(buffer-string)) (name . ,(tern-project-relative-file)))
-                sending-file t
-                file-name (tern-project-relative-file))))
-        (when file (push `(files . [, file]) doc))
-        (push `(file . ,file-name) (cdr (assoc 'query doc))))
+        (offset 0)
+        (pos pos))
+    (let (file file-name)
+      (cond
+       ((not tern-buffer-is-dirty) (setf file-name (tern-project-relative-file)))
+       ((and (not (eq mode :full-file)) (> (buffer-size) 8000))
+        (setf file (tern-get-partial-file pos)
+              offset (cdr (assoc 'offset file))
+              file-name "#0")
+        (decf pos offset))
+       (t
+        (setf file `((type . "full") (text . ,(buffer-string)) (name . ,(tern-project-relative-file)))
+              sending-file t
+              file-name (tern-project-relative-file))))
+      (when file (push `(files . [, file]) doc))
+      (push `(file . ,file-name) (cdr (assoc 'query doc)))
+      (push `(end . ,(1- pos)) (cdr (assoc 'query doc))))
     (setf callback
           (lambda (port)
             (if port
@@ -147,7 +150,7 @@
                        (setf retrying t)
                        (setf tern-known-port nil)
                        (tern-find-server callback t))
-                      ((not silent) (message "Request failed: %s" (cdr err))))))))
+                      ((not (eq mode :silent)) (message "Request failed: %s" (cdr err))))))))
     (tern-find-server callback)))
 
 ;; Completion
@@ -155,9 +158,7 @@
 (defun tern-completion-at-point ()
   (or (tern-completion-matches-last)
       (lambda ()
-        (tern-run-request #'tern-do-complete
-                          `((type . "completions")
-                            (end . ,(1- (point))))))))
+        (tern-run-request #'tern-do-complete "completions" (point)))))
 
 (defun tern-do-complete (data offset)
   (let ((cs (loop for elt across (cdr (assoc 'completions data)) collect (cdr (assoc 'name elt))))
@@ -195,9 +196,9 @@
                                 (setf tern-last-argument-hints (cons opening-paren type))
                                 (tern-show-argument-hints))))
                           `((type . "type")
-                            (end . ,(1- opening-paren))
                             (preferFunction . t))
-                          t)))))
+                          opening-paren
+                          :silent)))))
 
 (defun tern-skip-matching-brackets (end-chars)
   (let ((depth 0) (end (+ (point) 500)))
@@ -274,8 +275,9 @@
                         (when too-long (setf (cdr too-long) nil)))
                       (tern-go-to-position (concat (tern-project-dir) (cdr (assoc 'file data)))
                                            (1+ (cdr (assoc 'start data)))))
-                    `((type . "definition")
-                      (end . ,(1- (point))))))
+                    "definition"
+                    (point)
+                    :full-file))
 
 (defun tern-pop-find-definition ()
   (interactive)
