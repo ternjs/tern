@@ -206,33 +206,41 @@
 
     if (file.type == "part") {
       var realFile = findFile(srv.files, file.name);
-      if (!realFile) throw new Error("Partial file provided for " + file.name + ", which is not known");
+      if (!realFile)
+        return srv.options.getFile(file.name, function(err, text) {
+          if (err) return c(err);
+          loadFile(srv, file.name, text);
+          resolveFile(srv, localFiles, name, c);
+        });
+
       var line = firstLine(file.text);
       var foundPos = findMatchingPosition(line, realFile.text, file.position);
       var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", file.position)) : foundPos;
 
-      var scope = file.scope = infer.scopeAt(realFile.ast, pos), text = file.text, m;
-      if (foundPos && (m = line.match(/^(.*?)\bfunction\b/))) {
-        var cut = m[1].length, white = "";
-        for (var i = 0; i < cut; ++i) white += " ";
-        text = white + text.slice(cut);
-      }
-      file.ast = infer.analyze(file.text, file.name, scope).ast;
-
-      // This is a kludge to tie together the function types (if any)
-      // outside and inside of the fragment, so that arguments and
-      // return values have some information known about them.
-      var inner = infer.scopeAt(realFile.ast, pos + line.length);
-      if (m && inner != scope && inner.fnType) {
-        var newInner = infer.scopeAt(file.ast, line.length, scope);
-        var fOld = inner.fnType, fNew = newInner.fnType;
-        if (fNew && (fNew.name == fOld.name || !fOld.name)) {
-          for (var i = 0, e = Math.min(fOld.args.length, fNew.args.length); i < e; ++i)
-            fOld.args[i].propagate(fNew.args[i]);
-          fOld.self.propagate(fNew.self);
-          fNew.retval.propagate(fOld.retval);
+      infer.withContext(srv.cx, function() {
+        var scope = file.scope = infer.scopeAt(realFile.ast, pos), text = file.text, m;
+        if (foundPos && (m = line.match(/^(.*?)\bfunction\b/))) {
+          var cut = m[1].length, white = "";
+          for (var i = 0; i < cut; ++i) white += " ";
+          text = white + text.slice(cut);
         }
-      }
+        file.ast = infer.analyze(file.text, file.name, scope).ast;
+
+        // This is a kludge to tie together the function types (if any)
+        // outside and inside of the fragment, so that arguments and
+        // return values have some information known about them.
+        var inner = infer.scopeAt(realFile.ast, pos + line.length);
+        if (m && inner != scope && inner.fnType) {
+          var newInner = infer.scopeAt(file.ast, line.length, scope);
+          var fOld = inner.fnType, fNew = newInner.fnType;
+          if (fNew && (fNew.name == fOld.name || !fOld.name)) {
+            for (var i = 0, e = Math.min(fOld.args.length, fNew.args.length); i < e; ++i)
+              fOld.args[i].propagate(fNew.args[i]);
+            fOld.self.propagate(fNew.self);
+            fNew.retval.propagate(fOld.retval);
+          }
+        }
+      });
     }
     c(null, file);
   }
