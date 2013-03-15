@@ -598,7 +598,7 @@
     if (!target.isEmpty()) return;
 
     function explore(aval, path, depth) {
-      if (depth > 6 || !aval.forward) return;
+      if (depth > 3 || !aval.forward) return;
       for (var i = 0; i < aval.forward.length; ++i) {
         var fw = aval.forward[i], prop = fw.propagatesTo && fw.propagatesTo();
         if (!prop) continue;
