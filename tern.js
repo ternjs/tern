@@ -7,16 +7,14 @@
 // FIXME there are re-entrancy problems in this.
 // FIXME support both sync and async in a more solid way
 
-(function(exports) {
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    return mod(exports, require("./infer.js"));
+  if (typeof define == "function" && define.amd) // AMD
+    return define(["exports", "./infer.js"], mod);
+  mod(self.tern || (self.tern = {}), tern); // Plain browser env
+})(function(exports, infer) {
   "use strict";
-
-  var infer, condense;
-  if (typeof require != "undefined") {
-    infer = require("./infer.js");
-    condense = require("./condense.js");
-  } else {
-    infer = condense = exports;
-  }
 
   var plugins = Object.create(null);
   exports.registerPlugin = function(name, init) { plugins[name] = init; };
@@ -401,6 +399,5 @@
     }
 
     return data;
-  }    
-
-})(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
+  }
+});

@@ -1,6 +1,11 @@
-(function() {
-  var infer = typeof require == "undefined" ? window.tern : require("../../infer.js");
-  var tern = typeof require == "undefined" ? window.tern : require("../../tern.js");
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    return mod(require("../../infer.js"), require("../../tern.js"));
+  if (typeof define == "function" && define.amd) // AMD
+    return define(["../../infer.js", "../../tern.js"], mod);
+  mod(tern, tern);
+})(function(infer, tern) {
+  "use strict";
 
   function resolveName(name, data) {
     var opts = data.options;
@@ -85,4 +90,4 @@
       this._requireJS.interfaces = Object.create(null);
     });
   });
-})();
+});

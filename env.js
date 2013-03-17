@@ -8,10 +8,14 @@
 // B) to cheaply load the types for big libraries, or libraries that
 //    can't be inferred well
 
-(function(exports) {
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    return mod(exports, require("./infer.js"));
+  if (typeof define == "function" && define.amd) // AMD
+    return define(["exports", "./infer.js"], mod);
+  mod(self.tern || (self.tern = {}), tern); // Plain browser env
+})(function(exports, infer) {
   "use strict";
-
-  var infer = typeof require != "undefined" ? require("./infer") : exports;
 
   function hop(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -346,5 +350,4 @@
     }});
     return result;
   });
-
-})(typeof exports == "undefined" ? window.tern : exports);
+});

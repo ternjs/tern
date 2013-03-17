@@ -12,22 +12,14 @@
 // thus be used in place abstract values that only ever contain a
 // single type.
 
-(function(exports) {
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    return mod(exports, require("acorn"), require("acorn/util/walk"), require("./env.js"), require("./jsdoc.js"));
+  if (typeof define == "function" && define.amd) // AMD
+    return define(["exports", "acorn", "acorn/util/walk", "./env.js", "./jsdoc.js"], mod);
+  mod(self.tern || (self.tern = {}), acorn, acorn.walk, tern, tern); // Plain browser env
+})(function(exports, acorn, walk, env, jsdoc) {
   "use strict";
-
-  var acorn, walk, env, jsdoc;
-  if (typeof require != "undefined") {
-    acorn = require("acorn");
-    acorn.parse_dammit = require("acorn/acorn_loose").parse_dammit;
-    walk = require("acorn/util/walk");
-    env = require("./env.js");
-    exports.registerFunction = env.registerFunction;
-    jsdoc = require("./jsdoc.js");
-  } else {
-    acorn = window.acorn;
-    walk = acorn.walk;
-    env = jsdoc = exports;
-  }
 
   var toString = exports.toString = function(type, maxDepth) {
     return type ? type.toString(maxDepth) : "?";
@@ -537,6 +529,8 @@
   exports.addOrigin = function(origin) {
     if (cx.origins.indexOf(origin) < 0) cx.origins.push(origin);
   };
+
+  exports.registerFunction = env.registerFunction;
 
   // SCOPES
 
@@ -1154,5 +1148,4 @@
     locals.sort(compareProps);
     return locals;
   };
-
-})(typeof exports == "undefined" ? window.tern || (window.tern = {}) : exports);
+});
