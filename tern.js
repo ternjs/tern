@@ -51,6 +51,8 @@
     }
   };
 
+  exports.defineQueryType = function(name, desc) { queryTypes[name] = desc; };
+
   var Server = exports.Server = function(options) {
     this.cx = null;
     this.options = options || {};
@@ -320,7 +322,7 @@
             guess: infer.didGuess()};
   }
 
-  function findExpr(file, query) {
+  var findExpr = exports.findQueryExpr = function(file, query) {
     if (query.end == null) throw new Error("missing .query.end field");
     var expr = infer.findExpressionAt(file.ast, query.start, query.end, file.scope);
     if (expr) return expr;
@@ -328,7 +330,7 @@
     if (expr && (query.start == null || query.start - expr.node.start < 20) &&
         expr.node.end - query.end < 20) return expr;
     throw new Error("No expression at the given position.");
-  }
+  };
 
   function findTypeAt(_srv, query, file) {
     var expr = findExpr(file, query);
