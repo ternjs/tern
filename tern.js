@@ -25,6 +25,32 @@
     environment: []
   };
 
+  var queryTypes = {
+    completions: {
+      takesFile: true,
+      run: findCompletions
+    },
+    type: {
+      takesFile: true,
+      run: findTypeAt
+    },
+    definition: {
+      takesFile: true,
+      fullFile: true,
+      run: findDef
+    },
+    refs: {
+      takesFile: true,
+      fullFile: true,
+      run: findRefs
+    },
+    rename: {
+      takesFile: true,
+      fullFile: true,
+      run: buildRename
+    }
+  };
+
   var Server = exports.Server = function(options) {
     this.cx = null;
     this.options = options || {};
@@ -99,42 +125,29 @@
     }
   };
 
-  function ensureFull(file, doc) {
-    if (file.type == "part")
-      throw new Error("Can't run a " + doc.query.type + " query on a file fragment");
-  }
-
   function doRequest(srv, doc, c) {
+    if (!queryTypes.hasOwnProperty(doc.query.type))
+      return c("No query type '" + doc.query.type + "' defined");
+
     var files = doc.files || [];
     for (var i = 0; i < files.length; ++i) {
       var file = files[i];
       if (file.type == "full") loadFile(srv, file.name, file.text);
     }
 
-    resolveFile(srv, files, doc.query.file, function(err, file) {
+    var queryType = queryTypes[doc.query.type];
+
+    function finishReq(err, file) {
       if (err) return c(err);
+      if (queryType.fullFile && file.type == "part")
+        return("Can't run a " + doc.query.type + " query on a file fragment");
+
       finishPending(srv, function(err) {
+        if (err) return c(err);
         infer.withContext(srv.cx, function() {
-          if (err) return c(err);
           var result;
           try {
-            switch (doc.query.type) {
-            case "completions":
-              result = findCompletions(file, doc.query); break;
-            case "type":
-              result = findTypeAt(file, doc.query); break;
-            case "definition":
-              ensureFull(file, doc);
-              result = findDef(file, doc.query); break;
-            case "refs":
-              ensureFull(file, doc);
-              result = findRefs(srv, file, doc.query); break;
-            case "rename":
-              ensureFull(file, doc);
-              result = buildRename(srv, file, doc.query); break;
-            default:
-              throw new Error("Unsupported query type: " + doc.query.type);
-            }
+            result = queryType.run(srv, doc.query, file);
           } catch (e) {
             if (srv.options.debug) console.log(e.stack);
             return c(e.message || String(e));
@@ -142,7 +155,14 @@
           c(null, result);
         });
       });
-    });
+    }
+
+    if (queryType.takesFile) {
+      if (typeof doc.query.file != "string") return c(".query.file must be a string");
+      resolveFile(srv, files, doc.query.file, finishReq);
+    } else {
+      finishReq(null, null);
+    }
   }
 
   function loadFile(srv, filename, text) {
@@ -256,7 +276,6 @@
     var err;
     if (!doc.query) err = "Missing query property";
     else if (typeof doc.query.type != "string") err = ".query.type must be a string";
-    else if (typeof doc.query.file != "string") err = ".query.file must be a string";
     else if (doc.query.start && typeof doc.query.start != "number") err = ".query.start must be a number";
     else if (doc.query.end && typeof doc.query.end != "number") err = ".query.end must be a number";
     else if (doc.files) {
@@ -275,7 +294,9 @@
     else return true;
   }
 
-  function findCompletions(file, query) {
+  // Built-in query types
+
+  function findCompletions(_srv, query, file) {
     var wordStart = query.end, wordEnd = wordStart, text = file.text;
     if (wordStart == null) throw new Error("missing .query.end field");
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
@@ -309,7 +330,7 @@
     throw new Error("No expression at the given position.");
   }
 
-  function findTypeAt(file, query) {
+  function findTypeAt(_srv, query, file) {
     var expr = findExpr(file, query);
     infer.resetGuessing();
     var type = infer.expressionType(expr);
@@ -334,7 +355,7 @@
             guess: infer.didGuess()};
   }
 
-  function findDef(file, query) {
+  function findDef(_srv, query, file) {
     var expr = findExpr(file, query), def, file, guess = false;
     if (expr.node.type == "Identifier") {
       var found = expr.state.findVar(expr.node.name);
@@ -361,7 +382,7 @@
     return {start: def.start, end: def.end, file: file, guess: guess};
   }
 
-  function findRefs(srv, file, query) {
+  function findRefs(srv, query, file) {
     var expr = findExpr(file, query);
     if (!expr || expr.node.type != "Identifier") throw new Error("Not at a variable.");
     var name = expr.node.name;
@@ -385,9 +406,9 @@
     return {refs: refs, type: type, name: name};
   }
 
-  function buildRename(srv, file, query) {
+  function buildRename(srv, query, file) {
     if (typeof query.newName != "string") throw new Error(".query.newName should be a string");
-    var data = findRefs(srv, file, query), refs = data.refs;
+    var data = findRefs(srv, query, file), refs = data.refs;
     delete data.refs;
     data.files = srv.files.map(function(f){return f.name;});
 

@@ -26,7 +26,8 @@ function serverOptions(context, env) {
     environment: environment,
     getFile: function(name, c) {
       c(null, fs.readFileSync(context + name, "utf8"));
-    }
+    },
+    debug: true
   };
 }
 
