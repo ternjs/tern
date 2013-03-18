@@ -14,12 +14,17 @@
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("acorn"), require("acorn/util/walk"), require("./env.js"), require("./jsdoc.js"));
+    return mod(exports, require("acorn/acorn"), require("acorn/acorn_loose"), require("acorn/util/walk"),
+               require("./env"), require("./jsdoc"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "acorn", "acorn/util/walk", "./env.js", "./jsdoc.js"], mod);
-  mod(self.tern || (self.tern = {}), acorn, acorn.walk, tern, tern); // Plain browser env
-})(function(exports, acorn, walk, env, jsdoc) {
+    return define(["exports", "acorn/acorn", "acorn/acorn_loose", "acorn/util/walk", "./env", "./jsdoc"], mod);
+  mod(self.tern || (self.tern = {}), acorn, acorn, acorn.walk, tern.env, tern.jsdoc); // Plain browser env
+})(function(exports, acorn, acorn_loose, walk, env, jsdoc) {
   "use strict";
+
+  // Delayed initialization because of cyclic dependencies.
+  env = env.init({}, exports);
+  jsdoc = jsdoc.init({}, exports);
 
   var toString = exports.toString = function(type, maxDepth) {
     return type ? type.toString(maxDepth) : "?";
@@ -530,8 +535,6 @@
     if (cx.origins.indexOf(origin) < 0) cx.origins.push(origin);
   };
 
-  exports.registerFunction = env.registerFunction;
-
   // SCOPES
 
   function Scope(prev) {
@@ -945,7 +948,7 @@
     try { ast = acorn.parse(text, options); }
     catch(e) {
       jsDoc.length = 0;
-      ast = acorn.parse_dammit(text, options);
+      ast = acorn_loose.parse_dammit(text, options);
     }
 
     if (!scope) scope = cx.topScope;

@@ -5,10 +5,10 @@
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("./infer.js"));
+    return exports.init = mod;
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "./infer.js"], mod);
-  mod(self.tern || (self.tern = {}), tern); // Plain browser env
+    return define({init: mod});
+  tern.jsdoc = {init: mod}; // Plain browser env
 })(function(exports, infer) {
   "use strict";
 
@@ -165,4 +165,6 @@
       type.propagate(scope.findVar(varName));
     }
   };
+
+  return exports;
 });

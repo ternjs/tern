@@ -10,10 +10,10 @@
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("./infer.js"));
+    return exports.init = mod;
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "./infer.js"], mod);
-  mod(self.tern || (self.tern = {}), tern); // Plain browser env
+    return define({init: mod});
+  tern.env = {init: mod};
 })(function(exports, infer) {
   "use strict";
 
@@ -327,9 +327,9 @@
   // Used to register custom logic for more involved effect or type
   // computation.
   var customFunctions = Object.create(null);
-  exports.registerFunction = function(name, f) { customFunctions[name] = f; };
+  infer.registerFunction = function(name, f) { customFunctions[name] = f; };
 
-  exports.registerFunction("Object_create", function(self, args) {
+  infer.registerFunction("Object_create", function(self, args) {
     var result = new infer.AVal;
     if (args[0]) args[0].propagate({addType: function(tp) {
       if (tp.isEmpty()) {
@@ -350,4 +350,6 @@
     }});
     return result;
   });
+
+  return exports;
 });
