@@ -176,6 +176,7 @@
       if (!known) srv.files.push(known = {name: filename});
       known.text = file.text;
       known.ast = result.ast;
+      known.outerScope = srv.cx.topScope;
       srv.signal("afterLoad", known);
       return known;
     });
@@ -246,18 +247,19 @@
       var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", file.position)) : foundPos;
 
       infer.withContext(srv.cx, function() {
-        var scope = file.scope = infer.scopeAt(realFile.ast, pos), text = file.text, m;
+        var scope = file.scope = infer.scopeAt(realFile.ast, pos, realFile.outerScope), text = file.text, m;
         if (foundPos && (m = line.match(/^(.*?)\bfunction\b/))) {
           var cut = m[1].length, white = "";
           for (var i = 0; i < cut; ++i) white += " ";
           text = white + text.slice(cut);
         }
         file.ast = infer.analyze(file.text, file.name, scope).ast;
+        file.outerScope = scope;
 
         // This is a kludge to tie together the function types (if any)
         // outside and inside of the fragment, so that arguments and
         // return values have some information known about them.
-        var inner = infer.scopeAt(realFile.ast, pos + line.length);
+        var inner = infer.scopeAt(realFile.ast, pos + line.length, realFile.outerScope);
         if (m && inner != scope && inner.fnType) {
           var newInner = infer.scopeAt(file.ast, line.length, scope);
           var fOld = inner.fnType, fNew = newInner.fnType;
@@ -315,7 +317,7 @@
       else
         completions = [];
     } else {
-      completions = infer.localsAt(file.ast, query.end, word);
+      completions = infer.localsAt(file.ast, query.end, word, file.outerScope);
     }
     return {from: wordStart, to: wordEnd,
             completions: completions,

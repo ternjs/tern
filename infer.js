@@ -221,7 +221,6 @@
   IsCallee.prototype = {
     addType: function(fn) {
       if (!(fn instanceof Fn)) return;
-      if (!fn.args) console.log("escaped: ", fn.info);
       for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
         this.args[i].propagate(fn.args[i]);
       this.self.propagate(fn.self);
@@ -1145,8 +1144,8 @@
     else return defaultScope || cx.topScope;
   };
 
-  exports.localsAt = function(ast, pos, prefix) {
-    var scope = scopeAt(ast, pos), locals = [];
+  exports.localsAt = function(ast, pos, prefix, defaultScope) {
+    var scope = scopeAt(ast, pos, defaultScope), locals = [];
     scope.gatherProperties(prefix, locals);
     locals.sort(compareProps);
     return locals;
