@@ -60,7 +60,7 @@
     var type;
 
     if (str.indexOf("function(", pos) == pos) {
-      var args = parseLabelList(scope, str, pos + 9, ")"), ret = ANull;
+      var args = parseLabelList(scope, str, pos + 9, ")"), ret = infer.ANull;
       if (!args) return null;
       pos = skipSpace(str, args.end);
       if (str.charAt(pos) == ":") {
@@ -70,7 +70,7 @@
         pos = retType.end;
         ret = retType.type;
       }
-      type = new infer.Fn(null, ANull, args.labels, args.types, ret);
+      type = new infer.Fn(null, infer.ANull, args.labels, args.types, ret);
     } else if (str.charAt(pos) == "[") {
       var inner = parseType(scope, str, pos + 1);
       if (!inner) return null;
@@ -100,7 +100,7 @@
         var found = scope.findVar(word);
         if (found) found = found.getType();
         if (!found) {
-          type = ANull;
+          type = infer.ANull;
         } else if (found instanceof infer.Fn && /^[A-Z]/.test(word)) {
           var proto = found.getProp("prototype").getType();
           if (proto instanceof infer.Obj) type = infer.getInstance(proto);
