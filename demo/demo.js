@@ -232,7 +232,7 @@ function typeToIcon(type) {
 }
 
 function ternHints(cm, c) {
-  var req = buildRequest(cm, "completions");
+  var req = buildRequest(cm, {type: "completions", types: true});
 
   server.request(req.request, function(error, data) {
     if (error) return displayError(error);
@@ -243,8 +243,8 @@ function ternHints(cm, c) {
       completions.push({text: completion.name, className: className});
     }
 
-    c({from: cm.posFromIndex(data.from + req.offset),
-       to: cm.posFromIndex(data.to + req.offset),
+    c({from: cm.posFromIndex(data.start + req.offset),
+       to: cm.posFromIndex(data.end + req.offset),
        list: completions});
   });
 }

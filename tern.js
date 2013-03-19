@@ -300,28 +300,59 @@
 
   // Built-in query types
 
-  function findCompletions(_srv, query, file) {
+  function compareCompletions(a, b) {
+    if (typeof a != "string") { a = a.name; b = b.name; }
+    var aUp = /^[A-Z]/.test(a), bUp = /^[A-Z]/.test(b);
+    if (aUp == bUp) return a < b ? -1 : a == b ? 0 : 1;
+    else return aUp ? 1 : -1;
+  }
+
+  function findCompletions(srv, query, file) {
     var wordStart = query.end, wordEnd = wordStart, text = file.text;
     if (wordStart == null) throw new Error("missing .query.end field");
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
-    var word = text.slice(wordStart, wordEnd), completions, guessing = false;
+    var word = text.slice(wordStart, wordEnd), completions = [], guessing = false;
+    var wrapAsObjs = query.types || query.depths;
 
-    infer.resetGuessing();
+    function gather(prop, obj, depth) {
+      // 'hasOwnProperty' and such are usually just noise, leave them
+      // out when no prefix is provided.
+      if (!query.dontOmitObjectPrototype && this == srv.cx.protos.Object && !word) return;
+      if (word && prop.indexOf(word) != 0) return;
+      var val = obj.props[prop];
+      if (!(val.flags & infer.flag_definite)) return;
+      for (var i = 0; i < completions.length; ++i) {
+        var c = completions[i];
+        if ((wrapAsObjs ? c.name : c) == prop) return;
+      }
+      var rec = wrapAsObjs ? {name: prop} : prop;
+      completions.push(rec);
+
+      if (query.types) {
+        infer.resetGuessing();
+        rec.type = infer.toString(val.getType());
+        rec.guess = infer.didGuess();
+      }
+      if (query.depths) rec.depth = depth;
+    }
+
     var memberExpr = infer.findExpressionAround(file.ast, null, wordStart, file.scope, "MemberExpression");
     if (memberExpr && !memberExpr.node.computed && memberExpr.node.object.end < wordStart) {
       memberExpr.node = memberExpr.node.object;
       var tp = infer.expressionType(memberExpr);
-      if (tp)
-        completions = infer.propertiesOf(tp, word);
-      else
-        completions = [];
+      if (tp) infer.forAllPropertiesOf(tp, gather);
+
+      if (!completions.length && word.length >= 2 && !query.dontGuess)
+        for (var prop in srv.cx.props) gather(prop, srv.cx.props[prop][0], 0);
     } else {
-      completions = infer.localsAt(file.ast, query.end, word, file.outerScope);
+      infer.forAllLocalsAt(file.ast, query.end, file.outerScope, gather);
     }
-    return {from: wordStart, to: wordEnd,
-            completions: completions,
-            guess: infer.didGuess()};
+
+    if (!query.dontSort) completions.sort(compareCompletions);
+
+    return {start: wordStart, end: wordEnd,
+            completions: completions};
   }
 
   var findExpr = exports.findQueryExpr = function(file, query) {

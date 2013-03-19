@@ -122,9 +122,9 @@
     typeHint: function() { return this.types.length ? this.getType() : null; },
     propagatesTo: function() { return this; },
 
-    gatherProperties: function(prefix, out) {
+    gatherProperties: function(f, depth) {
       for (var i = 0; i < this.types.length; ++i)
-        this.types[i].gatherProperties(prefix, out);
+        this.types[i].gatherProperties(f, depth);
     }
   };
 
@@ -300,8 +300,8 @@
   Prim.prototype = Object.create(Type.prototype);
   Prim.prototype.toString = function() { return this.name; };
   Prim.prototype.getProp = function(prop) {return this.proto.props[prop] || ANull;};
-  Prim.prototype.gatherProperties = function(prefix, out) {
-    if (this.proto) this.proto.gatherProperties(prefix, out);
+  Prim.prototype.gatherProperties = function(f, depth) {
+    if (this.proto) this.proto.gatherProperties(f, depth);
   };
 
   var flag_initializer = exports.flag_initializer = 1;
@@ -375,23 +375,10 @@
       this.broadcastProp(prop, val, false);
     }
   };
-  Obj.prototype.gatherProperties = function(prefix, out) {
-    // 'hasOwnProperty' and such are usually just noise, leave them
-    // out when no prefix is provided.
-    if (this == cx.protos.Object && !prefix) return;
-
-    outer: for (var prop in this.props) {
-      if (prefix && prop.indexOf(prefix) != 0 || prop == "<i>") continue;
-      for (var i = 0; i < out.length; ++i) if (out[i].name == prop) continue outer;
-      var val = this.props[prop];
-      if (!(val.flags & flag_definite)) continue;
-      var oldGuessing = guessing;
-      guessing = false;
-      var type = toString(val.getType());
-      out.push({name: prop, type: type, guess: guessing});
-      guessing = oldGuessing;
-    }
-    if (this.proto) this.proto.gatherProperties(prefix, out);
+  Obj.prototype.gatherProperties = function(f, depth) {
+    for (var prop in this.props) if (prop != "<i>")
+      f(prop, this, depth);
+    if (this.proto) this.proto.gatherProperties(f, depth + 1);
   };
   Obj.prototype.forAllProps = function(c) {
     (this.onNewProp || (this.onNewProp = [])).push(c);
@@ -1102,25 +1089,11 @@
   // a type or set of completions.
   var guessing = false;
 
-  exports.resetGuessing = function() { guessing = false; };
+  exports.resetGuessing = function(val) { guessing = val; };
   exports.didGuess = function() { return guessing; };
 
-  function compareProps(a, b) {
-    var aUp = /^[A-Z]/.test(a.name), bUp = /^[A-Z]/.test(b.name);
-    if (aUp == bUp) return a.name < b.name ? -1 : a.name == b.name ? 0 : 1;
-    else return aUp ? 1 : -1;
-  }
-
-  exports.propertiesOf = function(type, prefix) {
-    var props = [];
-    type.gatherProperties(prefix, props);
-    if (!props.length && prefix.length >= 2) {
-      guessing = true;
-      for (var prop in cx.props) if (prop.indexOf(prefix) == 0)
-        props.push({name: prop, type: "?", guess: true});
-    }
-    props.sort(compareProps);
-    return props;
+  exports.forAllPropertiesOf = function(type, f) {
+    type.gatherProperties(f, 0);
   };
 
   var refFindWalker = walk.make({}, searchVisitor);
@@ -1144,10 +1117,8 @@
     else return defaultScope || cx.topScope;
   };
 
-  exports.localsAt = function(ast, pos, prefix, defaultScope) {
+  exports.forAllLocalsAt = function(ast, pos, defaultScope, f) {
     var scope = scopeAt(ast, pos, defaultScope), locals = [];
-    scope.gatherProperties(prefix, locals);
-    locals.sort(compareProps);
-    return locals;
+    scope.gatherProperties(f, 0);
   };
 });

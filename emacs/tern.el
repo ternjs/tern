@@ -186,9 +186,9 @@ list of strings, giving the binary name and arguments.")
         (tern-run-request #'tern-do-complete "completions" (point)))))
 
 (defun tern-do-complete (data offset)
-  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect (cdr (assq 'name elt))))
-        (start (+ 1 offset (cdr (assq 'from data))))
-        (end (+ 1 offset (cdr (assq 'to data)))))
+  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
+        (start (+ 1 offset (cdr (assq 'start data))))
+        (end (+ 1 offset (cdr (assq 'end data)))))
     (setf tern-last-completions (list (buffer-substring-no-properties start end) start end cs))
     (completion-in-region start end cs)))
 
