@@ -192,7 +192,7 @@
         var from = getFrom(self, args), to = getTo(self, args);
         from.forAllProps(function(prop, val, local) {
           if (local && prop != "<i>")
-            to.propagate(new PropHasSubset(prop, val));
+            to.propagate(new infer.PropHasSubset(prop, val));
         });
       });
     } else {
@@ -257,7 +257,7 @@
       }
       base.name = path;
     }
-    
+
     for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
       var inner = spec[name];
       if (typeof inner == "string") continue;
