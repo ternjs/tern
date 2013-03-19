@@ -198,7 +198,7 @@
     }
   };
 
-  function PropHasSubset(prop, target) {
+  var PropHasSubset = exports.PropHasSubset = function(prop, target) {
     this.target = target; this.prop = prop;
   }
   PropHasSubset.prototype = {
@@ -885,7 +885,7 @@
     Expression: function(node, scope, c) {
       infer(node, scope, c, ANull);
     },
-    
+
     FunctionDeclaration: function(node, scope, c) {
       var inner = node.body.scope, fn = inner.fnType;
       c(node.body, scope, "ScopeBody");
