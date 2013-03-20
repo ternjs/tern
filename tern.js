@@ -376,7 +376,7 @@
     function gather(prop, obj, depth) {
       // 'hasOwnProperty' and such are usually just noise, leave them
       // out when no prefix is provided.
-      if (!query.dontOmitObjectPrototype && this == srv.cx.protos.Object && !word) return;
+      if (!query.dontOmitObjectPrototype && obj == srv.cx.protos.Object && !word) return;
       if (word && prop.indexOf(word) != 0) return;
       var val = obj.props[prop];
       if (!(val.flags & infer.flag_definite)) return;
