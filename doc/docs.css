@@ -31,30 +31,11 @@ body {
 h1, h2, h3 { font-family: "Prosto One"; }
 code, pre { font-family: "Ubuntu Mono"; }
 
-#nag {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  padding: 10px 0 7px 0;
-  text-align: center;
-  color: #555;
-  background: -moz-linear-gradient(top, #fff549 0%, #fff770 22%, #fffcaf 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff549), color-stop(22%,#fff770), color-stop(100%,#fffcaf)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #fff549 0%,#fff770 22%,#fffcaf 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, #fff549 0%,#fff770 22%,#fffcaf 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, #fff549 0%,#fff770 22%,#fffcaf 100%); /* IE10+ */
-  background: linear-gradient(to bottom, #fff549 0%,#fff770 22%,#fffcaf 100%); /* W3C */
-  border-bottom: 1px solid #ccc;
-}
-
-#nag a {
-  color: #55e;
-}
-
 #head {
   position: relative;
   background: #b5ddf4;
   padding-top: 1px;
-  margin-top: 70px;
+  margin-top: 50px;
   overflow: hidden;
   border-radius: 15px;
   box-shadow: 5px 5px 10px #aaa;
