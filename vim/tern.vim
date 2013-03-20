@@ -63,19 +63,6 @@ def relativeFile():
   filename = vim.eval("expand('%:p')")
   return filename[len(projectDir()) + 1:]
 
-def pointAtStart(row):
-  buf = vim.current.buffer
-  pos = 0
-  cur = 1
-  while cur < row:
-    pos += len(buf[cur - 1]) + 1
-    cur = cur + 1
-  return pos
-
-def point():
-  (row, col) = vim.current.window.cursor
-  return col + pointAtStart(row)
-
 def bufferSlice(buf, pos, end):
   text = ""
   while pos < end:
@@ -107,7 +94,7 @@ def bufferFragment():
   return {"type": "part",
           "name": relativeFile(),
           "text": bufferSlice(buf, start, end),
-          "offset": pointAtStart(start + 1)};
+          "offsetLines": start};
 
 def runCommand(query, pos, mode=None):
   if isinstance(query, str): query = {"type": query}
@@ -123,13 +110,15 @@ def runCommand(query, pos, mode=None):
   elif len(vim.current.buffer) > 250:
     f = bufferFragment()
     doc["files"].append(f)
-    offset = f["offset"]
+    offset = f["offsetLines"]
+    pos = {"line": pos["line"] - offset, "ch": pos["ch"]}
     fname, sendingFile = ("#0", False)
   else:
     doc["files"].append(fullBuffer())
     fname, sendingFile = ("#0", True)
   query["file"] = fname
-  query["end"] = pos - offset
+  query["end"] = pos
+  query["lineCharPositions"] = True
 
   try:
     data = makeRequest(port, doc)
@@ -155,16 +144,14 @@ def ensureCompletionCached():
       vim.current.buffer[curRow-1][int(cached["start"]):int(cached["end"])] == cached["word"]):
     return
 
-  data, offset = runCommand("completions", point())
+  data, offset = runCommand("completions", {"line": curRow - 1, "ch": curCol})
   if data is None: return
 
   setLast = "let b:ternLastCompletion = ["
   for cmpl in data["completions"]:
     setLast += "\"" + cmpl + "\","
   vim.command(setLast + "]")
-  lineStart = pointAtStart(curRow)
-  start = (data["start"] + offset) - lineStart
-  end = (data["end"] + offset) - lineStart
+  start, end = (data["start"]["ch"], data["end"]["ch"])
   vim.command("let b:ternLastCompletionPos = {'row': " + str(curRow) +
               ", 'start': " + str(start) +
               ", 'end': " + str(end) +
