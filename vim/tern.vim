@@ -115,15 +115,20 @@ def runCommand(query, pos, mode=None):
   if not port: return
   data = None
   offset = 0
+  curSeq = vim.eval("undotree()['seq_cur']")
 
   doc = {"query": query, "files": []}
-  if len(vim.current.buffer) > 200:
+  if curSeq == vim.eval("b:ternBufferSentAt"):
+    fname, sendingFile = (relativeFile(), False)
+  elif len(vim.current.buffer) > 250:
     f = bufferFragment()
     doc["files"].append(f)
     offset = f["offset"]
+    fname, sendingFile = ("#0", False)
   else:
     doc["files"].append(fullBuffer())
-  query["file"] = "#0"
+    fname, sendingFile = ("#0", True)
+  query["file"] = fname
   query["end"] = pos - offset
 
   try:
@@ -138,6 +143,8 @@ def runCommand(query, pos, mode=None):
     except Exception as e:
       displayError(e)
 
+  if sendingFile:
+    vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return (data, offset)
 
 def ensureCompletionCached():
@@ -187,12 +194,10 @@ function! tern#Enable()
   let b:ternProjectDir = ''
   let b:ternLastCompletion = []
   let b:ternLastCompletionPos = {'row': -1, 'start': 0, 'end': 0}
-  let b:ternBufferModified = 1
+  let b:ternBufferSentAt = -1
   set omnifunc=tern#Complete
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
 
-" FIXME really should be asynchronous
-" FIXME need to find a way to detect changes to buf so that we don't always have to send text
 " FIXME String escaping in commands
