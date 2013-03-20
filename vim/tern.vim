@@ -47,10 +47,8 @@ def findServer(ignorePort=False):
       return port
   return startServer()
 
-ternCommand = ["tern"]
-
 def startServer():
-  proc = subprocess.Popen(ternCommand, cwd=projectDir(), stdout=subprocess.PIPE)
+  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=projectDir(), stdout=subprocess.PIPE)
   status = proc.stdout.readline()
   match = re.match("Listening on port (\\d+)", status)
   if match:
@@ -158,6 +156,10 @@ def ensureCompletionCached():
               ", 'word': '" + vim.current.buffer[curRow-1][start:end] + "'}")
 
 endpy
+
+if !exists('g:tern#command')
+  let g:tern#command = ["node", expand('<sfile>:h') . '/../bin/tern']
+endif
 
 function! tern#Complete(findstart, complWord)
   if a:findstart
