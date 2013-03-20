@@ -222,18 +222,21 @@
 
   function resolveFile(srv, localFiles, name, c) {
     var file, isRef = name.match(/^#(\d+)$/);
-    if (isRef) {
-      file = localFiles[isRef[1]];
-      if (!file) c("Reference to unknown file " + name);
-    } else {
+    if (!isRef) {
       file = findFile(srv.files, name);
       if (!file) return srv.options.getFile(name, function(err, text) {
         if (err) return c(err);
         c(null, loadFile(srv, name, text));
       });
+      return file;
     }
 
-    if (file.type == "part") {
+    file = localFiles[isRef[1]];
+    if (!file) c("Reference to unknown file " + name);
+
+    if (file.type == "full") {
+      file = findFile(srv.files, file.name);
+    } else { // Partial file
       var realFile = findFile(srv.files, file.name);
       if (!realFile)
         return srv.options.getFile(file.name, function(err, text) {
