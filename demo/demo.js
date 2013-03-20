@@ -54,7 +54,7 @@ function initEditor() {
     extraKeys: keyMap,
     matchBrackets: true
   });
-  server = new tern.Server({getFile: getFile, environment: environment});
+  server = new tern.Server({getFile: getFile, environment: environment, debug: true});
   registerDoc("test.js", editor.getDoc());
   editor.on("cursorActivity", updateArgumentHints);
 
@@ -157,7 +157,7 @@ function getFragmentAround(cm, start, end) {
 
   return {type: "part",
           name: curDoc.name,
-          offset: cm.indexFromPos(from),
+          offsetLine: from.line,
           text: cm.getRange(from, Pos(endLine, 0))};
 }
 
@@ -167,29 +167,28 @@ function displayError(err) {
   out.appendChild(document.createTextNode(err.message || String(err)));
 }
 
+function incLine(off, pos) { return Pos(pos.line + off, pos.ch); }
+
 function buildRequest(cm, query, allowFragments) {
-  var files = [], offset = 0, startPos, endPos;
+  var files = [], offsetLine = 0;
   if (typeof query == "string") query = {type: query};
-  if (query.end == null && query.start == null) {
-    query.end = cm.indexFromPos(endPos = cm.getCursor("end"));
+  query.lineCharPositions = true;
+  if (query.end == null) {
+    query.end = cm.getCursor("end");
     if (cm.somethingSelected())
-      query.start = cm.indexFromPos(startPos = cm.getCursor("start"));
-  } else {
-    query.end = cm.indexFromPos(endPos = query.end);
-    if (query.start != null)
-      query.start = cm.indexFromPos(startPos = query.start);
+      query.start = cm.getCursor("start");
   }
-  if (!startPos) startPos = endPos;
+  var startPos = query.start || query.end;
 
   if (curDoc.changed) {
     if (cm.lineCount() > 100 && allowFragments !== false &&
         curDoc.changed.to - curDoc.changed.from < 100 &&
-        curDoc.changed.from <= startPos.line && curDoc.changed.to > endPos.line) {
-      files.push(getFragmentAround(cm, startPos, endPos));
+        curDoc.changed.from <= query.start.line && curDoc.changed.to > query.end.line) {
+      files.push(getFragmentAround(cm, query.start, query.end));
       query.file = "#0";
-      offset = files[0].offset;
-      if (query.start != null) query.start -= offset;
-      query.end -= offset;
+      offsetLine = files[0].offsetLine;
+      if (query.start != null) query.start = incLine(offsetLine, query.start);
+      query.end = incLine(offsetLine, query.end);
     } else {
       files.push({type: "full",
                   name: curDoc.name,
@@ -209,7 +208,7 @@ function buildRequest(cm, query, allowFragments) {
   }
 
   return {request: {query: query, files: files},
-          offset: offset};
+          offsetLine: offsetLine};
 }
 
 function findType(cm) {
@@ -243,8 +242,9 @@ function ternHints(cm, c) {
       completions.push({text: completion.name, className: className});
     }
 
-    c({from: cm.posFromIndex(data.start + req.offset),
-       to: cm.posFromIndex(data.end + req.offset),
+    // FIXME make index/pos conversions unneeded (ask {line, ch} from server)
+    c({from: incLine(req.offsetLine, data.start),
+       to: incLine(req.offsetLine, data.end),
        list: completions});
   });
 }
@@ -358,7 +358,7 @@ function jumpToDef(cm) {
       if (i == docs.length) return displayError("Definition is not in a local buffer");
     }
     setTimeout(function() {
-      cm.setSelection(cm.posFromIndex(data.end), cm.posFromIndex(data.start));
+      cm.setSelection(data.end, data.start);
     }, 20);
   });
 }
@@ -387,7 +387,7 @@ function applyChanges(changes) {
     chs.sort(function(a, b) { return b.start - a.start; });
     for (var i = 0; i < chs.length; ++i) {
       var ch = chs[i];
-      doc.replaceRange(ch.text, doc.posFromIndex(ch.start), doc.posFromIndex(ch.end));
+      doc.replaceRange(ch.text, ch.start, ch.end);
     }
   }
 }

@@ -175,6 +175,7 @@
       var known = findFile(srv.files, filename);
       if (!known) srv.files.push(known = {name: filename});
       known.text = file.text;
+      known.lineOffsets = null;
       known.ast = result.ast;
       known.outerScope = srv.cx.topScope;
       srv.signal("afterLoad", known);
@@ -211,8 +212,8 @@
   function findMatchingPosition(line, file, near) {
     var pos = 0, closest = null;
     if (!/^\s*$/.test(line)) for (;;) {
-      var found = file.indexOf(line, pos);
-      if (found < 0) break;
+      var found = file.indexOf(line, pos - 500);
+      if (found < 0 || found > pos + 500) break;
       if (closest == null || Math.abs(closest - near) > Math.abs(found - near))
         closest = found;
       pos = found + line.length;
@@ -228,7 +229,7 @@
         if (err) return c(err);
         c(null, loadFile(srv, name, text));
       });
-      return file;
+      return c(null, file);
     }
 
     file = localFiles[isRef[1]];
@@ -245,9 +246,10 @@
           resolveFile(srv, localFiles, name, c);
         });
 
+      var offset = file.offset != null ? file.offset : findLineStart(file, file.offsetLine) || 0;
       var line = firstLine(file.text);
-      var foundPos = findMatchingPosition(line, realFile.text, file.position);
-      var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", file.position)) : foundPos;
+      var foundPos = findMatchingPosition(line, realFile.text, offset);
+      var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", offset)) : foundPos;
 
       infer.withContext(srv.cx, function() {
         var scope = file.scope = infer.scopeAt(realFile.ast, pos, realFile.outerScope), text = file.text, m;
@@ -278,13 +280,18 @@
     c(null, file);
   }
 
+  function isPosition(val) {
+    return typeof val == "number" || typeof val == "object" &&
+      typeof val.line == "number" && typeof val.ch == "number";
+  }
+
   // Baseline query document validation
   function validDoc(doc, c) {
     var err;
     if (!doc.query) err = "Missing query property";
     else if (typeof doc.query.type != "string") err = ".query.type must be a string";
-    else if (doc.query.start && typeof doc.query.start != "number") err = ".query.start must be a number";
-    else if (doc.query.end && typeof doc.query.end != "number") err = ".query.end must be a number";
+    else if (doc.query.start && !isPosition(doc.query.start)) err = ".query.start must be a number";
+    else if (doc.query.end && !isPosition(doc.query.end)) err = ".query.end must be a number";
     else if (doc.files) {
       if (!Array.isArray(doc.files)) err = "Files property must be an array";
       for (var i = 0; i < doc.files.length && !err; ++i) {
@@ -293,12 +300,60 @@
         else if (typeof file.text != "string") err = ".files[n].text must be a string";
         else if (typeof file.name != "string") err = ".files[n].name must be a string";
         else if (file.type == "part") {
-          if (typeof file.offset != "number") err = ".files[n].offset must be a number";
+          if (typeof file.offset != "number" && typeof file.offsetLines != "number")
+            err = ".files[n].offset or .files[n].offsetLines must be a number";
         } else if (file.type != "full") err = ".files[n].type must be \"full\" or \"part\"";
       }
     }
     if (err) c(err);
     else return true;
+  }
+
+  var offsetSkipLines = 25;
+
+  function findLineStart(file, line) {
+    var text = file.text, offsets = file.lineOffsets || (file.lineOffsets = [0]);
+    var pos = 0, curLine = 0;
+    var storePos = Math.min(Math.floor(line / offsetSkipLines), offsets.length - 1);
+    var pos = offsets[storePos], curLine = storePos * offsetSkipLines;
+
+    while (curLine < line) {
+      ++curLine;
+      pos = text.indexOf("\n", pos) + 1;
+      if (pos == 0) return null;
+      if (curLine % offsetSkipLines == 0) offsets.push(pos);
+    }
+    return pos;
+  }
+
+  function resolvePos(file, pos) {
+    if (typeof pos != "number") {
+      var lineStart = findLineStart(file, pos.line);
+      if (lineStart == null) throw new Error("File doesn't contain a line " + pos.line);
+      pos = lineStart + pos.ch;
+    }
+    if (pos > file.text.length) throw new Error("Position " + pos + " is outside of file.");
+    return pos;
+  }
+
+  function asLineChar(file, pos) {
+    var offsets = file.lineOffsets || (file.lineOffsets = [0]);
+    var text = file.text, line, lineStart;
+    for (var i = offsets.length - 1; i >= 0; --i) if (offsets[i] <= pos) {
+      line = i * offsetSkipLines;
+      lineStart = offsets[i];
+    }
+    for (;;) {
+      var eol = text.indexOf("\n", lineStart);
+      if (eol >= pos || eol < 0) break;
+      lineStart = eol + 1;
+      ++line;
+    }
+    return {line: line, ch: pos - lineStart};
+  }
+
+  function outputPos(query, file, pos) {
+    return query.lineCharPositions ? asLineChar(file, pos) : pos;
   }
 
   // Built-in query types
@@ -311,8 +366,8 @@
   }
 
   function findCompletions(srv, query, file) {
-    var wordStart = query.end, wordEnd = wordStart, text = file.text;
-    if (wordStart == null) throw new Error("missing .query.end field");
+    if (query.end == null) throw new Error("missing .query.end field");
+    var wordStart = resolvePos(file, query.end), wordEnd = wordStart, text = file.text;
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
     var word = text.slice(wordStart, wordEnd), completions = [], guessing = false;
@@ -349,22 +404,24 @@
       if (!completions.length && word.length >= 2 && !query.dontGuess)
         for (var prop in srv.cx.props) gather(prop, srv.cx.props[prop][0], 0);
     } else {
-      infer.forAllLocalsAt(file.ast, query.end, file.outerScope, gather);
+      infer.forAllLocalsAt(file.ast, wordStart, file.outerScope, gather);
     }
 
     if (!query.dontSort) completions.sort(compareCompletions);
 
-    return {start: wordStart, end: wordEnd,
+    return {start: outputPos(query, file, wordStart),
+            end: outputPos(query, file, wordEnd),
             completions: completions};
   }
 
   var findExpr = exports.findQueryExpr = function(file, query) {
     if (query.end == null) throw new Error("missing .query.end field");
-    var expr = infer.findExpressionAt(file.ast, query.start, query.end, file.scope);
+    var start = query.start && resolvePos(file, query.start), end = resolvePos(file, query.end);
+    var expr = infer.findExpressionAt(file.ast, start, end, file.scope);
     if (expr) return expr;
-    expr = infer.findExpressionAround(file.ast, query.start, query.end, file.scope);
-    if (expr && (query.start == null || query.start - expr.node.start < 20) &&
-        expr.node.end - query.end < 20) return expr;
+    expr = infer.findExpressionAround(file.ast, start, end, file.scope);
+    if (expr && (start == null || start - expr.node.start < 20) &&
+        expr.node.end - end < 20) return expr;
     throw new Error("No expression at the given position.");
   };
 
@@ -394,12 +451,12 @@
   }
 
   function findDef(_srv, query, file) {
-    var expr = findExpr(file, query), def, file, guess = false;
+    var expr = findExpr(file, query), def, fileName, guess = false;
     if (expr.node.type == "Identifier") {
       var found = expr.state.findVar(expr.node.name);
       if (found && typeof found.name == "object") {
         def = found.name;
-        file = found.origin;
+        fileName = found.origin;
       }
     }
     if (!def) {
@@ -412,12 +469,14 @@
       def = type.originNode;
       if (def) {
         if (/^Function/.test(def.type) && def.id) def = def.id;
-        file = type.origin;
+        fileName = type.origin;
         guess = infer.didGuess();
       }
     }
     if (!def) throw new Error("Could not find a definition for the given expression");
-    return {start: def.start, end: def.end, file: file, guess: guess};
+    return {start: outputPos(query, file, def.start),
+            end: outputPos(query, file, def.end),
+            file: fileName, guess: guess};
   }
 
   function findRefs(srv, query, file) {
@@ -431,7 +490,9 @@
     var type, refs = [];
     function findRefsIn(file) {
       infer.findRefs(file.ast, name, scope, function(node) {
-        refs.push({file: file.name, start: node.start, end: node.end});
+        refs.push({file: file.name,
+                   start: outputPos(query, file, node.start),
+                   end: outputPos(query, file, node.end)});
       });
     }
     if (scope.prev) {
