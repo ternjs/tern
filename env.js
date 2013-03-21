@@ -294,18 +294,6 @@
     }
   }
 
-  function parseDef(spec, path) {
-    var base, tp = spec["!type"];
-    if (tp) {
-      base = parseType(tp, path);
-    } else {
-      var proto = spec["!proto"];
-      base = new infer.Obj(proto ? parseType(proto) : true, path);
-    }
-    passTwo(base, spec, path);
-    return base;
-  }
-
   exports.loadEnvironment = function(data) {
     var cx = infer.cx();
 
@@ -316,8 +304,12 @@
     passOne(cx.topScope, data);
 
     var def = data["!define"];
-    if (def) for (var name in def)
-      cx.localDefs[name] = parseDef(def[name], name);
+    if (def) {
+      for (var name in def)
+        cx.localDefs[name] = passOne(null, def[name], name);
+      for (var name in def)
+        passTwo(cx.localDefs[name], def[name]);
+    }
 
     passTwo(cx.topScope, data);
 
