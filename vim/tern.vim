@@ -1,6 +1,6 @@
 py << endpy
 
-import vim, os, subprocess, urllib2, json, re
+import vim, os, platform, subprocess, urllib2, json, re
 
 def displayError(err):
   vim.command("echoerr '" + str(err) + "'")
@@ -48,7 +48,9 @@ def findServer(ignorePort=False):
   return startServer()
 
 def startServer():
-  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=projectDir(), stdout=subprocess.PIPE)
+  win = platform.system() == "Windows"
+  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=projectDir(),
+                          stdout=subprocess.PIPE, shell=win)
   status = proc.stdout.readline()
   match = re.match("Listening on port (\\d+)", status)
   if match:
