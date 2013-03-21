@@ -414,7 +414,7 @@
       "elementFromPoint": "fn(x: number, y: number) -> +Element",
       "getSelection": "fn() -> +Selection",
       "adoptNode": "fn(node: +Node) -> +Element",
-      "createTreeWalker": "fn(root: +Node, mask: number) -> +TreeWalker",
+      "createTreeWalker": "fn(root: +Node, mask: number) -> ?",
       "createExpression": "fn(text: string) -> ?",
       "createNSResolver": "fn(node: +Node)",
       "scripts": "+HTMLCollection",

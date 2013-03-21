@@ -3,7 +3,7 @@
   "!plugin": "requireJS",
   "requirejs": {
     "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> $custom:requireJS",
-    "onError": "fn(err: +Error.prototype)",
+    "onError": "fn(err: +Error)",
     "load": "fn(context: ?, moduleName: string, url: string)",
     "config": "fn(config: ?)",
     "version": "string",

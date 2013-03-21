@@ -231,6 +231,8 @@
           base = propVal.types[0];
       }
     }
+    // Uncomment this to get feedback on your poorly written .json files
+    // if (base == infer.ANull) console.log("bad path: " + path + " (" + cx.curOrigin + ")");
     cx.paths[path] = base == infer.ANull ? null : base;
     return base;
   }

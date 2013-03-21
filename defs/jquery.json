@@ -164,7 +164,7 @@
     "ajaxPrefilter": "fn(dataTypes?: string, handler: fn(options: ?, originalOptions: ?, req: +XMLHttpRequest))",
     "ajaxSetup": "fn(options: ?)",
     "ajaxTransport": "fn(dataType: string, handler: fn(options: ?, originalOptions: ?, req: +XMLHttpRequest))",
-    "callbacks": "fn(flags: string) -> CALLBACKS",
+    "callbacks": "fn(flags: string) -> ?",
     "contains": "fn(container: +Element, contained: +Element) -> bool",
     "cssHooks": {},
     "data": "fn(element: +Element, key: string, value: ?) -> $2",
@@ -273,7 +273,7 @@
     "proxy": "fn(function: fn(), context: ?) -> fn()",
     "queue": "fn(element: +Element, queue?: string) -> [?]",
     "removeData": "fn(element: +Element, name?: string)",
-    "sub": "fn() -> +jQuery",
+    "sub": "fn() -> jQuery",
     "support": {
       "getSetAttribute": "bool",
       "leadingWhitespace": "bool",
