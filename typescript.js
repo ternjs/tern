@@ -35,14 +35,15 @@ function buildPath(cx) {
 function functionType(node, cx) {
   var type = "fn(";
   var args = node.arguments.members, ret = node.returnTypeAnnotation;
-  for (var i = 0; i < args.length; ++i) {
+  for (var i = 0, e = args.length - (node.variableArgList ? 1 : 0); i < e; ++i) {
     if (i) type += ", ";
     var arg = args[i], name = arg.id.text;
+    if (arg.isOptional) name += "?";
     type += name + ": " + flat(arg.typeExpr, {enter: name, prev: cx});
   }
   type += ")";
   if (ret && (ret.nodeType != 26 || ret.term.text != "void"))
-    type += " -> " + flat(ret, cx);
+    type += " -> " + flat(ret, {enter: "!ret", prev: cx});
   return type;
 }
 
