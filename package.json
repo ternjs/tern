@@ -5,6 +5,7 @@
   "author": "Marijn Haverbeke <marijnh@gmail.com>",
   "description": "A JavaScript code analyzer for deep, cross-editor language support",
   "main": "tern.js",
+  "bin": "./bin/tern",
   "repository": {
     "type": "git",
     "url": "git://github.com/marijnh/tern.git"
