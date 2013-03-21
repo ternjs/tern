@@ -140,11 +140,10 @@
   }
 
   function parseType(spec, name, base) {
-    var withCallbacks = /^\*fn\(/.test(spec) && (spec = spec.slice(1));
     var type = new TypeParser(spec, null, base).parseType(name, true);
-    if (withCallbacks) for (var i = 0; i < type.args.length; ++i) (function(i) {
+    if (/^fn\(/.test(spec)) for (var i = 0; i < type.args.length; ++i) (function(i) {
       var arg = type.args[i];
-      if (arg instanceof infer.Fn) addEffect(type, function(_self, fArgs) {
+      if (arg instanceof infer.Fn && arg.args.length) addEffect(type, function(_self, fArgs) {
         var fArg = fArgs[i];
         if (fArg) fArg.propagate(new infer.IsCallee(infer.cx().topScope, arg.args));
       });
@@ -247,7 +246,7 @@
     if (!base) {
       var tp = spec["!type"];
       if (tp) {
-        if (/^\*?fn\(/.test(tp)) base = emptyObj(infer.Fn);
+        if (/^fn\(/.test(tp)) base = emptyObj(infer.Fn);
         else if (tp.charAt(0) == "[") base = emptyObj(infer.Arr);
         else throw new Error("Invalid !type spec: " + tp);
       } else if (spec["!stdProto"]) {

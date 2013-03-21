@@ -49,7 +49,7 @@
       "lookupPrefix": "fn(uri: string) -> string",
       "isDefaultNamespace": "fn(uri: string) -> bool",
       "lookupNamespaceURI": "fn(uri: string) -> string",
-      "addEventListener": "*fn(type: string, listener: fn(e: +Event), capture: bool)",
+      "addEventListener": "fn(type: string, listener: fn(e: +Event), capture: bool)",
       "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
       "isSameNode": "fn(other: +Node) -> bool",
       "isEqualNode": "fn(other: +Node) -> bool",
