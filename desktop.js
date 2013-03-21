@@ -28,8 +28,8 @@ var defaultConfig = {
   loadLibraries: []
 };
 var knownEnvironments = {
-  ecma5: JSON.parse(fs.readFileSync(path.resolve(__dirname, "ecma5.json"), "utf8")),
-  browser: JSON.parse(fs.readFileSync(path.resolve(__dirname, "browser.json"), "utf8"))
+  ecma5: JSON.parse(fs.readFileSync(path.resolve(__dirname, "defs/ecma5.json"), "utf8")),
+  browser: JSON.parse(fs.readFileSync(path.resolve(__dirname, "defs/browser.json"), "utf8"))
 };
 
 function readProjectFile(dir) {

@@ -488,7 +488,6 @@
     this.paths = Object.create(null);
 
     exports.withContext(this, function() {
-      cx.curOrigin = "ecma5";
       cx.protos.Object = new Obj(null, "Object.prototype");
       cx.topScope = new Scope();
       cx.protos.Array = new Obj(true, "Array.prototype");
