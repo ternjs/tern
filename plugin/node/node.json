@@ -1,5 +1,7 @@
 {
   "!name": "node",
+  "!plugin": "node",
+
   "!define": {
     "os.cpuSpec": {
       "model": "string",
@@ -135,22 +137,6 @@
   "clearTimeout": "fn(timeoutId: ?)",
   "setInterval": "fn(callback: fn(), ms: number) -> ?",
   "clearInterval": "fn(intervalId: ?)",
-  "require": {
-    "!type": "fn(id: string) -> $custom:nodeRequire",
-    "resolve": "fn() -> string",
-    "cache": {},
-    "extensions": {}
-  },
-  "module": {
-    "exports": "?",
-    "require": "require",
-    "id": "string",
-    "filename": "string",
-    "loaded": "bool",
-    "parent": "module",
-    "children": "[module]"
-  },
-  "exports": "?",
   "Buffer": {
     "!type": "fn(str: string, encoding?: string) -> +Buffer",
     "prototype": {
@@ -197,6 +183,24 @@
   },
 
   "node": {
+    "require": {
+      "!type": "fn(id: string) -> $custom:nodeRequire",
+      "resolve": "fn() -> string",
+      "cache": {},
+      "extensions": {}
+    },
+    "Module": {
+      "!type": "fn()",
+      "prototype": {
+        "exports": "?",
+        "require": "node.require",
+        "id": "string",
+        "filename": "string",
+        "loaded": "bool",
+        "parent": "+node.Module",
+        "children": "[+node.Module]"
+      }
+    },
     "events": {
       "EventEmitter": {
         "prototype": {
