@@ -1,4 +1,3 @@
-.tern-project
 .tern-port
 node_modules
 *.elc
