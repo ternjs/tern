@@ -38,13 +38,13 @@
     var known = data.interfaces[name];
     if (!known) {
       known = data.interfaces[name] = new infer.AVal;
-      data.parent.require(name);
+      data.server.require(name);
     }
     return known;
   }
 
   infer.registerFunction("requireJS", function(_self, args, argNodes) {
-    var manager = infer.cx().parent, data = manager && manager._requireJS;
+    var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
     var deps = [];
@@ -64,7 +64,7 @@
       value.propagate(new infer.IsCallee(infer.ANull, deps, null, retval));
       value = retval;
     }
-    var names = data.currentFile, name = names[names.length - 1];
+    var name = data.currentFile;
     var known = data.interfaces[name];
     if (!known) known = data.interfaces[name] = new infer.AVal;
     value.propagate(known);
@@ -72,21 +72,18 @@
     return infer.ANull;
   });
 
-  tern.registerPlugin("requireJS", function(manager, options) {
-    manager._requireJS = {
+  tern.registerPlugin("requireJS", function(server, options) {
+    server._requireJS = {
       interfaces: Object.create(null),
       options: options || {},
-      currentFile: [],
-      parent: manager
+      currentFile: null,
+      server: server
     };
 
-    manager.on("beforeLoad", function(file) {
-      this._requireJS.currentFile.push(file.name);
+    server.on("beforeLoad", function(file) {
+      this._requireJS.currentFile = file.name;
     });
-    manager.on("afterLoad", function(file) {
-      this._requireJS.currentFile.pop();
-    });
-    manager.on("reset", function(file) {
+    server.on("reset", function(file) {
       this._requireJS.interfaces = Object.create(null);
     });
   });
