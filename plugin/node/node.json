@@ -512,16 +512,16 @@
       "resolve": "fn(from: string, to: string) -> string"
     },
     "dns": {
-      "lookup": "fn(domain: string, callback: fn(err: Error, address: string, family: number)) -> string",
-      "resolve": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolve4": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolve6": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolveMx": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolveTxt": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolveSrv": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolveNs": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "resolveCname": "fn(domain: string, callback: fn(err: Error, addresses: [string])) -> [string]",
-      "reverse": "fn(ip: string, callback: fn(err: Error, domains: [string])) -> [string]"
+      "lookup": "fn(domain: string, callback: fn(err: +Error, address: string, family: number)) -> string",
+      "resolve": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolve4": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolve6": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolveMx": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolveTxt": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolveSrv": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolveNs": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "resolveCname": "fn(domain: string, callback: fn(err: +Error, addresses: [string])) -> [string]",
+      "reverse": "fn(ip: string, callback: fn(err: +Error, domains: [string])) -> [string]"
     },
     "net": {
       "createServer": "fn(options?: ?, connectionListener?: fn(socket: +node.net.Socket)) -> +node.net.Server",
@@ -532,7 +532,7 @@
           "listen": "fn(port: number, hostname?: string, backlog?: number, callback?: fn())",
           "close": "fn(callback?: fn())",
           "maxConnections": "number",
-          "getConnections": "fn(callback: fn(err: ?, count: number))"
+          "getConnections": "fn(callback: fn(err: +Error, count: number))"
         }
       },
       "Socket": {
@@ -606,9 +606,9 @@
       "fchmodSync": "fn(fd: number, mode: string)",
       "lchmod": "fn(path: string, mode: number, callback?: fn())",
       "lchmodSync": "fn(path: string, mode: string)",
-      "stat": "fn(path: string, callback?: fn(err: Error, stats: +node.fs.Stats) -> ?) -> +node.fs.Stats",
-      "lstat": "fn(path: string, callback?: fn(err: Error, stats: +node.fs.Stats) -> ?) -> +node.fs.Stats",
-      "fstat": "fn(fd: number, callback?: fn(err: Error, stats: +node.fs.Stats) -> ?) -> +node.fs.Stats",
+      "stat": "fn(path: string, callback?: fn(err: +Error, stats: +node.fs.Stats) -> ?) -> +node.fs.Stats",
+      "lstat": "fn(path: string, callback?: fn(err: +Error, stats: +node.fs.Stats) -> ?) -> +node.fs.Stats",
+      "fstat": "fn(fd: number, callback?: fn(err: +Error, stats: +node.fs.Stats) -> ?) -> +node.fs.Stats",
       "statSync": "fn(path: string) -> +node.fs.Stats",
       "lstatSync": "fn(path: string) -> +node.fs.Stats",
       "fstatSync": "fn(fd: number) -> +node.fs.Stats",
@@ -616,9 +616,9 @@
       "linkSync": "fn(srcpath: string, dstpath: string)",
       "symlink": "fn(srcpath: string, dstpath: string, type?: string, callback?: fn())",
       "symlinkSync": "fn(srcpath: string, dstpath: string, type?: string)",
-      "readlink": "fn(path: string, callback?: fn(err: ?, linkString: string))",
+      "readlink": "fn(path: string, callback?: fn(err: +Error, linkString: string))",
       "readlinkSync": "fn(path: string)",
-      "realpath": "fn(path: string, cache: string, callback: fn(err: ?, resolvedPath: string))",
+      "realpath": "fn(path: string, cache: string, callback: fn(err: +Error, resolvedPath: string))",
       "realpathSync": "fn(path: string, cache?: bool) -> string",
       "unlink": "fn(path: string, callback?: fn())",
       "unlinkSync": "fn(path: string)",
@@ -626,11 +626,11 @@
       "rmdirSync": "fn(path: string)",
       "mkdir": "fn(path: string, mode?: ?, callback?: fn())",
       "mkdirSync": "fn(path: string, mode?: string)",
-      "readdir": "fn(path: string, callback?: fn(err: ?, files: [string]))",
+      "readdir": "fn(path: string, callback?: fn(err: +Error, files: [string]))",
       "readdirSync": "fn(path: string) -> [string]",
       "close": "fn(fd: number, callback?: fn())",
       "closeSync": "fn(fd: number)",
-      "open": "fn(path: string, flags: string, mode?: string, callback?: fn(err: ?, fd: number))",
+      "open": "fn(path: string, flags: string, mode?: string, callback?: fn(err: +Error, fd: number))",
       "openSync": "fn(path: string, flags: string, mode?: string) -> number",
       "utimes": "fn(path: string, atime: number, mtime: number, callback?: fn())",
       "utimesSync": "fn(path: string, atime: number, mtime: number)",
@@ -638,11 +638,11 @@
       "futimesSync": "fn(fd: number, atime: number, mtime: number)",
       "fsync": "fn(fd: number, callback?: fn())",
       "fsyncSync": "fn(fd: number)",
-      "write": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: ?, written: number, buffer: +Buffer))",
+      "write": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, written: number, buffer: +Buffer))",
       "writeSync": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
-      "read": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: ?, bytesRead: number, buffer: +Buffer))",
+      "read": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, bytesRead: number, buffer: +Buffer))",
       "readSync": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
-      "readFile": "fn(filename: string, callback: fn(err: ?, data: +Buffer))",
+      "readFile": "fn(filename: string, callback: fn(err: +Error, data: +Buffer))",
       "readFileSync": "fn(filename: string, encoding: string) -> +Buffer",
       "writeFile": "fn(filename: string, data: +Buffer, encoding?: string, callback?: fn())",
       "writeFileSync": "fn(filename: string, data: +Buffer, encoding?: string)",
@@ -820,9 +820,9 @@
         }
       },
       "getDiffieHellman": "fn(group_name: string) -> +node.crypto.DiffieHellman",
-      "pbkdf2": "fn(password: string, salt: string, iterations: number, keylen: number, callback: fn(err: ?, derivedKey: string))",
-      "randomBytes": "fn(size: number, callback?: fn(err: ?, buf: +Buffer))",
-      "pseudoRandomBytes": "fn(size: number, callback?: fn(err: ?, buf: +Buffer))",
+      "pbkdf2": "fn(password: string, salt: string, iterations: number, keylen: number, callback: fn(err: +Error, derivedKey: string))",
+      "randomBytes": "fn(size: number, callback?: fn(err: +Error, buf: +Buffer))",
+      "pseudoRandomBytes": "fn(size: number, callback?: fn(err: +Error, buf: +Buffer))",
       "DEFAULT_ENCODING": "string"
     },
     "util": {
@@ -866,7 +866,7 @@
           "member": "[+node.events.EventEmitter]",
           "add": "fn(emitter: +node.events.EventEmitter)",
           "remove": "fn(emitter: +node.events.EventEmitter)",
-          "bind": "fn(callback: fn(err: ?, data: ?)) -> $0",
+          "bind": "fn(callback: fn(err: +Error, data: ?)) -> $0",
           "intercept": "fn(cb: fn(data: ?)) -> $0",
           "dispose": "fn()"
         }

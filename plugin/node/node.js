@@ -23,10 +23,8 @@
   function resolveName(data, name) {
     if (!/\.[^\/]*$/.test(name)) name = name + ".js";
     if (/^\.\.?\//.test(name)) return resolvePath(data.currentFile, name);
-    if (data.options.modulePaths) for (var i = 0; i < data.options.modulePaths.length; ++i) {
-      var path = data.options.modulePath + name;
-      if (path in data.modules || data.server.probeFile(path)) return path;
-    }
+    if (data.options.modules && data.options.modules.hasOwnProperty(name))
+      return data.options.modules;
   }
 
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {

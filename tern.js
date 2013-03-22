@@ -23,7 +23,6 @@
     debug: false,
     async: false,
     getFile: function(_f, c) { if (this.async) c(null, null); },
-    probeFile: function(_f) { return false; },
     environment: []
   };
 
@@ -94,10 +93,6 @@
     // `require`-d file.
     require: function(filename) {
       this.pendingFiles.push(filename);
-    },
-
-    probeFile: function(filename) {
-      return this.options.probeFile(filename);
     },
 
     request: function(doc, c) {

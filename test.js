@@ -4,11 +4,13 @@ var tern = require("./tern");
 var acorn = require("acorn");
 var walk = require("acorn/util/walk.js");
 require("./plugin/requirejs/requirejs.js");
+require("./plugin/node/node.js");
 
 var ecma5 = JSON.parse(fs.readFileSync("defs/ecma5.json"));
 var envData = {
   browser: JSON.parse(fs.readFileSync("defs/browser.json")),
   requireJS: JSON.parse(fs.readFileSync("plugin/requirejs/requirejs.json")),
+  node: JSON.parse(fs.readFileSync("plugin/node/node.json")),
   jquery: JSON.parse(fs.readFileSync("defs/jquery.json"))
 };
 
@@ -26,10 +28,6 @@ function serverOptions(context, env) {
     environment: environment,
     getFile: function(name, c) {
       c(null, fs.readFileSync(context + name, "utf8"));
-    },
-    probeFile: function(name) {
-      try { return fs.statSync(name).isFile(); }
-      catch(e) { return false; }
     },
     async: false,
     debug: true

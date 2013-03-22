@@ -56,7 +56,6 @@ function initEditor() {
   });
   server = new tern.Server({
     getFile: getFile,
-    probeFile: function(name) { return !!findDoc(name); },
     environment: environment,
     debug: true
   });

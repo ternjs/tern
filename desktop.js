@@ -52,16 +52,12 @@ function startServer(dir, config) {
   function getFile(name, c) {
     fs.readFile(path.resolve(dir, name), "utf8", c);
   }
-  function probeFile(name) {
-    try { return fs.statSync(name).isFile(); }
-    catch(e) { return false; }
-  }
   var env = [];
   config.environment.forEach(function(name) {
     env.push(knownEnvironments[name] || JSON.parse(fs.readFileSync(path.resolve(dir, name), "utf8")));
   });
 
-  return new tern.Server({getFile: getFile, probeFile: probeFile, environment: env, debug: true, async: true});
+  return new tern.Server({getFile: getFile, environment: env, debug: true, async: true});
 }
 
 function doShutdown() {
