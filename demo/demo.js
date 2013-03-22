@@ -21,7 +21,7 @@ CodeMirror.on(window, "load", function() {
   if (!Object.create)
     return document.getElementById("demospace").innerHTML = "<p><strong>Sorry!</strong> You seem to be using a browser that does not support ECMAScript version 5. Tern is using some ECMAScript 5 features, so it will not work on your browser. Try with a more modern one if you really want to see this.</p><p>(I may change the library to not depend on ECMAScript 5 in the future. It would not be all that hard, but I have not yet decided whether this is worthwhile.)</p>";
 
-  var files = ["defs/ecma5.json", "defs/browser.json", "plugin/requirejs/requirejs.json", "defs/jquery.json", "plugin/node/node.json"];
+  var files = ["defs/ecma5.json", "defs/browser.json", "plugin/requirejs/requirejs.json", "defs/jquery.json"];
   var loaded = 0;
   for (var i = 0; i < files.length; ++i) (function(i) {
     load(files[i], function(json) {
@@ -54,7 +54,12 @@ function initEditor() {
     extraKeys: keyMap,
     matchBrackets: true
   });
-  server = new tern.Server({getFile: getFile, environment: environment, debug: true});
+  server = new tern.Server({
+    getFile: getFile,
+    probeFile: function(name) { return !!findDoc(name); },
+    environment: environment,
+    debug: true
+  });
   registerDoc("test.js", editor.getDoc());
   editor.on("cursorActivity", updateArgumentHints);
 

@@ -21,7 +21,9 @@
 
   var defaultOptions = {
     debug: false,
-    getFile: function(_f, c) { c(null, null); },
+    async: false,
+    getFile: function(_f, c) { if (this.async) c(null, null); },
+    probeFile: function(_f) { return false; },
     environment: []
   };
 
@@ -92,6 +94,10 @@
     // `require`-d file.
     require: function(filename) {
       this.pendingFiles.push(filename);
+    },
+
+    probeFile: function(filename) {
+      return this.options.probeFile(filename);
     },
 
     request: function(doc, c) {
@@ -169,15 +175,15 @@
 
   function loadFile(srv, filename, text) {
     return infer.withContext(srv.cx, function() {
-      var file = {name: filename, text: text || ""};
+      var file = {name: filename, text: text || "", scope: srv.cx.topScope};
       srv.signal("beforeLoad", file);
-      var result = infer.analyze(file.text, filename);
+      var result = infer.analyze(file.text, filename, file.scope);
       var known = findFile(srv.files, filename);
       if (!known) srv.files.push(known = {name: filename});
       known.text = file.text;
       known.lineOffsets = null;
       known.ast = result.ast;
-      known.outerScope = srv.cx.topScope;
+      known.scope = file.scope;
       srv.signal("afterLoad", known);
       return known;
     });
@@ -252,19 +258,19 @@
       var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", offset)) : foundPos;
 
       infer.withContext(srv.cx, function() {
-        var scope = file.scope = infer.scopeAt(realFile.ast, pos, realFile.outerScope), text = file.text, m;
+        var scope = file.scope = infer.scopeAt(realFile.ast, pos, realFile.scope), text = file.text, m;
         if (foundPos && (m = line.match(/^(.*?)\bfunction\b/))) {
           var cut = m[1].length, white = "";
           for (var i = 0; i < cut; ++i) white += " ";
           text = white + text.slice(cut);
         }
         file.ast = infer.analyze(file.text, file.name, scope).ast;
-        file.outerScope = scope;
+        file.scope = scope;
 
         // This is a kludge to tie together the function types (if any)
         // outside and inside of the fragment, so that arguments and
         // return values have some information known about them.
-        var inner = infer.scopeAt(realFile.ast, pos + line.length, realFile.outerScope);
+        var inner = infer.scopeAt(realFile.ast, pos + line.length, realFile.scope);
         if (m && inner != scope && inner.fnType) {
           var newInner = infer.scopeAt(file.ast, line.length, scope);
           var fOld = inner.fnType, fNew = newInner.fnType;
@@ -337,6 +343,7 @@
   }
 
   function asLineChar(file, pos) {
+    if (!file) return {line: 0, ch: 0};
     var offsets = file.lineOffsets || (file.lineOffsets = [0]);
     var text = file.text, line, lineStart;
     for (var i = offsets.length - 1; i >= 0; --i) if (offsets[i] <= pos) {
@@ -370,7 +377,7 @@
     var wordStart = resolvePos(file, query.end), wordEnd = wordStart, text = file.text;
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
-    var word = text.slice(wordStart, wordEnd), completions = [], guessing = false;
+    var word = text.slice(wordStart, wordEnd), completions = [];
     var wrapAsObjs = query.types || query.depths;
 
     function gather(prop, obj, depth) {
@@ -389,8 +396,9 @@
 
       if (query.types) {
         infer.resetGuessing();
-        rec.type = infer.toString(val.getType());
+        var type = val.getType();
         rec.guess = infer.didGuess();
+        rec.type = infer.toString(type);
       }
       if (query.depths) rec.depth = depth;
     }
@@ -404,7 +412,7 @@
       if (!completions.length && word.length >= 2 && !query.dontGuess)
         for (var prop in srv.cx.props) gather(prop, srv.cx.props[prop][0], 0);
     } else {
-      infer.forAllLocalsAt(file.ast, wordStart, file.outerScope, gather);
+      infer.forAllLocalsAt(file.ast, wordStart, file.scope, gather);
     }
 
     if (!query.dontSort) completions.sort(compareCompletions);
@@ -444,13 +452,13 @@
     if (query.depth != null && typeof query.depth != "number")
       throw new Error(".query.depth must be a number");
 
-    return {type: infer.toString(type, query.depth),
+    return {guess: infer.didGuess(),
+            type: infer.toString(type, query.depth),
             name: name || null,
-            exprName: exprName || null,
-            guess: infer.didGuess()};
+            exprName: exprName || null};
   }
 
-  function findDef(_srv, query, file) {
+  function findDef(srv, query, file) {
     var expr = findExpr(file, query), def, fileName, guess = false;
     if (expr.node.type == "Identifier") {
       var found = expr.state.findVar(expr.node.name);
@@ -474,8 +482,10 @@
       }
     }
     if (!def) throw new Error("Could not find a definition for the given expression");
-    return {start: outputPos(query, file, def.start),
-            end: outputPos(query, file, def.end),
+
+    var defFile = findFile(srv.files, fileName);
+    return {start: outputPos(query, defFile, def.start),
+            end: outputPos(query, defFile, def.end),
             file: fileName, guess: guess};
   }
 
