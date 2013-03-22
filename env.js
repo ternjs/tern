@@ -22,7 +22,9 @@
   }
 
   var TypeParser = exports.TypeParser = function(spec, start, base) {
-    this.pos = start || 0; this.spec = spec; this.base = base;
+    this.pos = start || 0;
+    this.spec = spec;
+    this.base = base;
   };
   TypeParser.prototype = {
     eat: function(str) {
@@ -199,6 +201,8 @@
     }
   }
 
+  var currentTopScope;
+
   var parsePath = exports.parsePath = function(path) {
     var cx = infer.cx(), cached = cx.paths[path];
     if (cached != null) return cached;
@@ -206,7 +210,7 @@
 
     var isdate = /^Date.prototype/.test(path);
     var parts = path.split(".");
-    var base = cx.topScope;
+    var base = currentTopScope || cx.topScope;
     for (var i = 0; i < parts.length && base != infer.ANull; ++i) {
       var prop = parts[i];
       if (prop.charAt(0) == "!") {
@@ -295,14 +299,14 @@
     }
   }
 
-  exports.loadEnvironment = function(data) {
+  function doLoadEnvironment(data, scope) {
     var cx = infer.cx();
 
     infer.addOrigin(cx.curOrigin = data["!name"] || "env#" + cx.origins.length);
     cx.loading = data;
     cx.localDefs = Object.create(null);
 
-    passOne(cx.topScope, data);
+    passOne(scope, data);
 
     var def = data["!define"];
     if (def) {
@@ -312,9 +316,20 @@
         passTwo(cx.localDefs[name], def[name]);
     }
 
-    passTwo(cx.topScope, data);
+    passTwo(scope, data);
 
     cx.curOrigin = cx.loading = cx.localDefs = null;
+  }
+
+  exports.loadEnvironment = function(data, scope) {
+    if (!scope) scope = infer.cx().topScope;
+    var oldScope = currentTopScope;
+    currentTopScope = scope;
+    try {
+      doLoadEnvironment(data, scope);
+    } finally {
+      currentTopScope = oldScope;
+    }
   };
 
   // Used to register custom logic for more involved effect or type

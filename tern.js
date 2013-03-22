@@ -23,7 +23,8 @@
     debug: false,
     async: false,
     getFile: function(_f, c) { if (this.async) c(null, null); },
-    environment: []
+    environment: [],
+    pluginOptions: {}
   };
 
   var queryTypes = {
@@ -72,7 +73,8 @@
     addEnvironment: function(data) {
       this.environment.push(data);
       var plugin = data["!plugin"];
-      if (plugin && plugin in plugins) plugins[plugin](this);
+      if (plugin && plugin in plugins)
+        plugins[plugin](this, this.options.pluginOptions[plugin]);
     },
     addFile: function(file) {
       if (this.filesToLoad.indexOf(file) < 0) this.filesToLoad.push(file);

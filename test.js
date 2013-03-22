@@ -1,4 +1,4 @@
-var fs = require("fs");
+var fs = require("fs"), path = require("path");
 var infer = require("./infer");
 var tern = require("./tern");
 var acorn = require("acorn");
@@ -21,6 +21,11 @@ function getFile(file) {
   return {text: text, name: file, env: env, ast: acorn.parse(text)};
 }
 
+var nodeModules = {};
+fs.readdirSync("test/node_modules").forEach(function(name) {
+  nodeModules[path.basename(name, ".js")] = JSON.parse(fs.readFileSync("test/node_modules/" + name, "utf8"));
+});
+
 function serverOptions(context, env) {
   var environment = [ecma5];
   for (var i = 0; i < env.length; ++i) environment.push(env[i]);
@@ -30,7 +35,8 @@ function serverOptions(context, env) {
       c(null, fs.readFileSync(context + name, "utf8"));
     },
     async: false,
-    debug: true
+    debug: true,
+    pluginOptions: { node: { modules: nodeModules } }
   };
 }
 
@@ -42,6 +48,7 @@ function runTests(filter) {
     ++files;
     var fname = name, context = "test/";
     if (fs.statSync(context + name).isDirectory()) {
+      if (name == "node_modules") return;
       context += name + "/";
       fname = "main.js";
     }

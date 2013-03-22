@@ -13,18 +13,29 @@
 
   function resolvePath(base, path) {
     var slash = base.lastIndexOf("/"), m;
-    if (slash >= 0) base = base.slice(0, slash + 1);
-    path = base + path;
+    if (slash >= 0) path = base.slice(0, slash + 1) + path;
     while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
       path = path.slice(0, m.index) + path.slice(m.index + m[0].length);
     return path.replace(/(^|[^\.])\.\//g, "$1");
   }
 
-  function resolveName(data, name) {
-    if (!/\.[^\/]*$/.test(name)) name = name + ".js";
-    if (/^\.\.?\//.test(name)) return resolvePath(data.currentFile, name);
-    if (data.options.modules && data.options.modules.hasOwnProperty(name))
-      return data.options.modules;
+  function buildWrappingScope(parent, origin) {
+    var scope = new infer.Scope(parent);
+    infer.env.parsePath("node.require").propagate(scope.ensureProp("require"));
+    var module = infer.getInstance(infer.env.parsePath("node.Module.prototype").getType());
+    module.propagate(scope.ensureProp("module"));
+    var exports = new infer.Obj(true, "exports", origin);
+    exports.propagate(scope.ensureProp("exports"));
+    exports.propagate(module.ensureProp("exports"));
+    return scope;
+  }
+
+  function exportsFromScope(scope) {
+    var exportsVal = scope.getVar("module").getType().getProp("exports");
+    if (!(exportsVal instanceof infer.AVal))
+      return file.scope.getVar("exports");
+    else
+      return exportsVal.types[exportsVal.types.length - 1];
   }
 
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
@@ -35,10 +46,23 @@
     if (name != "Module" && node.props && (val = node.props[name]) && val.flags & infer.flag_definite)
       return val;
 
-    name = resolveName(data, name);
-    if (!name) return infer.ANull;
-    cx.parent.require(name);
-    return getModule(data, name);
+    if (/^\.\.?\//.test(name)) {
+      // Relative
+      if (!/\.[^\/]*$/.test(name)) name = name + ".js";
+      name = resolvePath(data.currentFile, name);
+      cx.parent.require(name);
+      return getModule(data, name);
+    }
+
+    if (name in data.modules) return data.modules[name];
+
+    if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
+      var scope = buildWrappingScope(cx.topScope, name);
+      infer.env.loadEnvironment(data.options.modules[name], scope);
+      return data.modules[name] = exportsFromScope(scope);
+    }
+
+    return infer.ANull;
   });
 
   tern.registerPlugin("node", function(server, options) {
@@ -51,23 +75,11 @@
 
     server.on("beforeLoad", function(file) {
       this._node.currentFile = file.name;
-      file.scope = new infer.Scope(file.scope);
-
-      infer.env.parsePath("node.require").propagate(file.scope.ensureProp("require"));
-      var module = infer.getInstance(infer.env.parsePath("node.Module.prototype").getType());
-      module.propagate(file.scope.ensureProp("module"));
-      var exports = new infer.Obj(true, "exports", file.name);
-      exports.propagate(file.scope.ensureProp("exports"));
-      exports.propagate(module.ensureProp("exports"));
+      file.scope = buildWrappingScope(file.scope, file.name);
     });
 
     server.on("afterLoad", function(file) {
-      var exportsVal = file.scope.getVar("module").getType().getProp("exports"), exports;
-      if (!(exportsVal instanceof infer.AVal))
-        exports = file.scope.getVar("exports");
-      else
-        exports = exportsVal.types[exportsVal.types.length - 1];
-      exports.propagate(getModule(this._node, this._node.currentFile));
+      exportsFromScope(file.scope).propagate(getModule(this._node, this._node.currentFile));
     });
 
     server.on("reset", function(file) {
