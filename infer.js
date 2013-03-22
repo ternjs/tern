@@ -23,8 +23,8 @@
   "use strict";
 
   // Delayed initialization because of cyclic dependencies.
-  env = env.init({}, exports);
-  jsdoc = jsdoc.init({}, exports);
+  env = exports.env = env.init({}, exports);
+  jsdoc = exports.jsdoc = jsdoc.init({}, exports);
 
   var toString = exports.toString = function(type, maxDepth) {
     return type ? type.toString(maxDepth) : "?";
@@ -48,6 +48,7 @@
     },
 
     propagate: function(c) {
+      if (c == ANull || (c instanceof Type)) return;
       (this.forward || (this.forward = [])).push(c);
       for (var i = 0; i < this.types.length; ++i)
         c.addType(this.types[i]);
@@ -71,8 +72,7 @@
     },
     isEmpty: function() { return this.types.length == 0; },
     getFunctionType: function() {
-      // FIXME find most complete one?
-      for (var i = 0; i < this.types.length; ++i)
+      for (var i = this.types.length - 1; i >= 0; --i)
         if (this.types[i] instanceof Fn) return this.types[i];
     },
 
@@ -83,11 +83,10 @@
     },
 
     makeupType: function() {
-      guessing = true;
       if (!this.forward) return null;
-      for (var i = 0; i < this.forward.length; ++i) {
+      for (var i = this.forward.length - 1; i >= 0; --i) {
         var fw = this.forward[i], hint = fw.typeHint && fw.typeHint();
-        if (hint && !hint.isEmpty()) return hint;
+        if (hint && !hint.isEmpty()) {guessing = true; return hint;}
       }
 
       var props = Object.create(null), foundProp = null;
@@ -115,7 +114,8 @@
           }
           matches.push(obj);
         }
-        return canonicalType(matches);
+        var canon = canonicalType(matches);
+        if (canon) {guessing = true; return canon;}
       }
     },
 
@@ -154,9 +154,7 @@
         for (var j = 0; j < tp.args.length; ++j) if (!tp.args[j].isEmpty()) ++score;
         if (!tp.retval.isEmpty()) ++score;
       } else if (objs) {
-        score = tp.name ? 100 : 1;
-        // FIXME this heuristic is far-fetched.
-        for (var prop in tp.props) if (tp.props[prop].flags & flag_definite) ++score;
+        score = tp.name ? 100 : 2;
         for (var o = tp; o; o = o.proto) if (o.provisionary) {
           score = 1;
           break;
@@ -164,7 +162,7 @@
       } else if (prims) {
         score = 1;
       }
-      if (score > maxScore) { maxScore = score; maxTp = tp; }
+      if (score >= maxScore) { maxScore = score; maxTp = tp; }
     }
     return maxTp;
   }
@@ -522,10 +520,10 @@
 
   // SCOPES
 
-  function Scope(prev) {
+  var Scope = exports.Scope = function(prev) {
     this.prev = prev;
     Obj.call(this, prev || true);
-  }
+  };
   Scope.prototype = Object.create(Obj.prototype);
   Scope.prototype.getVar = function(name, define) {
     for (var s = this; ; s = s.proto) {

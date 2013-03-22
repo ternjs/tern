@@ -199,7 +199,7 @@
     }
   }
 
-  function parsePath(path) {
+  var parsePath = exports.parsePath = function(path) {
     var cx = infer.cx(), cached = cx.paths[path];
     if (cached != null) return cached;
     cx.paths[path] = infer.ANull;
@@ -235,7 +235,7 @@
     // if (base == infer.ANull) console.log("bad path: " + path + " (" + cx.curOrigin + ")");
     cx.paths[path] = base == infer.ANull ? null : base;
     return base;
-  }
+  };
 
   function emptyObj(ctor) {
     var empty = Object.create(ctor.prototype);
