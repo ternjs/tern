@@ -43,14 +43,16 @@
       if (this.types.indexOf(type) > -1) return;
 
       this.types.push(type);
-      if (this.forward) for (var i = 0; i < this.forward.length; ++i)
+      if (this.forward) for (var i = 0, maxLen = this.forward.length + 10;
+                             i < this.forward.length && i < maxLen; ++i)
         this.forward[i].addType(type);
     },
 
     propagate: function(c) {
       if (c == ANull || (c instanceof Type)) return;
       (this.forward || (this.forward = [])).push(c);
-      for (var i = 0; i < this.types.length; ++i)
+      for (var i = 0, maxLen = this.types.length + 10;
+           i < this.types.length && i < maxLen; ++i)
         c.addType(this.types[i]);
     },
 
