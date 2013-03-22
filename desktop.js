@@ -125,11 +125,16 @@ var httpServer = require("http").createServer(function(req, resp) {
   }
 });
 httpServer.listen(0, "localhost", function() {
-  var portFile = path.resolve(projectDir, portFileName);
-  fs.writeFileSync(portFile, String(httpServer.address().port), "utf8");
-  process.on("exit", function() { try { fs.unlinkSync(portFile); } catch(e) {} });
+  var portFile = path.resolve(projectDir, portFileName), port = httpServer.address().port;
+  fs.writeFileSync(portFile, String(port), "utf8");
+  process.on("exit", function() {
+    try {
+      var cur = Number(fs.readFileSync(portFile, "utf8"));
+      if (cur == port) fs.unlinkSync(portFile);
+    } catch(e) {}
+  });
   process.on("SIGINT", function() { process.exit(); });
-  console.log("Listening on port " + httpServer.address().port);
+  console.log("Listening on port " + port);
 });
 
 function respondSimple(resp, status, text) {
