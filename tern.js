@@ -5,7 +5,6 @@
 // project.
 
 // FIXME there are re-entrancy problems in this.
-// FIXME support both sync and async in a more solid way
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -186,13 +185,19 @@
     });
   }
 
+  function getFile(srv, file, c) {
+    if (srv.options.async) return srv.options.getFile(file, c);
+    try { c(null, srv.options.getFile(file)); }
+    catch(e) { c(e); }
+  }
+
   function finishPending(srv, c) {
     var next;
     while (next = srv.pendingFiles.pop())
       if (!findFile(srv.files, next)) break;
     if (!next) return c();
 
-    srv.options.getFile(next, function(err, text) {
+    getFile(srv, next, function(err, text) {
       if (err) return c(err);
       loadFile(srv, next, text);
       finishPending(srv, c);
@@ -228,7 +233,7 @@
     var file, isRef = name.match(/^#(\d+)$/);
     if (!isRef) {
       file = findFile(srv.files, name);
-      if (!file) return srv.options.getFile(name, function(err, text) {
+      if (!file) return getFile(srv, name, function(err, text) {
         if (err) return c(err);
         c(null, loadFile(srv, name, text));
       });
@@ -243,7 +248,7 @@
     } else { // Partial file
       var realFile = findFile(srv.files, file.name);
       if (!realFile)
-        return srv.options.getFile(file.name, function(err, text) {
+        return getFile(srv, file.name, function(err, text) {
           if (err) return c(err);
           loadFile(srv, file.name, text);
           resolveFile(srv, localFiles, name, c);

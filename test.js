@@ -31,10 +31,7 @@ function serverOptions(context, env) {
   for (var i = 0; i < env.length; ++i) environment.push(env[i]);
   return {
     environment: environment,
-    getFile: function(name, c) {
-      c(null, fs.readFileSync(context + name, "utf8"));
-    },
-    async: false,
+    getFile: function(name) { return fs.readFileSync(context + name, "utf8"); },
     debug: true,
     pluginOptions: { node: { modules: nodeModules } }
   };

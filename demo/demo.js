@@ -56,6 +56,7 @@ function initEditor() {
   });
   server = new tern.Server({
     getFile: getFile,
+    async: true,
     environment: environment,
     debug: true
   });
