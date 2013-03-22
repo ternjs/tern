@@ -16,7 +16,6 @@
   "dependencies": {
     "codemirror": "git://github.com/marijnh/CodeMirror.git",
     "acorn": "git://github.com/marijnh/acorn.git",
-    // We're using all kinds of undocumented internals, so require precise version
     "typescript": "0.8.3"
   }
 }
