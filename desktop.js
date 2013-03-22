@@ -25,7 +25,7 @@ function findProjectDir() {
 
 var defaultConfig = {
   libs: [],
-  loadEagerly: false, // FIXME implement
+  loadEagerly: false,
   plugins: {},
   ecmaScript: true
 };
@@ -88,7 +88,7 @@ var server = startServer(projectDir, config);
 function startServer(dir, config) {
   var env = buildEnvironment(dir, config);
   var plugins = loadPlugins(dir, config.plugins, env);
-  return new tern.Server({
+  var server = new tern.Server({
     getFile: function(name, c) {
       fs.readFile(path.resolve(dir, name), "utf8", c);
     },
@@ -97,6 +97,11 @@ function startServer(dir, config) {
     debug: true,
     async: true
   });
+  // FIXME maybe allow globs?
+  if (config.loadEagerly) config.loadEagerly.forEach(function(file) {
+    server.addFile(file);
+  });
+  return server;
 }
 
 function doShutdown() {
