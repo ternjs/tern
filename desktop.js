@@ -24,12 +24,10 @@ function findProjectDir() {
 }
 
 var defaultConfig = {
-  environment: ["ecma5"],
-  loadLibraries: []
-};
-var knownEnvironments = {
-  ecma5: JSON.parse(fs.readFileSync(path.resolve(__dirname, "defs/ecma5.json"), "utf8")),
-  browser: JSON.parse(fs.readFileSync(path.resolve(__dirname, "defs/browser.json"), "utf8"))
+  libs: [],
+  loadEagerly: false, // FIXME implement
+  plugins: {},
+  ecmaScript: true
 };
 
 function readProjectFile(dir) {
@@ -39,25 +37,66 @@ function readProjectFile(dir) {
   return data;
 }
 
-var dir = findProjectDir(), config;
-if (dir) {
-  config = readProjectFile(dir);
-} else {
-  dir = process.cwd();
-  config = defaultConfig;
+function findFile(file, projectDir, fallbackDir) {
+  var local = path.resolve(projectDir, file);
+  if (fs.existsSync(local)) return local;
+  var shared = path.resolve(fallbackDir, file);
+  if (fs.existsSync(shared)) return shared;
 }
-var server = startServer(dir, config);
+
+function buildEnvironment(projectDir, config) {
+  var env = [], src = config.libs;
+  if (src.indexOf("ecma5") == -1 && config.ecmaScript) src = ["ecma5"].concat(src);
+  for (var i = 0; i < src.length; ++i) {
+    var file = src[i];
+    if (!/\.json$/.test(file)) file = file + ".json";
+    var found = findFile(file, projectDir, __dirname + "/defs");
+    if (found) env.push(JSON.parse(fs.readFileSync(found, "utf8")));
+    else process.stderr.write("Failed to find library " + src[i] + ".\n");
+  }
+  return env;
+}
+
+function loadPlugins(projectDir, plugins, env) {
+  var options = {};
+  for (var file in plugins) {
+    var found = findFile(file, projectDir, __dirname + "/plugin") ||
+      findFile(file + ".js", projectDir, __dirname + "/plugin");
+    if (!found) {
+      process.stderr.write("Failed to find plugin " + file + ".\n");
+      continue;
+    }
+    if (fs.statSync(found).isDirectory()) fs.readdirSync(found).forEach(function(file) {
+      if (/\.js$/.test(file)) require(found + "/" + file);
+      else if (/\.json$/.test(file)) env.push(JSON.parse(fs.readFileSync(found + "/" + file, "utf8")));
+    });
+    else require(found);
+    options[path.basename(file, ".js")] = plugins[file];
+  }
+  return options;
+}
+
+var projectDir = findProjectDir();
+if (projectDir) {
+  var config = readProjectFile(projectDir);
+} else {
+  projectDir = process.cwd();
+  var config = defaultConfig;
+}
+var server = startServer(projectDir, config);
 
 function startServer(dir, config) {
-  function getFile(name, c) {
-    fs.readFile(path.resolve(dir, name), "utf8", c);
-  }
-  var env = [];
-  config.environment.forEach(function(name) {
-    env.push(knownEnvironments[name] || JSON.parse(fs.readFileSync(path.resolve(dir, name), "utf8")));
+  var env = buildEnvironment(dir, config);
+  var plugins = loadPlugins(dir, config.plugins, env);
+  return new tern.Server({
+    getFile: function(name, c) {
+      fs.readFile(path.resolve(dir, name), "utf8", c);
+    },
+    environment: env,
+    pluginOptions: plugins,
+    debug: true,
+    async: true
   });
-
-  return new tern.Server({getFile: getFile, environment: env, debug: true, async: true});
 }
 
 function doShutdown() {
@@ -86,7 +125,7 @@ var httpServer = require("http").createServer(function(req, resp) {
   }
 });
 httpServer.listen(0, "localhost", function() {
-  var portFile = path.resolve(dir, portFileName);
+  var portFile = path.resolve(projectDir, portFileName);
   fs.writeFileSync(portFile, String(httpServer.address().port), "utf8");
   process.on("exit", function() { try { fs.unlinkSync(portFile); } catch(e) {} });
   process.on("SIGINT", function() { process.exit(); });

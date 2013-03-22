@@ -46,8 +46,7 @@
     if (name != "Module" && node.props && (val = node.props[name]) && val.flags & infer.flag_definite)
       return val;
 
-    if (/^\.\.?\//.test(name)) {
-      // Relative
+    if (/^\.{0,2}\//.test(name)) { // Relative
       if (!/\.[^\/]*$/.test(name)) name = name + ".js";
       name = resolvePath(data.currentFile, name);
       cx.parent.require(name);
