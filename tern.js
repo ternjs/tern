@@ -154,7 +154,7 @@
             result = queryType.run(srv, doc.query, file);
           } catch (e) {
             if (srv.options.debug) console.log(e.stack);
-            return c(e.message || String(e));
+            return c(e);
           }
           c(null, result);
         });

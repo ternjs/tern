@@ -67,7 +67,7 @@ function runTests(filter) {
                    file: fname,
                    depth: m[1] ? 2 : null};
       server.request({query: query}, function(err, resp) {
-        if (err) throw new Error(err);
+        if (err) throw err;
         var type = resp.guess && !m[2] ? "?" : resp.type || "?";
         if (type != m[3]) {
           console.log(name + ": Expression at line " + acorn.getLineInfo(file.text, m.index).line +

@@ -8,3 +8,6 @@ f(f);
 
 // Create a self-referential type
 var x = [x];
+
+// Force analysis
+x[0]; //: [?]

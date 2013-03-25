@@ -26,8 +26,8 @@
   env = exports.env = env.init({}, exports);
   jsdoc = exports.jsdoc = jsdoc.init({}, exports);
 
-  var toString = exports.toString = function(type, maxDepth) {
-    return type ? type.toString(maxDepth) : "?";
+  var toString = exports.toString = function(type, maxDepth, parent) {
+    return !type || type == parent ? "?": type.toString(maxDepth);
   };
 
   // ABSTRACT VALUES
@@ -448,11 +448,11 @@
       if (i) str += ", ";
       var name = this.argNames[i];
       if (name && name != "?") str += name + ": ";
-      str += toString(this.args[i].getType(), maxDepth);
+      str += toString(this.args[i].getType(), maxDepth, this);
     }
     str += ")";
     if (!this.retval.isEmpty())
-      str += " -> " + toString(this.retval.getType(), maxDepth);
+      str += " -> " + toString(this.retval.getType(), maxDepth, this);
     return str;
   };
   Fn.prototype.getProp = function(prop) {
@@ -484,8 +484,7 @@
   };
   Arr.prototype = Object.create(Obj.prototype);
   Arr.prototype.toString = function(maxDepth) {
-    if (maxDepth) maxDepth--;
-    return "[" + toString(this.getProp("<i>").getType(), maxDepth) + "]";
+    return "[" + toString(this.getProp("<i>").getType(), maxDepth, this) + "]";
   };
 
   // THE PROPERTY REGISTRY
