@@ -187,8 +187,9 @@
 
   function getFile(srv, file, c) {
     if (srv.options.async) return srv.options.getFile(file, c);
-    try { c(null, srv.options.getFile(file)); }
+    try { var file = srv.options.getFile(file); }
     catch(e) { c(e); }
+    c(null, file);
   }
 
   function finishPending(srv, c) {
