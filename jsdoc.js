@@ -83,7 +83,7 @@
       if (!fields) return null;
       type = new infer.Obj(true);
       for (var i = 0; i < fields.types.length; ++i) {
-        var field = type.ensureProp(fields.labels[i]);
+        var field = type.defProp(fields.labels[i]);
         field.flags |= infer.flag_initializer;
         fields.types[i].propagate(field);
       }
@@ -97,7 +97,7 @@
       else if (/^bool(ean)?$/i.test(word)) type = infer.cx().bool;
       else if (/^string$/i.test(word)) type = infer.cx().str;
       else {
-        var found = scope.findVar(word);
+        var found = scope.hasProp(word);
         if (found) found = found.getType();
         if (!found) {
           type = infer.ANull;
@@ -162,7 +162,7 @@
       }
       if (ret) ret.propagate(fn.retval);
     } else if (type) {
-      type.propagate(scope.findVar(varName));
+      type.propagate(scope.hasProp(varName));
     }
   };
 

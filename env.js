@@ -229,7 +229,7 @@
         }
       } else if (base instanceof infer.Obj) {
         var propVal = base.props[prop];
-        if (!propVal || !(propVal.flags & infer.flag_definite) || propVal.isEmpty())
+        if (!propVal || propVal.isEmpty())
           base = infer.ANull;
         else
           base = propVal.types[0];
@@ -266,7 +266,7 @@
     for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
       var inner = spec[name];
       if (typeof inner == "string") continue;
-      var prop = base.ensureProp(name);
+      var prop = base.defProp(name);
       passOne(prop.getType(), inner, path ? path + "." + name : name).propagate(prop);
     }
     return base;
@@ -289,7 +289,7 @@
       parseEffect(effects[i], base);
 
     for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
-      var inner = spec[name], known = base.ensureProp(name), innerPath = path ? path + "." + name : name;
+      var inner = spec[name], known = base.defProp(name), innerPath = path ? path + "." + name : name;
       if (typeof inner == "string") {
         if (known.getType()) continue;
         parseType(inner, innerPath).propagate(known);
@@ -347,7 +347,7 @@
         if (spec instanceof infer.AVal) spec = spec.types[0];
         if (spec instanceof infer.Obj) for (var prop in spec.props) {
           var cur = spec.props[prop].types[0];
-          var p = derived.ensureProp(prop);
+          var p = derived.defProp(prop);
           if (cur && cur instanceof infer.Obj && cur.props.value) {
             var vtp = cur.props.value.getType();
             if (vtp) p.addType(vtp);

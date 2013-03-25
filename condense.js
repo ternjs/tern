@@ -61,11 +61,8 @@
   infer.Obj.prototype.setPath = function(path, state, maxOrigin) {
     this.path = path || "<top>";
     var start = path ? path + "." : "";
-    for (var prop in this.props) {
-      var val = this.props[prop];
-      if (val.flags & infer.flag_definite)
-        setPath(val, start + prop, state, maxOrigin);
-    }
+    for (var prop in this.props)
+      setPath(this.props[prop], start + prop, state, maxOrigin);
     if (this.proto) setPath(this.proto, start + "!proto", state, maxOrigin);
   };
 
@@ -120,10 +117,7 @@
   };
 
   function hasProps(obj) {
-    for (var prop in obj.props) {
-      var val = obj.props[prop];
-      if (val.flags & infer.flag_definite) return true;
-    }
+    for (var prop in obj.props) return true;
   }
 
   function setProps(source, target, state) {

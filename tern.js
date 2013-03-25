@@ -389,7 +389,6 @@
       if (!query.dontOmitObjectPrototype && obj == srv.cx.protos.Object && !word) return;
       if (word && prop.indexOf(word) != 0) return;
       var val = obj.props[prop];
-      if (!(val.flags & infer.flag_definite)) return;
       for (var i = 0; i < completions.length; ++i) {
         var c = completions[i];
         if ((wrapAsObjs ? c.name : c) == prop) return;
@@ -464,7 +463,7 @@
   function findDef(srv, query, file) {
     var expr = findExpr(file, query), def, fileName, guess = false;
     if (expr.node.type == "Identifier") {
-      var found = expr.state.findVar(expr.node.name);
+      var found = expr.state.hasProp(expr.node.name);
       if (found && typeof found.name == "object") {
         def = found.name;
         fileName = found.origin;

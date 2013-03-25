@@ -21,19 +21,19 @@
 
   function buildWrappingScope(parent, origin) {
     var scope = new infer.Scope(parent);
-    infer.env.parsePath("node.require").propagate(scope.ensureProp("require"));
+    infer.env.parsePath("node.require").propagate(scope.defProp("require"));
     var module = infer.getInstance(infer.env.parsePath("node.Module.prototype").getType());
-    module.propagate(scope.ensureProp("module"));
+    module.propagate(scope.defProp("module"));
     var exports = new infer.Obj(true, "exports", origin);
-    exports.propagate(scope.ensureProp("exports"));
-    exports.propagate(module.ensureProp("exports"));
+    exports.propagate(scope.defProp("exports"));
+    exports.propagate(module.defProp("exports"));
     return scope;
   }
 
   function exportsFromScope(scope) {
-    var exportsVal = scope.getVar("module").getType().getProp("exports");
+    var exportsVal = scope.getProp("module").getType().getProp("exports");
     if (!(exportsVal instanceof infer.AVal))
-      return file.scope.getVar("exports");
+      return file.scope.getProp("exports");
     else
       return exportsVal.types[exportsVal.types.length - 1];
   }
@@ -42,8 +42,8 @@
     if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
       return infer.ANull;
     var cx = infer.cx(), data = cx.parent._node, name = argNodes[0].value;
-    var node = cx.topScope.getVar("node").getType(), val;
-    if (name != "Module" && node.props && (val = node.props[name]) && val.flags & infer.flag_definite)
+    var node = cx.topScope.getProp("node").getType(), val;
+    if (name != "Module" && node.props && (val = node.props[name]))
       return val;
 
     if (/^\.{0,2}\//.test(name)) { // Relative

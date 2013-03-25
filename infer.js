@@ -106,14 +106,7 @@
         var matches = [];
         search: for (var i = 0; i < objs.length; ++i) {
           var obj = objs[i];
-          for (var prop in props) {
-            var found = false;
-            for (var o = obj; o; o = o.proto) {
-              var match = o.props[prop];
-              if (match && (match.flags & flag_definite)) { found = true; break; }
-            }
-            if (!found) continue search;
-          }
+          for (var prop in props) if (!obj.hasProp(prop)) continue search;
           matches.push(obj);
         }
         var canon = canonicalType(matches);
@@ -203,8 +196,8 @@
   }
   PropHasSubset.prototype = {
     addType: function(type) {
-      if (type.ensureProp)
-        this.target.propagate(type.ensureProp(this.prop));
+      if (type.defProp)
+        this.target.propagate(type.defProp(this.prop));
     },
     propHint: function() { return this.prop; }
   };
@@ -305,7 +298,6 @@
   };
 
   var flag_initializer = exports.flag_initializer = 1;
-  var flag_definite = exports.flag_definite = 2;
 
   var Obj = exports.Obj = function(proto, name, origin) {
     if (!this.props) this.props = Object.create(null);
@@ -316,16 +308,17 @@
     } else {
       this.name = name;
     }
+    this.maybeProps = null;
     if (origin !== false) this.setOrigin(origin);
 
-    if (this.proto && !this.prev) this.proto.forAllProps(this.onProtoProp.bind(this));
+
     return this;
   };
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
     if (!maxDepth && this.name) return this.name;
     var props = [];
-    for (var prop in this.props) if (prop != "<i>" && this.props[prop].flags & flag_definite) {
+    for (var prop in this.props) if (prop != "<i>") {
       if (maxDepth)
         props.push(prop + ": " + toString(this.props[prop].getType(), maxDepth - 1));
       else if (this.props[prop].flags & flag_initializer)
@@ -334,60 +327,87 @@
     props.sort();
     return "{" + props.join(", ") + "}";
   };
-  Obj.prototype.ensureProp = function(prop, alsoProto) {
+  Obj.prototype.hasProp = function(prop, searchProto) {
     var found = this.props[prop];
-    if (alsoProto) for (var p = this.proto; p && !found; p = p.proto) found = p.props[prop];
-    if (found) {
-      if (!alsoProto && !(found.flags & flag_definite)) {
-        found.flags |= flag_definite;
-        this.broadcastProp(prop, found, true);
-      }
-      return found;
-    }
+    if (searchProto !== false)
+      for (var p = this.proto; p && !found; p = p.proto) found = p.props[prop];
+    return found;
+  },
+  Obj.prototype.defProp = function(prop) {
+    var found = this.hasProp(prop, false);
+    if (found) return found;
+    if (prop == "__proto__" || prop == "✖") return new AVal;
 
-    var av = new AVal;
-    if (prop == "__proto__" || prop == "✖") return av;
+    var av = this.maybeProps && this.maybeProps[prop];
+    if (av) {
+      delete this.maybeProps[prop];
+      this.maybeUnregProtoPropHandler();
+    } else {
+      av = new AVal;
+    }
 
     this.props[prop] = av;
-    if (!alsoProto) {
-      av.flags |= flag_definite;
-      this.broadcastProp(prop, av, true);
-    }
+    this.broadcastProp(prop, av, true);
     return av;
   };
   Obj.prototype.getProp = function(prop) {
-    return this.ensureProp(prop, true);
+    var found = this.hasProp(prop, true) || (this.maybeProps && this.maybeProps[prop]);
+    if (found) return found;
+    if (!this.maybeProps) {
+      this.maybeProps = Object.create(null);
+      if (this.proto) this.proto.forAllProps(this);
+    }
+    return this.maybeProps[prop] = new AVal;
   };
   Obj.prototype.broadcastProp = function(prop, val, local) {
     // If this is a scope, it shouldn't be registered
     if (local && !this.prev) registerProp(prop, this);
 
-    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i)
-      this.onNewProp[i](prop, val, local);
-  };
-  Obj.prototype.onProtoProp = function(prop, val, local) {
-    var val = this.props[prop];
-    if (val) {
-      if (val.flags & flag_definite) return;
-      delete this.props[prop];
-      this.proto.getProp(prop).propagate(val);
-    } else {
-      this.broadcastProp(prop, val, false);
+    if (this.onNewProp) for (var i = 0; i < this.onNewProp.length; ++i) {
+      var h = this.onNewProp[i];
+      h.onProtoProp ? h.onProtoProp(prop, val, local) : h(prop, val, local);
     }
   };
+  Obj.prototype.onProtoProp = function(prop, val, local) {
+    var maybe = this.maybeProps && this.maybeProps[prop];
+    if (maybe) {
+      delete this.maybeProps[prop];
+      this.maybeUnregProtoPropHandler();
+      this.proto.getProp(prop).propagate(maybe);
+    }
+    this.broadcastProp(prop, val, false);
+  };
+  Obj.prototype.forAllProps = function(c) {
+    if (!this.onNewProp) {
+      this.onNewProp = [];
+      if (this.proto) this.proto.forAllProps(this);
+    }
+    this.onNewProp.push(c);
+    for (var o = this; o; o = o.proto) for (var prop in o.props) {
+      if (c.onProtoProp)
+        c.onProtoProp(prop, o.props[prop], o == this);
+      else
+        c(prop, o.props[prop], o == this);
+    }
+  };
+  Obj.prototype.maybeUnregProtoPropHandler = function() {
+    if (this.maybeProps) {
+      for (var _n in this.maybeProps) return;
+      this.maybeProps = null;
+    }
+    if (!this.proto || this.onNewProp && this.onNewProp.length) return;
+    this.proto.unregPropHandler(this);
+  };
+  Obj.prototype.unregPropHandler = function(handler) {
+    for (var i = 0; i < this.onNewProp.length; ++i)
+      if (this.onNewProp[i] == handler) { this.onNewProp.splice(i, 1); break; }
+    this.maybeUnregProtoPropHandler();
+  };
+
   Obj.prototype.gatherProperties = function(f, depth) {
     for (var prop in this.props) if (prop != "<i>")
       f(prop, this, depth);
     if (this.proto) this.proto.gatherProperties(f, depth + 1);
-  };
-  Obj.prototype.forAllProps = function(c) {
-    (this.onNewProp || (this.onNewProp = [])).push(c);
-    for (var o = this; o; o = o.proto) {
-      for (var prop in o.props) {
-        var val = o.props[prop];
-        if (val.flags & flag_definite) c(prop, val, o == this);
-      }
-    }
   };
 
   Obj.prototype.setOrigin = function(orig) {
@@ -435,27 +455,30 @@
       str += " -> " + toString(this.retval.getType(), maxDepth);
     return str;
   };
-  Fn.prototype.ensureProp = function(prop, alsoProto) {
-    var newProto = prop == "prototype" && !("prototype" in this.props);
-    var retval = Obj.prototype.ensureProp.call(this, prop, alsoProto && !newProto);
-    if (newProto) {
-      if (this.name) {
-        var name = this.name + ".prototype";
-        retval.propagate({addType: function(t) {if (!t.name) t.name = name;}});
+  Fn.prototype.getProp = function(prop) {
+    if (prop == "prototype") {
+      var known = this.hasProp(prop);
+      if (!known) {
+        known = this.defProp(prop);
+        if (known.isEmpty()) {
+          if (this.name) {
+            var name = this.name + ".prototype";
+            known.propagate({addType: function(t) {if (!t.name) t.name = name;}});
+          }
+          var proto = new Obj(true);
+          proto.provisionary = true;
+          known.addType(proto);
+        }
       }
-      if (retval.isEmpty() && alsoProto) {
-        var proto = new Obj(true);
-        proto.provisionary = true;
-        retval.addType(proto);
-      }
+      return known;
     }
-    return retval;
+    return Obj.prototype.getProp.call(this, prop);
   };
   Fn.prototype.getFunctionType = function() { return this; };
 
   var Arr = exports.Arr = function(contentType) {
     Obj.call(this, cx.protos.Array, false);
-    var content = this.ensureProp("<i>");
+    var content = this.defProp("<i>");
     if (contentType) contentType.propagate(content);
     return this;
   };
@@ -527,18 +550,11 @@
     Obj.call(this, prev || true);
   };
   Scope.prototype = Object.create(Obj.prototype);
-  Scope.prototype.getVar = function(name, define) {
+  Scope.prototype.defVar = function(name) {
     for (var s = this; ; s = s.proto) {
       var found = s.props[name];
       if (found) return found;
-      if (s == cx.topScope) return s.ensureProp(name, !define);
-    }
-  };
-  Scope.prototype.defVar = function(name) { return this.getVar(name, true); };
-  Scope.prototype.findVar = function(name) {
-    for (var s = this; s; s = s.proto) {
-      var found = s.props[name];
-      if (found) return found;
+      if (!s.prev) return s.defProp(name);
     }
   };
 
@@ -558,7 +574,7 @@
         this.computeRet = null;
         var scopeCopy = new Scope(scope.prev);
         for (var v in scope.props) {
-          var local = scopeCopy.ensureProp(v);
+          var local = scopeCopy.defProp(v);
           for (var i = 0; i < fn.argNames.length; ++i) if (fn.argNames[i] == v && i < args.length)
             args[i].propagate(local);
         }
@@ -617,7 +633,7 @@
   // SCOPE GATHERING PASS
 
   function addVar(scope, name) {
-    var val = scope.ensureProp(name.name);
+    var val = scope.defProp(name.name);
     val.name = name;
     val.origin = cx.curOrigin;
     return val;
@@ -744,7 +760,7 @@
       }
 
       for (var i = 0; i < node.properties.length; ++i) {
-        var prop = node.properties[i], val = obj.ensureProp(prop.key.name);
+        var prop = node.properties[i], val = obj.defProp(prop.key.name);
         val.flags |= flag_initializer;
         infer(prop.value, scope, c, val, prop.key.name);
       }
@@ -755,7 +771,7 @@
       if (name && !fn.name) fn.name = name;
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
-      if (node.id) inner.defVar(node.id.name).addType(fn);
+      if (node.id) inner.getProp(node.id.name).addType(fn);
       return fn;
     }),
     SequenceExpression: ret(function(node, scope, c) {
@@ -865,8 +881,8 @@
     }),
     Identifier: ret(function(node, scope) {
       if (node.name == "arguments" && !(node.name in scope.props))
-        scope.ensureProp(node.name).addType(new Arr);
-      return scope.getVar(node.name);
+        scope.defProp(node.name).addType(new Arr);
+      return scope.getProp(node.name);
     }),
     ThisExpression: ret(function(node, scope) {
       return scope.fnType ? scope.fnType.self : cx.topScope;
@@ -889,14 +905,14 @@
       var inner = node.body.scope, fn = inner.fnType;
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
-      scope.defVar(node.id.name).addType(fn);
+      scope.getProp(node.id.name).addType(fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
       for (var i = 0; i < node.declarations.length; ++i) {
         var decl = node.declarations[i];
         if (decl.init)
-          infer(decl.init, scope, c, scope.defVar(decl.id.name), decl.id.name);
+          infer(decl.init, scope, c, scope.getProp(decl.id.name), decl.id.name);
       }
     },
 
@@ -917,7 +933,7 @@
           varName = node.left.declarations[0].id.name;
         }
         if (varName && varName in scope.props)
-          scope.getVar(varName).iteratesOver = source;
+          scope.getProp(varName).iteratesOver = source;
       }
       c(node.body, scope, "Statement");
     },
@@ -1029,7 +1045,7 @@
       return prop.isEmpty() && propN != "<i>" ? findByPropertyName(propN) : prop;
     },
     Identifier: function(node, scope) {
-      return scope.findVar(node.name) || ANull;
+      return scope.hasProp(node.name) || ANull;
     },
     ThisExpression: function(node, scope) {
       return scope.fnType ? scope.fnType.self : cx.topScope;
