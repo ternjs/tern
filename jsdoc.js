@@ -84,7 +84,7 @@
       type = new infer.Obj(true);
       for (var i = 0; i < fields.types.length; ++i) {
         var field = type.defProp(fields.labels[i]);
-        field.flags |= infer.flag_initializer;
+        field.initializer = true;
         fields.types[i].propagate(field);
       }
       pos = fields.end;

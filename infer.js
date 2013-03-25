@@ -35,7 +35,6 @@
   var AVal = exports.AVal = function(type) {
     this.types = [];
     this.forward = null;
-    this.flags = 0;
     if (type) type.propagate(this);
   };
   AVal.prototype = {
@@ -297,8 +296,6 @@
     if (this.proto) this.proto.gatherProperties(f, depth);
   };
 
-  var flag_initializer = exports.flag_initializer = 1;
-
   var Obj = exports.Obj = function(proto, name, origin) {
     if (!this.props) this.props = Object.create(null);
     this.proto = proto === true ? cx.protos.Object : proto;
@@ -321,7 +318,7 @@
     for (var prop in this.props) if (prop != "<i>") {
       if (maxDepth)
         props.push(prop + ": " + toString(this.props[prop].getType(), maxDepth - 1));
-      else if (this.props[prop].flags & flag_initializer)
+      else if (this.props[prop].initializer)
         props.push(prop);
     }
     props.sort();
@@ -422,7 +419,7 @@
       var type = types[i], matching = 0;
       for (var p in type.props) {
         var prop = type.props[p];
-        if (prop.flags & flag_initializer) {
+        if (prop.initializer) {
           if (!props.some(function(x) {return x.key.name == p;})) continue outer;
           ++matching;
         }
@@ -760,7 +757,7 @@
 
       for (var i = 0; i < node.properties.length; ++i) {
         var prop = node.properties[i], val = obj.defProp(prop.key.name);
-        val.flags |= flag_initializer;
+        val.initializer = true;
         infer(prop.value, scope, c, val, prop.key.name);
       }
       return obj;
