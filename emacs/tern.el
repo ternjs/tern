@@ -3,6 +3,7 @@
 (eval-when-compile (require 'cl))
 (require 'json)
 (require 'url)
+(require 'url-http)
 
 (defun tern-req (port doc c)
   (declare (special url-mime-charset-string url-request-method url-request-data url-show-status))
