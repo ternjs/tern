@@ -971,7 +971,7 @@ var AVal = exports.AVal = function(type) {
   }
 
   AVal.prototype.purge = function(test) {
-    if (this.purgeGen && this.purgeGen > cx.purgeGen) return;
+    if (this.purgeGen == cx.purgeGen) return;
     this.purgeGen = cx.purgeGen;
     for (var i = 0; i < this.types.length; ++i) {
       var type = this.types[i];
@@ -990,7 +990,7 @@ var AVal = exports.AVal = function(type) {
   };
   ANull.purge = Type.prototype.purge = function() {};
   Obj.prototype.purge = function(test) {
-    if (this.purgeGen && this.purgeGen > cx.purgeGen) return true;
+    if (this.purgeGen == cx.purgeGen) return true;
     this.purgeGen = cx.purgeGen;
     for (var p in this.props) this.props[p].purge(test);
   };

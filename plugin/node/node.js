@@ -49,7 +49,7 @@
     if (/^\.{0,2}\//.test(name)) { // Relative
       if (!/\.[^\/]*$/.test(name)) name = name + ".js";
       name = resolvePath(data.currentFile, name);
-      cx.parent.require(name);
+      cx.parent.addFile(name);
       return getModule(data, name);
     }
 

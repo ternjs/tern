@@ -38,7 +38,7 @@
     var known = data.interfaces[name];
     if (!known) {
       known = data.interfaces[name] = new infer.AVal;
-      data.server.require(name);
+      data.server.addFile(name);
     }
     return known;
   }
