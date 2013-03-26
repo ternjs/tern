@@ -257,7 +257,7 @@ var AVal = exports.AVal = function(type) {
         var cur = o.instances[i];
         if (cur.ctor == this.ctor) return this.target.addType(cur.instance);
       }
-      var instance = new Obj(o);
+      var instance = new Obj(o, this.ctor.name);
       o.instances.push({ctor: this.ctor, instance: instance});
       this.target.addType(instance);
     }
@@ -300,10 +300,9 @@ var AVal = exports.AVal = function(type) {
     this.proto = proto === true ? cx.protos.Object : proto;
     if (proto && !name && proto.name && !(this instanceof Fn)) {
       var match = /^(.*)\.prototype$/.exec(this.proto.name);
-      this.name = match ? match[1] : proto.name;
-    } else {
-      this.name = name;
+      if (match) name = match[1];
     }
+    this.name = name;
     this.maybeProps = null;
     this.origin = cx.curOrigin;
 
@@ -451,10 +450,6 @@ var AVal = exports.AVal = function(type) {
       if (!known) {
         known = this.defProp(prop);
         if (known.isEmpty()) {
-          if (this.name) {
-            var name = this.name + ".prototype";
-            known.propagate({addType: function(t) {if (!t.name) t.name = name;}});
-          }
           var proto = new Obj(true);
           proto.provisionary = true;
           known.addType(proto);
@@ -805,7 +800,7 @@ var AVal = exports.AVal = function(type) {
       }
 
       if (node.operator != "=" && node.operator != "+=") {
-        infer(node.right, scope, c, ANull, name);
+        infer(node.right, scope, c, ANull);
         rhs = cx.num;
       } else {
         rhs = infer(node.right, scope, c, null, name);
@@ -954,6 +949,7 @@ var AVal = exports.AVal = function(type) {
 
   // PURGING
 
+  // FIXME purge cx.props
   exports.purgeTypes = function(origins, start, end) {
     ++cx.purgeGen;
     cx.topScope.purge(makePredicate(origins, start, end))

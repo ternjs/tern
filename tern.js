@@ -199,6 +199,8 @@
 
   function clearFile(srv, file, newText) {
     if (file.ast) {
+      // FIXME try to batch purges into a single pass (each call needs
+      // to traverse the whole graph)
       infer.withContext(srv.cx, function() {
         infer.purgeTypes(file.name);
       });
