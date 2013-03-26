@@ -425,8 +425,8 @@
     function gather(prop, obj, depth) {
       // 'hasOwnProperty' and such are usually just noise, leave them
       // out when no prefix is provided.
-      if (!query.dontOmitObjectPrototype && obj == srv.cx.protos.Object && !word) return;
-      if (word && prop.indexOf(word) != 0) return;
+      if (query.omitObjectPrototype !== false && obj == srv.cx.protos.Object && !word) return;
+      if (query.filter !== false && word && prop.indexOf(word) != 0) return;
       var val = obj.props[prop];
       for (var i = 0; i < completions.length; ++i) {
         var c = completions[i];
@@ -450,13 +450,13 @@
       var tp = infer.expressionType(memberExpr);
       if (tp) infer.forAllPropertiesOf(tp, gather);
 
-      if (!completions.length && word.length >= 2 && !query.dontGuess)
+      if (!completions.length && word.length >= 2 && query.guess !== false)
         for (var prop in srv.cx.props) gather(prop, srv.cx.props[prop][0], 0);
     } else {
       infer.forAllLocalsAt(file.ast, wordStart, file.scope, gather);
     }
 
-    if (!query.dontSort) completions.sort(compareCompletions);
+    if (query.sort !== false) completions.sort(compareCompletions);
 
     return {start: outputPos(query, file, wordStart),
             end: outputPos(query, file, wordEnd),
