@@ -222,7 +222,6 @@
     for (var i = 0; i < srv.files.length; ++i) {
       var file = srv.files[i];
       if (file.text != null) continue;
-      done = false;
       if (srv.options.async) {
         done = false;
         srv.options.getFile(file.name, function(err, text) {
