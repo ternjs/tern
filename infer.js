@@ -32,7 +32,7 @@
 
   // ABSTRACT VALUES
 
-  var AVal = exports.AVal = function(type) {
+var AVal = exports.AVal = function(type) {
     this.types = [];
     this.forward = null;
     if (type) type.propagate(this);
@@ -176,10 +176,20 @@
 
   // PROPAGATION STRATEGIES
 
-  function PropIsSubset(prop, target) {
-    this.target = target; this.prop = prop;
+  function Constraint() {}
+  Constraint.prototype.init = function() { this.origin = cx.curOrigin; };
+
+  function constraint(props, methods) {
+    var body = "this.init();";
+    for (var i = 0; i < props.length; ++i)
+      body += "this." + props[i] + " = " + props[i] + ";";
+    var ctor = Function.apply(null, props.concat([body]));
+    ctor.prototype = Object.create(Constraint.prototype);
+    for (var m in methods) if (methods.hasOwnProperty(m)) ctor.prototype[m] = methods[m];
+    return ctor;
   }
-  PropIsSubset.prototype = {
+
+  var PropIsSubset = constraint(["prop", "target"], {
     addType: function(type) {
       if (type.getProp)
         type.getProp(this.prop).propagate(this.target);
@@ -188,34 +198,30 @@
     propagatesTo: function() {
       return {target: this.target, pathExt: "." + this.prop};
     }
-  };
+  });
 
-  var PropHasSubset = exports.PropHasSubset = function(prop, target) {
-    this.target = target; this.prop = prop;
-  }
-  PropHasSubset.prototype = {
+  var PropHasSubset = exports.PropHasSubset = constraint(["prop", "target"], {
     addType: function(type) {
       if (type.defProp)
         this.target.propagate(type.defProp(this.prop));
     },
     propHint: function() { return this.prop; }
-  };
+  });
 
-  function ForAllProps(c) { this.c = c; }
-  ForAllProps.prototype.addType = function(type) {
-    if (!(type instanceof Obj)) return;
-    type.forAllProps(this.c);
-  };
+  var ForAllProps = constraint(["c"], {
+    addType: function(type) {
+      if (!(type instanceof Obj)) return;
+      type.forAllProps(this.c);
+    }
+  });
 
-  var IsCallee = exports.IsCallee = function(self, args, argNodes, retval) {
-    this.self = self; this.args = args; this.argNodes = argNodes; this.retval = retval || ANull;
-  }
-  IsCallee.prototype = {
+  var IsCallee = exports.IsCallee = constraint(["self", "args", "argNodes", "retval"], {
     addType: function(fn) {
       if (!(fn instanceof Fn)) return;
       for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
         this.args[i].propagate(fn.args[i]);
       this.self.propagate(fn.self);
+      if (!this.retval) return;
       if (fn.computeRet)
         fn.computeRet(this.self, this.args, this.argNodes).propagate(this.retval);
       else
@@ -226,45 +232,38 @@
       for (var i = 0; i < this.args.length; ++i) names.push("?");
       return new Fn(null, this.self, this.args, names, this.retval);
     }
-  };
+  });
 
-  function IfObjType(other) { this.other = other; }
-  IfObjType.prototype.addType = function(obj) {
-    if (obj instanceof Obj) this.other.addType(obj);
-  };
+  var HasMethodCall = constraint(["propName", "args", "argNodes", "retval"], {
+    addType: function(obj) {
+      obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.argNodes, this.retval));
+    },
+    propHint: function() { return this.propName; }
+  });
 
-  function HasMethodCall(propName, args, argNodes, retval) {
-    this.propName = propName; this.args = args; this.argNodes = argNodes; this.retval = retval;
-  }
-  HasMethodCall.prototype.addType = function(obj) {
-    obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.argNodes, this.retval));
-  };
-  HasMethodCall.prototype.propHint = function() { return this.propName; };
-
-  function IsCtor(target) { this.target = target; }
-  IsCtor.prototype.addType = function(f) {
-    if (!(f instanceof Fn)) return;
-    f.getProp("prototype").propagate(new IsProto(f, this.target));
-  };
-
-  function IsProto(ctor, target) { this.ctor = ctor; this.target = target; }
-  IsProto.prototype.addType = function(o) {
-    if (!(o instanceof Obj)) return;
-
-    if (!o.instances) o.instances = [];
-    for (var i = 0; i < o.instances.length; ++i) {
-      var cur = o.instances[i];
-      if (cur.ctor == this.ctor) return this.target.addType(cur.instance);
+  var IsCtor = constraint(["target"], {
+    addType: function(f) {
+      if (!(f instanceof Fn)) return;
+      f.getProp("prototype").propagate(new IsProto(f, this.target));
     }
-    var instance = new Obj(o);
-    o.instances.push({ctor: this.ctor, instance: instance});
-    this.target.addType(instance);
-  };
+  });
 
-  function IsAdded(other, target) {
-    this.other = other; this.target = target;
-  }
-  IsAdded.prototype = {
+  var IsProto = constraint(["ctor", "target"], {
+    addType: function(o) {
+      if (!(o instanceof Obj)) return;
+
+      if (!o.instances) o.instances = [];
+      for (var i = 0; i < o.instances.length; ++i) {
+        var cur = o.instances[i];
+        if (cur.ctor == this.ctor) return this.target.addType(cur.instance);
+      }
+      var instance = new Obj(o);
+      o.instances.push({ctor: this.ctor, instance: instance});
+      this.target.addType(instance);
+    }
+  });
+
+  var IsAdded = constraint(["other", "target"], {
     addType: function(type) {
       if (type == cx.str)
         this.target.addType(cx.str);
@@ -272,7 +271,7 @@
         this.target.addType(cx.num);
     },
     typeHint: function() { return this.other; }
-  };
+  });
 
   // TYPE OBJECTS
 
@@ -499,6 +498,7 @@
     this.origins = [];
     this.curOrigin = "ecma5";
     this.paths = Object.create(null);
+    this.purgeGen = 0;
 
     exports.withContext(this, function() {
       cx.protos.Object = new Obj(null, "Object.prototype");
@@ -949,6 +949,64 @@
       jsdoc.applyType(jsDoc[i], ast, scope, walk);
     cx.curOrigin = null;
     return {ast: ast, text: text, file: file};
+  };
+
+  // PURGING
+
+  exports.purgeTypes = function(origins, start, end) {
+    ++cx.purgeGen;
+    cx.topScope.purge(makePredicate(origins, start, end))
+  };
+
+  function makePredicate(origins, start, end) {
+    var arr = Array.isArray(origins);
+    if (arr && origins.length == 1) { origins = origins[0]; arr = false; }
+    if (arr) {
+      if (end == null) return function(n) { return origins.indexOf(n.origin) > -1; };
+      return function(n, pos) { return pos && pos.start >= start && pos.end <= end && origins.indexOf(n.origin) > -1; }
+    } else {
+      if (end == null) return function(n) { return n.origin == origins; };
+      return function(n, pos) { return pos && pos.start >= start && pos.end <= end && n.origin = origins; };
+    }
+  }
+
+  AVal.prototype.purge = function(test) {
+    if (this.purgeGen && this.purgeGen > cx.purgeGen) return;
+    this.purgeGen = cx.purgeGen;
+    for (var i = 0; i < this.types.length; ++i) {
+      var type = this.types[i];
+      if (test(type, type.originNode))
+        this.types.splice(i--, 1);
+      else
+        type.purge(test);
+    }
+    if (this.forward) for (var i = 0; i < this.forward.length; ++i) {
+      var f = this.forward[i];
+      if (test(f))
+        this.forward.splice(i--, 1);
+      else if (f.purge)
+        f.purge(test);
+    }
+  };
+  ANull.purge = Type.prototype.purge = function() {};
+  Obj.prototype.purge = function(test) {
+    if (this.purgeGen && this.purgeGen > cx.purgeGen) return true;
+    this.purgeGen = cx.purgeGen;
+    for (var p in this.props) this.props[p].purge(test);
+  };
+  Fn.prototype.purge = function(test) {
+    if (Obj.prototype.purge.call(this, test)) return;
+    this.self.purge(test);
+    this.retval.purge(test);
+    for (var i = 0; i < this.args.length; ++i) this.args[i].purge(test);
+  };
+
+  exports.purgeVariables = function(scope, origins, start, end) {
+    var test = makePredicate(origins, start, end);
+    for (var s = scope; s; s = s.prev) for (var p in s.props) {
+      var prop = s.props[p];
+      if (test(prop, prop.name)) delete s.props[p];
+    }
   };
 
   // EXPRESSION TYPE DETERMINATION
