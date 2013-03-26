@@ -949,10 +949,17 @@ var AVal = exports.AVal = function(type) {
 
   // PURGING
 
-  // FIXME purge cx.props
   exports.purgeTypes = function(origins, start, end) {
+    var test = makePredicate(origins, start, end);
     ++cx.purgeGen;
-    cx.topScope.purge(makePredicate(origins, start, end))
+    cx.topScope.purge(test);
+    for (var prop in cx.props) {
+      var list = cx.props[prop];
+      for (var i = 0; i < list.length; ++i) {
+        var obj = list[i];
+        if (test(obj, obj.originNode)) list.splice(i--, 1);
+      }
+    }
   };
 
   function makePredicate(origins, start, end) {
