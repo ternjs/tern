@@ -4,8 +4,6 @@
 // project, and defines an interface for querying the code in the
 // project.
 
-// FIXME there are re-entrancy problems in this.
-
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("./infer"));
@@ -83,7 +81,9 @@
         plugins[plugin](this, this.options.pluginOptions[plugin]);
     },
     addFile: function(name, /*optional*/ text) {
-      if (!findFile(this.files, name)) this.files.push(new File(name, text));
+      if (findFile(this.files, name)) return;
+      this.files.push(new File(name, text));
+      analyzeAll(this, function(){});
     },
     delFile: function(name) {
       for (var i = 0, f; i < this.files.length; ++i) if ((f = this.files[i]).name == name) {
@@ -189,7 +189,9 @@
     infer.withContext(srv.cx, function() {
       file.scope = srv.cx.topScope;
       srv.signal("beforeLoad", file);
+      infer.markVariablesDefinedBy(file.scope, file.name);
       file.ast = infer.analyze(file.text, file.name, file.scope).ast;
+      infer.purgeMarkedVariables(file.scope);
       srv.signal("afterLoad", file);
     });
     return file;
@@ -199,7 +201,6 @@
     if (file.ast) {
       infer.withContext(srv.cx, function() {
         infer.purgeTypes(file.name);
-        infer.purgeVariables(srv.cx.topScope, file.name);
       });
       file.ast = file.scope = null;
     }
@@ -215,6 +216,7 @@
     c();
   }
 
+  // FIXME there are re-entrancy problems in this when getFile is async
   function fetchAll(srv, c) {
     var done = true, returned = false;
     for (var i = 0; i < srv.files.length; ++i) {
@@ -296,13 +298,18 @@
     var retval = new File(file.name, file.text);
 
     infer.withContext(srv.cx, function() {
-      var scope = retval.scope = infer.scopeAt(realFile.ast, pos, realFile.scope), text = file.text, m;
+      infer.purgeTypes(file.name, pos, pos + file.text.length);
+
+      var text = file.text, m;
       if (foundPos && (m = line.match(/^(.*?)\bfunction\b/))) {
         var cut = m[1].length, white = "";
         for (var i = 0; i < cut; ++i) white += " ";
         text = white + text.slice(cut);
       }
+      var scope = retval.scope = infer.scopeAt(realFile.ast, pos, realFile.scope);
+      infer.markVariablesDefinedBy(scope, file.name, pos, pos + file.text.length);
       retval.ast = infer.analyze(file.text, file.name, scope).ast;
+      infer.purgeMarkedVariables(scope);
 
       // This is a kludge to tie together the function types (if any)
       // outside and inside of the fragment, so that arguments and

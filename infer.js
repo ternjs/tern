@@ -626,6 +626,7 @@ var AVal = exports.AVal = function(type) {
     var val = scope.defProp(name.name);
     val.name = name;
     val.origin = cx.curOrigin;
+    if (val.maybePurge) val.maybePurge = false;
     return val;
   }
 
@@ -1001,12 +1002,17 @@ var AVal = exports.AVal = function(type) {
     for (var i = 0; i < this.args.length; ++i) this.args[i].purge(test);
   };
 
-  exports.purgeVariables = function(scope, origins, start, end) {
+  exports.markVariablesDefinedBy = function(scope, origins, start, end) {
     var test = makePredicate(origins, start, end);
     for (var s = scope; s; s = s.prev) for (var p in s.props) {
       var prop = s.props[p];
-      if (test(prop, prop.name)) delete s.props[p];
+      if (test(prop, prop.name)) prop.maybePurge = true;
     }
+  };
+
+  exports.purgeMarkedVariables = function(scope) {
+    for (var s = scope; s; s = s.prev) for (var p in s.props)
+      if (s.props[p].maybePurge) delete s.props[p];
   };
 
   // EXPRESSION TYPE DETERMINATION
