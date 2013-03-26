@@ -133,7 +133,7 @@
   };
 
   function doRequest(srv, doc, c) {
-    if (!queryTypes.hasOwnProperty(doc.query.type))
+    if (doc.query && !queryTypes.hasOwnProperty(doc.query.type))
       return c("No query type '" + doc.query.type + "' defined");
 
     var files = doc.files || [];
@@ -146,6 +146,12 @@
       } else if (!known) {
         srv.files.push(new File(file.name));
       }
+    }
+
+    if (!doc.query) {
+      c(null, {});
+      analyzeAll(srv, function(){});
+      return;
     }
 
     var queryType = queryTypes[doc.query.type];
@@ -323,11 +329,12 @@
 
   // Baseline query document validation
   function invalidDoc(doc) {
-    if (!doc.query) return "Missing query property";
-    else if (typeof doc.query.type != "string") return ".query.type must be a string";
-    else if (doc.query.start && !isPosition(doc.query.start)) return ".query.start must be a number";
-    else if (doc.query.end && !isPosition(doc.query.end)) return ".query.end must be a number";
-    else if (doc.files) {
+    if (doc.query) {
+      if (typeof doc.query.type != "string") return ".query.type must be a string";
+      if (doc.query.start && !isPosition(doc.query.start)) return ".query.start must be a number";
+      if (doc.query.end && !isPosition(doc.query.end)) return ".query.end must be a number";
+    }
+    if (doc.files) {
       if (!Array.isArray(doc.files)) return "Files property must be an array";
       for (var i = 0; i < doc.files.length; ++i) {
         var file = doc.files[i];
