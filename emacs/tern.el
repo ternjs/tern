@@ -339,6 +339,14 @@ list of strings, giving the binary name and arguments.")
   (find-file file)
   (goto-char (min pos (point-max))))
 
+;; Query type
+
+(defun tern-get-type ()
+  (interactive)
+  (tern-run-request (lambda (data _offset) (message (or (cdr (assq 'type data)) "Not found")))
+                    "type"
+                    (point)))
+
 ;; Mode plumbing
 
 (defun tern-after-change (_start _end _len)
@@ -357,6 +365,7 @@ list of strings, giving the binary name and arguments.")
 (define-key tern-mode-keymap [(meta ?.)] 'tern-find-definition)
 (define-key tern-mode-keymap [(meta ?,)] 'tern-pop-find-definition)
 (define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
+(define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
 
 (define-minor-mode tern-mode
   "Minor mode binding to the Tern JavaScript analyzer"
