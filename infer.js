@@ -296,7 +296,7 @@
     if (this.proto) this.proto.gatherProperties(f, depth);
   };
 
-  var Obj = exports.Obj = function(proto, name, origin) {
+  var Obj = exports.Obj = function(proto, name) {
     if (!this.props) this.props = Object.create(null);
     this.proto = proto === true ? cx.protos.Object : proto;
     if (proto && !name && proto.name && !(this instanceof Fn)) {
@@ -306,8 +306,7 @@
       this.name = name;
     }
     this.maybeProps = null;
-    if (origin !== false) this.setOrigin(origin);
-
+    this.origin = cx.curOrigin;
 
     return this;
   };
@@ -407,10 +406,6 @@
     if (this.proto) this.proto.gatherProperties(f, depth + 1);
   };
 
-  Obj.prototype.setOrigin = function(orig) {
-    if (orig || (orig = cx.curOrigin)) this.origin = orig;
-  };
-
   // FIXME this is too easily confused. Use types again (or give up on it entirely?)
   Obj.findByProps = function(props) {
     if (!props.length) return null;
@@ -429,12 +424,11 @@
   };
 
   var Fn = exports.Fn = function(name, self, args, argNames, retval) {
-    Obj.call(this, cx.protos.Function, name, false);
+    Obj.call(this, cx.protos.Function, name);
     this.self = self;
     this.args = args;
     this.argNames = argNames;
     this.retval = retval;
-    this.setOrigin();
     return this;
   };
   Fn.prototype = Object.create(Obj.prototype);
@@ -474,7 +468,7 @@
   Fn.prototype.getFunctionType = function() { return this; };
 
   var Arr = exports.Arr = function(contentType) {
-    Obj.call(this, cx.protos.Array, false);
+    Obj.call(this, cx.protos.Array);
     var content = this.defProp("<i>");
     if (contentType) contentType.propagate(content);
     return this;

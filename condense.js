@@ -189,8 +189,8 @@
     setPath(cx.topScope, "", state, 0);
 
     for (var v in cx.topScope.props) {
-      var typ = cx.topScope.props[v].getType(false);
-      if (typ && sources.indexOf(typ.origin) > -1)
+      var av = cx.topScope.props[v], typ = av.getType(false);
+      if (typ && (sources.indexOf(typ.origin) > -1 || sources.indexOf(av.origin) > -1))
         output[v] = desc(typ, state);
     }
     if (state.addedToForeign.length > 0) {
