@@ -967,7 +967,7 @@ var AVal = exports.AVal = function(type) {
       return function(n, pos) { return pos && pos.start >= start && pos.end <= end && origins.indexOf(n.origin) > -1; }
     } else {
       if (end == null) return function(n) { return n.origin == origins; };
-      return function(n, pos) { return pos && pos.start >= start && pos.end <= end && n.origin = origins; };
+      return function(n, pos) { return pos && pos.start >= start && pos.end <= end && n.origin == origins; };
     }
   }
 
