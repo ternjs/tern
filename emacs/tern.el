@@ -130,13 +130,26 @@ list of strings, giving the binary name and arguments.")
                   (text . ,(buffer-string))) found))))
     (nreverse found)))
 
-(defun tern-run-request (f query pos &optional mode)
+(defun tern-run-request (f doc)
+  (let ((buffer (current-buffer))
+        (retrying nil))
+    (labels ((callback (port)
+               (if port
+                   (tern-req port doc #'runner)
+                 (message "Could not find a Tern server")))
+             (runner (err data)
+               (with-current-buffer buffer
+                 (cond ((and err (eq (cadar err) 'connection-failed) (not retrying))
+                        (setf retrying t)
+                        (let ((old-port tern-known-port))
+                          (setf tern-known-port nil)
+                          (tern-find-server #'callback old-port)))
+                       (t (funcall f err data))))))
+      (tern-find-server #'callback))))
+
+(defun tern-run-query (f query pos &optional mode)
   (when (stringp query) (setf query `((type . ,query))))
   (let ((generation (incf tern-command-generation))
-        (buffer (current-buffer))
-        (retrying nil)
-        runner
-        callback
         (doc `((query . ,query)))
         (files (and (eq mode :full-file) (tern-modified-sibling-buffers)))
         file-name
@@ -155,35 +168,30 @@ list of strings, giving the binary name and arguments.")
     (when files (push `(files . ,(apply #'vector files)) doc))
     (push `(file . ,file-name) (cdr (assq 'query doc)))
     (push `(end . ,(1- pos)) (cdr (assq 'query doc)))
-    (setf callback
-          (lambda (port)
-            (if port
-                (tern-req port doc runner)
-              (message "Could not find a Tern server"))))
-    (setf runner
-          (lambda (err data)
-            (when (< tern-activity-since-command generation)
-              (with-current-buffer buffer
-                (cond ((not err)
-                       (dolist (file files)
-                         (when (equal (cdr (assq 'type file)) "full")
-                           (with-current-buffer (find-file-noselect (concat tern-project-dir (cdr (assq 'name file))))
-                             (setf tern-buffer-is-dirty nil))))
-                       (funcall f data offset))
-                      ((and (eq (cadar err) 'connection-failed) (not retrying))
-                       (setf retrying t)
-                       (let ((old-port tern-known-port))
-                         (setf tern-known-port nil)
-                         (tern-find-server callback old-port)))
-                      ((not (eq mode :silent)) (message "Request failed: %s" (cdr err))))))))
-    (tern-find-server callback)))
+    (tern-run-request
+     (lambda (err data)
+       (when (< tern-activity-since-command generation)
+         (cond ((not err)
+                (dolist (file files)
+                  (when (equal (cdr (assq 'type file)) "full")
+                    (with-current-buffer (find-file-noselect (concat tern-project-dir (cdr (assq 'name file))))
+                      (setf tern-buffer-is-dirty nil))))
+                (funcall f data offset))
+               ((not (eq mode :silent)) (message "Request failed: %s" (cdr err))))))
+     doc)))
+
+(defun tern-send-buffer-to-server ()
+  (tern-run-request (lambda (_err _data))
+                    `((files . [((type . "full")
+                                 (name . ,(tern-project-relative-file))
+                                 (text . ,(buffer-string)))]))))
 
 ;; Completion
 
 (defun tern-completion-at-point ()
   (or (tern-completion-matches-last)
       (lambda ()
-        (tern-run-request #'tern-do-complete "completions" (point)))))
+        (tern-run-query #'tern-do-complete "completions" (point)))))
 
 (defun tern-do-complete (data offset)
   (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
@@ -215,15 +223,15 @@ list of strings, giving the binary name and arguments.")
     (when (and opening-paren (equal (char-after opening-paren) ?\())
       (if (and tern-last-argument-hints (eq (car tern-last-argument-hints) opening-paren))
           (tern-show-argument-hints)
-        (tern-run-request (lambda (data _offset)
-                            (let ((type (tern-parse-function-type data)))
-                              (when type
-                                (setf tern-last-argument-hints (cons opening-paren type))
-                                (tern-show-argument-hints))))
-                          `((type . "type")
-                            (preferFunction . t))
-                          opening-paren
-                          :silent)))))
+        (tern-run-query (lambda (data _offset)
+                          (let ((type (tern-parse-function-type data)))
+                            (when type
+                              (setf tern-last-argument-hints (cons opening-paren type))
+                              (tern-show-argument-hints))))
+                        `((type . "type")
+                          (preferFunction . t))
+                        opening-paren
+                        :silent)))))
 
 (defun tern-skip-matching-brackets (end-chars)
   (let ((depth 0) (end (+ (point) 500)))
@@ -311,7 +319,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-rename-variable (new-name)
   (interactive "MNew variable name: ")
-  (tern-run-request #'tern-do-refactor `((type . "rename") (newName . ,new-name)) (point) :full-file))
+  (tern-run-query #'tern-do-refactor `((type . "rename") (newName . ,new-name)) (point) :full-file))
 
 ;; Jump-to-definition
 
@@ -319,7 +327,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-find-definition ()
   (interactive)
-  (tern-run-request (lambda (data _offset)
+  (tern-run-query (lambda (data _offset)
                       (push (cons (buffer-file-name) (point)) tern-find-definition-stack)
                       (let ((too-long (nthcdr 20 tern-find-definition-stack)))
                         (when too-long (setf (cdr too-long) nil)))
@@ -343,9 +351,9 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-get-type ()
   (interactive)
-  (tern-run-request (lambda (data _offset) (message (or (cdr (assq 'type data)) "Not found")))
-                    "type"
-                    (point)))
+  (tern-run-query (lambda (data _offset) (message (or (cdr (assq 'type data)) "Not found")))
+                  "type"
+                  (point)))
 
 ;; Mode plumbing
 
@@ -360,6 +368,13 @@ list of strings, giving the binary name and arguments.")
     (setf tern-last-point-pos (point))
     (setf tern-activity-since-command tern-command-generation)
     (tern-update-argument-hints)))
+
+(defun tern-left-buffer ()
+  (declare (special buffer-list-update-hook))
+  (when tern-buffer-is-dirty
+    (setf tern-buffer-is-dirty nil)
+    (let ((buffer-list-update-hook ()))
+      (tern-send-buffer-to-server))))
 
 (defvar tern-mode-keymap (make-sparse-keymap))
 (define-key tern-mode-keymap [(meta ?.)] 'tern-find-definition)
@@ -383,13 +398,15 @@ list of strings, giving the binary name and arguments.")
   (set (make-local-variable 'tern-buffer-is-dirty) (buffer-modified-p))
   (make-local-variable 'completion-at-point-functions)
   (push 'tern-completion-at-point completion-at-point-functions)
-  (add-hook 'after-change-functions 'tern-after-change t t)
-  (add-hook 'post-command-hook 'tern-post-command t t))
+  (add-hook 'after-change-functions 'tern-after-change nil t)
+  (add-hook 'post-command-hook 'tern-post-command nil t)
+  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t))
 
 (defun tern-mode-disable ()
   (setf completion-at-point-functions
         (remove 'tern-completion-at-point completion-at-point-functions))
   (remove-hook 'after-change-functions 'tern-after-change t)
-  (remove-hook 'post-command-hook 'tern-post-command t))
+  (remove-hook 'post-command-hook 'tern-post-command t)
+  (remove-hook 'buffer-list-update-hook 'tern-left-buffer t))
 
 (provide 'tern)
