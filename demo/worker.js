@@ -1,0 +1,35 @@
+importScripts("../node_modules/acorn/acorn.js", "../node_modules/acorn/acorn_loose.js", "../node_modules/acorn/util/walk.js",
+              "../tern.js", "../env.js", "../jsdoc.js", "../infer.js");
+
+var server;
+
+onmessage = function(e) {
+  var data = e.data;
+  switch (data.type) {
+  case "env": return startServer(data.data);
+  case "add": return server.addFile(data.name, data.text);
+  case "del": return server.delFile(data.name);
+  case "req": return server.request(data.body, function(err, reqData) {
+    postMessage({id: data.id, body: reqData, err: err});
+  });
+  case "getFile":
+    var c = pending[data.id];
+    delete pending[data.id];
+    return c(data.err, data.text);
+  default: throw new Error("Unknown message type: " + data.type);
+  }
+};
+
+var nextId = 0, pending = {};
+function getFile(file, c) {
+  postMessage({type: "getFile", name: file, id: ++nextId});
+  pending[nextId] = c;
+}
+
+function startServer(env) {
+  server = new tern.Server({
+    getFile: getFile,
+    async: true,
+    environment: env
+  });
+}

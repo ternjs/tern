@@ -1,10 +1,8 @@
-// FIXME put the server in a webworker
-
 var server, editor, environment = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
-var bigDoc = 250;
+var bigDoc = 250, useWorker = true;
 
 function findDoc(name) {
   for (var i = 0; i < docs.length; ++i) if (docs[i].name == name) return docs[i];
@@ -56,12 +54,17 @@ function initEditor() {
     extraKeys: keyMap,
     matchBrackets: true
   });
-  server = new tern.Server({
-    getFile: getFile,
-    async: true,
-    environment: environment,
-    debug: true
-  });
+
+  if (useWorker) {
+    server = workerServer();
+  } else {
+    server = new tern.Server({
+      getFile: getFile,
+      async: true,
+      environment: environment,
+      debug: true
+    });
+  }
   registerDoc("test.js", editor.getDoc());
   editor.on("cursorActivity", updateArgumentHints);
 
@@ -76,6 +79,42 @@ function initEditor() {
     for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling))
       if (c == target) return selectDoc(i);
   });
+}
+
+function workerServer() {
+  var worker = new Worker("demo/worker.js");
+  worker.postMessage({type: "env", data: environment});
+  var msgId = 0, pending = {};
+
+  function send(data, c) {
+    if (c) {
+      data.id = ++msgId;
+      pending[msgId] = c;
+    }
+    worker.postMessage(data);
+  }
+  worker.onmessage = function(e) {
+    var data = e.data;
+    if (data.type == "getFile") {
+      getFile(data.name, function(err, text) {
+        send({type: "getFile", err: String(err), text: text, id: data.id});
+      });
+    } else if (data.id && pending[data.id]) {
+      pending[data.id](data.err, data.body);
+      delete pending[data.id];
+    }
+  };
+  worker.onerror = function(e) {
+    for (var id in pending) pending[id](e);
+    pending = {};
+  };
+
+  return {
+    worker: worker,
+    addFile: function(name, text) { send({type: "add", name: name, text: text}); },
+    delFile: function(name) { send({type: "del", name: name}); },
+    request: function(body, c) { send({type: "req", body: body}, c); }
+  };
 }
 
 var httpCache = {};
@@ -130,7 +169,6 @@ function unregisterDoc(doc) {
   docList.removeChild(docList.childNodes[i]);
   selectDoc(Math.max(0, i - 1));
   CodeMirror.off(doc.doc, "change", trackChange);
-  if (server) server.reset();
 }
 
 function setSelectedDoc(pos) {
@@ -261,7 +299,6 @@ function ternHints(cm, c) {
       completions.push({text: completion.name, className: className});
     }
 
-    // FIXME make index/pos conversions unneeded (ask {line, ch} from server)
     c({from: incLine(req.offsetLine, data.start),
        to: incLine(req.offsetLine, data.end),
        list: completions});
