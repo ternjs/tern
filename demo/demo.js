@@ -212,7 +212,7 @@ function getFragmentAround(cm, start, end) {
 
   return {type: "part",
           name: curDoc.name,
-          offsetLine: from.line,
+          offsetLines: from.line,
           text: cm.getRange(from, Pos(endLine, 0))};
 }
 
@@ -225,7 +225,7 @@ function displayError(err) {
 function incLine(off, pos) { return Pos(pos.line + off, pos.ch); }
 
 function buildRequest(cm, query, allowFragments) {
-  var files = [], offsetLine = 0;
+  var files = [], offsetLines = 0;
   if (typeof query == "string") query = {type: query};
   query.lineCharPositions = true;
   if (query.end == null) {
@@ -238,12 +238,12 @@ function buildRequest(cm, query, allowFragments) {
   if (curDoc.changed) {
     if (cm.lineCount() > bigDoc && allowFragments !== false &&
         curDoc.changed.to - curDoc.changed.from < 100 &&
-        curDoc.changed.from <= query.start.line && curDoc.changed.to > query.end.line) {
-      files.push(getFragmentAround(cm, query.start, query.end));
+        curDoc.changed.from <= startPos.line && curDoc.changed.to > query.end.line) {
+      files.push(getFragmentAround(cm, startPos, query.end));
       query.file = "#0";
-      offsetLine = files[0].offsetLine;
-      if (query.start != null) query.start = incLine(offsetLine, query.start);
-      query.end = incLine(offsetLine, query.end);
+      offsetLines = files[0].offsetLines;
+      if (query.start != null) query.start = incLine(-offsetLines, query.start);
+      query.end = incLine(-offsetLines, query.end);
     } else {
       files.push({type: "full",
                   name: curDoc.name,
@@ -263,7 +263,7 @@ function buildRequest(cm, query, allowFragments) {
   }
 
   return {request: {query: query, files: files},
-          offsetLine: offsetLine};
+          offsetLines: offsetLines};
 }
 
 function sendDoc(doc) {
@@ -304,8 +304,8 @@ function ternHints(cm, c) {
       completions.push({text: completion.name, className: className});
     }
 
-    c({from: incLine(req.offsetLine, data.start),
-       to: incLine(req.offsetLine, data.end),
+    c({from: incLine(req.offsetLines, data.start),
+       to: incLine(req.offsetLines, data.end),
        list: completions});
   });
 }
