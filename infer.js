@@ -404,23 +404,6 @@ var AVal = exports.AVal = function(type) {
     if (this.proto) this.proto.gatherProperties(f, depth + 1);
   };
 
-  // FIXME this is too easily confused. Use types again (or give up on it entirely?)
-  Obj.findByProps = function(props) {
-    if (!props.length) return null;
-    var types = objsWithProp(props[0].key.name);
-    if (types) outer: for (var i = 0; i < types.length; ++i) {
-      var type = types[i], matching = 0;
-      for (var p in type.props) {
-        var prop = type.props[p];
-        if (prop.initializer) {
-          if (!props.some(function(x) {return x.key.name == p;})) continue outer;
-          ++matching;
-        }
-      }
-      if (matching == props.length) return type;
-    }
-  };
-
   var Fn = exports.Fn = function(name, self, args, argNames, retval) {
     Obj.call(this, cx.protos.Function, name);
     this.self = self;
@@ -739,11 +722,8 @@ var AVal = exports.AVal = function(type) {
       return new Arr(eltval);
     }),
     ObjectExpression: ret(function(node, scope, c, name) {
-      var obj = Obj.findByProps(node.properties);
-      if (!obj) {
-        obj = new Obj(true, name);
-        obj.originNode = node;
-      }
+      var obj = node.objType = new Obj(true, name);
+      obj.originNode = node;
 
       for (var i = 0; i < node.properties.length; ++i) {
         var prop = node.properties[i], val = obj.defProp(prop.key.name);
@@ -1039,9 +1019,8 @@ var AVal = exports.AVal = function(type) {
       }
       return new Arr(eltval);
     },
-    ObjectExpression: function(node, scope) {
-      if (node.properties.length) return Obj.findByProps(node.properties);
-      else return new Obj(true);
+    ObjectExpression: function(node) {
+      return node.objType;
     },
     FunctionExpression: function(node) {
       return node.body.scope.fnType;
