@@ -11,3 +11,9 @@ var x = [x];
 
 // Force analysis
 x[0]; //: [?]
+
+function goop(n) {
+  n.prototype = {};
+  return function(f){f(1);};
+};
+goop(1)(goop);
