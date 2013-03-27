@@ -148,41 +148,37 @@
       }
     }
 
-    if (!doc.query) {
+    var query = doc.query;
+    if (!query) {
       c(null, {});
       analyzeAll(srv, function(){});
       return;
     }
 
-    var queryType = queryTypes[doc.query.type];
+    var queryType = queryTypes[query.type];
     if (queryType.takesFile) {
-      if (typeof doc.query.file != "string") return c(".query.file must be a string");
-      if (!/^#/.test(doc.query.file) && !findFile(srv.files, doc.query.file))
-        srv.files.push(new File(doc.query.file));
+      if (typeof query.file != "string") return c(".query.file must be a string");
+      if (!/^#/.test(query.file) && !findFile(srv.files, query.file))
+        srv.files.push(new File(query.file));
     }
 
     analyzeAll(srv, function(err) {
       if (err) return c(err);
-      if (queryType.takesFile) resolveFile(srv, files, doc.query.file, finishReq);
-      else finishReq(null, null);
-    });
-
-    function finishReq(err, file) {
-      if (err) return c(err);
+      var file = queryType.takesFile && resolveFile(srv, files, query.file);
       if (queryType.fullFile && file.type == "part")
-        return("Can't run a " + doc.query.type + " query on a file fragment");
+        return("Can't run a " + query.type + " query on a file fragment");
 
       infer.withContext(srv.cx, function() {
         var result;
         try {
-          result = queryType.run(srv, doc.query, file);
+          result = queryType.run(srv, query, file);
         } catch (e) {
           if (srv.options.debug) console.log(e.stack);
           return c(e);
         }
         c(null, result);
       });
-    }
+    });
   }
 
   function analyzeFile(srv, file) {
@@ -281,13 +277,13 @@
     return closest;
   }
 
-  function resolveFile(srv, localFiles, name, c) {
+  function resolveFile(srv, localFiles, name) {
     var isRef = name.match(/^#(\d+)$/);
-    if (!isRef) return c(null, findFile(srv.files, name));
+    if (!isRef) return findFile(srv.files, name);
 
     var file = localFiles[isRef[1]];
-    if (!file) c("Reference to unknown file " + name);
-    if (file.type == "full") return c(null, findFile(srv.files, file.name));
+    if (!file) throw new Error("Reference to unknown file " + name);
+    if (file.type == "full") return findFile(srv.files, file.name);
 
     // This is a partial file
 
@@ -327,7 +323,7 @@
         }
       }
     });
-    c(null, retval);
+    return retval;
   }
 
   function isPosition(val) {
