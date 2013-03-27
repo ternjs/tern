@@ -907,24 +907,29 @@ var AVal = exports.AVal = function(type) {
     ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
   });
 
-  exports.analyze = function(text, file, scope) {
-    if (!file) file = "file#" + cx.origins.length;
-    exports.addOrigin(cx.curOrigin = file);
-
+  var parse = exports.parse = function(text) {
     var jsDoc = [], options = {onComment: jsdoc.gather(jsDoc)}, ast;
     try { ast = acorn.parse(text, options); }
     catch(e) {
       jsDoc.length = 0;
       ast = acorn_loose.parse_dammit(text, options);
     }
+    ast.jsDocComments = jsDoc;
+    return ast;
+  };
+
+  exports.analyze = function(ast, name, scope) {
+    if (typeof ast == "string") ast = parse(ast);
+
+    if (!name) name = "file#" + cx.origins.length;
+    exports.addOrigin(cx.curOrigin = name);
 
     if (!scope) scope = cx.topScope;
     walk.recursive(ast, scope, null, scopeGatherer);
     walk.recursive(ast, scope, null, inferWrapper);
-    for (var i = 0; i < jsDoc.length; ++i)
-      jsdoc.applyType(jsDoc[i], ast, scope, walk);
+    for (var i = 0; i < ast.jsDocComments.length; ++i)
+      jsdoc.applyType(ast.jsDocComments[i], ast, scope, walk);
     cx.curOrigin = null;
-    return {ast: ast, text: text, file: file};
   };
 
   // PURGING

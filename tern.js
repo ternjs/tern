@@ -54,8 +54,13 @@
 
   function File(name, text) {
     this.name = name;
-    this.text = text;
-    this.ast = this.scope = null;
+    this.scope = null;
+    updateText(this, text);
+  }
+  function updateText(file, text) {
+    file.text = text;
+    file.ast = infer.parse(text);
+    file.lineOffsets = null;
   }
 
   var Server = exports.Server = function(options) {
@@ -87,7 +92,6 @@
       else if (text != null)
         clearFile(this, known, text);
       else return;
-      analyzeAll(this, function(){});
     },
     delFile: function(name) {
       for (var i = 0, f; i < this.files.length; ++i) if ((f = this.files[i]).name == name) {
@@ -185,37 +189,32 @@
     });
   }
 
+  var depth = 0;
   function analyzeFile(srv, file) {
+    if (depth) console.trace("calling inside");
+    ++depth;
     infer.withContext(srv.cx, function() {
       file.scope = srv.cx.topScope;
       srv.signal("beforeLoad", file);
       infer.markVariablesDefinedBy(file.scope, file.name);
-      file.ast = infer.analyze(file.text, file.name, file.scope).ast;
+      infer.analyze(file.ast, file.name, file.scope);
       infer.purgeMarkedVariables(file.scope);
       srv.signal("afterLoad", file);
     });
+    --depth;
     return file;
   }
 
   function clearFile(srv, file, newText) {
-    if (file.ast) {
+    if (file.scope) {
       // FIXME try to batch purges into a single pass (each call needs
       // to traverse the whole graph)
       infer.withContext(srv.cx, function() {
         infer.purgeTypes(file.name);
       });
-      file.ast = file.scope = null;
+      file.scope = null;
     }
-    if (newText != null) file.text = newText;
-  }
-
-  function getFileText(srv, file, c) {
-    if (srv.options.async) 
-    try {
-      file.text = srv.options.getFile(file.name) || "";
-      file.lineOffsets = null;
-    } catch(e) { return c(e); }
-    c();
+    if (newText != null) updateText(file, newText);
   }
 
   // FIXME there are re-entrancy problems in this when getFile is async
@@ -228,14 +227,12 @@
         done = false;
         srv.options.getFile(file.name, function(err, text) {
           if (err && !returned) { returned = true; return c(err); }
-          file.text = text || "";
-          file.lineOffsets = null;
+          updateText(file, text || "");
           fetchAll(srv, c);
         });
       } else {
         try {
-          file.text = srv.options.getFile(file.name) || "";
-          file.lineOffsets = null;
+          updateText(file, srv.options.getFile(file.name) || "");
         } catch (e) { return c(e); }
       }
     }
@@ -249,7 +246,7 @@
       for (var i = 0; i < srv.files.length; ++i) {
         var file = srv.files[i];
         if (file.text == null) done = false;
-        else if (file.ast == null) analyzeFile(srv, file);
+        else if (file.scope == null) analyzeFile(srv, file);
       }
       if (done) c();
       else analyzeAll(srv, c);
@@ -296,7 +293,6 @@
     var line = firstLine(file.text);
     var foundPos = findMatchingPosition(line, realFile.text, offset);
     var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", offset)) : foundPos;
-    var retval = new File(file.name, file.text);
 
     infer.withContext(srv.cx, function() {
       infer.purgeTypes(file.name, pos, pos + file.text.length);
@@ -307,9 +303,10 @@
         for (var i = 0; i < cut; ++i) white += " ";
         text = white + text.slice(cut);
       }
-      var scope = retval.scope = infer.scopeAt(realFile.ast, pos, realFile.scope);
+      var scope = file.scope = infer.scopeAt(realFile.ast, pos, realFile.scope);
       infer.markVariablesDefinedBy(scope, file.name, pos, pos + file.text.length);
-      retval.ast = infer.analyze(file.text, file.name, scope).ast;
+      file.ast = infer.parse(file.text);
+      infer.analyze(file.ast, file.name, scope);
       infer.purgeMarkedVariables(scope);
 
       // This is a kludge to tie together the function types (if any)
@@ -327,7 +324,7 @@
         }
       }
     });
-    return retval;
+    return file;
   }
 
   function isPosition(val) {
