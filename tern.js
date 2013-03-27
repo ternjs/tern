@@ -81,8 +81,12 @@
         plugins[plugin](this, this.options.pluginOptions[plugin]);
     },
     addFile: function(name, /*optional*/ text) {
-      if (findFile(this.files, name)) return;
-      this.files.push(new File(name, text));
+      var known = findFile(this.files, name);
+      if (!known)
+        this.files.push(new File(name, text));
+      else if (text != null)
+        clearFile(this, known, text);
+      else return;
       analyzeAll(this, function(){});
     },
     delFile: function(name) {

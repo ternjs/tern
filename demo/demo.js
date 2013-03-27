@@ -4,6 +4,8 @@ var server, editor, environment = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
+var bigDoc = 250;
+
 function findDoc(name) {
   for (var i = 0; i < docs.length; ++i) if (docs[i].name == name) return docs[i];
 }
@@ -101,7 +103,7 @@ function registerDoc(name, doc) {
     setSelectedDoc(docs.length - 1);
     curDoc = data;
   }
-  server.addFile(name);
+  server.addFile(name, doc.getValue());
   CodeMirror.on(doc, "change", trackChange);
 }
 
@@ -114,6 +116,10 @@ function trackChange(doc, change) {
   if (change.from.line < changed.to) changed.to = changed.to - (change.to.line - end);
   if (end >= changed.to) changed.to = end + 1;
   if (changed.from > change.from.line) changed.from = change.from.line;
+
+  if (doc.lineCount() > bigDoc && change.to - changed.from > 100) setTimeout(function() {
+    if (data.changed && data.changed.to - data.changed.from > 100) sendDoc(data);
+  }, 100);
 }
 
 function unregisterDoc(doc) {
@@ -135,6 +141,7 @@ function setSelectedDoc(pos) {
 
 function selectDoc(pos) {
   setSelectedDoc(pos);
+  if (curDoc.changed) sendDoc(curDoc);
   curDoc = docs[pos];
   editor.swapDoc(curDoc.doc);
 }
@@ -186,7 +193,7 @@ function buildRequest(cm, query, allowFragments) {
   var startPos = query.start || query.end;
 
   if (curDoc.changed) {
-    if (cm.lineCount() > 100 && allowFragments !== false &&
+    if (cm.lineCount() > bigDoc && allowFragments !== false &&
         curDoc.changed.to - curDoc.changed.from < 100 &&
         curDoc.changed.from <= query.start.line && curDoc.changed.to > query.end.line) {
       files.push(getFragmentAround(cm, query.start, query.end));
@@ -214,6 +221,13 @@ function buildRequest(cm, query, allowFragments) {
 
   return {request: {query: query, files: files},
           offsetLine: offsetLine};
+}
+
+function sendDoc(doc) {
+  server.request({files: [{type: "full", name: doc.name, text: doc.doc.getValue()}]}, function(error) {
+    if (error) return displayError(error);
+    else doc.changed = null;
+  });
 }
 
 function findType(cm) {
