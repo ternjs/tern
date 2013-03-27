@@ -365,34 +365,29 @@ function showArgumentHints(cache, out, pos) {
 
 var jumpStack = [];
 
+function moveTo(name, start, end) {
+  if (name != curDoc.name) {
+    for (var i = 0; i < docs.length; ++i)
+      if (docs[i].name == name) { selectDoc(i); break; }
+    if (i == docs.length) return displayError("Definition is not in a local buffer");
+  }
+  curDoc.doc.setSelection(end, start);
+}
+
 function jumpToDef(cm) {
   server.request(buildRequest(cm, "definition", false).request, function(error, data) {
     if (error) return displayError(error);
     jumpStack.push({file: curDoc.name,
                     start: cm.getCursor("from"),
                     end: cm.getCursor("to")});
-    if (data.file != curDoc.name) {
-      for (var i = 0; i < docs.length; ++i)
-        if (docs[i].name == data.file) { selectDoc(i); break; }
-      if (i == docs.length) return displayError("Definition is not in a local buffer");
-    }
-    setTimeout(function() {
-      cm.setSelection(data.end, data.start);
-    }, 20);
+    moveTo(data.file, data.start, data.end);
   });
 }
 
 function jumpBack(cm) {
   var pos = jumpStack.pop();
   if (!pos) return;
-  if (pos.file != curDoc.name) {
-    for (var i = 0; i < docs.length; ++i)
-      if (docs[i].name == pos.file) { selectDoc(i); break; }
-    if (i == docs.length) return;
-  }
-  setTimeout(function() {
-    cm.setSelection(pos.end, pos.start);
-  }, 20);
+  moveTo(pos.file, pos.start, pos.end);
 }
 
 function applyChanges(changes) {
