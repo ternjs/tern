@@ -357,8 +357,16 @@ list of strings, giving the binary name and arguments.")
 
 ;; Mode plumbing
 
-(defun tern-after-change (_start _end _len)
-  (setf tern-buffer-is-dirty t)
+(defun tern-before-change (start end)
+  (if tern-buffer-is-dirty
+      (setf (car tern-buffer-is-dirty) (min (car tern-buffer-is-dirty) start)
+            (cdr tern-buffer-is-dirty) (max (cdr tern-buffer-is-dirty) end))
+    (setf tern-buffer-is-dirty (cons start end)))
+  (when (> (- (cdr tern-buffer-is-dirty) (car tern-buffer-is-dirty)) 4000)
+    (run-at-time "200 millisec" nil (lambda ()
+                                      (when tern-buffer-is-dirty
+                                        (setf tern-buffer-is-dirty nil)
+                                        (tern-send-buffer-to-server)))))
   (setf tern-last-point-pos nil)
   (when (and tern-last-argument-hints (<= (point) (car tern-last-argument-hints)))
     (setf tern-last-argument-hints nil)))
@@ -371,7 +379,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-left-buffer ()
   (declare (special buffer-list-update-hook))
-  (when tern-buffer-is-dirty
+  (when (and tern-buffer-is-dirty (not (buffer-file-name (car (buffer-list)))))
     (setf tern-buffer-is-dirty nil)
     (let ((buffer-list-update-hook ()))
       (tern-send-buffer-to-server))))
@@ -398,14 +406,14 @@ list of strings, giving the binary name and arguments.")
   (set (make-local-variable 'tern-buffer-is-dirty) (buffer-modified-p))
   (make-local-variable 'completion-at-point-functions)
   (push 'tern-completion-at-point completion-at-point-functions)
-  (add-hook 'after-change-functions 'tern-after-change nil t)
+  (add-hook 'before-change-functions 'tern-before-change nil t)
   (add-hook 'post-command-hook 'tern-post-command nil t)
   (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t))
 
 (defun tern-mode-disable ()
   (setf completion-at-point-functions
         (remove 'tern-completion-at-point completion-at-point-functions))
-  (remove-hook 'after-change-functions 'tern-after-change t)
+  (remove-hook 'before-change-functions 'tern-before-change t)
   (remove-hook 'post-command-hook 'tern-post-command t)
   (remove-hook 'buffer-list-update-hook 'tern-left-buffer t))
 
