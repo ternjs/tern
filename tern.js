@@ -21,7 +21,8 @@
     async: false,
     getFile: function(_f, c) { if (this.async) c(null, null); },
     environment: [],
-    pluginOptions: {}
+    pluginOptions: {},
+    fetchTimeout: 1000
   };
 
   var queryTypes = {
@@ -52,10 +53,9 @@
 
   exports.defineQueryType = function(name, desc) { queryTypes[name] = desc; };
 
-  function File(name, text) {
+  function File(name) {
     this.name = name;
-    this.scope = null;
-    updateText(this, text);
+    this.scope = this.text = this.ast = this.lineOffsets = null;
   }
   function updateText(file, text) {
     file.text = text;
@@ -73,6 +73,8 @@
     this.handlers = {};
     this.files = [];
     this.uses = 0;
+    this.fetchingFiles = 0;
+    this.asyncError = null;
 
     for (var i = 0; i < options.environment.length; ++i)
       this.addEnvironment(options.environment[i]);
@@ -86,12 +88,7 @@
         plugins[plugin](this, this.options.pluginOptions[plugin]);
     },
     addFile: function(name, /*optional*/ text) {
-      var known = findFile(this.files, name);
-      if (!known)
-        this.files.push(new File(name, text));
-      else if (text != null)
-        clearFile(this, known, text);
-      else return;
+      ensureFile(this, name, text);
     },
     delFile: function(name) {
       for (var i = 0, f; i < this.files.length; ++i) if ((f = this.files[i]).name == name) {
@@ -147,13 +144,7 @@
     var files = doc.files || [];
     for (var i = 0; i < files.length; ++i) {
       var file = files[i];
-      var known = findFile(srv.files, file.name);
-      if (file.type == "full") {
-        if (!known) srv.files.push(new File(file.name, file.text));
-        else clearFile(srv, known, file.text);
-      } else if (!known) {
-        srv.files.push(new File(file.name));
-      }
+      ensureFile(srv, file.name, file.type == "full" ? file.text : null)
     }
 
     var query = doc.query;
@@ -166,8 +157,7 @@
     var queryType = queryTypes[query.type];
     if (queryType.takesFile) {
       if (typeof query.file != "string") return c(".query.file must be a string");
-      if (!/^#/.test(query.file) && !findFile(srv.files, query.file))
-        srv.files.push(new File(query.file));
+      if (!/^#/.test(query.file)) ensureFile(srv, query.file);
     }
 
     analyzeAll(srv, function(err) {
@@ -205,6 +195,29 @@
     return file;
   }
 
+  function ensureFile(srv, name, text) {
+    var known = findFile(srv.files, name);
+    if (known) {
+      if (text) clearFile(srv, known, text);
+      return;
+    }
+
+    var file = new File(name);
+    srv.files.push(file);
+    if (text) {
+      updateText(file, text)
+    } else if (srv.options.async) {
+      ++srv.fetchingFiles;
+      srv.options.getFile(name, function(err, text) {
+        if (err) srv.asyncError = err;
+        updateText(file, text || "");
+        if (--srv.fetchingFiles == 0) srv.signal("everythingFetched");
+      });
+    } else {
+      updateText(file, srv.options.getFile(name));
+    }
+  }
+
   function clearFile(srv, file, newText) {
     if (file.scope) {
       // FIXME try to batch purges into a single pass (each call needs
@@ -217,7 +230,6 @@
     if (newText != null) updateText(file, newText);
   }
 
-  // FIXME there are re-entrancy problems in this when getFile is async
   function fetchAll(srv, c) {
     var done = true, returned = false;
     for (var i = 0; i < srv.files.length; ++i) {
@@ -239,18 +251,30 @@
     if (done) c();
   }
 
+  function waitOnFetch(srv, c) {
+    var done = function() {
+      srv.off("everythingFetched", done);
+      clearTimeout(timeout);
+      analyzeAll(srv, c);
+    }
+    srv.on("everythingFetched", done);
+    var timeout = setTimeout(done, srv.options.fetchTimeout);
+  }
+
   function analyzeAll(srv, c) {
-    fetchAll(srv, function(e) {
-      if (e) return c(e);
-      var done = true;
-      for (var i = 0; i < srv.files.length; ++i) {
-        var file = srv.files[i];
-        if (file.text == null) done = false;
-        else if (file.scope == null) analyzeFile(srv, file);
-      }
-      if (done) c();
-      else analyzeAll(srv, c);
-    });
+    if (srv.fetchingFiles) return waitForFiles(srv, c);
+
+    var e = srv.fetchError;
+    if (e) { srv.fetchError = null; return c(e); }
+
+    var done = true;
+    for (var i = 0; i < srv.files.length; ++i) {
+      var file = srv.files[i];
+      if (file.text == null) done = false;
+      else if (file.scope == null) analyzeFile(srv, file);
+    }
+    if (done) c();
+    else waitOnFetch(srv, c);
   }
 
   function findFile(arr, name) {
