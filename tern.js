@@ -231,17 +231,32 @@
   }
 
   function fetchAll(srv, c) {
+    // when in async mode, check if all files have been received
+    function finishAllAsync(srv, c) {
+        var done = true;
+        for (var i = 0; i < srv.files.length; ++i) {
+            if (!file.text) {
+                done = false;
+            }
+        }
+        if (done) c();
+    }
+      
     var done = true, returned = false;
     for (var i = 0; i < srv.files.length; ++i) {
       var file = srv.files[i];
       if (file.text != null) continue;
       if (srv.options.async) {
         done = false;
-        srv.options.getFile(file.name, function(err, text) {
-          if (err && !returned) { returned = true; return c(err); }
-          updateText(file, text || "");
-          fetchAll(srv, c);
-        });
+        // need another closure to avoid 'file' always being the last
+        // file in the array
+        (function(file){  
+            srv.options.getFile(file.name, function(err, text) {
+              if (err && !returned) { returned = true; return c(err); }
+              updateText(file, text || "");
+              finishAllAsync(srv, c);
+            });
+        })(file);
       } else {
         try {
           updateText(file, srv.options.getFile(file.name) || "");
