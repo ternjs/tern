@@ -551,7 +551,7 @@
             file: fileName, guess: guess};
   }
 
-  function findRefs(srv, query, file) {
+  function findRefs(srv, query, file, checkShadowing) {
     var expr = findExpr(file, query);
     if (!expr || expr.node.type != "Identifier") throw new Error("Not at a variable.");
     var name = expr.node.name;
@@ -560,26 +560,39 @@
     if (!scope) throw new Error("Could not find a definition for " + name);
 
     var type, refs = [];
-    function findRefsIn(file) {
-      infer.findRefs(file.ast, name, scope, function(node) {
+    function storeRef(file) {
+      return function(node) {
         refs.push({file: file.name,
                    start: outputPos(query, file, node.start),
                    end: outputPos(query, file, node.end)});
-      });
+      };
     }
-    if (scope.prev) {
+
+    if (scope.node) {
       type = "local";
-      findRefsIn(file);
+      if (checkShadowing) {
+        for (var prev = scope.prev; prev; prev = prev.prev)
+          if (checkShadowing in prev.props) break;
+        if (prev) infer.findRefs(scope.node, scope, checkShadowing, prev, function(node) {
+          throw new Error("Renaming `" + name + "` to `" + checkShadowing + "` would shadow the definition used at line " +
+                          (asLineChar(file, node.start).line + 1));
+        });
+      }
+      infer.findRefs(scope.node, scope, name, scope, storeRef(file));
     } else {
       type = "global";
-      for (var i = 0; i < srv.files.length; ++i) findRefsIn(srv.files[i]);
+      for (var i = 0; i < srv.files.length; ++i) {
+        var cur = srv.files[i];
+        infer.findRefs(cur.ast, cur.scope, name, scope, storeRef(cur));
+      }
     }
+
     return {refs: refs, type: type, name: name};
   }
 
   function buildRename(srv, query, file) {
     if (typeof query.newName != "string") throw new Error(".query.newName should be a string");
-    var data = findRefs(srv, query, file), refs = data.refs;
+    var data = findRefs(srv, query, file, query.newName), refs = data.refs;
     delete data.refs;
     data.files = srv.files.map(function(f){return f.name;});
 

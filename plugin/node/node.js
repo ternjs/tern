@@ -19,8 +19,9 @@
     return path.replace(/(^|[^\.])\.\//g, "$1");
   }
 
-  function buildWrappingScope(parent, origin) {
+  function buildWrappingScope(parent, origin, node) {
     var scope = new infer.Scope(parent);
+    scope.node = node;
     infer.env.parsePath("node.require").propagate(scope.defProp("require"));
     var module = infer.getInstance(infer.env.parsePath("node.Module.prototype").getType());
     module.propagate(scope.defProp("module"));
@@ -74,7 +75,7 @@
 
     server.on("beforeLoad", function(file) {
       this._node.currentFile = file.name;
-      file.scope = buildWrappingScope(file.scope, file.name);
+      file.scope = buildWrappingScope(file.scope, file.name, file.ast);
     });
 
     server.on("afterLoad", function(file) {

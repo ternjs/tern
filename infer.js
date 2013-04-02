@@ -611,6 +611,7 @@ var AVal = exports.AVal = function(type) {
   var scopeGatherer = walk.make({
     Function: function(node, scope, c) {
       var inner = node.body.scope = new Scope(scope);
+      inner.node = node;
       var argVals = [], argNames = [];
       for (var i = 0; i < node.params.length; ++i) {
         var param = node.params[i];
@@ -1154,15 +1155,15 @@ var AVal = exports.AVal = function(type) {
 
   var refFindWalker = walk.make({}, searchVisitor);
 
-  exports.findRefs = function(ast, name, scope, f) {
-    refFindWalker.Identifier = function(node, sc) {
+  exports.findRefs = function(ast, baseScope, name, refScope, f) {
+    refFindWalker.Identifier = function(node, scope) {
       if (node.name != name) return;
-      for (; sc; sc = sc.prev) {
-        if (sc == scope) f(node);
-        if (name in sc.props) return;
+      for (; scope; scope = scope.prev) {
+        if (scope == refScope) f(node);
+        if (name in scope.props) return;
       }
     };
-    walk.recursive(ast, cx.topScope, null, refFindWalker);
+    walk.recursive(ast, baseScope, null, refFindWalker);
   };
 
   // LOCAL-VARIABLE QUERIES
