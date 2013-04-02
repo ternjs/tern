@@ -627,10 +627,10 @@ var AVal = exports.AVal = function(type) {
     },
     TryStatement: function(node, scope, c) {
       c(node.block, scope, "Statement");
-      for (var i = 0; i < node.handlers.length; ++i) {
-        var handler = node.handlers[i], name = handler.param.name;
-        addVar(scope, handler.param);
-        c(handler.body, scope, "ScopeBody");
+      if (node.handler) {
+        var name = node.handler.param.name;
+        addVar(scope, node.handler.param);
+        c(node.handler.body, scope, "ScopeBody");
       }
       if (node.finalizer) c(node.finalizer, scope, "Statement");
     },
@@ -1111,8 +1111,8 @@ var AVal = exports.AVal = function(type) {
       c(node.body, scope, "ScopeBody");
     },
     TryStatement: function(node, st, c) {
-      for (var i = 0; i < node.handlers.length; ++i)
-        c(node.handlers[i].param, st);
+      if (node.handler)
+        c(node.handler.param, st);
       walk.base.TryStatement(node, st, c);
     },
     VariableDeclaration: function(node, st, c) {
