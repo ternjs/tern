@@ -30,6 +30,9 @@
       takesFile: true,
       run: findCompletions
     },
+    properties: {
+      run: findProperties
+    },
     type: {
       takesFile: true,
       run: findTypeAt
@@ -262,7 +265,7 @@
   }
 
   function analyzeAll(srv, c) {
-    if (srv.fetchingFiles) return waitForFiles(srv, c);
+    if (srv.fetchingFiles) return waitOnFetch(srv, c);
 
     var e = srv.fetchError;
     if (e) { srv.fetchError = null; return c(e); }
@@ -482,6 +485,14 @@
     return {start: outputPos(query, file, wordStart),
             end: outputPos(query, file, wordEnd),
             completions: completions};
+  }
+
+  function findProperties(srv, query) {
+    var prefix = query.prefix, found = [];
+    for (var prop in srv.cx.props)
+      if (!prefix || prop.indexOf(prefix) == 0) found.push(prop);
+    if (query.sort !== false) found.sort(compareCompletions);
+    return {completions: found};
   }
 
   var findExpr = exports.findQueryExpr = function(file, query) {
