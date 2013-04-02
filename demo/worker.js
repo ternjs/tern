@@ -30,6 +30,11 @@ function startServer(env) {
   server = new tern.Server({
     getFile: getFile,
     async: true,
-    environment: env
+    environment: env,
+    debug: true
   });
 }
+
+var console = {
+  log: function(v) { postMessage({type: "debug", message: v}); }
+};
