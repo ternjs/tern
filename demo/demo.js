@@ -450,8 +450,11 @@ function applyChanges(changes) {
 }
 
 function renameVar(cm) {
-  var token = cm.getTokenAt(cm.getCursor());
-  if (!/^variable|^def$/.test(token.type)) return displayError("Not at a variable name");
+  var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+  if (!/^variable|^def$/.test(token.type)) {
+    token = cm.getTokenAt(Pos(cur.line, cur.ch + 1));
+    if (!/^variable|^def$/.test(token.type)) return displayError("Not at a variable name");
+  }
   cm.openDialog("New name for " + token.string + ": <input type=text>", function(newName) {
     server.request(buildRequest(cm, {type: "rename", newName: newName}, false).request, function(error, data) {
       if (error) return displayError(error);
