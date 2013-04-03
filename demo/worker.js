@@ -1,5 +1,5 @@
 importScripts("../node_modules/acorn/acorn.js", "../node_modules/acorn/acorn_loose.js", "../node_modules/acorn/util/walk.js",
-              "../tern.js", "../env.js", "../jsdoc.js", "../infer.js", "../plugin/requirejs.js");
+              "../tern.js", "../def.js", "../jsdoc.js", "../infer.js", "../plugin/requirejs.js");
 
 var server;
 

@@ -13,7 +13,7 @@
     return exports.init = mod;
   if (typeof define == "function" && define.amd) // AMD
     return define({init: mod});
-  tern.env = {init: mod};
+  tern.def = {init: mod};
 })(function(exports, infer) {
   "use strict";
 
@@ -336,7 +336,7 @@
     cx.curOrigin = cx.loading = cx.localDefs = null;
   }
 
-  exports.loadEnvironment = function(data, scope) {
+  exports.load = function(data, scope) {
     if (!scope) scope = infer.cx().topScope;
     var oldScope = currentTopScope;
     currentTopScope = scope;

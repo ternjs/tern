@@ -2,7 +2,7 @@
 
 // This code can be used to, after a library has been analyzed,
 // extract the types defined in that library and dump them as a JSON
-// structure (as parsed by env.js).
+// structure (as parsed by def.js).
 
 // The idea being that big libraries can be analyzed once, dumped, and
 // then cheaply included in later analysis.

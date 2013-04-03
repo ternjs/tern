@@ -22,8 +22,8 @@
   function buildWrappingScope(parent, origin, node) {
     var scope = new infer.Scope(parent);
     scope.node = node;
-    infer.env.parsePath("node.require").propagate(scope.defProp("require"));
-    var module = infer.getInstance(infer.env.parsePath("node.Module.prototype").getType());
+    infer.def.parsePath("node.require").propagate(scope.defProp("require"));
+    var module = infer.getInstance(infer.def.parsePath("node.Module.prototype").getType());
     module.propagate(scope.defProp("module"));
     var exports = new infer.Obj(true, "exports", origin);
     exports.propagate(scope.defProp("exports"));
@@ -99,7 +99,7 @@
 
     if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
       var scope = buildWrappingScope(cx.topScope, name);
-      infer.env.loadEnvironment(data.options.modules[name], scope);
+      infer.def.load(data.options.modules[name], scope);
       return data.modules[name] = exportsFromScope(scope);
     } else {
       return resolveModule(server, name);

@@ -1,4 +1,4 @@
-// plugin=requireJS
+// plugin=requirejs
 
 requirejs(["foo", "bar"], function(foo, bar) {
   foo.aString; //: string

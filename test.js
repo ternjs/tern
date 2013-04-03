@@ -7,7 +7,7 @@ require("./plugin/requirejs.js");
 require("./plugin/node.js");
 
 var ecma5 = JSON.parse(fs.readFileSync("defs/ecma5.json"));
-var envData = {
+var defData = {
   browser: JSON.parse(fs.readFileSync("defs/browser.json")),
   jquery: JSON.parse(fs.readFileSync("defs/jquery.json"))
 };
@@ -15,7 +15,7 @@ var envData = {
 function getDefs(text) {
   var spec = /\/\/ environment=(\w+)\n/g, m, defs = [ecma5];
   while (m = spec.exec(text)) {
-    var data = envData[m[1]];
+    var data = defData[m[1]];
     if (!data) throw new Error("Unknown environment: " + m[1]);
     defs.push(data);
   }

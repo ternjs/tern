@@ -44,20 +44,20 @@ function findFile(file, projectDir, fallbackDir) {
   if (fs.existsSync(shared)) return shared;
 }
 
-function buildEnvironment(projectDir, config) {
-  var env = [], src = config.libs;
+function findDefs(projectDir, config) {
+  var defs = [], src = config.libs;
   if (src.indexOf("ecma5") == -1 && config.ecmaScript) src = ["ecma5"].concat(src);
   for (var i = 0; i < src.length; ++i) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";
     var found = findFile(file, projectDir, __dirname + "/defs");
-    if (found) env.push(JSON.parse(fs.readFileSync(found, "utf8")));
+    if (found) defs.push(JSON.parse(fs.readFileSync(found, "utf8")));
     else process.stderr.write("Failed to find library " + src[i] + ".\n");
   }
-  return env;
+  return defs;
 }
 
-function loadPlugins(projectDir, plugins, env) {
+function loadPlugins(projectDir, plugins) {
   var options = {};
   for (var plugin in plugins) {
     var found = findFile(plugin + ".js", projectDir, __dirname + "/plugin");
@@ -81,13 +81,13 @@ if (projectDir) {
 var server = startServer(projectDir, config);
 
 function startServer(dir, config) {
-  var env = buildEnvironment(dir, config);
-  var plugins = loadPlugins(dir, config.plugins, env);
+  var defs = findDefs(dir, config);
+  var plugins = loadPlugins(dir, config.plugins);
   var server = new tern.Server({
     getFile: function(name, c) {
       fs.readFile(path.resolve(dir, name), "utf8", c);
     },
-    defs: env,
+    defs: defs,
     pluginOptions: plugins,
     debug: true,
     async: true,

@@ -15,15 +15,15 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(exports, require("acorn/acorn"), require("acorn/acorn_loose"), require("acorn/util/walk"),
-               require("./env"), require("./jsdoc"));
+               require("./def"), require("./jsdoc"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "acorn/acorn", "acorn/acorn_loose", "acorn/util/walk", "./env", "./jsdoc"], mod);
-  mod(self.tern || (self.tern = {}), acorn, acorn, acorn.walk, tern.env, tern.jsdoc); // Plain browser env
-})(function(exports, acorn, acorn_loose, walk, env, jsdoc) {
+    return define(["exports", "acorn/acorn", "acorn/acorn_loose", "acorn/util/walk", "./def", "./jsdoc"], mod);
+  mod(self.tern || (self.tern = {}), acorn, acorn, acorn.walk, tern.def, tern.jsdoc); // Plain browser env
+})(function(exports, acorn, acorn_loose, walk, def, jsdoc) {
   "use strict";
 
   // Delayed initialization because of cyclic dependencies.
-  env = exports.env = env.init({}, exports);
+  def = exports.def = def.init({}, exports);
   jsdoc = exports.jsdoc = jsdoc.init({}, exports);
 
   var toString = exports.toString = function(type, maxDepth, parent) {
@@ -468,7 +468,7 @@ var AVal = exports.AVal = function(type) {
 
   // INFERENCE CONTEXT
 
-  var Context = exports.Context = function(environment, parent) {
+  var Context = exports.Context = function(defs, parent) {
     this.parent = parent;
     this.props = Object.create(null);
     this.protos = Object.create(null);
@@ -492,8 +492,8 @@ var AVal = exports.AVal = function(type) {
       cx.num = new Prim(cx.protos.Number, "number");
       cx.curOrigin = null;
 
-      if (environment) for (var i = 0; i < environment.length; ++i)
-        env.loadEnvironment(environment[i]);
+      if (defs) for (var i = 0; i < defs.length; ++i)
+        def.load(defs[i]);
     });
   };
 
@@ -591,7 +591,7 @@ var AVal = exports.AVal = function(type) {
 
     if (foundPath) {
       if (asArray) foundPath = "[" + foundPath + "]";
-      var p = new env.TypeParser(foundPath);
+      var p = new def.TypeParser(foundPath);
       fn.computeRet = p.parseRetType();
       fn.computeRetSource = foundPath;
       return true;
