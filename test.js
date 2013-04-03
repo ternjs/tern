@@ -23,7 +23,8 @@ function getFile(file) {
 
 var nodeModules = {};
 fs.readdirSync("test/node_modules").forEach(function(name) {
-  nodeModules[path.basename(name, ".js")] = JSON.parse(fs.readFileSync("test/node_modules/" + name, "utf8"));
+  if (/\.json$/.test(name))
+    nodeModules[path.basename(name, ".json")] = JSON.parse(fs.readFileSync("test/node_modules/" + name, "utf8"));
 });
 
 function serverOptions(context, env) {
@@ -31,9 +32,10 @@ function serverOptions(context, env) {
   for (var i = 0; i < env.length; ++i) environment.push(env[i]);
   return {
     environment: environment,
-    getFile: function(name) { return fs.readFileSync(context + name, "utf8"); },
+    getFile: function(name) { return fs.readFileSync(path.resolve(context, name), "utf8"); },
     debug: true,
-    pluginOptions: { node: { modules: nodeModules } }
+    pluginOptions: { node: { modules: nodeModules } },
+    projectDir: context
   };
 }
 

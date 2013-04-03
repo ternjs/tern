@@ -31,3 +31,6 @@ mymod.bar; //: string
 require("./localfile").hello; //: fn() -> number
 
 require("./foo/../exportfunc.js"); //: fn(a: number, b: number) -> number
+
+require("mod1").mainExport; // {x, y}
+require("mod1/secondfile"); // {u, v}

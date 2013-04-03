@@ -95,7 +95,8 @@ function startServer(dir, config) {
     environment: env,
     pluginOptions: plugins,
     debug: true,
-    async: true
+    async: true,
+    projectDir: dir
   });
   // FIXME maybe allow globs?
   if (config.loadEagerly) config.loadEagerly.forEach(function(file) {

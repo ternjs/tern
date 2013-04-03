@@ -9,16 +9,16 @@
 
   function resolveName(name, data) {
     var opts = data.options;
-    var base = opts.baseURL || "";
-    if (!opts.paths) return base + "/" + name + ".js";
+    var base = opts.baseURL ? opts.baseURL + "/" : "";
+    if (!opts.paths) return base + name + ".js";
     var known = opts.paths[name];
-    if (known) return base + "/" + known + ".js";
+    if (known) return base + known + ".js";
     var dir = name.match(/^([^\/]+)(\/.*)$/);
     if (dir) {
       var known = opts.paths[dir[0]];
-      if (known) return base + "/" + known + dir[1] + ".js";
+      if (known) return base + known + dir[1] + ".js";
     }
-    return base + "/" + name + ".js";
+    return base + name + ".js";
   }
 
   function flattenPath(path) {
