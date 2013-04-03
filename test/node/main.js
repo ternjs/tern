@@ -1,4 +1,4 @@
-// environment=node
+// plugin=node
 
 var fs = require("fs"), crypto = require("crypto"), tls = require("tls");
 

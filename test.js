@@ -3,22 +3,30 @@ var infer = require("./infer");
 var tern = require("./tern");
 var acorn = require("acorn");
 var walk = require("acorn/util/walk.js");
-require("./plugin/requirejs/requirejs.js");
-require("./plugin/node/node.js");
+require("./plugin/requirejs.js");
+require("./plugin/node.js");
 
 var ecma5 = JSON.parse(fs.readFileSync("defs/ecma5.json"));
 var envData = {
   browser: JSON.parse(fs.readFileSync("defs/browser.json")),
-  requireJS: JSON.parse(fs.readFileSync("plugin/requirejs/requirejs.json")),
-  node: JSON.parse(fs.readFileSync("plugin/node/node.json")),
   jquery: JSON.parse(fs.readFileSync("defs/jquery.json"))
 };
 
-function getFile(file) {
-  var text = fs.readFileSync(file, "utf8"), env = [];
-  var envSpec = /\/\/ environment=(\w+)\n/g, m;
-  while (m = envSpec.exec(text)) env.push(envData[m[1]]);
-  return {text: text, name: file, env: env, ast: acorn.parse(text)};
+function getDefs(text) {
+  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [ecma5];
+  while (m = spec.exec(text)) {
+    var data = envData[m[1]];
+    if (!data) throw new Error("Unknown environment: " + m[1]);
+    defs.push(data);
+  }
+  return defs;
+}
+
+function getPlugins(text) {
+  var spec = /\/\/ plugin=(\w+)\n/g, m, plugins = {};
+  while (m = spec.exec(text))
+    plugins[m[1]] = m[1] == "node" ? {modules: nodeModules} : {};
+  return plugins;
 }
 
 var nodeModules = {};
@@ -27,15 +35,14 @@ fs.readdirSync("test/node_modules").forEach(function(name) {
     nodeModules[path.basename(name, ".json")] = JSON.parse(fs.readFileSync("test/node_modules/" + name, "utf8"));
 });
 
-function serverOptions(context, env) {
-  var environment = [ecma5];
-  for (var i = 0; i < env.length; ++i) environment.push(env[i]);
+function serverOptions(context, text) {
   return {
-    environment: environment,
+    defs: getDefs(text),
     getFile: function(name) { return fs.readFileSync(path.resolve(context, name), "utf8"); },
     debug: true,
     pluginOptions: { node: { modules: nodeModules } },
-    projectDir: context
+    projectDir: context,
+    plugins: getPlugins(text)
   };
 }
 
@@ -51,16 +58,17 @@ function runTests(filter) {
       context += name + "/";
       fname = "main.js";
     }
-    var file = getFile(context + fname);
-
-    var server = new tern.Server(serverOptions(context, file.env));
+    var text = fs.readFileSync(context + fname, "utf8");
+    var server = new tern.Server(serverOptions(context, text));
+    server.addFile(fname);
+    var ast = server.files[0].ast;
 
     var typedef = /\/\/:(:)?(\?)?\s+([^\n]*)/g, m;
-    while (m = typedef.exec(file.text)) {
+    while (m = typedef.exec(text)) {
       ++tests;
-      var expr = walk.findNodeBefore(file.ast, m.index, "Expression");
+      var expr = walk.findNodeBefore(ast, m.index, "Expression");
       if (!expr) {
-        console.log(name + ": No expression found at line " + acorn.getLineInfo(file.text, m.index).line);
+        console.log(name + ": No expression found at line " + acorn.getLineInfo(text, m.index).line);
         ++failed;
         continue;
       }
@@ -72,7 +80,7 @@ function runTests(filter) {
         if (err) throw err;
         var type = resp.guess && !m[2] ? "?" : resp.type || "?";
         if (type != m[3]) {
-          console.log(name + ": Expression at line " + acorn.getLineInfo(file.text, m.index).line +
+          console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
                       " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
           ++failed;
         }

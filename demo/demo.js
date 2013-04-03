@@ -1,4 +1,4 @@
-var server, editor, environment = [];
+var server, editor, defs = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
@@ -21,11 +21,11 @@ CodeMirror.on(window, "load", function() {
   if (!Object.create)
     return document.getElementById("demospace").innerHTML = "<p><strong>Sorry!</strong> You seem to be using a browser that does not support ECMAScript version 5. Tern is using some ECMAScript 5 features, so it will not work on your browser. Try with a more modern one if you really want to see this.</p><p>(I may change the library to not depend on ECMAScript 5 in the future. It would not be all that hard, but I have not yet decided whether this is worthwhile.)</p>";
 
-  var files = ["defs/ecma5.json", "defs/browser.json", "plugin/requirejs/requirejs.json", "defs/jquery.json"];
+  var files = ["defs/ecma5.json", "defs/browser.json", "defs/jquery.json"];
   var loaded = 0;
   for (var i = 0; i < files.length; ++i) (function(i) {
     load(files[i], function(json) {
-      environment[i] = JSON.parse(json);
+      defs[i] = JSON.parse(json);
       if (++loaded == files.length) initEditor();
     });
   })(i);
@@ -61,8 +61,9 @@ function initEditor() {
     server = new tern.Server({
       getFile: getFile,
       async: true,
-      environment: environment,
-      debug: true
+      defs: defs,
+      debug: true,
+      plugins: {requirejs: {}}
     });
   }
   registerDoc("test.js", editor.getDoc());
@@ -83,7 +84,7 @@ function initEditor() {
 
 function workerServer() {
   var worker = new Worker("demo/worker.js");
-  worker.postMessage({type: "env", data: environment});
+  worker.postMessage({type: "defs", data: defs});
   var msgId = 0, pending = {};
 
   function send(data, c) {

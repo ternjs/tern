@@ -20,8 +20,8 @@
     debug: false,
     async: false,
     getFile: function(_f, c) { if (this.async) c(null, null); },
-    environment: [],
-    pluginOptions: {},
+    defs: [],
+    plugins: {},
     fetchTimeout: 1000
   };
 
@@ -72,24 +72,21 @@
     for (var o in defaultOptions) if (!options.hasOwnProperty(o))
       options[o] = defaultOptions[o];
 
-    this.environment = [];
     this.handlers = {};
     this.files = [];
     this.uses = 0;
     this.fetchingFiles = 0;
     this.asyncError = null;
 
-    for (var i = 0; i < options.environment.length; ++i)
-      this.addEnvironment(options.environment[i]);
+    this.defs = options.defs.slice(0);
+    for (var plugin in options.plugins) if (options.plugins.hasOwnProperty(plugin)) {
+      var init = plugins[plugin](this, options.plugins[plugin]);
+      if (init && init.defs) this.defs.push(init.defs);
+    }
+
     this.reset();
   };
   Server.prototype = {
-    addEnvironment: function(data) {
-      this.environment.push(data);
-      var plugin = data["!plugin"];
-      if (plugin && plugin in plugins)
-        plugins[plugin](this, this.options.pluginOptions[plugin]);
-    },
     addFile: function(name, /*optional*/ text) {
       ensureFile(this, name, text);
     },
@@ -101,7 +98,7 @@
       }
     },
     reset: function() {
-      this.cx = new infer.Context(this.environment, this);
+      this.cx = new infer.Context(this.defs, this);
       this.uses = 0;
       for (var i = 0; i < this.files.length; ++i) clearFile(this, this.files[i]);
       this.signal("reset");

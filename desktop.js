@@ -59,19 +59,14 @@ function buildEnvironment(projectDir, config) {
 
 function loadPlugins(projectDir, plugins, env) {
   var options = {};
-  for (var file in plugins) {
-    var found = findFile(file, projectDir, __dirname + "/plugin") ||
-      findFile(file + ".js", projectDir, __dirname + "/plugin");
+  for (var plugin in plugins) {
+    var found = findFile(plugin + ".js", projectDir, __dirname + "/plugin");
     if (!found) {
-      process.stderr.write("Failed to find plugin " + file + ".\n");
+      process.stderr.write("Failed to find plugin " + plugin + ".\n");
       continue;
     }
-    if (fs.statSync(found).isDirectory()) fs.readdirSync(found).forEach(function(file) {
-      if (/\.js$/.test(file)) require(found + "/" + file);
-      else if (/\.json$/.test(file)) env.push(JSON.parse(fs.readFileSync(found + "/" + file, "utf8")));
-    });
-    else require(found);
-    options[path.basename(file, ".js")] = plugins[file];
+    require(found);
+    options[path.basename(plugin)] = plugins[plugin];
   }
   return options;
 }
@@ -92,7 +87,7 @@ function startServer(dir, config) {
     getFile: function(name, c) {
       fs.readFile(path.resolve(dir, name), "utf8", c);
     },
-    environment: env,
+    defs: env,
     pluginOptions: plugins,
     debug: true,
     async: true,

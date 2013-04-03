@@ -1,8 +1,8 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../../infer"), require("../../tern"));
+    return mod(require("../infer"), require("../tern"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../../infer", "../../tern"], mod);
+    return define(["../infer", "../tern"], mod);
   mod(tern, tern);
 })(function(infer, tern) {
   "use strict";
@@ -72,7 +72,7 @@
     return infer.ANull;
   });
 
-  tern.registerPlugin("requireJS", function(server, options) {
+  tern.registerPlugin("requirejs", function(server, options) {
     server._requireJS = {
       interfaces: Object.create(null),
       options: options || {},
@@ -86,5 +86,25 @@
     server.on("reset", function(file) {
       this._requireJS.interfaces = Object.create(null);
     });
+    return {defs: defs};
   });
+
+  var defs = {
+    "!name": "requirejs.js",
+    requirejs: {
+      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> $custom:requireJS",
+      onError: "fn(err: +Error)",
+      load: "fn(context: ?, moduleName: string, url: string)",
+      config: "fn(config: ?)",
+      version: "string",
+      isBrowser: "bool"
+    },
+    require: "requirejs",
+    define: {
+      "!type": "fn(deps: [string], callback: fn()) -> $custom:requireJS",
+      amd: {
+        jQuery: "bool"
+      }
+    }
+  };
 });

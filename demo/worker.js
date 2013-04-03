@@ -1,12 +1,12 @@
 importScripts("../node_modules/acorn/acorn.js", "../node_modules/acorn/acorn_loose.js", "../node_modules/acorn/util/walk.js",
-              "../tern.js", "../env.js", "../jsdoc.js", "../infer.js");
+              "../tern.js", "../env.js", "../jsdoc.js", "../infer.js", "../plugin/requirejs.js");
 
 var server;
 
 onmessage = function(e) {
   var data = e.data;
   switch (data.type) {
-  case "env": return startServer(data.data);
+  case "defs": return startServer(data.data);
   case "add": return server.addFile(data.name, data.text);
   case "del": return server.delFile(data.name);
   case "req": return server.request(data.body, function(err, reqData) {
@@ -26,12 +26,13 @@ function getFile(file, c) {
   pending[nextId] = c;
 }
 
-function startServer(env) {
+function startServer(defs) {
   server = new tern.Server({
     getFile: getFile,
     async: true,
-    environment: env,
-    debug: true
+    defs: defs,
+    debug: true,
+    plugins: {requirejs: {}}
   });
 }
 
