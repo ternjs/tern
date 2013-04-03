@@ -208,9 +208,20 @@
     if (cached != null) return cached;
     cx.paths[path] = infer.ANull;
 
+    var base = currentTopScope || cx.topScope;
+
+    if (cx.localDefs) for (var name in cx.localDefs) {
+      if (path.indexOf(name) == 0) {
+        if (path == name) return cx.paths[path] = cx.localDefs[path];
+        if (path.charAt(name.length) == ".") {
+          base = cx.localDefs[name];
+          path = path.slice(name.length + 1);
+        }
+      }
+    }
+
     var isdate = /^Date.prototype/.test(path);
     var parts = path.split(".");
-    var base = currentTopScope || cx.topScope;
     for (var i = 0; i < parts.length && base != infer.ANull; ++i) {
       var prop = parts[i];
       if (prop.charAt(0) == "!") {
@@ -279,8 +290,8 @@
       if (tp) {
         parseType(tp, path, base);
       } else {
-        var proto = spec["!proto"];
-        infer.Obj.call(base, proto ? parseType(proto) : true, path);
+        var proto = spec["!proto"] && parseType(spec["!proto"]);
+        infer.Obj.call(base, proto instanceof infer.Obj ? proto : true, path);
       }
     }
 
@@ -310,10 +321,14 @@
 
     var def = data["!define"];
     if (def) {
-      for (var name in def)
-        cx.localDefs[name] = passOne(null, def[name], name);
-      for (var name in def)
-        passTwo(cx.localDefs[name], def[name]);
+      for (var name in def) {
+        var spec = def[name];
+        cx.localDefs[name] = typeof spec == "string" ? parsePath(spec) : passOne(null, spec, name);
+      }
+      for (var name in def) {
+        var spec = def[name];
+        if (typeof spec != "string") passTwo(cx.localDefs[name], def[name]);
+      }
     }
 
     passTwo(scope, data);

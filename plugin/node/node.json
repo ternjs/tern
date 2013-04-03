@@ -3,6 +3,7 @@
   "!plugin": "node",
 
   "!define": {
+    "EventEmitter": "node.events.EventEmitter",
     "os.cpuSpec": {
       "model": "string",
       "speed": "number",
@@ -218,7 +219,7 @@
     "stream": {
       "!type": "fn()",
       "prototype": {
-        "!proto": "node.events.EventEmitter.prototype",
+        "!proto": "EventEmitter.prototype",
         "pipe": "fn(destination: +node.stream.Writable, options?: ?)"
       },
       "Writable": {
@@ -272,7 +273,7 @@
       "Server": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "listen": "fn(port: number, hostname?: string, backlog?: number, callback?: fn())",
           "close": "fn(callback?: ?)",
           "maxHeadersCount": "number",
@@ -344,7 +345,7 @@
       "globalAgent": "node.http.globalAgent"
     },
     "cluster": {
-      "!proto": "node.events.EventEmitter.prototype",
+      "!proto": "EventEmitter.prototype",
       "settings": {
         "exec": "string",
         "args": "[string]",
@@ -353,7 +354,7 @@
       "Worker": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "id": "string",
           "process": "+node.child_process.ChildProcess",
           "suicide": "bool",
@@ -455,14 +456,14 @@
       "version": "?"
     },
     "repl": {
-      "start": "fn(options: ?) -> +node.events.EventEmitter"
+      "start": "fn(options: ?) -> +EventEmitter"
     },
     "readline": {
       "createInterface": "fn(options: ?) -> +node.readline.Interface",
       "Interface": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "setPrompt": "fn(prompt: string, length: number)",
           "prompt": "fn(preserveCursor?: bool)",
           "question": "fn(query: string, callback: fn())",
@@ -491,7 +492,7 @@
       "ChildProcess": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "stdin": "+node.stream.Writable",
           "stdout": "+node.stream.Readable",
           "stderr": "+node.stream.Readable",
@@ -538,7 +539,7 @@
       "Socket": {
         "!type": "fn(options: ?)",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "connect": "fn(port: number, host?: string, connectionListener?: fn())",
           "bufferSize": "number",
           "setEncoding": "fn(encoding?: string)",
@@ -570,7 +571,7 @@
       "Socket": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "send": "fn(buf: +Buffer, offset: number, length: number, port: number, address: string, callback?: fn())",
           "bind": "fn(port: number, address?: string)",
           "close": "fn()",
@@ -738,7 +739,7 @@
       "SecurePair": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "cleartext": "+node.tls.ClearTextStream",
           "encrypted": "+node.stream.Duplex"
         }
@@ -857,15 +858,15 @@
       "isatty": "fn(fd: number) -> bool"
     },
     "domain": {
-      "create": "fn() -> +node.events.EventEmitter",
+      "create": "fn() -> +EventEmitter",
       "Domain": {
         "!type": "fn()",
         "prototype": {
-          "!proto": "node.events.EventEmitter.prototype",
+          "!proto": "EventEmitter.prototype",
           "run": "fn(fn: fn())",
-          "member": "[+node.events.EventEmitter]",
-          "add": "fn(emitter: +node.events.EventEmitter)",
-          "remove": "fn(emitter: +node.events.EventEmitter)",
+          "member": "[+EventEmitter]",
+          "add": "fn(emitter: +EventEmitter)",
+          "remove": "fn(emitter: +EventEmitter)",
           "bind": "fn(callback: fn(err: +Error, data: ?)) -> $0",
           "intercept": "fn(cb: fn(data: ?)) -> $0",
           "dispose": "fn()"
