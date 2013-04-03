@@ -60,6 +60,12 @@
     }
 
     resolveModule = function(server, name) {
+      var data = server._node;
+      if (data.options.dontLoad == true ||
+          data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
+          data.options.load && !new RegExp(data.options.load).test(name))
+        return infer.ANull;
+
       var modDir = findModuleDir(server);
       if (!modDir) return infer.ANull;
 
@@ -75,7 +81,7 @@
       file = path.resolve(modDir, file);
       if (!fs.existsSync(file)) return infer.ANull;
       server.addFile(file);
-      return server._node.modules[file] = server._node.modules[name] = new infer.AVal;
+      return data.modules[file] = data.modules[name] = new infer.AVal;
     };
   })();
 
