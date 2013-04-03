@@ -79,7 +79,7 @@
     });
 
     server.on("afterLoad", function(file) {
-      exportsFromScope(file.scope).propagate(getModule(this._node, this._node.currentFile));
+      exportsFromScope(file.scope).propagate(getModule(this._node, file.name));
     });
 
     server.on("reset", function(file) {
