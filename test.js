@@ -68,8 +68,17 @@ function runTests(filter) {
       var args = m[2], kind = m[1];
       ++tests;
       if (kind == "+") {
-        for (var pos = m.index; /\s/.test(text.charAt(pos - 1)); --pos) {}
-        var query = {type: "completions", end: pos, file: fname};
+        var query, columnInfo = /\s*@(\d+)$/.exec(args);
+        if (columnInfo) {
+          var line = acorn.getLineInfo(server.files[0].text, m.index).line;
+          var endInfo = {line: line - 1, ch: parseInt(columnInfo[1])};
+          query = {type: "completions", lineCharPositions: true, end: endInfo, file: fname};
+          args = args.slice(0, columnInfo.index);
+        }
+        else {
+          for (var pos = m.index; /\s/.test(text.charAt(pos - 1)); --pos) {}
+          query = {type: "completions", end: pos, file: fname};
+        }
         var andOthers = /,\s*\.\.\.$/.test(args);
         if (andOthers) args = args.slice(0, args.lastIndexOf(","));
         var parts = args.split(/\s*,\s*/);
