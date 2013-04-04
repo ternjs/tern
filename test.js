@@ -40,7 +40,7 @@ function serverOptions(context, text) {
     defs: getDefs(text),
     getFile: function(name) { return fs.readFileSync(path.resolve(context, name), "utf8"); },
     debug: true,
-    pluginOptions: { node: { modules: nodeModules } },
+    plugins: { node: { modules: nodeModules } },
     projectDir: context,
     plugins: getPlugins(text)
   };
