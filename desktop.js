@@ -88,7 +88,7 @@ function startServer(dir, config) {
       fs.readFile(path.resolve(dir, name), "utf8", c);
     },
     defs: defs,
-    pluginOptions: plugins,
+    plugins: plugins,
     debug: true,
     async: true,
     projectDir: dir
