@@ -1,249 +1,768 @@
 {
   "!name": "ecma5",
-  "Infinity": "number",
-  "undefined": "?",
-  "NaN": "number",
+  "Infinity": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Infinity"
+  },
+  "undefined": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/undefined"
+  },
+  "NaN": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/NaN"
+  },
   "Object": {
     "!type": "fn()",
-    "getPrototypeOf": "fn(obj: ?) -> ?",
-    "create": "fn(proto: ?) -> $custom:Object_create",
-    "defineProperty": "fn(obj: ?, prop: string, desc: ?)",
-    "defineProperties": "fn(obj: ?, props: ?)",
-    "getOwnPropertyDescriptor": "fn(obj: ?, prop: string) -> ?",
-    "keys": "fn(obj: ?) -> [string]",
-    "getOwnPropertyNames": "fn(obj: ?) -> [string]",
-    "seal": "fn(obj: ?)",
-    "isSealed": "fn(obj: ?) -> bool",
-    "freeze": "fn(obj: ?)",
-    "isFrozen": "fn(obj: ?) -> bool",
+    "getPrototypeOf": {
+      "!type": "fn(obj: ?) -> ?",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/getPrototypeOf"
+    },
+    "create": {
+      "!type": "fn(proto: ?) -> $custom:Object_create",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/create"
+    },
+    "defineProperty": {
+      "!type": "fn(obj: ?, prop: string, desc: ?)",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/defineProperty"
+    },
+    "defineProperties": {
+      "!type": "fn(obj: ?, props: ?)",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/defineProperty"
+    },
+    "getOwnPropertyDescriptor": {
+      "!type": "fn(obj: ?, prop: string) -> ?",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor"
+    },
+    "keys": {
+      "!type": "fn(obj: ?) -> [string]",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/keys"
+    },
+    "getOwnPropertyNames": {
+      "!type": "fn(obj: ?) -> [string]",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames"
+    },
+    "seal": {
+      "!type": "fn(obj: ?)",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/seal"
+    },
+    "isSealed": {
+      "!type": "fn(obj: ?) -> bool",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/isSealed"
+    },
+    "freeze": {
+      "!type": "fn(obj: ?)",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/freeze"
+    },
+    "isFrozen": {
+      "!type": "fn(obj: ?) -> bool",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/isFrozen"
+    },
     "prototype": {
       "!stdProto": "Object",
-      "toString": "fn() -> string",
-      "toLocaleString": "fn() -> string",
-      "valueOf": "fn() -> number",
-      "hasOwnProperty": "fn(prop: string) -> bool",
-      "propertyIsEnumerable": "fn(prop: string) -> bool"
-    }
+      "toString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/toString"
+      },
+      "toLocaleString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/toLocaleString"
+      },
+      "valueOf": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/valueOf"
+      },
+      "hasOwnProperty": {
+        "!type": "fn(prop: string) -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/hasOwnProperty"
+      },
+      "propertyIsEnumerable": {
+        "!type": "fn(prop: string) -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/propertyIsEnumerable"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object"
   },
   "Function": {
     "!type": "fn(body: string)",
     "prototype": {
       "!stdProto": "Function",
-      "apply": "fn(this: ?, args: [?]) -> $this.$ret",
+      "apply": {
+        "!type": "fn(this: ?, args: [?]) -> $this.$ret",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/apply"
+      },
       "call": {
         "!type": "fn(this: ?, args?: ?) -> $this.$ret",
-        "!effects": ["call $this this=$0 $1 $2 $3 $4"]
+        "!effects": [
+          "call $this this=$0 $1 $2 $3 $4"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/call"
       },
-      "bind": "fn(this: ?) -> fn()"
-    }
+      "bind": {
+        "!type": "fn(this: ?) -> fn()",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function"
   },
   "Array": {
     "!type": "fn(size: number) -> [?]",
-    "isArray": "fn(value: ?) -> bool",
+    "isArray": {
+      "!type": "fn(value: ?) -> bool",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/isArray"
+    },
     "prototype": {
       "!stdProto": "Array",
-      "length": "number",
-      "concat": "fn(other: [?]) -> $this",
-      "join": "fn(separator?: string) -> string",
-      "splice": "fn(pos: number, amount: number)",
-      "pop": "fn() -> $this.<i>",
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/length"
+      },
+      "concat": {
+        "!type": "fn(other: [?]) -> $this",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/concat"
+      },
+      "join": {
+        "!type": "fn(separator?: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/join"
+      },
+      "splice": {
+        "!type": "fn(pos: number, amount: number)",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/splice"
+      },
+      "pop": {
+        "!type": "fn() -> $this.<i>",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/pop"
+      },
       "push": {
         "!type": "fn(newelt: ?) -> number",
-        "!effects": ["propagate $0 $this.<i>"]
+        "!effects": [
+          "propagate $0 $this.<i>"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/push"
       },
-      "shift": "fn() -> $this.<i>",
+      "shift": {
+        "!type": "fn() -> $this.<i>",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/shift"
+      },
       "unshift": {
         "!type": "fn(newelt: ?) -> number",
-        "!effects": ["propagate $0 $this.<i>"]
+        "!effects": [
+          "propagate $0 $this.<i>"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/unshift"
       },
-      "slice": "fn(from: number, to?: number) -> $this",
-      "reverse": "fn()",
+      "slice": {
+        "!type": "fn(from: number, to?: number) -> $this",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/slice"
+      },
+      "reverse": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/reverse"
+      },
       "sort": {
         "!type": "fn(compare?: fn(a: ?, b: ?) -> number)",
-        "!effects": ["call $0 $this.<i> $this.<i>"]
+        "!effects": [
+          "call $0 $this.<i> $this.<i>"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/sort"
       },
-      "indexOf": "fn(elt: ?, from?: number) -> number",
-      "lastIndexOf": "fn(elt: ?, from?: number) -> number",
+      "indexOf": {
+        "!type": "fn(elt: ?, from?: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf"
+      },
+      "lastIndexOf": {
+        "!type": "fn(elt: ?, from?: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/lastIndexOf"
+      },
       "every": {
         "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> bool",
-        "!effects": ["call $0 this=$1 $this.<i> number"]
+        "!effects": [
+          "call $0 this=$1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/every"
       },
       "some": {
         "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> bool",
-        "!effects": ["call $0 this=$1 $this.<i> number"]
+        "!effects": [
+          "call $0 this=$1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/some"
       },
       "filter": {
         "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> $this",
-        "!effects": ["call $0 this=$1 $this.<i> number"]
+        "!effects": [
+          "call $0 this=$1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter"
       },
       "forEach": {
         "!type": "fn(f: fn(elt: ?, i: number), context?: ?)",
-        "!effects": ["call $0 this=$1 $this.<i> number"]
+        "!effects": [
+          "call $0 this=$1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/forEach"
       },
       "map": {
         "!type": "fn(f: fn(elt: ?, i: number) -> ?, context?: ?) -> [$0.$ret]",
-        "!effects": ["call $0 this=$1 $this.<i> number"]
+        "!effects": [
+          "call $0 this=$1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/map"
       },
       "reduce": {
         "!type": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> $0.$ret",
-        "!effects": ["call $0 $1 $this.<i> number"]
+        "!effects": [
+          "call $0 $1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce"
       },
       "reduceRight": {
         "!type": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> $0.$ret",
-        "!effects": ["call $0 $1 $this.<i> number"]
+        "!effects": [
+          "call $0 $1 $this.<i> number"
+        ],
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/ReduceRight"
       }
-    }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array"
   },
   "String": {
     "!type": "fn(value: ?) -> string",
-    "fromCharCode": "fn(code: number) -> string",
+    "fromCharCode": {
+      "!type": "fn(code: number) -> string",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/fromCharCode"
+    },
     "prototype": {
       "!stdProto": "String",
-      "length": "number",
-      "charAt": "fn(i: number) -> string",
-      "charCodeAt": "fn(i: number) -> number",
-      "indexOf": "fn(char: string, from?: number) -> number",
-      "lastIndexOf": "fn(char: string, from?: number) -> number",
-      "substring": "fn(from: number, to?: number) -> string",
-      "substr": "fn(from: number, length?: number) -> string",
-      "slice": "fn(from: number, to?: number) -> string",
-      "trim": "fn() -> string",
-      "trimLeft": "fn() -> string",
-      "trimRight": "fn() -> string",
-      "toUpperCase": "fn() -> string",
-      "toLowerCase": "fn() -> string",
-      "toLocaleUpperCase": "fn() -> string",
-      "toLocaleLowerCase": "fn() -> string",
-      "split": "fn(pattern: string) -> [string]",
-      "concat": "fn(other: string) -> string",
-      "localeCompare": "fn(other: string) -> number",
-      "match": "fn(pattern: +RegExp) -> [string]",
-      "replace": "fn(pattern: +RegExp, replacement: string) -> string",
-      "search": "fn(pattern: +RegExp) -> number"
-    }
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en-US/docs/XPath/Functions/string-length"
+      },
+      "charAt": {
+        "!type": "fn(i: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/charAt"
+      },
+      "charCodeAt": {
+        "!type": "fn(i: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/charCodeAt"
+      },
+      "indexOf": {
+        "!type": "fn(char: string, from?: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/indexOf"
+      },
+      "lastIndexOf": {
+        "!type": "fn(char: string, from?: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/lastIndexOf"
+      },
+      "substring": {
+        "!type": "fn(from: number, to?: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/substring"
+      },
+      "substr": {
+        "!type": "fn(from: number, length?: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/substr"
+      },
+      "slice": {
+        "!type": "fn(from: number, to?: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/slice"
+      },
+      "trim": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/Trim"
+      },
+      "trimLeft": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/TrimLeft"
+      },
+      "trimRight": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/TrimRight"
+      },
+      "toUpperCase": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/toUpperCase"
+      },
+      "toLowerCase": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/toLowerCase"
+      },
+      "toLocaleUpperCase": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/toLocaleUpperCase"
+      },
+      "toLocaleLowerCase": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/toLocaleLowerCase"
+      },
+      "split": {
+        "!type": "fn(pattern: string) -> [string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/split"
+      },
+      "concat": {
+        "!type": "fn(other: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/concat"
+      },
+      "localeCompare": {
+        "!type": "fn(other: string) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/localeCompare"
+      },
+      "match": {
+        "!type": "fn(pattern: +RegExp) -> [string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/match"
+      },
+      "replace": {
+        "!type": "fn(pattern: +RegExp, replacement: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/replace"
+      },
+      "search": {
+        "!type": "fn(pattern: +RegExp) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/search"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String"
   },
   "Number": {
     "!type": "fn(value: ?) -> number",
-    "MAX_VALUE": "number",
-    "MIN_VALUE": "number",
-    "POSITIVE_INFINITY": "number",
-    "NEGATIVE_INFINITY": "number",
+    "MAX_VALUE": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/MAX_VALUE"
+    },
+    "MIN_VALUE": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/MIN_VALUE"
+    },
+    "POSITIVE_INFINITY": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/POSITIVE_INFINITY"
+    },
+    "NEGATIVE_INFINITY": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/NEGATIVE_INFINITY"
+    },
     "prototype": {
       "!stdProto": "Number",
-      "toString": "fn(radix?: number) -> string",
-      "toFixed": "fn(digits: number) -> string",
-      "toExponential": "fn(digits: number) -> string"
-    }
+      "toString": {
+        "!type": "fn(radix?: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toString"
+      },
+      "toFixed": {
+        "!type": "fn(digits: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toFixed"
+      },
+      "toExponential": {
+        "!type": "fn(digits: number) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number/toExponential"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Number"
   },
   "Boolean": {
     "!type": "fn(value: ?) -> bool",
-    "prototype": {"!stdProto": "Boolean"}
+    "prototype": {
+      "!stdProto": "Boolean"
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Boolean"
   },
   "RegExp": {
     "!type": "fn(source: string, flags?: string)",
     "prototype": {
       "!stdProto": "RegExp",
-      "exec": "fn(input: string) -> [string]",
-      "compile": "fn(source: string, flags?: string)",
-      "test": "fn(input: string) -> bool",
-      "global": "bool",
-      "ignoreCase": "bool",
-      "multiline": "bool",
-      "source": "string",
-      "lastIndex": "number"
-    }
+      "exec": {
+        "!type": "fn(input: string) -> [string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/exec"
+      },
+      "compile": {
+        "!type": "fn(source: string, flags?: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp"
+      },
+      "test": {
+        "!type": "fn(input: string) -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/test"
+      },
+      "global": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp"
+      },
+      "ignoreCase": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp"
+      },
+      "multiline": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/multiline"
+      },
+      "source": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/source"
+      },
+      "lastIndex": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/lastIndex"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp"
   },
   "Date": {
     "!type": "fn(ms: number)",
-    "parse": "fn(source: string) -> +Date",
-    "UTC": "fn(year: number, month: number, date: number, hour?: number, min?: number, sec?: number, ms?: number) -> number",
-    "now": "fn() -> number",
+    "parse": {
+      "!type": "fn(source: string) -> +Date",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/parse"
+    },
+    "UTC": {
+      "!type": "fn(year: number, month: number, date: number, hour?: number, min?: number, sec?: number, ms?: number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/UTC"
+    },
+    "now": {
+      "!type": "fn() -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/now"
+    },
     "prototype": {
-      "toUTCString": "fn() -> string",
-      "toISOString": "fn() -> string",
-      "toDateString": "fn() -> string",
-      "toTimeString": "fn() -> string",
-      "toLocaleDateString": "fn() -> string",
-      "toLocaleTimeString": "fn() -> string",
-      "getTime": "fn() -> number",
-      "getFullYear": "fn() -> number",
-      "getYear": "fn() -> number",
-      "getMonth": "fn() -> number",
-      "getUTCMonth": "fn() -> number",
-      "getDate": "fn() -> number",
-      "getUTCDate": "fn() -> number",
-      "getDay": "fn() -> number",
-      "getUTCDay": "fn() -> number",
-      "getHours": "fn() -> number",
-      "getUTCHours": "fn() -> number",
-      "getMinutes": "fn() -> number",
-      "getUTCMinutes": "fn() -> number",
-      "getSeconds": "fn() -> number",
-      "getUTCSeconds": "fn() -> number",
-      "getMilliseconds": "fn() -> number",
-      "getUTCMilliseconds": "fn() -> number",
-      "getTimezoneOffset": "fn() -> number",
-      "setTime": "fn(date: +Date) -> number",
-      "setFullYear": "fn(year: number) -> number",
-      "setUTCFullYear": "fn(year: number) -> number",
-      "setMonth": "fn(month: number) -> number",
-      "setUTCMonth": "fn(month: number) -> number",
-      "setDate": "fn(day: number) -> number",
-      "setUTCDate": "fn(day: number) -> number",
-      "setHours": "fn(hour: number) -> number",
-      "setUTCHours": "fn(hour: number) -> number",
-      "setMinutes": "fn(min: number) -> number",
-      "setUTCMinutes": "fn(min: number) -> number",
-      "setSeconds": "fn(sec: number) -> number",
-      "setUTCSeconds": "fn(sec: number) -> number",
-      "setMilliseconds": "fn(ms: number) -> number",
-      "setUTCMilliseconds": "fn(ms: number) -> number"
-    }
+      "toUTCString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toUTCString"
+      },
+      "toISOString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toISOString"
+      },
+      "toDateString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toDateString"
+      },
+      "toTimeString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toTimeString"
+      },
+      "toLocaleDateString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toLocaleDateString"
+      },
+      "toLocaleTimeString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toLocaleTimeString"
+      },
+      "getTime": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getTime"
+      },
+      "getFullYear": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getFullYear"
+      },
+      "getYear": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getYear"
+      },
+      "getMonth": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getMonth"
+      },
+      "getUTCMonth": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCMonth"
+      },
+      "getDate": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getDate"
+      },
+      "getUTCDate": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCDate"
+      },
+      "getDay": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getDay"
+      },
+      "getUTCDay": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCDay"
+      },
+      "getHours": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getHours"
+      },
+      "getUTCHours": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCHours"
+      },
+      "getMinutes": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getMinutes"
+      },
+      "getUTCMinutes": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date"
+      },
+      "getSeconds": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getSeconds"
+      },
+      "getUTCSeconds": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCSeconds"
+      },
+      "getMilliseconds": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getMilliseconds"
+      },
+      "getUTCMilliseconds": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCMilliseconds"
+      },
+      "getTimezoneOffset": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getTimezoneOffset"
+      },
+      "setTime": {
+        "!type": "fn(date: +Date) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setTime"
+      },
+      "setFullYear": {
+        "!type": "fn(year: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setFullYear"
+      },
+      "setUTCFullYear": {
+        "!type": "fn(year: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCFullYear"
+      },
+      "setMonth": {
+        "!type": "fn(month: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setMonth"
+      },
+      "setUTCMonth": {
+        "!type": "fn(month: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCMonth"
+      },
+      "setDate": {
+        "!type": "fn(day: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setDate"
+      },
+      "setUTCDate": {
+        "!type": "fn(day: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCDate"
+      },
+      "setHours": {
+        "!type": "fn(hour: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setHours"
+      },
+      "setUTCHours": {
+        "!type": "fn(hour: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCHours"
+      },
+      "setMinutes": {
+        "!type": "fn(min: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setMinutes"
+      },
+      "setUTCMinutes": {
+        "!type": "fn(min: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCMinutes"
+      },
+      "setSeconds": {
+        "!type": "fn(sec: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setSeconds"
+      },
+      "setUTCSeconds": {
+        "!type": "fn(sec: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCSeconds"
+      },
+      "setMilliseconds": {
+        "!type": "fn(ms: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setMilliseconds"
+      },
+      "setUTCMilliseconds": {
+        "!type": "fn(ms: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCMilliseconds"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date"
   },
   "Error": {
     "!type": "fn(message: string)",
     "prototype": {
-      "name": "string",
-      "message": "string"
-    }
+      "name": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Error/name"
+      },
+      "message": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Error/message"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Error"
   },
-  "SyntaxError": "fn(message_FIXME_needs_proto: string)",
-  "ReferenceError": "fn(message: string)",
-  "URIError": "fn(message: string)",
-  "EvalError": "fn(message: string)",
-  "RangeError": "fn(message: string)",
-  "parseInt": "fn(string: string, radix?: number) -> number",
-  "parseFloat": "fn(string: string) -> number",
-  "isNaN": "fn(value: number) -> bool",
-  "eval": "fn(code: string) -> ?",
-  "encodeURI": "fn(uri: string) -> string",
-  "encodeURIComponent": "fn(uir: string) -> string",
-  "decodeURI": "fn(uri: string) -> string",
-  "decodeURIComponent": "fn(uri: string) -> string",
+  "SyntaxError": {
+    "!type": "fn(message: string)",
+    "prototype": "Error.prototype",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/SyntaxError"
+  },
+  "ReferenceError": {
+    "!type": "fn(message: string)",
+    "prototype": "Error.prototype",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/ReferenceError"
+  },
+  "URIError": {
+    "!type": "fn(message: string)",
+    "prototype": "Error.prototype",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/URIError"
+  },
+  "EvalError": {
+    "!type": "fn(message: string)",
+    "prototype": "Error.prototype",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/EvalError"
+  },
+  "RangeError": {
+    "!type": "fn(message: string)",
+    "prototype": "Error.prototype",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RangeError"
+  },
+  "parseInt": {
+    "!type": "fn(string: string, radix?: number) -> number",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/parseInt"
+  },
+  "parseFloat": {
+    "!type": "fn(string: string) -> number",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/parseFloat"
+  },
+  "isNaN": {
+    "!type": "fn(value: number) -> bool",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/isNaN"
+  },
+  "eval": {
+    "!type": "fn(code: string) -> ?",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/eval"
+  },
+  "encodeURI": {
+    "!type": "fn(uri: string) -> string",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/encodeURI"
+  },
+  "encodeURIComponent": {
+    "!type": "fn(uir: string) -> string",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/encodeURIComponent"
+  },
+  "decodeURI": {
+    "!type": "fn(uri: string) -> string",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/decodeURI"
+  },
+  "decodeURIComponent": {
+    "!type": "fn(uri: string) -> string",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/decodeURIComponent"
+  },
   "Math": {
-    "E": "number", "LN2": "number", "LN10": "number", "LOG2E": "number", "LOG10E": "number",
-    "SQRT1_2": "number", "SQRT2": "number", "PI": "number",
-    "abs": "fn(number) -> number",
-    "cos": "fn(number) -> number",
-    "sin": "fn(number) -> number",
-    "tan": "fn(number) -> number",
-    "acos": "fn(number) -> number",
-    "asin": "fn(number) -> number",
-    "atan": "fn(number) -> number",
-    "atan2": "fn(number, number) -> number",
-    "ceil": "fn(number) -> number",
-    "floor": "fn(number) -> number",
-    "round": "fn(number) -> number",
-    "exp": "fn(number) -> number",
-    "log": "fn(number) -> number",
-    "sqrt": "fn(number) -> number",
-    "pow": "fn(number, number) -> number",
-    "max": "fn(number, number) -> number",
-    "min": "fn(number, number) -> number",
-    "random": "fn() -> number"
+    "E": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/E"
+    },
+    "LN2": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/LN2"
+    },
+    "LN10": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/LN10"
+    },
+    "LOG2E": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/LOG2E"
+    },
+    "LOG10E": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/LOG10E"
+    },
+    "SQRT1_2": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/SQRT1_2"
+    },
+    "SQRT2": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/SQRT2"
+    },
+    "PI": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/PI"
+    },
+    "abs": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/abs"
+    },
+    "cos": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/cos"
+    },
+    "sin": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/sin"
+    },
+    "tan": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/tan"
+    },
+    "acos": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/acos"
+    },
+    "asin": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/asin"
+    },
+    "atan": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/atan"
+    },
+    "atan2": {
+      "!type": "fn(number, number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/atan2"
+    },
+    "ceil": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/ceil"
+    },
+    "floor": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/floor"
+    },
+    "round": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/round"
+    },
+    "exp": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/exp"
+    },
+    "log": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/log"
+    },
+    "sqrt": {
+      "!type": "fn(number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/sqrt"
+    },
+    "pow": {
+      "!type": "fn(number, number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/pow"
+    },
+    "max": {
+      "!type": "fn(number, number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/max"
+    },
+    "min": {
+      "!type": "fn(number, number) -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/min"
+    },
+    "random": {
+      "!type": "fn() -> number",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/random"
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math"
   },
   "JSON": {
-    "parse": "fn(json: string) -> ?",
-    "stringify": "fn(value: ?) -> string"
+    "parse": {
+      "!type": "fn(json: string) -> ?",
+      "!url": "https://developer.mozilla.org/en-US/docs/Using_native_JSON"
+    },
+    "stringify": {
+      "!type": "fn(value: ?) -> string",
+      "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/stringify"
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/JSON"
   }
 }
