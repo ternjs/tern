@@ -113,8 +113,8 @@ var httpServer = require("http").createServer(function(req, resp) {
   shutdown = setTimeout(doShutdown, maxIdleTime);
 
   var target = url.parse(req.url, true);
-  if (target.path == "/ping") return respondSimple(resp, 200, "pong");
-  if (target.path != "/") return respondSimple(resp, 404, "No service at " + target.path);
+  if (target.pathname == "/ping") return respondSimple(resp, 200, "pong");
+  if (target.pathname != "/") return respondSimple(resp, 404, "No service at " + target.pathname);
 
   if (req.method == "POST") {
     var body = "";
