@@ -100,7 +100,7 @@ function runTests(filter) {
           var type = resp.guess && kind != ":?" ? "?" : resp.type || "?";
           if (type != args) {
             console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
-                        " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
+                        " has type\n  " + type + "\ninstead of expected type\n  " + args);
             ++failed;
           }
         });
