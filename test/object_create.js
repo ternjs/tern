@@ -27,5 +27,7 @@ extend.prop1; //: string
 extend.bar; //: number
 
 var empty = Object.create(null);
+empty.prop1 = "hi";
 
 empty.hasOwnProperty; //: ?
+empty.prop1; //: string
