@@ -421,10 +421,17 @@ function moveTo(name, start, end) {
 function jumpToDef(cm) {
   server.request(buildRequest(cm, "definition", false).request, function(error, data) {
     if (error) return displayError(error);
-    jumpStack.push({file: curDoc.name,
-                    start: cm.getCursor("from"),
-                    end: cm.getCursor("to")});
-    moveTo(data.file, data.start, data.end);
+    if (data.file) {
+      jumpStack.push({file: curDoc.name,
+                      start: cm.getCursor("from"),
+                      end: cm.getCursor("to")});
+      moveTo(data.file, data.start, data.end);
+    } else if (data.url) {
+      document.getElementById("out").innerHTML = "Opening documentation in a new window.";
+      window.open(data.url);
+    } else {
+      displayError("Could not find a definition.");
+    }
   });
 }
 

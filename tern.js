@@ -529,9 +529,10 @@
   }
 
   function findDef(srv, query, file) {
-    var expr = findExpr(file, query), def, fileName, guess = false;
+    var expr = findExpr(file, query), def, url, fileName, guess = false;
     if (expr.node.type == "Identifier") {
       var found = expr.state.hasProp(expr.node.name);
+      if (found) url = found.url;
       if (found && typeof found.name == "object") {
         def = found.name;
         fileName = found.origin;
@@ -542,6 +543,7 @@
       var type = infer.expressionType(expr);
       if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
         var tp = type.types[i];
+        if (!url && tp.url) url = tp.url;
         if (tp.originNode) { type = tp; break; }
       }
       def = type.originNode;
@@ -551,12 +553,15 @@
         guess = infer.didGuess();
       }
     }
-    if (!def) throw new Error("Could not find a definition for the given expression");
-
-    var defFile = findFile(srv.files, fileName);
-    return {start: outputPos(query, defFile, def.start),
-            end: outputPos(query, defFile, def.end),
-            file: fileName, guess: guess};
+    var result = {guess: guess};
+    if (def) {
+      var defFile = findFile(srv.files, fileName);
+      result.start = outputPos(query, defFile, def.start);
+      result.end = outputPos(query, defFile, def.end);
+      result.file = fileName;
+    }
+    if (url) result.url = url;
+    return result;
   }
 
   function findRefs(srv, query, file, checkShadowing) {

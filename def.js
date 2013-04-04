@@ -259,6 +259,14 @@
     return empty;
   }
 
+  function isSimpleAnnotation(spec) {
+    if (!spec["!type"]) return false;
+    for (var prop in spec)
+      if (prop != "!type" && prop != "!doc" && prop != "!url")
+        return false;
+    return true;
+  }
+
   function passOne(base, spec, path) {
     if (!base) {
       var tp = spec["!type"];
@@ -276,7 +284,7 @@
 
     for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
       var inner = spec[name];
-      if (typeof inner == "string") continue;
+      if (typeof inner == "string" || isSimpleAnnotation(inner)) continue;
       var prop = base.defProp(name);
       passOne(prop.getType(), inner, path ? path + "." + name : name).propagate(prop);
     }
@@ -301,11 +309,22 @@
 
     for (var name in spec) if (hop(spec, name) && name.charCodeAt(0) != 33) {
       var inner = spec[name], known = base.defProp(name), innerPath = path ? path + "." + name : name;
+      var type = known.getType();
       if (typeof inner == "string") {
-        if (known.getType()) continue;
+        if (type) continue;
         parseType(inner, innerPath).propagate(known);
       } else {
-        passTwo(known.getType(), inner, innerPath);
+        var doc = inner["!doc"], url = inner["!url"];
+        if (doc) known.doc = doc;
+        if (url) known.url = url;
+        if (!isSimpleAnnotation(inner)) {
+          passTwo(type, inner, innerPath);
+          if (doc) type.doc = doc;
+          if (url) type.url = url;
+        } else if (!type) {
+          if (!inner["!type"]) console.log(innerPath);
+          parseType(inner["!type"], innerPath).propagate(known);
+        }
       }
     }
   }
