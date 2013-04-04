@@ -1,10 +1,10 @@
 {
   "!name": "browser",
-
   "!define": {
     "canvas.context2d": {
       "canvas": "+Element",
-      "width": "number", "height": "number",
+      "width": "number",
+      "height": "number",
       "commit": "fn()",
       "save": "fn()",
       "restore": "fn()",
@@ -40,11 +40,17 @@
       "createImageData": "fn(sw: number, sh: number) -> ?",
       "getImageData": "fn(sx: number, sy: number, sw: number, sh: number) -> ?",
       "putImageData": "fn(imagedata: ?, dx: number, dy: number)",
-      "lineWidth": "number", "lineCap": "string", "lineJoin": "string", "miterLimit": "number",
+      "lineWidth": "number",
+      "lineCap": "string",
+      "lineJoin": "string",
+      "miterLimit": "number",
       "setLineDash": "fn(segments: [number])",
       "getLineDash": "fn() -> [number]",
       "lineDashOffset": "number",
-      "font": "string", "textAlign": "string", "textBaseline": "string", "direction": "string",
+      "font": "string",
+      "textAlign": "string",
+      "textBaseline": "string",
+      "direction": "string",
       "closePath": "fn()",
       "moveTo": "fn(x: number, y: number)",
       "lineTo": "fn(x: number, y: number)",
@@ -56,62 +62,208 @@
       "ellipse": "fn(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise: bool)"
     }
   },
-
   "location": {
-    "assign": "fn(url: string)",
-    "replace": "fn(url: string)",
-    "reload": "fn()",
-    "origin": "string",
-    "hash": "string",
-    "search": "string",
-    "pathname": "string",
-    "port": "string",
-    "hostname": "string",
-    "host": "string",
-    "protocol": "string",
-    "href": "string"
+    "assign": {
+      "!type": "fn(url: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "replace": {
+      "!type": "fn(url: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "reload": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "origin": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "hash": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "search": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "pathname": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "port": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "hostname": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "host": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "protocol": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "href": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.location"
   },
-
   "Node": {
     "!type": "fn()",
     "prototype": {
-      "parentElement": "+Element",
-      "textContent": "string",
-      "baseURI": "string",
-      "localName": "string",
-      "prefix": "string",
-      "namespaceURI": "string",
-      "ownerDocument": "+Document",
-      "attributes": "+NamedNodeMap",
-      "nextSibling": "+Element",
-      "previousSibling": "+Element",
-      "lastChild": "+Element",
-      "firstChild": "+Element",
-      "childNodes": "+NodeList",
-      "parentNode": "+Element",
-      "nodeType": "number",
-      "nodeValue": "string",
-      "nodeName": "string",
-      "tagName": "string",
-      "insertBefore": "fn(newElt: +Element, before: +Element) -> +Element",
-      "replaceChild": "fn(newElt: +Element, oldElt: +Element) -> +Element",
-      "removeChild": "fn(oldElt: +Element) -> +Element",
-      "appendChild": "fn(newElt: +Element) -> +Element",
-      "hasChildNodes": "fn() -> bool",
-      "cloneNode": "fn(deep: bool) -> +Element",
-      "normalize": "fn()",
-      "isSupported": "fn(features: string, version: number) -> bool",
-      "hasAttributes": "fn() -> bool",
-      "lookupPrefix": "fn(uri: string) -> string",
-      "isDefaultNamespace": "fn(uri: string) -> bool",
-      "lookupNamespaceURI": "fn(uri: string) -> string",
-      "addEventListener": "fn(type: string, listener: fn(e: +Event), capture: bool)",
-      "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
-      "isSameNode": "fn(other: +Node) -> bool",
-      "isEqualNode": "fn(other: +Node) -> bool",
-      "compareDocumentPosition": "fn(other: +Node) -> number",
-      "contains": "fn(other: +Node) -> bool",
-      "dispatchEvent": "fn(event: +Event) -> bool",
+      "parentElement": {
+        "!type": "++Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.parentElement"
+      },
+      "textContent": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.textContent"
+      },
+      "baseURI": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.baseURI"
+      },
+      "localName": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.localName"
+      },
+      "prefix": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.prefix"
+      },
+      "namespaceURI": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.namespaceURI"
+      },
+      "ownerDocument": {
+        "!type": "+Document",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.ownerDocument"
+      },
+      "attributes": {
+        "!type": "+NamedNodeMap",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.attributes"
+      },
+      "nextSibling": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nextSibling"
+      },
+      "previousSibling": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.previousSibling"
+      },
+      "lastChild": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.lastChild"
+      },
+      "firstChild": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.firstChild"
+      },
+      "childNodes": {
+        "!type": "+NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.childNodes"
+      },
+      "parentNode": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.parentNode"
+      },
+      "nodeType": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nodeType"
+      },
+      "nodeValue": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nodeValue"
+      },
+      "nodeName": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nodeName"
+      },
+      "tagName": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nodeName"
+      },
+      "insertBefore": {
+        "!type": "fn(newElt: +Element, before: +Element) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.insertBefore"
+      },
+      "replaceChild": {
+        "!type": "fn(newElt: +Element, oldElt: +Element) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.replaceChild"
+      },
+      "removeChild": {
+        "!type": "fn(oldElt: +Element) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.removeChild"
+      },
+      "appendChild": {
+        "!type": "fn(newElt: +Element) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.appendChild"
+      },
+      "hasChildNodes": {
+        "!type": "fn() -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.hasChildNodes"
+      },
+      "cloneNode": {
+        "!type": "fn(deep: bool) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.cloneNode"
+      },
+      "normalize": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.normalize"
+      },
+      "isSupported": {
+        "!type": "fn(features: string, version: number) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.isSupported"
+      },
+      "hasAttributes": {
+        "!type": "fn() -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.hasAttributes"
+      },
+      "lookupPrefix": {
+        "!type": "fn(uri: string) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.lookupPrefix"
+      },
+      "isDefaultNamespace": {
+        "!type": "fn(uri: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.isDefaultNamespace"
+      },
+      "lookupNamespaceURI": {
+        "!type": "fn(uri: string) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.lookupNamespaceURI"
+      },
+      "addEventListener": {
+        "!type": "fn(type: string, listener: fn(e: +Event), capture: bool)",
+        "!url": "https://developer.mozilla.org/ja/docs/DOM/EventTarget.addEventListener"
+      },
+      "removeEventListener": {
+        "!type": "fn(type: string, listener: fn(), capture: bool)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget.removeEventListener"
+      },
+      "isSameNode": {
+        "!type": "fn(other: +Node) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.isSameNode"
+      },
+      "isEqualNode": {
+        "!type": "fn(other: +Node) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.isEqualNode"
+      },
+      "compareDocumentPosition": {
+        "!type": "fn(other: +Node) -> number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.compareDocumentPosition"
+      },
+      "contains": {
+        "!type": "fn(other: +Node) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Node.contains"
+      },
+      "dispatchEvent": {
+        "!type": "fn(event: +Event) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget.dispatchEvent"
+      },
       "ELEMENT_NODE": "number",
       "ATTRIBUTE_NODE": "number",
       "TEXT_NODE": "number",
@@ -130,42 +282,129 @@
       "DOCUMENT_POSITION_CONTAINS": "number",
       "DOCUMENT_POSITION_CONTAINED_BY": "number",
       "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC": "number"
-    }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Node"
   },
-
   "Element": {
     "!type": "fn()",
     "prototype": {
       "!proto": "Node.prototype",
-      "getAttribute": "fn(name: string) -> string",
-      "setAttribute": "fn(name: string, value: string)",
-      "removeAttribute": "fn(name: string)",
-      "getAttributeNode": "fn(name: string) -> +Attr",
-      "getElementsByTagName": "fn(tagName: string) -> +NodeList",
-      "getElementsByTagNameNS": "fn(ns: string, tagName: string) -> +NodeList",
-      "getAttributeNS": "fn(ns: string, name: string) -> string",
-      "setAttributeNS": "fn(ns: string, name: string, value: string)",
-      "removeAttributeNS": "fn(ns: string, name: string)",
-      "getAttributeNodeNS": "fn(ns: string, name: string) -> +Attr",
-      "hasAttribute": "fn(name: string) -> bool",
-      "hasAttributeNS": "fn(ns: string, name: string) -> bool",
-      "focus": "fn()",
-      "blur": "fn()",
-      "scrollIntoView": "fn(top: bool)",
-      "scrollByLines": "fn(lines: number)",
-      "scrollByPages": "fn(pages: number)",
-      "getElementsByClassName": "fn(name: string) -> +NodeList",
-      "querySelector": "fn(selectors: string) -> +Node",
-      "querySelectorAll": "fn(selectors: string) -> +NodeList",
-      "getClientRects": "fn() -> [+ClientRect]",
-      "getBoundingClientRect": "fn() -> +ClientRect",
-      "setAttributeNode": "fn(attr: +Attr) -> +Attr",
-      "removeAttributeNode": "fn(attr: +Attr) -> +Attr",
-      "setAttributeNodeNS": "fn(attr: +Attr) -> +Attr",
-      "insertAdjacentHTML": "fn(position: string, text: string)",
-      "children": "+HTMLCollection",
-      "childElementCount": "number",
-      "className": "string",
+      "getAttribute": {
+        "!type": "fn(name: string) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getAttribute"
+      },
+      "setAttribute": {
+        "!type": "fn(name: string, value: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.setAttribute"
+      },
+      "removeAttribute": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.removeAttribute"
+      },
+      "getAttributeNode": {
+        "!type": "fn(name: string) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getAttributeNode"
+      },
+      "getElementsByTagName": {
+        "!type": "fn(tagName: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getElementsByTagName"
+      },
+      "getElementsByTagNameNS": {
+        "!type": "fn(ns: string, tagName: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getElementsByTagNameNS"
+      },
+      "getAttributeNS": {
+        "!type": "fn(ns: string, name: string) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getAttributeNS"
+      },
+      "setAttributeNS": {
+        "!type": "fn(ns: string, name: string, value: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.setAttributeNS"
+      },
+      "removeAttributeNS": {
+        "!type": "fn(ns: string, name: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.removeAttributeNS"
+      },
+      "getAttributeNodeNS": {
+        "!type": "fn(ns: string, name: string) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getAttributeNodeNS"
+      },
+      "hasAttribute": {
+        "!type": "fn(name: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.hasAttribute"
+      },
+      "hasAttributeNS": {
+        "!type": "fn(ns: string, name: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.hasAttributeNS"
+      },
+      "focus": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.focus"
+      },
+      "blur": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.blur"
+      },
+      "scrollIntoView": {
+        "!type": "fn(top: bool)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.scrollIntoView"
+      },
+      "scrollByLines": {
+        "!type": "fn(lines: number)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollByLines"
+      },
+      "scrollByPages": {
+        "!type": "fn(pages: number)",
+        "!url": "https://developer.mozilla.org/en/docs/XPCOM_Interface_Reference/nsIDOMWindow"
+      },
+      "getElementsByClassName": {
+        "!type": "fn(name: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.getElementsByClassName"
+      },
+      "querySelector": {
+        "!type": "fn(selectors: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.querySelector"
+      },
+      "querySelectorAll": {
+        "!type": "fn(selectors: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.querySelectorAll"
+      },
+      "getClientRects": {
+        "!type": "fn() -> [+ClientRect]",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects"
+      },
+      "getBoundingClientRect": {
+        "!type": "fn() -> +ClientRect",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getBoundingClientRect"
+      },
+      "setAttributeNode": {
+        "!type": "fn(attr: +Attr) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.setAttributeNode"
+      },
+      "removeAttributeNode": {
+        "!type": "fn(attr: +Attr) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.removeAttributeNode"
+      },
+      "setAttributeNodeNS": {
+        "!type": "fn(attr: +Attr) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.setAttributeNodeNS"
+      },
+      "insertAdjacentHTML": {
+        "!type": "fn(position: string, text: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.insertAdjacentHTML"
+      },
+      "children": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.children"
+      },
+      "childElementCount": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.childElementCount"
+      },
+      "className": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.className"
+      },
       "style": {
         "cssText": "string",
         "alignmentBaseline": "string",
@@ -356,216 +595,717 @@
         "wordWrap": "string",
         "writingMode": "string",
         "zIndex": "string",
-        "zoom": "string"
+        "zoom": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.style"
       },
-      "classList": "+DOMTokenList",
-      "contentEditable": "bool",
-      "firstElementChild": "+Element",
-      "lastElementChild": "+Element",
-      "nextElementSibling": "+Element",
-      "previousElementSibling": "+Element",
-      "tabIndex": "number",
-      "title": "string",
-
-      "width": "number", "height": "number",
-      "getContext": "fn(id: string) -> canvas.context2d",
+      "classList": {
+        "!type": "+DOMTokenList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.classList"
+      },
+      "contentEditable": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.contentEditable"
+      },
+      "firstElementChild": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.firstElementChild"
+      },
+      "lastElementChild": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.lastElementChild"
+      },
+      "nextElementSibling": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.nextElementSibling"
+      },
+      "previousElementSibling": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.previousElementSibling"
+      },
+      "tabIndex": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.tabIndex"
+      },
+      "title": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.title"
+      },
+      "width": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.offsetWidth"
+      },
+      "height": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.offsetHeight"
+      },
+      "getContext": {
+        "!type": "fn(id: string) -> canvas.context2d",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/HTMLCanvasElement"
+      },
       "supportsContext": "fn(id: string) -> bool",
-
-      "oncopy": "?", "oncut": "?", "onpaste": "?",
-      "onbeforeunload": "?",
-      "onfocus": "?", "onblur": "?",
-      "onchange": "?",
-      "onclick": "?", "ondblclick": "?",
-      "onmousedown": "?", "onmouseup": "?", "onmousewheel": "?",
-      "onmouseover": "?", "onmouseout": "?", "onmousemove": "?",
-      "oncontextmenu": "?",
-      "onkeydown": "?", "onkeyup": "?", "onkeypress": "?",
-      "onresize": "?", "onscroll": "?",
-      "ondragstart": "?", "ondragover": "?", "ondragleave": "?", "ondragenter": "?",
-      "ondragend": "?", "ondrag": "?",
-
-      "offsetTop": "number", "offsetLeft": "number",
-      "offsetHeight": "number", "offsetWidth": "number",
-      "scrollTop": "number", "scrollLeft": "number",
-      "scrollHeight": "number", "scrollWidth": "number",
-      "clientTop": "number", "clientLeft": "number",
-      "clientHeight": "number", "clientWidth": "number",
-
-      "innerHTML": "string"
-    }
+      "oncopy": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.oncopy"
+      },
+      "oncut": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.oncut"
+      },
+      "onpaste": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onpaste"
+      },
+      "onbeforeunload": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/HTML/Element/body"
+      },
+      "onfocus": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onfocus"
+      },
+      "onblur": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onblur"
+      },
+      "onchange": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onchange"
+      },
+      "onclick": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onclick"
+      },
+      "ondblclick": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.ondblclick"
+      },
+      "onmousedown": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmousedown"
+      },
+      "onmouseup": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmouseup"
+      },
+      "onmousewheel": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Mozilla_event_reference/wheel"
+      },
+      "onmouseover": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmouseover"
+      },
+      "onmouseout": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmouseout"
+      },
+      "onmousemove": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmousemove"
+      },
+      "oncontextmenu": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/window.oncontextmenu"
+      },
+      "onkeydown": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onkeydown"
+      },
+      "onkeyup": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onkeyup"
+      },
+      "onkeypress": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onkeypress"
+      },
+      "onresize": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onresize"
+      },
+      "onscroll": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.onscroll"
+      },
+      "ondragstart": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations"
+      },
+      "ondragover": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Mozilla_event_reference/dragover"
+      },
+      "ondragleave": "?",
+      "ondragenter": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+      },
+      "ondragend": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+      },
+      "ondrag": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+      },
+      "offsetTop": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.offsetTop"
+      },
+      "offsetLeft": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.offsetLeft"
+      },
+      "offsetHeight": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.offsetHeight"
+      },
+      "offsetWidth": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.offsetWidth"
+      },
+      "scrollTop": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.scrollTop"
+      },
+      "scrollLeft": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.scrollLeft"
+      },
+      "scrollHeight": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.scrollHeight"
+      },
+      "scrollWidth": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.scrollWidth"
+      },
+      "clientTop": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.clientTop"
+      },
+      "clientLeft": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.clientLeft"
+      },
+      "clientHeight": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.clientHeight"
+      },
+      "clientWidth": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.clientWidth"
+      },
+      "innerHTML": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.innerHTML"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/DOM/Element"
   },
-
   "Text": {
     "!type": "fn()",
     "prototype": {
       "!proto": "Node.prototype",
-      "wholeText": "string",
-      "splitText": "fn(offset: number) -> +Text"
-    }
+      "wholeText": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Text.wholeText"
+      },
+      "splitText": {
+        "!type": "fn(offset: number) -> +Text",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Text.splitText"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Text"
   },
-
   "Document": {
     "!type": "fn()",
     "prototype": {
       "!proto": "Node.prototype",
-      "activeElement": "+Element",
-      "compatMode": "string",
-      "designMode": "string",
-      "dir": "string",
-      "height": "number",
-      "width": "number",
-      "characterSet": "string",
-      "readyState": "string",
-      "defaultCharset": "string",
-      "charset": "string",
-      "location": "location",
-      "lastModified": "string",
-      "head": "+Element",
-      "body": "+Element",
-      "cookie": "string",
-      "URL": "string",
-      "domain": "string",
-      "referrer": "string",
-      "title": "string",
-      "defaultView": {},
-      "documentURI": "string",
-      "xmlStandalone": "bool",
-      "xmlVersion": "?",
-      "xmlEncoding": "?",
-      "inputEncoding": "string",
-      "documentElement": "+Element",
-      "implementation": {
-        "hasFeature": "fn(feature: string, version: number) -> bool",
-        "createDocumentType": "fn(qualifiedName: string, publicId: string, systemId: string) -> +Node",
-        "createCSSStyleSheet": "fn() -> +Node",
-        "createHTMLDocument": "fn(title: string) -> +Document",
-        "createDocument": "fn(namespaceURI: string, qualifiedName: string, type: +Node) -> +Document"
+      "activeElement": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.activeElement"
       },
-      "doctype": "+Node",
-      "open": "fn()",
-      "close": "fn()",
-      "write": "fn(html: string)",
-      "writeln": "fn(html: string)",
-      "clear": "fn()",
-      "hasFocus": "fn() -> bool",
-      "createElement": "fn(tagName: string) -> +Element",
-      "createElementNS": "fn(ns: string, tagName: string) -> +Element",
-      "createDocumentFragment": "fn() -> +DocumentFragment",
-      "createTextNode": "fn(content: string) -> +Text",
-      "createComment": "fn(content: string) -> +Node",
-      "createCDATASection": "fn(content: string) -> +Node",
-      "createProcessingInstruction": "fn(content: string) -> +Node",
-      "createAttribute": "fn(name: string) -> +Attr",
-      "createAttributeNS": "fn(ns: string, name: string) -> +Attr",
-      "importNode": "fn(node: +Node, deep: bool) -> +Element",
-      "getElementById": "fn(id: string) -> +Element",
-      "getElementsByTagName": "fn(tagName: string) -> +NodeList",
-      "getElementsByTagNameNS": "fn(ns: string, tagName: string) -> +NodeList",
-      "createEvent": "fn(type: string) -> +Event",
-      "createRange": "fn() -> +Range",
-      "evaluate": "fn(expr: ?) -> +XPathResult",
-      "execCommand": "fn(cmd: string)",
-      "queryCommandEnabled": "fn(cmd: string) -> bool",
-      "queryCommandIndeterm": "fn(cmd: string) -> bool",
-      "queryCommandState": "fn(cmd: string) -> bool",
-      "queryCommandSupported": "fn(cmd: string) -> bool",
-      "queryCommandValue": "fn(cmd: string) -> string",
-      "getElementsByName": "fn(name: string) -> +HTMLCollection",
-      "elementFromPoint": "fn(x: number, y: number) -> +Element",
-      "getSelection": "fn() -> +Selection",
-      "adoptNode": "fn(node: +Node) -> +Element",
-      "createTreeWalker": "fn(root: +Node, mask: number) -> ?",
-      "createExpression": "fn(text: string) -> ?",
-      "createNSResolver": "fn(node: +Node)",
-      "scripts": "+HTMLCollection",
-      "plugins": "+HTMLCollection",
-      "embeds": "+HTMLCollection",
-      "anchors": "+HTMLCollection",
-      "links": "+HTMLCollection",
-      "forms": "+HTMLCollection",
-      "styleSheets": "+HTMLCollection"
-    }
+      "compatMode": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.compatMode"
+      },
+      "designMode": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.designMode"
+      },
+      "dir": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Document.dir"
+      },
+      "height": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.height"
+      },
+      "width": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.width"
+      },
+      "characterSet": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.characterSet"
+      },
+      "readyState": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.readyState"
+      },
+      "defaultCharset": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.characterSet"
+      },
+      "charset": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.characterSet"
+      },
+      "location": {
+        "!type": "location",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.location"
+      },
+      "lastModified": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.lastModified"
+      },
+      "head": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.head"
+      },
+      "body": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.body"
+      },
+      "cookie": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.cookie"
+      },
+      "URL": "string",
+      "domain": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.domain"
+      },
+      "referrer": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.referrer"
+      },
+      "title": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.title"
+      },
+      "defaultView": {
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.defaultView"
+      },
+      "documentURI": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.documentURI"
+      },
+      "xmlStandalone": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+      },
+      "xmlVersion": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.xmlVersion"
+      },
+      "xmlEncoding": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Document.xmlEncoding"
+      },
+      "inputEncoding": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.inputEncoding"
+      },
+      "documentElement": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.documentElement"
+      },
+      "implementation": {
+        "hasFeature": {
+          "!type": "fn(feature: string, version: number) -> bool",
+          "!url": "https://developer.mozilla.org/en/docs/DOM/document.implementation"
+        },
+        "createDocumentType": {
+          "!type": "fn(qualifiedName: string, publicId: string, systemId: string) -> +Node",
+          "!url": "https://developer.mozilla.org/en/docs/DOM/DOMImplementation.createDocumentType"
+        },
+        "createCSSStyleSheet": {
+          "!type": "fn() -> +Node",
+          "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+        },
+        "createHTMLDocument": {
+          "!type": "fn(title: string) -> +Document",
+          "!url": "https://developer.mozilla.org/en/docs/DOM/DOMImplementation.createHTMLDocument"
+        },
+        "createDocument": {
+          "!type": "fn(namespaceURI: string, qualifiedName: string, type: +Node) -> +Document",
+          "!url": "https://developer.mozilla.org/en/docs/DOM/document.implementation"
+        },
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.implementation"
+      },
+      "doctype": {
+        "!type": "+Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.doctype"
+      },
+      "open": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.open"
+      },
+      "close": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.close"
+      },
+      "write": {
+        "!type": "fn(html: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.write"
+      },
+      "writeln": {
+        "!type": "fn(html: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.writeln"
+      },
+      "clear": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.clear"
+      },
+      "hasFocus": {
+        "!type": "fn() -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.hasFocus"
+      },
+      "createElement": {
+        "!type": "fn(tagName: string) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createElement"
+      },
+      "createElementNS": {
+        "!type": "fn(ns: string, tagName: string) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createElementNS"
+      },
+      "createDocumentFragment": {
+        "!type": "fn() -> +DocumentFragment",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createDocumentFragment"
+      },
+      "createTextNode": {
+        "!type": "fn(content: string) -> +Text",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createTextNode"
+      },
+      "createComment": {
+        "!type": "fn(content: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createComment"
+      },
+      "createCDATASection": {
+        "!type": "fn(content: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createCDATASection"
+      },
+      "createProcessingInstruction": {
+        "!type": "fn(content: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createProcessingInstruction"
+      },
+      "createAttribute": {
+        "!type": "fn(name: string) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createAttribute"
+      },
+      "createAttributeNS": {
+        "!type": "fn(ns: string, name: string) -> +Attr",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Attr"
+      },
+      "importNode": {
+        "!type": "fn(node: +Node, deep: bool) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.importNode"
+      },
+      "getElementById": {
+        "!type": "fn(id: string) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.getElementById"
+      },
+      "getElementsByTagName": {
+        "!type": "fn(tagName: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.getElementsByTagName"
+      },
+      "getElementsByTagNameNS": {
+        "!type": "fn(ns: string, tagName: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.getElementsByTagNameNS"
+      },
+      "createEvent": {
+        "!type": "fn(type: string) -> +Event",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createEvent"
+      },
+      "createRange": {
+        "!type": "fn() -> +Range",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createRange"
+      },
+      "evaluate": {
+        "!type": "fn(expr: ?) -> +XPathResult",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.evaluate"
+      },
+      "execCommand": {
+        "!type": "fn(cmd: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.execCommand"
+      },
+      "queryCommandEnabled": {
+        "!type": "fn(cmd: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+      },
+      "queryCommandIndeterm": {
+        "!type": "fn(cmd: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+      },
+      "queryCommandState": {
+        "!type": "fn(cmd: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+      },
+      "queryCommandSupported": {
+        "!type": "fn(cmd: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.queryCommandSupported"
+      },
+      "queryCommandValue": {
+        "!type": "fn(cmd: string) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+      },
+      "getElementsByName": {
+        "!type": "fn(name: string) -> +HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.getElementsByName"
+      },
+      "elementFromPoint": {
+        "!type": "fn(x: number, y: number) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.elementFromPoint"
+      },
+      "getSelection": {
+        "!type": "fn() -> +Selection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.getSelection"
+      },
+      "adoptNode": {
+        "!type": "fn(node: +Node) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.adoptNode"
+      },
+      "createTreeWalker": {
+        "!type": "fn(root: +Node, mask: number) -> ?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createTreeWalker"
+      },
+      "createExpression": {
+        "!type": "fn(text: string) -> ?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createExpression"
+      },
+      "createNSResolver": {
+        "!type": "fn(node: +Node)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.createNSResolver"
+      },
+      "scripts": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Document.scripts"
+      },
+      "plugins": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.plugins"
+      },
+      "embeds": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.embeds"
+      },
+      "anchors": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.anchors"
+      },
+      "links": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.links"
+      },
+      "forms": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.forms"
+      },
+      "styleSheets": {
+        "!type": "+HTMLCollection",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.styleSheets"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/document"
   },
-  "document": "+Document",
+  "document": {
+    "!type": "+Document",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/document"
+  },
   "XMLDocument": {
     "!type": "fn()",
-    "prototype": "Document.prototype"
+    "prototype": "Document.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/Parsing_and_serializing_XML"
   },
-
   "Attr": {
     "!type": "fn()",
     "prototype": {
-      "isId": "bool",
-      "name": "string",
-      "value": "string"
-    }
+      "isId": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Attr"
+      },
+      "name": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Attr"
+      },
+      "value": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Attr"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Attr"
   },
-
   "NodeList": {
     "!type": "fn()",
     "prototype": {
-      "length": "number",
-      "item": "fn(i: number) -> +Element",
-      "<i>": "+Element"
-    }
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.length"
+      },
+      "item": {
+        "!type": "fn(i: number) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NodeList.item"
+      },
+      "<i>": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NodeList"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/NodeList"
   },
   "HTMLCollection": {
     "!type": "fn()",
     "prototype": {
-      "length": "number",
-      "item": "fn(i: number) -> +Element",
-      "namedItem": "fn(name: string) -> +Element",
-      "<i>": "+Element"
-    }
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/HTMLCollection"
+      },
+      "item": {
+        "!type": "fn(i: number) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/HTMLCollection"
+      },
+      "namedItem": {
+        "!type": "fn(name: string) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/HTMLCollection"
+      },
+      "<i>": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/HTMLCollection"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/HTMLCollection"
   },
-
   "NamedNodeMap": {
     "!type": "fn()",
     "prototype": {
-      "length": "number",
-      "getNamedItem": "fn(name: string) -> +Node",
-      "setNamedItem": "fn(node: +Node) -> +Node",
-      "removeNamedItem": "fn(name: string) -> +Node",
-      "item": "fn(i: number) -> +Node",
-      "getNamedItemNS": "fn(ns: string, name: string) -> +Node",
-      "setNamedItemNS": "fn(node: +Node) -> +Node",
-      "removeNamedItemNS": "fn(ns: string, name: string) -> +Node",
-      "<i>": "+Node"
-    }
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "getNamedItem": {
+        "!type": "fn(name: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "setNamedItem": {
+        "!type": "fn(node: +Node) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "removeNamedItem": {
+        "!type": "fn(name: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "item": {
+        "!type": "fn(i: number) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "getNamedItemNS": {
+        "!type": "fn(ns: string, name: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "setNamedItemNS": {
+        "!type": "fn(node: +Node) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "removeNamedItemNS": {
+        "!type": "fn(ns: string, name: string) -> +Node",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
+      },
+      "<i>": {
+        "!type": "+Node",
+        "!url": "https://developer.mozilla.org/en/docs/Gecko_DOM_Reference/Introduction"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap"
   },
-
   "DocumentFragment": {
     "!type": "fn()",
     "prototype": {
       "!proto": "Node.prototype"
-    }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/document.createDocumentFragment"
   },
-
   "DOMTokenList": {
     "!type": "fn()",
     "prototype": {
-      "length": "number",
-      "item": "fn(i: number) -> string",
-      "contains": "fn(token: string) -> bool",
-      "add": "fn(token: string)",
-      "remove": "fn(token: string)",
-      "toggle": "fn(token: string) -> bool",
-      "<i>": "string"
-    }
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
+      },
+      "item": {
+        "!type": "fn(i: number) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
+      },
+      "contains": {
+        "!type": "fn(token: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
+      },
+      "add": {
+        "!type": "fn(token: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
+      },
+      "remove": {
+        "!type": "fn(token: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
+      },
+      "toggle": {
+        "!type": "fn(token: string) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
+      },
+      "<i>": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.classList"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/DOMTokenList"
   },
-
   "XPathResult": {
     "!type": "fn()",
     "prototype": {
       "boolValue": "bool",
-      "invalidIteratorState": "bool",
-      "numberValue": "number",
-      "resultType": "number",
-      "singleNodeValue": "+Element",
-      "snapshotLength": "number",
-      "stringValue": "string",
-      "iterateNext": "fn()",
-      "snapshotItem": "fn()",
+      "invalidIteratorState": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/Introduction_to_using_XPath_in_JavaScript"
+      },
+      "numberValue": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/XPathResult"
+      },
+      "resultType": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/document.evaluate"
+      },
+      "singleNodeValue": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/Introduction_to_using_XPath_in_JavaScript"
+      },
+      "snapshotLength": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/XPathResult"
+      },
+      "stringValue": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/Introduction_to_using_XPath_in_JavaScript"
+      },
+      "iterateNext": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/Introduction_to_using_XPath_in_JavaScript"
+      },
+      "snapshotItem": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/fr/docs/XPathResult.SnapshotItem()"
+      },
       "ANY_TYPE": "number",
       "NUMBER_TYPE": "number",
       "STRING_TYPE": "number",
@@ -575,25 +1315,51 @@
       "UNORDERED_NODE_SNAPSHOT_TYPE": "number",
       "ORDERED_NODE_SNAPSHOT_TYPE": "number",
       "ANY_UNORDERED_NODE_TYPE": "number",
-      "ANY_TYPE": "number",
       "FIRST_ORDERED_NODE_TYPE": "number"
-    }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/XPathResult"
   },
-
   "ClientRect": {
     "!type": "fn()",
     "prototype": {
-      "top": "number", "left": "number", "bottom": "number", "right": "number"
-    }
+      "top": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects"
+      },
+      "left": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects"
+      },
+      "bottom": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects"
+      },
+      "right": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects"
   },
-
   "Event": {
     "!type": "fn()",
     "prototype": {
-      "stopPropagation": "fn()",
-      "preventDefault": "fn()",
-      "initEvent": "fn(type: string, bubbles: bool, cancelable: bool)",
-      "stopImmediatePropagation": "fn()",
+      "stopPropagation": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.stopPropagation"
+      },
+      "preventDefault": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.preventDefault"
+      },
+      "initEvent": {
+        "!type": "fn(type: string, bubbles: bool, cancelable: bool)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.initEvent"
+      },
+      "stopImmediatePropagation": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.stopImmediatePropagation"
+      },
       "NONE": "number",
       "CAPTURING_PHASE": "number",
       "AT_TARGET": "number",
@@ -614,315 +1380,1062 @@
       "BLUR": "number",
       "SELECT": "number",
       "CHANGE": "number",
-      "target": "+Element",
-      "relatedTarget": "+Element",
-      "pageX": "number", "pageY": "number", "clientX": "number", "clientY": "number",
-      "keyCode": "number", "charCode": "number", "which": "number", "button": "number",
-      "shiftKey": "bool", "ctrlKey": "bool", "altKey": "bool", "metaKey": "bool",
-      "returnValue": "bool", "cancelBubble": "bool",
+      "target": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget"
+      },
+      "relatedTarget": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.relatedTarget"
+      },
+      "pageX": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.pageX"
+      },
+      "pageY": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.pageY"
+      },
+      "clientX": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.clientX"
+      },
+      "clientY": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.clientY"
+      },
+      "keyCode": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.keyCode"
+      },
+      "charCode": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.charCode"
+      },
+      "which": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.which"
+      },
+      "button": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.button"
+      },
+      "shiftKey": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.shiftKey"
+      },
+      "ctrlKey": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.ctrlKey"
+      },
+      "altKey": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.altKey"
+      },
+      "metaKey": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.metaKey"
+      },
+      "returnValue": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/window.onbeforeunload"
+      },
+      "cancelBubble": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/event.cancelBubble"
+      },
       "dataTransfer": {
-        "dropEffect": "string",
-        "effectAllowed": "string",
-        "files": "+FileList",
-        "types": "[string]",
-        "addElement": "fn(element: +Element)",
-        "clearData": "fn()",
-        "getData": "fn(type: string) -> string",
-        "setData": "fn(type: string, data: string)",
-        "setDragImage": "fn(image: +Element)"
+        "dropEffect": {
+          "!type": "string",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer"
+        },
+        "effectAllowed": {
+          "!type": "string",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations"
+        },
+        "files": {
+          "!type": "+FileList",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer"
+        },
+        "types": {
+          "!type": "[string]",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Recommended_Drag_Types"
+        },
+        "addElement": {
+          "!type": "fn(element: +Element)",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer"
+        },
+        "clearData": {
+          "!type": "fn()",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations"
+        },
+        "getData": {
+          "!type": "fn(type: string) -> string",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations"
+        },
+        "setData": {
+          "!type": "fn(type: string, data: string)",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations"
+        },
+        "setDragImage": {
+          "!type": "fn(image: +Element)",
+          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations"
+        },
+        "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer"
       }
-    }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/event/Comparison_of_Event_Targets"
   },
-  "TouchEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "WheelEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "MouseEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "KeyboardEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "HashChangeEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "ErrorEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "CustomEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  "BeforeLoadEvent": {"!type": "fn()", "prototype": "Event.prototype"},
-  
+  "TouchEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Touch_events"
+  },
+  "WheelEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/WheelEvent"
+  },
+  "MouseEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/MouseEvent"
+  },
+  "KeyboardEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/KeyboardEvent"
+  },
+  "HashChangeEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onhashchange"
+  },
+  "ErrorEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/DOM_event_reference/error"
+  },
+  "CustomEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Event/CustomEvent"
+  },
+  "BeforeLoadEvent": {
+    "!type": "fn()",
+    "prototype": "Event.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window"
+  },
   "WebSocket": {
     "!type": "fn(url: string)",
     "prototype": {
-      "close": "fn()",
-      "send": "fn(data: string)",
-      "binaryType": "string",
-      "bufferedAmount": "number",
-      "extensions": "string",
-      "onclose": "?", "onerror": "?", "onmessage": "?", "onopen": "?",
-      "protocol": "string",
-      "url": "string",
-      "CONNECTING": "number", "OPEN": "number", "CLOSING": "number", "CLOSED": "number"
-    }
+      "close": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/CloseEvent"
+      },
+      "send": {
+        "!type": "fn(data: string)",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/WebSocket"
+      },
+      "binaryType": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/WebSocket"
+      },
+      "bufferedAmount": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/Writing_WebSocket_client_applications"
+      },
+      "extensions": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/WebSocket"
+      },
+      "onclose": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/CloseEvent"
+      },
+      "onerror": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/Writing_WebSocket_client_applications"
+      },
+      "onmessage": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/WebSocket"
+      },
+      "onopen": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/WebSockets_reference/WebSocket"
+      },
+      "protocol": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets"
+      },
+      "url": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/WebSockets/Writing_WebSocket_client_applications"
+      },
+      "CONNECTING": "number",
+      "OPEN": "number",
+      "CLOSING": "number",
+      "CLOSED": "number"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/WebSockets"
   },
-
   "Worker": {
     "!type": "fn(scriptURL: string)",
     "prototype": {
-      "postMessage": "fn(message: ?)",
-      "terminate": "fn()",
-      "onmessage": "?", "onerror": "?"
-    }
+      "postMessage": {
+        "!type": "fn(message: ?)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Using_web_workers"
+      },
+      "terminate": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Using_web_workers"
+      },
+      "onmessage": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Using_web_workers"
+      },
+      "onerror": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Using_web_workers"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Worker"
   },
-
   "SharedWorker": {
     "!type": "fn(scriptURL: string)",
-    "prototype": "Worker.prototype"
+    "prototype": "Worker.prototype",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/SharedWorker"
   },
-
   "localStorage": {
-    "setItem": "fn(name: string, value: string)",
-    "getItem": "fn(name: string) -> string"
+    "setItem": {
+      "!type": "fn(name: string, value: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage"
+    },
+    "getItem": {
+      "!type": "fn(name: string) -> string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Storage"
   },
   "sessionStorage": {
-    "setItem": "fn(name: string, value: string)",
-    "getItem": "fn(name: string) -> string"
+    "setItem": {
+      "!type": "fn(name: string, value: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage"
+    },
+    "getItem": {
+      "!type": "fn(name: string) -> string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Storage"
   },
-
   "FileList": {
     "!type": "fn()",
     "prototype": {
-      "length": "number",
-      "item": "fn(i: number) -> +File",
-      "<i>": "+File"
-    }
+      "length": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileList"
+      },
+      "item": {
+        "!type": "fn(i: number) -> +File",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileList"
+      },
+      "<i>": {
+        "!type": "+File",
+        "!url": "https://developer.mozilla.org/pt-BR/docs/DOM/FileList"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/FileList"
   },
   "File": {
     "!type": "fn()",
     "prototype": {
       "!proto": "Blob.prototype",
-      "fileName": "string",
-      "fileSize": "number",
-      "lastModifiedDate": "?",
-      "name": "string"
-    }
+      "fileName": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/File.fileName"
+      },
+      "fileSize": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/File.fileSize"
+      },
+      "lastModifiedDate": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/File.lastModifiedDate"
+      },
+      "name": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/File.name"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/File"
   },
   "Blob": {
     "!type": "fn(parts: [?], properties?: ?)",
     "prototype": {
-      "size": "number",
-      "type": "string",
-      "slice": "fn(start: number, end?: number, type?: string) -> +Blob"
-    }
+      "size": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Blob"
+      },
+      "type": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Blob"
+      },
+      "slice": {
+        "!type": "fn(start: number, end?: number, type?: string) -> +Blob",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Blob"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Blob"
   },
   "FileReader": {
     "!type": "fn()",
     "prototype": {
-      "abort": "fn()",
-      "readAsArrayBuffer": "fn(blob: +Blob)",
-      "readAsBinaryString": "fn(blob: +Blob)",
-      "readAsDataURL": "fn(blob: +Blob)",
-      "readAsText": "fn(blob: +Blob, encoding?: string)",
-      "EMPTY": "number", "LOADING": "number", "DONE": "number",
-      "error": "?",
-      "readyState": "number",
-      "result": "?",
-      "onabort": "?", "onerror": "?",
-      "onload": "?", "onloadend": "?", "onloadstart": "?", "onprogress": "?"
-    }
+      "abort": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "readAsArrayBuffer": {
+        "!type": "fn(blob: +Blob)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "readAsBinaryString": {
+        "!type": "fn(blob: +Blob)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "readAsDataURL": {
+        "!type": "fn(blob: +Blob)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "readAsText": {
+        "!type": "fn(blob: +Blob, encoding?: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "EMPTY": "number",
+      "LOADING": "number",
+      "DONE": "number",
+      "error": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "readyState": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "result": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "onabort": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "onerror": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "onload": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "onloadend": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "onloadstart": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      },
+      "onprogress": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader"
   },
-
   "Range": {
     "!type": "fn()",
     "prototype": {
-      "collapsed": "bool",
-      "commonAncestorContainer": "+Element",
-      "endContainer": "+Element",
-      "endOffset": "number",
-      "startContainer": "+Element",
-      "startOffset": "number",
-      "setStart": "fn(node: +Element, offset: number)",
-      "setEnd": "fn(node: +Element, offset: number)",
-      "setStartBefore": "fn(node: +Element)",
-      "setStartAfter": "fn(node: +Element)",
-      "setEndBefore": "fn(node: +Element)",
-      "setEndAfter": "fn(node: +Element)",
-      "selectNode": "fn(node: +Element)",
-      "selectNodeContents": "fn(node: +Element)",
-      "collapse": "fn(toStart: bool)",
-      "cloneContents": "fn() -> +DocumentFragment",
-      "deleteContents": "fn()",
-      "extractContents": "fn() -> +DocumentFragment",
-      "insertNode": "fn(node: +Element)",
-      "surroundContents": "fn(node: +Element)",
-      "compareBoundaryPoints": "fn(how: number, other: +Range) -> number",
-      "cloneRange": "fn() -> +Range",
-      "detach": "fn()",
-      "END_TO_END": "number", "END_TO_START": "number", "START_TO_END": "number", "START_TO_START": "number"
-    }
+      "collapsed": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.collapsed"
+      },
+      "commonAncestorContainer": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.commonAncestorContainer"
+      },
+      "endContainer": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.endContainer"
+      },
+      "endOffset": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.endOffset"
+      },
+      "startContainer": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.startContainer"
+      },
+      "startOffset": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.startOffset"
+      },
+      "setStart": {
+        "!type": "fn(node: +Element, offset: number)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.setStart"
+      },
+      "setEnd": {
+        "!type": "fn(node: +Element, offset: number)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.setEnd"
+      },
+      "setStartBefore": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.setStartBefore"
+      },
+      "setStartAfter": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.setStartAfter"
+      },
+      "setEndBefore": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.setEndBefore"
+      },
+      "setEndAfter": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.setEndAfter"
+      },
+      "selectNode": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.selectNode"
+      },
+      "selectNodeContents": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.selectNodeContents"
+      },
+      "collapse": {
+        "!type": "fn(toStart: bool)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.collapse"
+      },
+      "cloneContents": {
+        "!type": "fn() -> +DocumentFragment",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.cloneContents"
+      },
+      "deleteContents": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.deleteContents"
+      },
+      "extractContents": {
+        "!type": "fn() -> +DocumentFragment",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.extractContents"
+      },
+      "insertNode": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.insertNode"
+      },
+      "surroundContents": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.surroundContents"
+      },
+      "compareBoundaryPoints": {
+        "!type": "fn(how: number, other: +Range) -> number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.compareBoundaryPoints"
+      },
+      "cloneRange": {
+        "!type": "fn() -> +Range",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.cloneRange"
+      },
+      "detach": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/range.detach"
+      },
+      "END_TO_END": "number",
+      "END_TO_START": "number",
+      "START_TO_END": "number",
+      "START_TO_START": "number"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/range.detach"
   },
-
   "XMLHttpRequest": {
     "!type": "fn()",
     "prototype": {
-      "abort": "fn()",
-      "getAllResponseHeaders": "fn() -> string",
-      "getResponseHeader": "fn(header: string) -> string",
-      "open": "fn(method: string, url: string, async?: bool, user?: string, password?: string)",
-      "overrideMimeType": "fn(type: string)",
-      "send": "fn(data?: string)",
-      "setRequestHeader": "fn(header: string, value: string)",
-      "onreadystatechange": "fn()",
-      "readyState": "number",
-      "response": "+Document",
-      "responseText": "string",
-      "responseType": "string",
-      "timeout": "number",
-      "UNSENT": "number", "OPENED": "number", "HEADERS_RECEIVED": "number", "LOADING": "number", "DONE": "number"
-    }
+      "abort": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "getAllResponseHeaders": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "getResponseHeader": {
+        "!type": "fn(header: string) -> string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "open": {
+        "!type": "fn(method: string, url: string, async?: bool, user?: string, password?: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "overrideMimeType": {
+        "!type": "fn(type: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "send": {
+        "!type": "fn(data?: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "setRequestHeader": {
+        "!type": "fn(header: string, value: string)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "onreadystatechange": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "readyState": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "response": {
+        "!type": "+Document",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "responseText": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest/Using_XMLHttpRequest"
+      },
+      "responseType": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
+      },
+      "timeout": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest/Synchronous_and_Asynchronous_Requests"
+      },
+      "UNSENT": "number",
+      "OPENED": "number",
+      "HEADERS_RECEIVED": "number",
+      "LOADING": "number",
+      "DONE": "number"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest"
   },
-
   "DOMParser": {
     "!type": "fn()",
     "prototype": {
-      "parseFromString": "fn(data: string, mime: string) -> +Document"
-    }
+      "parseFromString": {
+        "!type": "fn(data: string, mime: string) -> +Document",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/DOMParser"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/DOMParser"
   },
-
   "Selection": {
     "!type": "fn()",
     "prototype": {
-      "anchorNode": "+Element",
-      "anchorOffset": "number",
-      "focusNode": "+Element",
-      "focusOffset": "number",
-      "isCollapsed": "bool",
-      "rangeCount": "number",
-      "getRangeAt": "fn(i: number) -> +Range",
-      "collapse": "fn()",
-      "extend": "fn(node: +Element, offset: number)",
-      "collapseToStart": "fn()",
-      "collapseToEnd": "fn()",
-      "selectAllChildren": "fn(node: +Element)",
-      "addRange": "fn(range: +Range)",
-      "removeRange": "fn(range: +Range)",
-      "removeAllRanges": "fn()",
-      "deleteFromDocument": "fn()",
-      "containsNode": "fn(node: +Element) -> bool"
-    }
+      "anchorNode": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/anchorNode"
+      },
+      "anchorOffset": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/anchorOffset"
+      },
+      "focusNode": {
+        "!type": "+Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/focusNode"
+      },
+      "focusOffset": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/focusOffset"
+      },
+      "isCollapsed": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/isCollapsed"
+      },
+      "rangeCount": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/rangeCount"
+      },
+      "getRangeAt": {
+        "!type": "fn(i: number) -> +Range",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/getRangeAt"
+      },
+      "collapse": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/collapse"
+      },
+      "extend": {
+        "!type": "fn(node: +Element, offset: number)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/extend"
+      },
+      "collapseToStart": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/collapseToStart"
+      },
+      "collapseToEnd": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/collapseToEnd"
+      },
+      "selectAllChildren": {
+        "!type": "fn(node: +Element)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/selectAllChildren"
+      },
+      "addRange": {
+        "!type": "fn(range: +Range)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/addRange"
+      },
+      "removeRange": {
+        "!type": "fn(range: +Range)",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/removeRange"
+      },
+      "removeAllRanges": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/removeAllRanges"
+      },
+      "deleteFromDocument": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/deleteFromDocument"
+      },
+      "containsNode": {
+        "!type": "fn(node: +Element) -> bool",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Selection/containsNode"
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/DOM/Selection"
   },
-
   "console": {
-    "debug": "fn(text: string)",
-    "error": "fn(text: string)",
-    "info": "fn(text: string)",
-    "log": "fn(text: string)",
-    "warn": "fn(text: string)"
+    "debug": {
+      "!type": "fn(text: string)",
+      "!url": "https://developer.mozilla.org/en/docs/Debugging_JavaScript"
+    },
+    "error": {
+      "!type": "fn(text: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/console.error"
+    },
+    "info": {
+      "!type": "fn(text: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/console.info"
+    },
+    "log": {
+      "!type": "fn(text: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/console.log"
+    },
+    "warn": {
+      "!type": "fn(text: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/console.warn"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/console"
   },
-
-  "top": "<top>",
-  "parent": "<top>",
-  "window": "<top>",
-  "opener": "<top>",
-  "self": "<top>",
-  
+  "top": {
+    "!type": "<top>",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.top"
+  },
+  "parent": {
+    "!type": "<top>",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.parent"
+  },
+  "window": {
+    "!type": "<top>",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window"
+  },
+  "opener": {
+    "!type": "<top>",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.opener"
+  },
+  "self": {
+    "!type": "<top>",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.self"
+  },
   "devicePixelRatio": "number",
-
-  "name": "string",
-  "closed": "bool",
-
-  "pageYOffset": "number",
-  "pageXOffset": "number",
-  "scrollY": "number",
-  "scrollX": "number",
-  "screenTop": "number",
-  "screenLeft": "number",
-  "screenY": "number",
-  "screenX": "number",
-  "innerWidth": "number",
-  "innerHeight": "number",
-  "outerWidth": "number",
-  "outerHeight": "number",
-
-  "frameElement": "+Element",
-
+  "name": {
+    "!type": "string",
+    "!url": "https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/Function/name"
+  },
+  "closed": {
+    "!type": "bool",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.closed"
+  },
+  "pageYOffset": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollY"
+  },
+  "pageXOffset": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollX"
+  },
+  "scrollY": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollY"
+  },
+  "scrollX": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollX"
+  },
+  "screenTop": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.top"
+  },
+  "screenLeft": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.left"
+  },
+  "screenY": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/event.screenY"
+  },
+  "screenX": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/event.screenX"
+  },
+  "innerWidth": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.innerWidth"
+  },
+  "innerHeight": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.innerHeight"
+  },
+  "outerWidth": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.outerWidth"
+  },
+  "outerHeight": {
+    "!type": "number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.outerHeight"
+  },
+  "frameElement": {
+    "!type": "+Element",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.frameElement"
+  },
   "crypto": {
-    "getRandomValues": "fn([number])"
+    "getRandomValues": {
+      "!type": "fn([number])",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.crypto.getRandomValues"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.crypto.getRandomValues"
   },
-
   "navigator": {
-    "appName": "string",
-    "appVersion": "string",
-    "language": "string",
-    "platform": "string",
-    "plugins": "[?]",
-    "userAgent": "string",
-    "vendor": "string",
-    "javaEnabled": "bool"
+    "appName": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.appName"
+    },
+    "appVersion": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.appVersion"
+    },
+    "language": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.language"
+    },
+    "platform": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.platform"
+    },
+    "plugins": {
+      "!type": "[?]",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.plugins"
+    },
+    "userAgent": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.userAgent"
+    },
+    "vendor": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.vendor"
+    },
+    "javaEnabled": {
+      "!type": "bool",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.javaEnabled"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator"
   },
-
   "history": {
-    "state": "?",
-    "length": "number",
-    "go": "fn(delta: number)",
-    "forward": "fn()",
-    "back": "fn()",
-    "pushState": "fn(data: ?, title: string, url?: string)",
-    "replaceState": "fn(data: ?, title: string, url?: string)"
+    "state": {
+      "!type": "?",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
+    },
+    "length": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
+    },
+    "go": {
+      "!type": "fn(delta: number)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.history"
+    },
+    "forward": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
+    },
+    "back": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
+    },
+    "pushState": {
+      "!type": "fn(data: ?, title: string, url?: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
+    },
+    "replaceState": {
+      "!type": "fn(data: ?, title: string, url?: string)",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history"
   },
-
   "screen": {
-    "availWidth": "number",
-    "availHeight": "number",
-    "availTop": "number",
-    "availLeft": "number",
-    "pixelDepth": "number",
-    "colorDepth": "number",
-    "width": "number",
-    "height": "number"
+    "availWidth": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.availWidth"
+    },
+    "availHeight": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.availHeight"
+    },
+    "availTop": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.availTop"
+    },
+    "availLeft": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.availLeft"
+    },
+    "pixelDepth": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.pixelDepth"
+    },
+    "colorDepth": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.colorDepth"
+    },
+    "width": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.width"
+    },
+    "height": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen.height"
+    },
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.screen"
   },
-
-  "postMessage": "fn(message: string, targetOrigin: string)",
-
-  "close": "fn()",
-  "blur": "fn()",
-  "focus": "fn()",
-
-  "onload": "?", "onunload": "?",
-  "onscroll": "?", "onresize": "?",
-  "onpageshow": "?", "onpagehide": "?",
-  "ononline": "?", "onoffline": "?",
-  "onmousewheel": "?", "onmouseup": "?", "onmouseover": "?", "onmouseout": "?",
-  "onmousemove": "?", "onmousedown": "?",
-  "onclick": "?", "ondblclick": "?",
-  "onmessage": "?",
-  "onkeyup": "?", "onkeypress": "?", "onkeydown": "?",
-  "oninput": "?",
-  "onpopstate": "?", "onhashchange": "?",
-  "onfocus": "?", "onblur": "?",
-  "onerror": "?",
-  "ondrop": "?", "ondragstart": "?", "ondragover": "?", "ondragleave": "?",
-  "ondragenter": "?", "ondragend": "?", "ondrag": "?",
-  "oncontextmenu": "?",
-  "onchange": "?",
-  "onbeforeunload": "?",
-  "onabort": "?",
-
-  "getSelection": "fn() -> +Selection",
-
-  "alert": "fn(message: string)",
-  "confirm": "fn(message: string) -> bool",
-  "prompt": "fn(message: string, value: string) -> string",
-
-  "scrollBy": "fn(x: number, y: number)",
-  "scrollTo": "fn(x: number, y: number)",
-  "scroll": "fn(x: number, y: number)",
- 
-  "setTimeout": "fn(f: fn(), ms: number) -> number",
-  "clearTimeout": "fn(timeout: number)",
-  "setInterval": "fn(f: fn(), ms: number) -> number",
-  "clearInterval": "fn(interval: number)",
-
-  "atob": "fn(encoded: string) -> string",
-  "btoa": "fn(data: string) -> string",
-
+  "postMessage": {
+    "!type": "fn(message: string, targetOrigin: string)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.postMessage"
+  },
+  "close": {
+    "!type": "fn()",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.close"
+  },
+  "blur": {
+    "!type": "fn()",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.blur"
+  },
+  "focus": {
+    "!type": "fn()",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.focus"
+  },
+  "onload": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onload"
+  },
+  "onunload": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onunload"
+  },
+  "onscroll": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onscroll"
+  },
+  "onresize": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onresize"
+  },
+  "ononline": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/document.ononline"
+  },
+  "onoffline": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Online_and_offline_events"
+  },
+  "onmousewheel": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/DOM_event_reference/mousewheel"
+  },
+  "onmouseup": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onmouseup"
+  },
+  "onmouseover": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmouseover"
+  },
+  "onmouseout": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmouseout"
+  },
+  "onmousemove": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onmousemove"
+  },
+  "onmousedown": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onmousedown"
+  },
+  "onclick": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onclick"
+  },
+  "ondblclick": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.ondblclick"
+  },
+  "onmessage": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/Using_web_workers"
+  },
+  "onkeyup": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onkeyup"
+  },
+  "onkeypress": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onkeypress"
+  },
+  "onkeydown": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onkeydown"
+  },
+  "oninput": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/DOM_event_reference/input"
+  },
+  "onpopstate": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onpopstate"
+  },
+  "onhashchange": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onhashchange"
+  },
+  "onfocus": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onfocus"
+  },
+  "onblur": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onblur"
+  },
+  "onerror": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onerror"
+  },
+  "ondrop": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop_Example"
+  },
+  "ondragstart": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop_Example"
+  },
+  "ondragover": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+  },
+  "ondragleave": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM_Client_Object_Cross-Reference/DOM_HTML"
+  },
+  "ondragenter": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+  },
+  "ondragend": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+  },
+  "ondrag": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/Drag_and_Drop"
+  },
+  "oncontextmenu": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.oncontextmenu"
+  },
+  "onchange": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/element.onchange"
+  },
+  "onbeforeunload": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onbeforeunload"
+  },
+  "onabort": {
+    "!type": "?",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.onabort"
+  },
+  "getSelection": {
+    "!type": "fn() -> +Selection",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.getSelection"
+  },
+  "alert": {
+    "!type": "fn(message: string)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.alert"
+  },
+  "confirm": {
+    "!type": "fn(message: string) -> bool",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.confirm"
+  },
+  "prompt": {
+    "!type": "fn(message: string, value: string) -> string",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.prompt"
+  },
+  "scrollBy": {
+    "!type": "fn(x: number, y: number)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollBy"
+  },
+  "scrollTo": {
+    "!type": "fn(x: number, y: number)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scrollTo"
+  },
+  "scroll": {
+    "!type": "fn(x: number, y: number)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.scroll"
+  },
+  "setTimeout": {
+    "!type": "fn(f: fn(), ms: number) -> number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.setTimeout"
+  },
+  "clearTimeout": {
+    "!type": "fn(timeout: number)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.clearTimeout"
+  },
+  "setInterval": {
+    "!type": "fn(f: fn(), ms: number) -> number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.setInterval"
+  },
+  "clearInterval": {
+    "!type": "fn(interval: number)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.clearInterval"
+  },
+  "atob": {
+    "!type": "fn(encoded: string) -> string",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.atob"
+  },
+  "btoa": {
+    "!type": "fn(data: string) -> string",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.btoa"
+  },
   "addEventListener": {
     "!type": "fn(type: string, listener: fn(e: +Event), capture: bool)",
-    "!effects": ["call $1 +Event"]
+    "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget.addEventListener"
   },
-  "removeEventListener": "fn(type: string, listener: fn(), capture: bool)",
-  "dispatchEvent": "fn(event: +Event) -> bool",
-
-  "getComputedStyle": "fn(node: +Element, pseudo?: string) -> Element.prototype.style"
+  "removeEventListener": {
+    "!type": "fn(type: string, listener: fn(), capture: bool)",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget.removeEventListener"
+  },
+  "dispatchEvent": {
+    "!type": "fn(event: +Event) -> bool",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget.dispatchEvent"
+  },
+  "getComputedStyle": {
+    "!type": "fn(node: +Element, pseudo?: string) -> Element.prototype.style",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.getComputedStyle"
+  }
 }
