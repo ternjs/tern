@@ -21,10 +21,11 @@
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
-  var TypeParser = exports.TypeParser = function(spec, start, base) {
+  var TypeParser = exports.TypeParser = function(spec, start, base, forceNew) {
     this.pos = start || 0;
     this.spec = spec;
     this.base = base;
+    this.forceNew = forceNew;
   };
   TypeParser.prototype = {
     eat: function(str) {
@@ -87,8 +88,9 @@
         var path = this.word(/[\w$<>\.!]/);
         var base = parsePath(path + ".prototype");
         if (!(base instanceof infer.Obj)) base = parsePath(path);
-        if (base instanceof infer.Obj) return infer.getInstance(base);
-        return base;
+        if (!(base instanceof infer.Obj)) return base;
+        if (top && this.forceNew) return new infer.Obj(base);
+        return infer.getInstance(base);
       } else if (this.eat("?")) {
         return infer.ANull;
       } else {
@@ -141,8 +143,8 @@
     }
   }
 
-  function parseType(spec, name, base) {
-    var type = new TypeParser(spec, null, base).parseType(name, true);
+  function parseType(spec, name, base, forceNew) {
+    var type = new TypeParser(spec, null, base, forceNew).parseType(name, true);
     if (/^fn\(/.test(spec)) for (var i = 0; i < type.args.length; ++i) (function(i) {
       var arg = type.args[i];
       if (arg instanceof infer.Fn && arg.args.length) addEffect(type, function(_self, fArgs) {
@@ -314,16 +316,21 @@
         if (type) continue;
         parseType(inner, innerPath).propagate(known);
       } else {
-        var doc = inner["!doc"], url = inner["!url"];
-        if (doc) known.doc = doc;
-        if (url) known.url = url;
         if (!isSimpleAnnotation(inner)) {
           passTwo(type, inner, innerPath);
-          if (doc) type.doc = doc;
-          if (url) type.url = url;
         } else if (!type) {
           if (!inner["!type"]) console.log(innerPath);
-          parseType(inner["!type"], innerPath).propagate(known);
+          parseType(inner["!type"], innerPath, null, true).propagate(known);
+          type = known.getType();
+        } else continue;
+        var doc = inner["!doc"], url = inner["!url"];
+        if (doc) {
+          if (type && type instanceof infer.Obj) type.doc = doc;
+          if (!path) known.doc = doc;
+        }
+        if (url) {
+          if (type && type instanceof infer.Obj) type.url = url;
+          if (!path) known.url = url;
         }
       }
     }

@@ -541,6 +541,7 @@
     if (!def) {
       infer.resetGuessing();
       var type = infer.expressionType(expr);
+      if (!url && type.url) url = type.url;
       if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
         var tp = type.types[i];
         if (!url && tp.url) url = tp.url;
