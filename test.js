@@ -63,28 +63,48 @@ function runTests(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/:(:)?(\?)?\s+([^\n]*)/g, m;
+    var typedef = /\/\/(\+|::?|:\?)\s+([^\n]*)/g, m;
     while (m = typedef.exec(text)) {
+      var args = m[2], kind = m[1];
       ++tests;
-      var expr = walk.findNodeBefore(ast, m.index, "Expression");
-      if (!expr) {
-        console.log(name + ": No expression found at line " + acorn.getLineInfo(text, m.index).line);
-        ++failed;
-        continue;
-      }
-      var query = {type: "type",
-                   start: expr.node.start, end: expr.node.end,
-                   file: fname,
-                   depth: m[1] ? 2 : null};
-      server.request({query: query}, function(err, resp) {
-        if (err) throw err;
-        var type = resp.guess && !m[2] ? "?" : resp.type || "?";
-        if (type != m[3]) {
-          console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
-                      " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
+      if (kind == "+") {
+        for (var pos = m.index; /\s/.test(text.charAt(pos - 1)); --pos) {}
+        var query = {type: "completions", end: pos, file: fname};
+        var andOthers = /,\s*\.\.\.$/.test(args);
+        if (andOthers) args = args.slice(0, args.lastIndexOf(","));
+        var parts = args.split(/\s*,\s*/);
+        server.request({query: query}, function(err, resp) {
+          if (err) throw err;
+          var match = andOthers || parts.length == resp.completions.length;
+          for (var i = 0; i < parts.length && match; ++i)
+            if (resp.completions.indexOf(parts[i]) < 0) match = false;
+          if (!match) {
+            console.log(name + ": Wrong completion set at line " + acorn.getLineInfo(text, m.index).line +
+                        "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
+            ++failed;
+          }
+        });
+      } else {
+        var expr = walk.findNodeBefore(ast, m.index, "Expression");
+        if (!expr) {
+          console.log(name + ": No expression found at line " + acorn.getLineInfo(text, m.index).line);
           ++failed;
+          continue;
         }
-      });
+        var query = {type: "type",
+                     start: expr.node.start, end: expr.node.end,
+                     file: fname,
+                     depth: kind == "::" ? 2 : null};
+        server.request({query: query}, function(err, resp) {
+          if (err) throw err;
+          var type = resp.guess && kind != ":?" ? "?" : resp.type || "?";
+          if (type != args) {
+            console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
+                        " has type\n  " + type + "\ninstead of expected type\n  " + m[3]);
+            ++failed;
+          }
+        });
+      }
     }
   });
   console.log("Ran " + tests + " tests from " + files + " files.");
