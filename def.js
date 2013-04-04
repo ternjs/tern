@@ -353,11 +353,13 @@
   infer.registerFunction = function(name, f) { customFunctions[name] = f; };
 
   infer.registerFunction("Object_create", function(self, args) {
-    var result = new infer.AVal;
+    var result = new infer.AVal, didEmpty = 0, didFull = 0;
     if (args[0]) args[0].propagate({addType: function(tp) {
       if (tp.isEmpty()) {
+        if (didEmpty++) return;
         result.addType(new infer.Obj());
       } else if (tp instanceof infer.Obj) {
+        if (didFull++ > 5) return;
         var derived = new infer.Obj(tp), spec = args[1];
         if (spec instanceof infer.AVal) spec = spec.types[0];
         if (spec instanceof infer.Obj) for (var prop in spec.props) {

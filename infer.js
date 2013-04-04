@@ -32,7 +32,7 @@
 
   // ABSTRACT VALUES
 
-var AVal = exports.AVal = function(type) {
+  var AVal = exports.AVal = function(type) {
     this.types = [];
     this.forward = null;
     if (type) type.propagate(this);
@@ -222,10 +222,10 @@ var AVal = exports.AVal = function(type) {
         this.args[i].propagate(fn.args[i]);
       this.self.propagate(fn.self);
       if (!this.retval) return;
-      if (fn.computeRet)
-        fn.computeRet(this.self, this.args, this.argNodes).propagate(this.retval);
-      else
+      if (!fn.computeRet)
         fn.retval.propagate(this.retval);
+      else if ((this.computed = (this.computed || 0) + 1) < 5)
+        fn.computeRet(this.self, this.args, this.argNodes).propagate(this.retval);
     },
     typeHint: function() {
       var names = [];
