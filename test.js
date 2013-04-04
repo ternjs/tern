@@ -71,7 +71,7 @@ function runTests(filter) {
         var query, columnInfo = /\s*@(\d+)$/.exec(args);
         if (columnInfo) {
           var line = acorn.getLineInfo(server.files[0].text, m.index).line;
-          var endInfo = {line: line - 1, ch: parseInt(columnInfo[1])};
+          var endInfo = {line: line - 1, ch: parseInt(columnInfo[1]) - 1};
           query = {type: "completions", lineCharPositions: true, end: endInfo, file: fname};
           args = args.slice(0, columnInfo.index);
         }
