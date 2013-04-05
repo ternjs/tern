@@ -530,6 +530,8 @@
     return {guess: infer.didGuess(),
             type: infer.toString(type, query.depth),
             name: name || null,
+            url: type && type.url || null,
+            doc: type && type.doc || null,
             exprName: exprName || null};
   }
 

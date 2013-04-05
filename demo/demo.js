@@ -282,6 +282,17 @@ function findType(cm) {
     var out = document.getElementById("out");
     out.innerHTML = "";
     out.appendChild(document.createTextNode(data.type || "not found"));
+    if (data.doc || data.url) {
+      var docnode = out.appendChild(document.createElement("div"));
+      docnode.className = "hint-doc";
+      docnode.style.marginTop = ".3em";
+      if (data.doc) docnode.appendChild(document.createTextNode(data.doc + " "));
+      if (data.url) {
+        var a = docnode.appendChild(document.createElement("a"));
+        a.innerHTML = "[docs]";
+        a.href = data.url;
+      }
+    }
   });
 }
 
@@ -313,10 +324,11 @@ function ternHints(cm, c) {
        list: completions,
        onSelect: function(cur) {
          out.innerHTML = "";
-         var node = document.createElement("div");
-         node.className = "hint-doc";
-         node.appendChild(document.createTextNode(cur.doc));
-         if (cur.doc) out.appendChild(node);
+         if (cur.doc) {
+           var node = out.appendChild(document.createElement("div"));
+           node.className = "hint-doc";
+           node.appendChild(document.createTextNode(cur.doc));
+         }
        },
        onClose: function() { out.innerHTML = ""; }
       });
