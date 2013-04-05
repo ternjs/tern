@@ -296,7 +296,7 @@ function typeToIcon(type) {
 }
 
 function ternHints(cm, c) {
-  var req = buildRequest(cm, {type: "completions", types: true});
+  var req = buildRequest(cm, {type: "completions", types: true, docs: true});
 
   server.request(req.request, function(error, data) {
     if (error) return displayError(error);
@@ -304,12 +304,19 @@ function ternHints(cm, c) {
     for (var i = 0; i < data.completions.length; ++i) {
       var completion = data.completions[i], className = typeToIcon(completion.type);
       if (data.guess) className += " Tern-completion-guess";
-      completions.push({text: completion.name, className: className});
+      console.log(completion.name, ":", completion.doc);
+      completions.push({text: completion.name, className: className, doc: completion.doc});
     }
 
+    var out = document.getElementById("out");
     c({from: incLine(req.offsetLines, data.start),
        to: incLine(req.offsetLines, data.end),
-       list: completions});
+       list: completions,
+       onSelect: function(cur) {
+         out.innerHTML = "";
+         if (cur.doc) out.appendChild(document.createTextNode(cur.doc));
+       }
+      });
   });
 }
 

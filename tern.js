@@ -441,7 +441,7 @@
     while (wordStart && /\w$/.test(text.charAt(wordStart - 1))) --wordStart;
     while (wordEnd < text.length && /\w$/.test(text.charAt(wordEnd))) ++wordEnd;
     var word = text.slice(wordStart, wordEnd), completions = [];
-    var wrapAsObjs = query.types || query.depths;
+    var wrapAsObjs = query.types || query.depths || query.docs || query.urls;
 
     function gather(prop, obj, depth) {
       // 'hasOwnProperty' and such are usually just noise, leave them
@@ -456,11 +456,16 @@
       var rec = wrapAsObjs ? {name: prop} : prop;
       completions.push(rec);
 
-      if (query.types) {
+      if (query.types || query.docs || query.urls) {
         infer.resetGuessing();
         var type = val.getType();
         rec.guess = infer.didGuess();
-        rec.type = infer.toString(type);
+        if (query.types)
+          rec.type = infer.toString(type);
+        if (query.docs)
+          rec.doc = val.doc || type && type.doc;
+        if (query.urls)
+          rec.url = val.url || type && type.url;
       }
       if (query.depths) rec.depth = depth;
     }
@@ -529,10 +534,10 @@
   }
 
   function findDef(srv, query, file) {
-    var expr = findExpr(file, query), def, url, fileName, guess = false;
+    var expr = findExpr(file, query), def, url, doc, fileName, guess = false;
     if (expr.node.type == "Identifier") {
       var found = expr.state.hasProp(expr.node.name);
-      if (found) url = found.url;
+      if (found) { url = found.url; doc = found.doc; }
       if (found && typeof found.name == "object") {
         def = found.name;
         fileName = found.origin;
@@ -542,9 +547,11 @@
       infer.resetGuessing();
       var type = infer.expressionType(expr);
       if (!url && type.url) url = type.url;
+      if (!doc && type.doc) doc = type.doc;
       if (type.types) for (var i = type.types.length - 1; i >= 0; --i) {
         var tp = type.types[i];
         if (!url && tp.url) url = tp.url;
+        if (!doc && tp.doc) doc = tp.doc;
         if (tp.originNode) { type = tp; break; }
       }
       def = type.originNode;
@@ -562,6 +569,7 @@
       result.file = fileName;
     }
     if (url) result.url = url;
+    if (doc) result.doc = doc;
     return result;
   }
 
