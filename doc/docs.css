@@ -107,6 +107,11 @@ button {
   border-bottom-right-radius: 6px;
   overflow: hidden;
 }
+.hint-doc {
+  white-space: normal;
+  font-size: 12pt;
+}
+
 .Tern-fname { color: black; }
 .Tern-farg { color: #70a; }
 .Tern-farg-current { text-decoration: underline; }

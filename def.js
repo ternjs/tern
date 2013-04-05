@@ -326,11 +326,11 @@
         var doc = inner["!doc"], url = inner["!url"];
         if (doc) {
           if (type && type instanceof infer.Obj) type.doc = doc;
-          if (!path) known.doc = doc;
+          known.doc = doc;
         }
         if (url) {
           if (type && type instanceof infer.Obj) type.url = url;
-          if (!path) known.url = url;
+          known.url = url;
         }
       }
     }

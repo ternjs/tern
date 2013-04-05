@@ -304,7 +304,6 @@ function ternHints(cm, c) {
     for (var i = 0; i < data.completions.length; ++i) {
       var completion = data.completions[i], className = typeToIcon(completion.type);
       if (data.guess) className += " Tern-completion-guess";
-      console.log(completion.name, ":", completion.doc);
       completions.push({text: completion.name, className: className, doc: completion.doc});
     }
 
@@ -314,8 +313,12 @@ function ternHints(cm, c) {
        list: completions,
        onSelect: function(cur) {
          out.innerHTML = "";
-         if (cur.doc) out.appendChild(document.createTextNode(cur.doc));
-       }
+         var node = document.createElement("div");
+         node.className = "hint-doc";
+         node.appendChild(document.createTextNode(cur.doc));
+         if (cur.doc) out.appendChild(node);
+       },
+       onClose: function() { out.innerHTML = ""; }
       });
   });
 }
