@@ -9,7 +9,7 @@ fs.stat("foobar", function(err, stats) {
   stats.isFile(); //: bool
 });
 
-crypto.getCyphers()[3]; //: string
+crypto.getCiphers()[3]; //: string
 crypto.createHash("sha1").digest().readUInt16BE(0); //: number
 
 tls.createServer({}, function(stream) {
