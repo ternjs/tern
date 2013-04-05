@@ -20,7 +20,7 @@
     "getPrototypeOf": {
       "!type": "fn(obj: ?) -> ?",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/getPrototypeOf",
-      "!doc": "Returns the prototype (i.e. the internal [[Prototype]]) of the specified object."
+      "!doc": "Returns the prototype (i.e. the internal prototype) of the specified object."
     },
     "create": {
       "!type": "fn(proto: ?) -> $custom:Object_create",
