@@ -883,11 +883,6 @@
     },
     "Deferred": {
       "prototype": {
-        "when":{
-          "!type": "fn(deferred: +jQuery.Deferred) -> +jQuery.Deferred",
-          "!url": "http://api.jquery.com/jquery.when/",
-          "!doc": "Provides a way to execute callback functions based on one or more objects, usually Deferred objects that represent asynchronous events."
-        },
         "always":{
           "!type": "fn(callback: fn()) -> +jQuery.Deferred",
           "!url": "http://api.jquery.com/deferred.always/",
