@@ -192,7 +192,7 @@
       "reverse": {
         "!type": "fn()",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/reverse",
-        "!doc": "Reverses an array in place.  The first array element becomes the last and the last becomes the first."
+        "!doc": "Reverses an array in place.  The first array element becomes the last and the last becomes the first."
       },
       "sort": {
         "!type": "fn(compare?: fn(a: ?, b: ?) -> number)",
@@ -379,7 +379,7 @@
       "replace": {
         "!type": "fn(pattern: +RegExp, replacement: string) -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/replace",
-        "!doc": "Returns a new string with some or all matches of a pattern replaced by a replacement.  The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match."
+        "!doc": "Returns a new string with some or all matches of a pattern replaced by a replacement.  The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match."
       },
       "search": {
         "!type": "fn(pattern: +RegExp) -> number",
@@ -600,7 +600,7 @@
       "getUTCMinutes": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date",
-        "!doc": "Creates JavaScript Date instances which let you work with dates and times."
+        "!doc": "Creates JavaScript Date instances which let you work with dates and times."
       },
       "getSeconds": {
         "!type": "fn() -> number",
@@ -704,7 +704,7 @@
       }
     },
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date",
-    "!doc": "Creates JavaScript Date instances which let you work with dates and times."
+    "!doc": "Creates JavaScript Date instances which let you work with dates and times."
   },
   "Error": {
     "!type": "fn(message: string)",
@@ -939,6 +939,6 @@
       "!doc": "Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified."
     },
     "!url": "https://developer.mozilla.org/en-US/docs/JSON",
-    "!doc": "JSON (JavaScript Object Notation) is a data-interchange format.  It closely resembles a subset of JavaScript syntax, although it is not a strict subset. (See JSON in the JavaScript Reference for full details.)  It is useful when writing any kind of JavaScript-based application, including websites and browser extensions.  For example, you might store user information in JSON format in a cookie, or you might store extension preferences in JSON in a string-valued browser preference."
+    "!doc": "JSON (JavaScript Object Notation) is a data-interchange format.  It closely resembles a subset of JavaScript syntax, although it is not a strict subset. (See JSON in the JavaScript Reference for full details.)  It is useful when writing any kind of JavaScript-based application, including websites and browser extensions.  For example, you might store user information in JSON format in a cookie, or you might store extension preferences in JSON in a string-valued browser preference."
   }
 }
