@@ -25,3 +25,14 @@ foo; //: fn(a: number, b: string) -> [number]
 var bar = function(a, b) { return goop(); };
 bar(gulp(), 10);
 bar; //: fn(a: number, b: number) -> string
+
+var o = {
+  /** @type {String} */
+  prop1: mystery(),
+
+  /** @returns {Number} */
+  prop2: function() { return anything(); }
+};
+
+o.prop1; //: string
+o.prop2; //: fn() -> number

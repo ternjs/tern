@@ -37,6 +37,10 @@
       takesFile: true,
       run: findTypeAt
     },
+    documentation: {
+      takesFile: true,
+      run: findDocs
+    },
     definition: {
       takesFile: true,
       fullFile: true,
@@ -533,6 +537,25 @@
             url: type && type.url || null,
             doc: type && type.doc || null,
             exprName: exprName || null};
+  }
+
+  function findDocs(_srv, query, file) {
+    var expr = findExpr(file, query), prop;
+    if (expr.node.type == "Identifier") {
+      prop = expr.state.hasProp(expr.node.name);
+    } else if (expr.node.type == "MemberExpression" && !expr.node.computed) {
+      var base = infer.expressionType({node: expr.node.object, state: expr.state});
+      if (base instanceof infer.Obj) prop = base.hasProp(expr.node.property.name);
+    }
+    var url = prop && prop.url, doc = prop && prop.doc;
+    if (!url && !doc) {
+      var type = infer.expressionType(expr);
+      if (type && (type = type.getType())) {
+        url = type.url;
+        doc = type.doc;
+      }
+    }
+    return {url: url || null, doc: doc || null};
   }
 
   function findDef(srv, query, file) {

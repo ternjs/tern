@@ -753,6 +753,7 @@
         var prop = node.properties[i], val = obj.defProp(prop.key.name);
         val.initializer = true;
         infer(prop.value, scope, c, val, prop.key.name);
+        interpretComments(prop, prop.key.comments, scope, val);
       }
       return obj;
     }),
@@ -895,14 +896,17 @@
       var inner = node.body.scope, fn = inner.fnType;
       c(node.body, scope, "ScopeBody");
       maybeTagAsTypeManipulator(node, inner) || maybeTagAsGeneric(node, inner.fnType);
-      scope.getProp(node.id.name).addType(fn);
+      var prop = scope.getProp(node.id.name);
+      prop.addType(fn);
+      interpretComments(node, node.comments, scope, prop, fn);
     },
 
     VariableDeclaration: function(node, scope, c) {
       for (var i = 0; i < node.declarations.length; ++i) {
-        var decl = node.declarations[i];
+        var decl = node.declarations[i], prop = scope.getProp(decl.id.name);
         if (decl.init)
-          infer(decl.init, scope, c, scope.getProp(decl.id.name), decl.id.name);
+          infer(decl.init, scope, c, prop, decl.id.name);
+        if (!i) interpretComments(node, node.comments, scope, prop);
       }
     },
 
@@ -931,16 +935,82 @@
     ScopeBody: function(node, scope, c) { c(node, node.scope || scope); }
   });
 
-  var parse = exports.parse = function(text) {
-    var jsDoc = [], options = {onComment: jsdoc.gather(jsDoc)}, ast;
-    try { ast = acorn.parse(text, options); }
-    catch(e) {
-      jsDoc.length = 0;
-      ast = acorn_loose.parse_dammit(text, options);
+  // PARSING
+
+  function isSpace(ch) {
+    return (ch < 14 && ch > 8) || ch === 32 || ch === 160;
+  }
+
+  function onOwnLine(text, pos) {
+    for (; pos > 0; --pos) {
+      var ch = text.charCodeAt(pos - 1);
+      if (ch == 10) break;
+      if (!isSpace(ch)) return false;
     }
-    ast.jsDocComments = jsDoc;
+    return true;
+  }
+
+  // Gather comments directly before a function
+  function commentsBefore(text, pos) {
+    var found = "", emptyLines = 0;
+    out: while (pos > 0) {
+      var prev = text.charCodeAt(pos - 1);
+      if (prev == 10) {
+        for (var scan = --pos, sawNonWS = false; scan > 0; --scan) {
+          prev = text.charCodeAt(scan - 1);
+          if (prev == 47 && text.charCodeAt(scan - 2) == 47) {
+            if (!onOwnLine(text, scan - 2)) break out;
+            found = text.slice(scan, pos) + found;
+            emptyLines = 0;
+            pos = scan - 2;
+            break;
+          } else if (prev == 10) {
+            if (!sawNonWS && ++emptyLines > 1) break out;
+            break;
+          } else if (!sawNonWS && !isSpace(prev)) {
+            sawNonWS = true;
+          }
+        }
+      } else if (prev == 47 && text.charCodeAt(pos - 2) == 42) {
+        for (var scan = pos - 2; scan > 1; --scan) {
+          if (text.charCodeAt(scan - 1) == 42 && text.charCodeAt(scan - 2) == 47) {
+            if (!onOwnLine(text, scan - 2)) break out;
+            found = text.slice(scan, pos - 2) + "\n" + found;
+            emptyLines = 0;
+            break;
+          }
+        }
+        pos = scan - 2;
+      } else if (isSpace(prev)) {
+        --pos;
+      } else {
+        break;
+      }
+    }
+    return found;
+  }
+
+  var parse = exports.parse = function(text) {
+    var ast;
+    try { ast = acorn.parse(text); }
+    catch(e) { ast = acorn_loose.parse_dammit(text); }
+
+    function attachComments(node) {
+      var comments = commentsBefore(text, node.start);
+      if (comments) node.comments = comments;
+    }
+    walk.simple(ast, {
+      VariableDeclaration: attachComments,
+      FunctionDeclaration: attachComments,
+      ObjectExpression: function(node) {
+        for (var i = 0; i < node.properties.length; ++i)
+          attachComments(node.properties[i].key);
+      }
+    });
     return ast;
   };
+
+  // ANALYSIS INTERFACE
 
   exports.analyze = function(ast, name, scope) {
     if (typeof ast == "string") ast = parse(ast);
@@ -951,10 +1021,28 @@
     if (!scope) scope = cx.topScope;
     walk.recursive(ast, scope, null, scopeGatherer);
     walk.recursive(ast, scope, null, inferWrapper);
-    for (var i = 0; i < ast.jsDocComments.length; ++i)
-      jsdoc.applyType(ast.jsDocComments[i], ast, scope, walk);
+    
     cx.curOrigin = null;
   };
+
+  // COMMENT INTERPRETATION
+
+  function interpretComments(node, comments, scope, aval, type) {
+    if (!comments) return;
+
+    jsdoc.interpretComments(node, scope, aval, comments);
+
+    if (!type && aval.types.length) {
+      type = aval.types[aval.types.length - 1];
+      if (!(type instanceof Obj) || type.origin != cx.curOrigin || type.doc) type = null;
+    }
+
+    var dot = comments.search(/\.\s/);
+    if (dot > 5) comments = comments.slice(0, dot + 1);
+    comments = comments.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
+    aval.doc = comments;
+    if (type) type.doc = comments;
+  }
 
   // PURGING
 

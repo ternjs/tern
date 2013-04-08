@@ -62,11 +62,11 @@ function runTests(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(\+|::?|:\?)\s+([^\n]*)/g, m;
+    var typedef = /\/\/(\+|::?|:\?|~)\s+([^\n]*)/g, m;
     while (m = typedef.exec(text)) {
       var args = m[2], kind = m[1];
       ++tests;
-      if (kind == "+") {
+      if (kind == "+") { // Completion test
         var columnInfo = /\s*@(\d+)$/.exec(args), pos = m.index;
         if (columnInfo) {
           var line = acorn.getLineInfo(text, m.index).line;
@@ -97,17 +97,27 @@ function runTests(filter) {
           ++failed;
           continue;
         }
-        var query = {type: "type",
+        var query = {type: kind == "~" ? "documentation" : "type",
                      start: expr.node.start, end: expr.node.end,
                      file: fname,
                      depth: kind == "::" ? 2 : null};
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
-          var type = resp.guess && kind != ":?" ? "?" : resp.type || "?";
-          if (type != args) {
-            console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
-                        " has type\n  " + type + "\ninstead of expected type\n  " + args);
-            ++failed;
+
+          if (kind == "~") { // Docstring test
+            if (resp.doc != args) {
+              console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line + " has " +
+                          (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
+                          "instead of expected docstring\n  " + args);
+              ++failed;
+            }
+          } else { // Type test
+            var type = resp.guess && kind != ":?" ? "?" : resp.type || "?";
+            if (type != args) {
+              console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
+                          " has type\n  " + type + "\ninstead of expected type\n  " + args);
+              ++failed;
+            }
           }
         });
       }

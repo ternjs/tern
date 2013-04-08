@@ -12,20 +12,6 @@
 })(function(exports, infer) {
   "use strict";
 
-  exports.gather = function(out) {
-    return function(block, text, _start, end) {
-      if (!block || !/^\*/.test(text)) return;
-      var decl = /(?:\n|\*)\s*@(type|param|arg(?:ument)?|returns?)\s+(.*)/g, m, found = [];
-      while (m = decl.exec(text)) {
-        var type = m[1];
-        if (/^arg/.test(type)) type = "param";
-        if (type == "return") type = "returns";
-        found.push(type, m[2]);
-      }
-      if (found.length) out.push({decls: found, at: end});
-    };
-  };
-
   function skipSpace(str, pos) {
     while (/\s/.test(str.charAt(pos))) ++pos;
     return pos;
@@ -121,38 +107,40 @@
     return result;
   }
 
-  exports.applyType = function(annotation, ast, scope, walk) {
-    function isDecl(_type, node) { return /^(Variable|Function)Declaration/.test(node.type); }
-    var found = walk.findNodeAfter(ast, annotation.at, isDecl, infer.searchVisitor, scope);
-    if (!found) return;
-    scope = found.state;
-    var node = found.node;
+  exports.interpretComments = function(node, scope, aval, comment) {
+    var type, args, ret, foundOne;
 
-    var type, args, ret, decls = annotation.decls;
-    for (var i = 0; i < decls.length; i += 2) {
-      var parsed = parseTypeOuter(scope, decls[i + 1]);
+    var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?)\s+(.*)/g, m;
+    while (m = decl.exec(comment)) {
+      var parsed = parseTypeOuter(scope, m[2]);
       if (!parsed) continue;
-      switch (decls[i]) {
-      case "returns": ret = parsed.type; break;
-      case "type": type = parsed.type; break;
-      case "param":
-        var name = decls[i + 1].slice(parsed.end).match(/^\s*([\w$]+)/);
+      foundOne = true;
+
+      switch(m[1]) {
+      case "returns": case "return":
+        ret = parsed.type; break;
+      case "type":
+        type = parsed.type; break;
+      case "param": case "arg": case "argument":
+        var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/);
         if (!name) continue;
         (args || (args = {}))[name[1]] = parsed.type;
         break;
       }
     }
 
-    var varName, fn;
-    if (node.type == "VariableDeclaration" && node.declarations.length == 1) {
+    if (foundOne) applyType(type, args, ret, node, aval);
+  };
+
+  function applyType(type, args, ret, node, aval) {
+    var fn;
+    if (node.type == "VariableDeclaration") {
       var decl = node.declarations[0];
-      varName = decl.id.name;
       if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.body.scope.fnType;
     } else if (node.type == "FunctionDeclaration") {
-      varName = node.id.name;
       fn = node.body.scope.fnType;
-    } else {
-      return;
+    } else { // An object property
+      if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
     }
 
     if (fn && (args || ret)) {
@@ -162,7 +150,7 @@
       }
       if (ret) ret.propagate(fn.retval);
     } else if (type) {
-      type.propagate(scope.hasProp(varName));
+      type.propagate(aval);
     }
   };
 
