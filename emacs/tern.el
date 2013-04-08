@@ -302,7 +302,7 @@ list of strings, giving the binary name and arguments.")
   (let ((per-file ())
         (orig-buffer (current-buffer)))
     (loop for change across (cdr (assq 'changes data)) do
-          (let ((found (assq-string (cdr (assq 'file change)) per-file)))
+          (let ((found (assoc-string (cdr (assq 'file change)) per-file)))
             (unless found (setf found (list (cdr (assq 'file change)))) (push found per-file))
             (push change (cdr found))))
     (loop for (file . changes) in per-file do
