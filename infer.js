@@ -42,17 +42,19 @@
       if (this.types.indexOf(type) > -1) return;
 
       this.types.push(type);
-      if (this.forward) for (var i = 0, maxLen = this.forward.length + 10;
-                             i < this.forward.length && i < maxLen; ++i)
-        this.forward[i].addType(type);
+      var forward = this.forward;
+      if (forward) withWorklist(function(add) {
+        for (var i = 0; i < forward.length; ++i) add(type, forward[i]);
+      });
     },
 
-    propagate: function(c) {
-      if (c == ANull || (c instanceof Type)) return;
-      (this.forward || (this.forward = [])).push(c);
-      for (var i = 0, maxLen = this.types.length + 10;
-           i < this.types.length && i < maxLen; ++i)
-        c.addType(this.types[i]);
+    propagate: function(target) {
+      if (target == ANull || (target instanceof Type)) return;
+      (this.forward || (this.forward = [])).push(target);
+      var types = this.types;
+      if (types.length) withWorklist(function(add) {
+        for (var i = 0; i < types.length; ++i) add(types[i], target);
+      });
     },
 
     getProp: function(prop) {
@@ -477,6 +479,7 @@
     this.curOrigin = "ecma5";
     this.paths = Object.create(null);
     this.purgeGen = 0;
+    this.workList = null;
 
     exports.withContext(this, function() {
       cx.protos.Object = new Obj(null, "Object.prototype");
@@ -510,6 +513,27 @@
   exports.addOrigin = function(origin) {
     if (cx.origins.indexOf(origin) < 0) cx.origins.push(origin);
   };
+
+  var baseMaxWorkDepth = 20, reduceMaxWorkDepth = .001;
+  function withWorklist(f) {
+    if (cx.workList) return f(cx.workList);
+
+    var list = [], depth = 0;
+    var add = cx.workList = function(type, target) {
+      if (depth < baseMaxWorkDepth - reduceMaxWorkDepth * list.length)
+        list.push(type, target, depth);
+    };
+    try {
+      var ret = f(add);
+      for (var i = 0; i < list.length; i += 3) {
+        depth = list[i + 2] + 1;
+        list[i + 1].addType(list[i]);
+      }
+      return ret;
+    } finally {
+      cx.workList = null;
+    }
+  }
 
   // SCOPES
 
