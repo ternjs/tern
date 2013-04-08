@@ -434,11 +434,10 @@
       var known = this.hasProp(prop);
       if (!known) {
         known = this.defProp(prop);
-        if (known.isEmpty()) {
-          var proto = new Obj(true);
-          proto.provisionary = true;
-          known.addType(proto);
-        }
+        var proto = new Obj(true);
+        proto.origin = this.origin;
+        proto.provisionary = true;
+        known.addType(proto);
       }
       return known;
     }
@@ -996,10 +995,12 @@
     }
     if (this.forward) for (var i = 0; i < this.forward.length; ++i) {
       var f = this.forward[i];
-      if (test(f))
+      if (test(f)) {
         this.forward.splice(i--, 1);
-      else if (f.purge)
+        if (this.props) this.props = null;
+      } else if (f.purge) {
         f.purge(test);
+      }
     }
   };
   ANull.purge = Type.prototype.purge = function() {};

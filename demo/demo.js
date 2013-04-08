@@ -2,7 +2,7 @@ var server, editor, defs = [];
 var Pos = CodeMirror.Pos;
 var docs = [], curDoc;
 
-var bigDoc = 250, useWorker = true;
+var bigDoc = 250, useWorker = false;
 
 function findDoc(name) {
   for (var i = 0; i < docs.length; ++i) if (docs[i].name == name) return docs[i];
