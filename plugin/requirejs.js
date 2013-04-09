@@ -56,6 +56,29 @@
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") deps.push(getInterface(elt.value, data));
       }
+    } else if (argNodes && args.length === 1) {
+      var node = argNodes[0];
+      if( node.type == "FunctionExpression" ) {
+        if (node.params.length === 3 && 
+          node.params[0].name === "require" && 
+          node.params[1].name === "exports" &&
+          node.params[2].name === "module") {
+          // simplified commonjs module
+          var exportVal = args[0].args[1];
+          // create a Fn to handle the synchronous require calls
+          var reqFn = new infer.Fn("require", new infer.Obj, [infer.cx().str], ["module"], new infer.AVal);
+          reqFn.computeRet = function(_self, args, argNodes) {
+            if (argNodes.length === 1) {
+              var node = argNodes[0];
+              if (node.type == "Literal" && typeof node.value == "string") {
+                return getInterface(node.value, data);
+              }
+              return infer.ANull;
+            }
+          }
+          deps.push(reqFn, new infer.Obj(true));
+        }
+      }
     }
 
     var value = args[Math.min(args.length - 1, 2)];
@@ -63,6 +86,9 @@
       var retval = new infer.AVal;
       value.propagate(new infer.IsCallee(infer.ANull, deps, null, retval));
       value = retval;
+      if (exportVal) {
+        value.addType(exportVal);
+      }
     }
     var name = data.currentFile;
     var known = data.interfaces[name];
