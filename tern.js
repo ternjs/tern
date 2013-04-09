@@ -6,11 +6,11 @@
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("./infer"));
+    return mod(exports, require("./infer"), require("acorn/util/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "./infer"], mod);
-  mod(self.tern || (self.tern = {}), tern); // Plain browser env
-})(function(exports, infer) {
+    return define(["exports", "./infer", "acorn/util/walk"], mod);
+  mod(self.tern || (self.tern = {}), tern, acorn.walk); // Plain browser env
+})(function(exports, infer, walk) {
   "use strict";
 
   var plugins = Object.create(null);
@@ -43,7 +43,6 @@
     },
     definition: {
       takesFile: true,
-      fullFile: true,
       run: findDef
     },
     refs: {
@@ -183,10 +182,7 @@
     });
   }
 
-  var depth = 0;
   function analyzeFile(srv, file) {
-    if (depth) console.trace("calling inside");
-    ++depth;
     infer.withContext(srv.cx, function() {
       file.scope = srv.cx.topScope;
       srv.signal("beforeLoad", file);
@@ -195,7 +191,6 @@
       infer.purgeMarkedVariables(file.scope);
       srv.signal("afterLoad", file);
     });
-    --depth;
     return file;
   }
 
@@ -317,7 +312,9 @@
     // This is a partial file
 
     var realFile = findFile(srv.files, file.name);
-    var offset = file.offset != null ? file.offset : findLineStart(file, file.offsetLine) || 0;
+    var offset = file.offset;
+    if (offset == null)
+      offset = file.offset = findLineStart(realFile, file.offsetLines) || 0;
     var line = firstLine(file.text);
     var foundPos = findMatchingPosition(line, realFile.text, offset);
     var pos = foundPos == null ? Math.max(0, realFile.text.lastIndexOf("\n", offset)) : foundPos;
@@ -558,6 +555,10 @@
     return {url: url || null, doc: doc || null};
   }
 
+  function isInAST(node, ast) {
+    return walk.findNodeAt(ast, node.start, node.end, node.type);
+  }
+
   function findDef(srv, query, file) {
     var expr = findExpr(file, query), def, url, doc, fileName, guess = false;
     if (expr.node.type == "Identifier") {
@@ -588,10 +589,22 @@
     }
     var result = {guess: guess};
     if (def) {
-      var defFile = findFile(srv.files, fileName);
-      result.start = outputPos(query, defFile, def.start);
-      result.end = outputPos(query, defFile, def.end);
+      var inFragment = file.type == "part" && file.name == fileName && isInAST(def, file.ast);
+      var outerFile = findFile(srv.files, fileName), defFile = inFragment ? file : outerFile;
+      var start = outputPos(query, defFile, def.start), end = outputPos(query, defFile, def.end);
+      if (inFragment) {
+        if (query.lineCharPositions) {
+          var lines = file.offsetLines != null ? file.offsetLines : asLineChar(file, file.offset).line;
+          start.line += lines; end.line += end;
+        } else {
+          start += file.offset; end += file.offset;
+        }
+      }
+      result.start = start; result.end = end;
       result.file = fileName;
+      var cxStart = Math.max(0, def.start - 50);
+      result.contextOffset = def.start - cxStart;
+      result.context = defFile.text.slice(cxStart, cxStart + 50);
     }
     if (url) result.url = url;
     if (doc) result.doc = doc;
