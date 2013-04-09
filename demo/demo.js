@@ -463,6 +463,7 @@ function jumpBack(cm) {
   moveTo(pos.file, pos.start, pos.end);
 }
 
+var nextChangeOrig = 0;
 function applyChanges(changes) {
   var perFile = Object.create(null);
   for (var i = 0; i < changes.length; ++i) {
@@ -471,10 +472,11 @@ function applyChanges(changes) {
   }
   for (var file in perFile) {
     var chs = perFile[file], doc = findDoc(file).doc;
-    chs.sort(function(a, b) { return b.start - a.start; });
+    chs.sort(function(a, b) { return b.start.line - a.start.line || b.start.ch - a.start.ch; });
+    var origin = "*" + (++nextChangeOrig);
     for (var i = 0; i < chs.length; ++i) {
       var ch = chs[i];
-      doc.replaceRange(ch.text, ch.start, ch.end);
+      doc.replaceRange(ch.text, ch.start, ch.end, origin);
     }
   }
 }
