@@ -31,7 +31,21 @@
     return parts.join("/");
   }
 
+  function getRequire(data) {
+    if (!data.require) {
+      data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
+      data.require.computeRet = function(_self, args, argNodes) {
+        if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string")
+          return getInterface(argNodes[0].value, data);
+        return infer.ANull;
+      };
+    }
+    return data.require;
+  }
+
   function getInterface(name, data) {
+    if (name == "require") return getRequire(data);
+
     if (!/^(https?:|\/)|\.js$/.test(name))
       name = resolveName(name, data);
     name = flattenPath(name);
@@ -47,23 +61,39 @@
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
-    var deps = [];
+    var deps = [], value, fn;
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length == 2 ? 0 : 1];
       if (node.type == "Literal" && typeof node.value == "string") {
         deps.push(getInterface(node.value, data));
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string") deps.push(getInterface(elt.value, data));
+        if (elt.type == "Literal" && typeof elt.value == "string") {
+          if (elt.value == "exports")
+            deps.push(value = new infer.Obj());
+          else
+            deps.push(getInterface(elt.value, data));
+        }
       }
+    } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression") {
+      // Simplified CommonJS call
+      deps.push(getInterface("require", data), value = new infer.Obj());
+      fn = args[0];
     }
 
-    var value = args[Math.min(args.length - 1, 2)];
-    if (value.isEmpty() || value.getFunctionType()) {
-      var retval = new infer.AVal;
-      value.propagate(new infer.IsCallee(infer.ANull, deps, null, retval));
-      value = retval;
+    if (!fn) {
+      fn = args[Math.min(args.length - 1, 2)];
+      if (!fn.isEmpty() && !fn.getFunctionType()) {
+        if (!value) value = fn;
+        fn = null;
+      }
     }
+    if (fn) {
+      var retval = new infer.AVal;
+      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, retval));
+      if (!value) value = retval;
+    }
+
     var name = data.currentFile;
     var known = data.interfaces[name];
     if (!known) known = data.interfaces[name] = new infer.AVal;
@@ -85,6 +115,7 @@
     });
     server.on("reset", function(file) {
       this._requireJS.interfaces = Object.create(null);
+      this._requireJS.require = null;
     });
     return {defs: defs};
   });
