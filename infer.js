@@ -275,6 +275,11 @@
     typeHint: function() { return this.other; }
   });
 
+  var MarkPropagation = constraint(["target"], {
+    addType: function() {},
+    propagatesTo: function() {return this.target;}
+  });
+
   // TYPE OBJECTS
 
   var Type = exports.Type = function() {};
@@ -639,6 +644,17 @@
     });
   }
 
+  function propagateIfSimple(source) {
+    if (!(source instanceof AVal)) return source;
+    var target = new AVal;
+    source.propagate(new MarkPropagation(target));
+    cx.toFlush.push(function() {
+      var type = source.getType();
+      if (type) type.propagate(target);
+    });
+    return target;
+  };
+
   // SCOPE GATHERING PASS
 
   function addVar(scope, name) {
@@ -888,7 +904,10 @@
       }
     }),
     MemberExpression: ret(function(node, scope, c) {
-      return infer(node.object, scope, c).getProp(propName(node, scope, c));
+      var name = propName(node, scope, c);
+      var prop = infer(node.object, scope, c).getProp(name);
+      if (name == "<i>") return propagateIfSimple(prop);
+      else return prop;
     }),
     Identifier: ret(function(node, scope) {
       if (node.name == "arguments" && !(node.name in scope.props))
