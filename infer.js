@@ -917,10 +917,13 @@
       }
     }),
     MemberExpression: ret(function(node, scope, c) {
-      var name = propName(node, scope, c);
+      var name = propName(node, scope);
       var prop = infer(node.object, scope, c).getProp(name);
-      if (name == "<i>") return propagateIfSimple(prop);
-      else return prop;
+      if (name == "<i>") {
+        var propType = infer(node.property, scope, c);
+        if (!propType.hasType(cx.num)) return propagateIfSimple(prop);
+      }
+      return prop;
     }),
     Identifier: ret(function(node, scope) {
       if (node.name == "arguments" && !(node.name in scope.props))
