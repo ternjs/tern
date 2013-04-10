@@ -329,14 +329,40 @@ list of strings, giving the binary name and arguments.")
 (defun tern-find-definition ()
   (interactive)
   (tern-run-query (lambda (data _offset)
-                      (push (cons (buffer-file-name) (point)) tern-find-definition-stack)
-                      (let ((too-long (nthcdr 20 tern-find-definition-stack)))
-                        (when too-long (setf (cdr too-long) nil)))
-                      (tern-go-to-position (concat (tern-project-dir) (cdr (assq 'file data)))
-                                           (1+ (cdr (assq 'start data)))))
+                    (let* ((file (cdr (assq 'file data)))
+                           (found (and file (setf file (concat (tern-project-dir) (cdr (assq 'file data))))
+                                       (tern-find-position file data))))
+                      (if found
+                          (progn
+                            (push (cons (buffer-file-name) (point)) tern-find-definition-stack)
+                            (let ((too-long (nthcdr 20 tern-find-definition-stack)))
+                              (when too-long (setf (cdr too-long) nil)))
+                            (tern-go-to-position file found))
+                          (let ((url (cdr (assq 'url data))))
+                            (if url
+                                (browse-url url)
+                              (message "No definition found."))))))
                     "definition"
-                    (point)
-                    :full-file))
+                    (point)))
+
+(defun tern-find-position (file data)
+  (with-current-buffer (find-file-noselect file)
+    (let* ((start (1+ (cdr (assq 'start data))))
+           (cx-start (- start (cdr (assq 'contextOffset data))))
+           (cx (cdr (assq 'context data))))
+      (if (equal (buffer-substring-no-properties cx-start (+ cx-start (length cx))) cx)
+          start
+        (let (nearest nearest-dist)
+          (save-excursion
+            (goto-char (point-min))
+            (loop
+             (unless (search-forward cx nil t) (return))
+             (let* ((here (- (point) (length cx)))
+                    (dist (abs (- cx-start here))))
+               (when (or (not nearest-dist) (< dist nearest-dist))
+                 (setf nearest here nearest-dist dist)))))
+          (when nearest
+            (+ nearest (- start cx-start))))))))
 
 (defun tern-pop-find-definition ()
   (interactive)
