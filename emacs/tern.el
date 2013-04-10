@@ -326,24 +326,37 @@ list of strings, giving the binary name and arguments.")
 
 (defvar tern-find-definition-stack ())
 
-(defun tern-find-definition ()
+(defun tern-show-definition (data _offset)
+  (let* ((file (cdr (assq 'file data)))
+         (found (and file (setf file (expand-file-name (cdr (assq 'file data)) (tern-project-dir)))
+                     (tern-find-position file data))))
+    (if found
+        (progn
+          (push (cons (buffer-file-name) (point)) tern-find-definition-stack)
+          (let ((too-long (nthcdr 20 tern-find-definition-stack)))
+            (when too-long (setf (cdr too-long) nil)))
+          (tern-go-to-position file found))
+      (let ((url (cdr (assq 'url data))))
+        (if url
+            (browse-url url)
+          (message "No definition found."))))))
+
+(defun tern-at-interesting-expression ()
+  (if (member (get-text-property (point) 'face)
+              '(font-lock-comment-face font-lock-comment-delimiter-face font-lock-string-face))
+      nil
+    (let ((around (buffer-substring-no-properties (max 1 (1- (point))) (min (1+ (point)) (point-max)))))
+      (string-match "\\sw" around))))
+
+(defun tern-find-definition (&optional prompt-var)
   (interactive)
-  (tern-run-query (lambda (data _offset)
-                    (let* ((file (cdr (assq 'file data)))
-                           (found (and file (setf file (expand-file-name (cdr (assq 'file data)) (tern-project-dir)))
-                                       (tern-find-position file data))))
-                      (if found
-                          (progn
-                            (push (cons (buffer-file-name) (point)) tern-find-definition-stack)
-                            (let ((too-long (nthcdr 20 tern-find-definition-stack)))
-                              (when too-long (setf (cdr too-long) nil)))
-                            (tern-go-to-position file found))
-                          (let ((url (cdr (assq 'url data))))
-                            (if url
-                                (browse-url url)
-                              (message "No definition found."))))))
-                    "definition"
-                    (point)))
+  (let ((varname (and (or prompt-var (not (tern-at-interesting-expression)))
+                      (read-from-minibuffer "Variable: "))))
+    (tern-run-query #'tern-show-definition `((type . "definition") (variable . ,varname)) (point))))
+
+(defun tern-find-definition-by-name ()
+  (interactive)
+  (tern-find-definition t))
 
 (defun tern-find-position (file data)
   (with-current-buffer (find-file-noselect file)
@@ -434,6 +447,7 @@ list of strings, giving the binary name and arguments.")
 
 (defvar tern-mode-keymap (make-sparse-keymap))
 (define-key tern-mode-keymap [(meta ?.)] 'tern-find-definition)
+(define-key tern-mode-keymap [(meta ?>)] 'tern-find-definition-by-name)
 (define-key tern-mode-keymap [(meta ?,)] 'tern-pop-find-definition)
 (define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
 (define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
