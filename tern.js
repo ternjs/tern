@@ -450,7 +450,6 @@
       // out when no prefix is provided.
       if (query.omitObjectPrototype !== false && obj == srv.cx.protos.Object && !word) return;
       if (query.filter !== false && word && prop.indexOf(word) != 0) return;
-      var val = obj.props[prop];
       for (var i = 0; i < completions.length; ++i) {
         var c = completions[i];
         if ((wrapAsObjs ? c.name : c) == prop) return;
@@ -459,6 +458,7 @@
       completions.push(rec);
 
       if (query.types || query.docs || query.urls) {
+        var val = obj ? obj.props[prop] : infer.ANull;
         infer.resetGuessing();
         var type = val.getType();
         rec.guess = infer.didGuess();
@@ -478,6 +478,8 @@
       var tp = infer.expressionType(memberExpr);
       if (tp) infer.forAllPropertiesOf(tp, gather);
 
+      if (!completions.length && query.guess !== false && tp && tp.guessProperties)
+        tp.guessProperties(function(p, o, d) {if (p != word) gather(p, o, d);});
       if (!completions.length && word.length >= 2 && query.guess !== false)
         for (var prop in srv.cx.props) gather(prop, srv.cx.props[prop][0], 0);
     } else {

@@ -121,6 +121,13 @@
     gatherProperties: function(f, depth) {
       for (var i = 0; i < this.types.length; ++i)
         this.types[i].gatherProperties(f, depth);
+    },
+
+    guessProperties: function(f) {
+      if (this.forward) for (var i = 0; i < this.forward.length; ++i) {
+        var fw = this.forward[i], prop = fw.propHint && fw.propHint();
+        if (prop) f(prop, null, 0);
+      }
     }
   };
 
