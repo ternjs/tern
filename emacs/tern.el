@@ -36,7 +36,7 @@
       (let ((project-dir (file-name-directory (buffer-file-name))))
         (loop for cur = project-dir then (file-name-directory (substring cur 0 (1- (length cur))))
               while cur do
-              (when (file-exists-p (concat cur ".tern-project"))
+              (when (file-exists-p (expand-file-name ".tern-project" cur))
                 (return (setf project-dir cur))))
         (setf tern-project-dir project-dir))))
 
@@ -46,7 +46,7 @@
       (return (funcall c tern-known-port)))
     (unless (buffer-file-name)
       (return (funcall c nil)))
-    (let ((port-file (concat (tern-project-dir) ".tern-port")))
+    (let ((port-file (expand-file-name ".tern-port" (tern-project-dir))))
       (when (file-exists-p port-file)
         (let ((port (string-to-number (with-temp-buffer
                                         (insert-file-contents port-file)
@@ -174,7 +174,7 @@ list of strings, giving the binary name and arguments.")
          (cond ((not err)
                 (dolist (file files)
                   (when (equal (cdr (assq 'type file)) "full")
-                    (with-current-buffer (find-file-noselect (concat tern-project-dir (cdr (assq 'name file))))
+                    (with-current-buffer (find-file-noselect (expand-file-name (cdr (assq 'name file)) tern-project-dir))
                       (setf tern-buffer-is-dirty nil))))
                 (funcall f data offset))
                ((not (eq mode :silent)) (message "Request failed: %s" (cdr err))))))
@@ -308,7 +308,7 @@ list of strings, giving the binary name and arguments.")
             (push change (cdr found))))
     (loop for (file . changes) in per-file do
           (setf changes (sort changes (lambda (a b) (> (cdr (assq 'start a)) (cdr (assq 'start b))))))
-          (find-file (concat (tern-project-dir) file))
+          (find-file (expand-file-name file (tern-project-dir)))
           (loop for change in changes do
                 (let ((start (1+ (cdr (assq 'start change))))
                       (end (1+ (cdr (assq 'end change)))))
@@ -330,7 +330,7 @@ list of strings, giving the binary name and arguments.")
   (interactive)
   (tern-run-query (lambda (data _offset)
                     (let* ((file (cdr (assq 'file data)))
-                           (found (and file (setf file (concat (tern-project-dir) (cdr (assq 'file data))))
+                           (found (and file (setf file (expand-file-name (cdr (assq 'file data)) (tern-project-dir)))
                                        (tern-find-position file data))))
                       (if found
                           (progn
@@ -349,8 +349,9 @@ list of strings, giving the binary name and arguments.")
   (with-current-buffer (find-file-noselect file)
     (let* ((start (1+ (cdr (assq 'start data))))
            (cx-start (- start (cdr (assq 'contextOffset data))))
-           (cx (cdr (assq 'context data))))
-      (if (equal (buffer-substring-no-properties cx-start (+ cx-start (length cx))) cx)
+           (cx (cdr (assq 'context data)))
+           (cx-end (+ cx-start (length cx))))
+      (if (and (<= (point-max) cx-end) (equal (buffer-substring-no-properties cx-start cx-end) cx))
           start
         (let (nearest nearest-dist)
           (save-excursion
