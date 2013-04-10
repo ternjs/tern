@@ -238,7 +238,7 @@
     typeHint: function() {
       var names = [];
       for (var i = 0; i < this.args.length; ++i) names.push("?");
-      return new Fn(null, this.self, this.args, names, this.retval);
+      return new Fn(null, this.self, this.args, names, ANull);
     }
   });
 
