@@ -223,7 +223,6 @@
       for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
         this.args[i].propagate(fn.args[i]);
       this.self.propagate(fn.self);
-      if (!this.retval) return;
       if (!fn.computeRet)
         fn.retval.propagate(this.retval);
       else if ((this.computed = (this.computed || 0) + 1) < 5)
@@ -277,7 +276,14 @@
 
   var MarkPropagation = constraint(["target"], {
     addType: function() {},
-    propagatesTo: function() {return this.target;}
+    propagatesTo: function() { return this.target; }
+  });
+
+  var IfObj = constraint(["target"], {
+    addType: function(t) {
+      if (t instanceof Obj) this.target.addType(t);
+    },
+    propagatesTo: function() { return this.target; }
   });
 
   // TYPE OBJECTS
@@ -888,9 +894,9 @@
         args.push(infer(node.arguments[i], scope, c));
       var callee = infer(node.callee, scope, c);
       var self = new AVal;
-      callee.propagate(new IsCtor(self));
-      callee.propagate(new IsCallee(self, args, node.arguments, out));
       self.propagate(out);
+      callee.propagate(new IsCtor(self));
+      callee.propagate(new IsCallee(self, args, node.arguments, new IfObj(out)));
     }),
     CallExpression: fill(function(node, scope, c, out) {
       for (var i = 0, args = []; i < node.arguments.length; ++i)

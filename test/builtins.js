@@ -22,3 +22,6 @@ Math.cos.call(null, 10); //: number
 toString; //: fn() -> string
 
 new Date; //: Date
+
+var num = new Number(1);
+num; //: Number

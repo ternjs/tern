@@ -149,7 +149,7 @@
       var arg = type.args[i];
       if (arg instanceof infer.Fn && arg.args.length) addEffect(type, function(_self, fArgs) {
         var fArg = fArgs[i];
-        if (fArg) fArg.propagate(new infer.IsCallee(infer.cx().topScope, arg.args));
+        if (fArg) fArg.propagate(new infer.IsCallee(infer.cx().topScope, arg.args, null, infer.ANull));
       });
     })(i);
     return type;
@@ -181,7 +181,7 @@
         var callee = getCallee(self, args);
         var slf = getSelf ? getSelf(self, args) : infer.ANull, as = [];
         for (var i = 0; i < getArgs.length; ++i) as.push(getArgs[i](self, args));
-        callee.propagate(new infer.IsCallee(slf, as));
+        callee.propagate(new infer.IsCallee(slf, as, null, infer.ANull));
       });
     } else if (effect.indexOf("custom ") == 0) {
       var customFunc = customFunctions[effect.slice(7).trim()];
