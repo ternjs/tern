@@ -447,7 +447,7 @@ list of strings, giving the binary name and arguments.")
 
 (defvar tern-mode-keymap (make-sparse-keymap))
 (define-key tern-mode-keymap [(meta ?.)] 'tern-find-definition)
-(define-key tern-mode-keymap [(meta ?>)] 'tern-find-definition-by-name)
+(define-key tern-mode-keymap [(control meta ?.)] 'tern-find-definition-by-name)
 (define-key tern-mode-keymap [(meta ?,)] 'tern-pop-find-definition)
 (define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
 (define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
