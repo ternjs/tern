@@ -45,6 +45,7 @@ function initEditor() {
     "Ctrl-I": findType,
     "Ctrl-Space": function(cm) { CodeMirror.showHint(cm, ternHints, {async: true}); },
     "Alt-.": jumpToDef,
+    "Shift-Alt-.": function(cm) { jumpToDef(cm, true); },
     "Alt-,": jumpBack,
     "Ctrl-Q": renameVar
   };
@@ -472,24 +473,37 @@ function findContext(data) {
   return {start: nearest, end: end};
 }
 
-function jumpToDef(cm) {
-  server.request(buildRequest(cm, "definition").request, function(error, data) {
-    if (error) return displayError(error);
-    if (data.file) {
-      var found = findContext(data);
-      if (!found)
-        return displayError("Could not find a definition.");
-      jumpStack.push({file: curDoc.name,
-                      start: cm.getCursor("from"),
-                      end: cm.getCursor("to")});
-      moveTo(data.file, found.start, found.end);
-    } else if (data.url) {
-      document.getElementById("out").innerHTML = "Opening documentation in a new window.";
-      window.open(data.url);
-    } else {
-      displayError("Could not find a definition.");
-    }
-  });
+function atInterestingExpression(cm) {
+  var pos = cm.getCursor("end"), tok = cm.getTokenAt(pos);
+  if (tok.start < pos.ch && (tok.type == "comment" || tok.type == "string")) return false;
+  return /\w/.test(cm.getLine(pos.line).slice(Math.max(pos.ch - 1, 0), pos.ch + 1));
+}
+
+function jumpToDef(cm, named) {
+  if (named == true || !atInterestingExpression(cm))
+    cm.openDialog("Jump to variable: <input type=text>", inner);
+  else
+    inner();
+
+  function inner(v) {
+    server.request(buildRequest(cm, {type: "definition", variable: v || null}).request, function(error, data) {
+      if (error) return displayError(error);
+      if (data.file) {
+        var found = findContext(data);
+        if (!found)
+          return displayError("Could not find a definition.");
+        jumpStack.push({file: curDoc.name,
+                        start: cm.getCursor("from"),
+                        end: cm.getCursor("to")});
+        moveTo(data.file, found.start, found.end);
+      } else if (data.url) {
+        document.getElementById("out").innerHTML = "Opening documentation in a new window.";
+        window.open(data.url);
+      } else {
+        displayError("Could not find a definition.");
+      }
+    });
+  }
 }
 
 function jumpBack(cm) {

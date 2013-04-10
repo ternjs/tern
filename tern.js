@@ -503,13 +503,20 @@
 
   var findExpr = exports.findQueryExpr = function(file, query) {
     if (query.end == null) throw new Error("missing .query.end field");
-    var start = query.start && resolvePos(file, query.start), end = resolvePos(file, query.end);
-    var expr = infer.findExpressionAt(file.ast, start, end, file.scope);
-    if (expr) return expr;
-    expr = infer.findExpressionAround(file.ast, start, end, file.scope);
-    if (expr && (start == null || start - expr.node.start < 20) &&
-        expr.node.end - end < 20) return expr;
-    throw new Error("No expression at the given position.");
+
+    if (query.variable) {
+      var scope = infer.scopeAt(file.ast, query.end, file.scope);
+      return {node: {type: "Identifier", name: query.variable, start: query.end, end: query.end + 1},
+              state: scope};
+    } else {
+      var start = query.start && resolvePos(file, query.start), end = resolvePos(file, query.end);
+      var expr = infer.findExpressionAt(file.ast, start, end, file.scope);
+      if (expr) return expr;
+      expr = infer.findExpressionAround(file.ast, start, end, file.scope);
+      if (expr && (start == null || start - expr.node.start < 20 || expr.node.end - end < 20))
+        return expr;
+      throw new Error("No expression at the given position.");
+    }
   };
 
   function findTypeAt(_srv, query, file) {
