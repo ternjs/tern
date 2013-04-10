@@ -97,7 +97,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-get-partial-file (at)
   (let* (min-indent start-pos end-pos
-         (min-pos (max 0 (- (point) 2000))))
+         (min-pos (max 0 (- at 2000))))
     (save-excursion
       (goto-char at)
       (loop
