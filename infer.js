@@ -434,7 +434,7 @@
       var known = this.hasProp(prop);
       if (!known) {
         known = this.defProp(prop);
-        var proto = new Obj(true);
+        var proto = new Obj(true, this.name && this.name + ".prototype");
         proto.origin = this.origin;
         proto.provisionary = true;
         known.addType(proto);
@@ -479,6 +479,7 @@
     this.paths = Object.create(null);
     this.purgeGen = 0;
     this.workList = null;
+    this.toFlush = [];
 
     exports.withContext(this, function() {
       cx.protos.Object = new Obj(null, "Object.prototype");
@@ -548,6 +549,8 @@
       if (!s.prev) return s.defProp(name);
     }
   };
+
+  // RETVAL COMPUTATION HEURISTICS
 
   function maybeTypeManipulator(scope, score) {
     if (!scope.typeManipScore) scope.typeManipScore = 0;
@@ -619,6 +622,21 @@
       fn.computeRetSource = foundPath;
       return true;
     }
+  }
+
+  // DELAYED PROPAGATION
+
+  function maybeMethod(node, obj) {
+    if (node.type != "FunctionExpression") return;
+    var fnNode = node.body.scope.fnType;
+    cx.toFlush.push(function() {
+      if (!fnNode.self.isEmpty()) return;
+      obj = obj.getType();
+      if (!obj || !(obj instanceof Obj)) return;
+      if (obj.name && /\.prototype$/.test(obj.name))
+        obj = exports.getInstance(obj);
+      obj.propagate(fnNode.self);
+    });
   }
 
   // SCOPE GATHERING PASS
@@ -754,6 +772,7 @@
         val.initializer = true;
         infer(prop.value, scope, c, val, prop.key.name);
         interpretComments(prop, prop.key.comments, scope, val);
+        maybeMethod(prop.value, obj);
       }
       return obj;
     }),
@@ -813,6 +832,7 @@
 
       if (node.left.type == "MemberExpression") {
         var obj = infer(node.left.object, scope, c);
+        maybeMethod(node.right, obj);
         if (pName == "prototype") maybeTypeManipulator(scope, 20);
         if (pName == "<i>") {
           // This is a hack to recognize for/in loops that copy
@@ -1023,6 +1043,12 @@
     walk.recursive(ast, scope, null, inferWrapper);
     
     cx.curOrigin = null;
+  };
+
+  exports.flush = function() {
+    var toFlush = cx.toFlush;
+    cx.toFlush = [];
+    for (var i = 0; i < toFlush.length; ++i) toFlush[i]();
   };
 
   // COMMENT INTERPRETATION

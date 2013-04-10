@@ -170,6 +170,7 @@
         return("Can't run a " + query.type + " query on a file fragment");
 
       infer.withContext(srv.cx, function() {
+        infer.flush();
         var result;
         try {
           result = queryType.run(srv, query, file);
