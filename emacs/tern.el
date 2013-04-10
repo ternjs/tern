@@ -382,6 +382,26 @@ list of strings, giving the binary name and arguments.")
                   "type"
                   (point)))
 
+;; Display docs
+
+(defvar tern-last-docs-url nil)
+(defun tern-get-docs ()
+  (interactive)
+  (if (and tern-last-docs-url (eq last-command 'tern-get-docs))
+      (progn
+        (browse-url tern-last-docs-url)
+        (setf tern-last-docs-url nil))
+    (tern-run-query (lambda (data _offset)
+                      (let ((url (cdr (assq 'url data))) (doc (cdr (assq 'doc data))))
+                        (cond (doc
+                               (setf tern-last-docs-url url)
+                               (message doc))
+                              (url
+                               (browse-url url))
+                              (t (message "Not found")))))
+                    "documentation"
+                    (point))))
+
 ;; Mode plumbing
 
 (defun tern-before-change (start end)
@@ -416,6 +436,7 @@ list of strings, giving the binary name and arguments.")
 (define-key tern-mode-keymap [(meta ?,)] 'tern-pop-find-definition)
 (define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
 (define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
+(define-key tern-mode-keymap [(control ?c) (control ?d)] 'tern-get-docs)
 
 (define-minor-mode tern-mode
   "Minor mode binding to the Tern JavaScript analyzer"

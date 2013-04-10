@@ -45,6 +45,9 @@ The following keys are bound:
  * `M-.` to jump to the definition of the thing under the cursor.
  * `M-,` brings you back to last place you were when you pressed `M-.`.
  * `C-c C-r` to rename the variable under the cursor.
+ * `C-c C-c` to find the type of the thing under the cursor.
+ * `C-c C-d` to find docs of the thing under the cursor. Press again to
+   open the associated URL (if any).
 
 ## Setting up the Vim plugin
 
