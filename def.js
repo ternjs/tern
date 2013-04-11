@@ -379,26 +379,33 @@
   var customFunctions = Object.create(null);
   infer.registerFunction = function(name, f) { customFunctions[name] = f; };
 
+  var IsCreated;
+  function initIsCreated() {
+    return IsCreated || (IsCreated = infer.constraint("created, target, spec", {
+      addType: function(tp) {
+        if (tp instanceof infer.Obj && this.created++ < 5) {
+          var derived = new infer.Obj(tp), spec = this.spec;
+          if (spec instanceof infer.AVal) spec = spec.getType();
+          if (spec instanceof infer.Obj) for (var prop in spec.props) {
+            var cur = spec.props[prop].types[0];
+            var p = derived.defProp(prop);
+            if (cur && cur instanceof infer.Obj && cur.props.value) {
+              var vtp = cur.props.value.getType();
+              if (vtp) p.addType(vtp);
+            }
+          }
+          this.target.addType(derived)
+        }
+      }
+    }));
+  }
+
   infer.registerFunction("Object_create", function(self, args, argNodes) {
     if (argNodes.length && argNodes[0].type == "Literal" && argNodes[0].value == null)
       return new infer.Obj();
 
-    var result = new infer.AVal, createdObj = 0;
-    if (args[0]) args[0].propagate({addType: function(tp) {
-      if (tp instanceof infer.Obj && createdObj++ < 5) {
-        var derived = new infer.Obj(tp), spec = args[1];
-        if (spec instanceof infer.AVal) spec = spec.types[0];
-        if (spec instanceof infer.Obj) for (var prop in spec.props) {
-          var cur = spec.props[prop].types[0];
-          var p = derived.defProp(prop);
-          if (cur && cur instanceof infer.Obj && cur.props.value) {
-            var vtp = cur.props.value.getType();
-            if (vtp) p.addType(vtp);
-          }
-        }
-        result.addType(derived)
-      }
-    }});
+    var result = new infer.AVal;
+    if (args[0]) args[0].propagate(new (initIsCreated())(0, result, args[1]));
     return result;
   });
 

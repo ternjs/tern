@@ -88,5 +88,5 @@ if (!origins.length) usage(1);
 
 server.flush(function(err) {
   if (err) throw err;
-  console.log(JSON.stringify(condense.condense(origins, name), null, 2));
+  (JSON.stringify(condense.condense(origins, name), null, 2));
 });
