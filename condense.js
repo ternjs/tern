@@ -145,7 +145,7 @@
 
   infer.Obj.prototype.getDesc = function(state, flag) {
     if (!isTarget(state, this)) return this.path;
-    if (isSimpleInstance(this, state)) return "+" + this.proto.path;
+    if (isSimpleInstance(this, state)) return "+" + this.proto.path.replace(/\.prototype$/, "");
 
     var structure = {}, proto;
     state.paths[this.path] = {structure: structure};
