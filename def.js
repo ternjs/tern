@@ -67,8 +67,8 @@
           computeRet = this.parseRetType();
         } else retType = this.parseType();
       } else retType = infer.ANull;
-      if (top && this.base)
-        fn = infer.Fn.call(this.base, name, infer.ANull, args, names, retType);
+      if (top && (fn = this.base))
+        infer.Fn.call(this.base, name, infer.ANull, args, names, retType);
       else
         fn = new infer.Fn(name, infer.ANull, args, names, retType);
       if (computeRet) fn.computeRet = computeRet;
@@ -80,10 +80,11 @@
       } else if (this.eat("[")) {
         var inner = this.parseType();
         this.eat("]") || this.error();
-        if (top && this.base)
-          return infer.Arr.call(this.base, inner);
-        else
-          return new infer.Arr(inner);
+        if (top && this.base) {
+          infer.Arr.call(this.base, inner);
+          return this.base;
+        }
+        return new infer.Arr(inner);
       } else if (this.eat("+")) {
         var path = this.word(/[\w$<>\.!]/);
         var base = parsePath(path + ".prototype");

@@ -325,8 +325,6 @@
     this.name = name;
     this.maybeProps = null;
     this.origin = cx.curOrigin;
-
-    return this;
   };
   Obj.prototype = Object.create(Type.prototype);
   Obj.prototype.toString = function(maxDepth) {
@@ -361,6 +359,7 @@
     }
 
     this.props[prop] = av;
+    av.origin = cx.curOrigin;
     this.broadcastProp(prop, av, true);
     return av;
   };
@@ -368,8 +367,8 @@
     var found = this.hasProp(prop, true) || (this.maybeProps && this.maybeProps[prop]);
     if (found) return found;
     if (!this.maybeProps) {
-      this.maybeProps = Object.create(null);
       if (this.proto) this.proto.forAllProps(this);
+      this.maybeProps = Object.create(null);
     }
     return this.maybeProps[prop] = new AVal;
   };
@@ -430,7 +429,6 @@
     this.args = args;
     this.argNames = argNames;
     this.retval = retval;
-    return this;
   };
   Fn.prototype = Object.create(Obj.prototype);
   Fn.prototype.toString = function(maxDepth) {
@@ -467,7 +465,6 @@
     Obj.call(this, cx.protos.Array);
     var content = this.defProp("<i>");
     if (contentType) contentType.propagate(content);
-    return this;
   };
   Arr.prototype = Object.create(Obj.prototype);
   Arr.prototype.toString = function(maxDepth) {
@@ -861,7 +858,7 @@
 
       if (node.left.type == "MemberExpression") {
         var obj = infer(node.left.object, scope, c);
-        maybeMethod(node.right, obj);
+        if (!obj.hasType(cx.topScope)) maybeMethod(node.right, obj);
         if (pName == "prototype") maybeTypeManipulator(scope, 20);
         if (pName == "<i>") {
           // This is a hack to recognize for/in loops that copy

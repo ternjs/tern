@@ -19,9 +19,8 @@
   function pathLen(path) {
     var len = 1, pos = 0, dot;
     while ((dot = path.indexOf(".", pos)) != -1) {
-      ++len;
       pos = dot + 1;
-      if (path.charAt(pos) == "!") len += .1;
+      len += path.charAt(pos) == "!" ? 10 : 1;
     }
     return len;
   }
@@ -123,31 +122,37 @@
   function setProps(source, target, state) {
     for (var prop in source.props) {
       var val = source.props[prop];
-      if (val.flags & infer.flag_definite)
-        target[prop] = desc(val, state);
+      if (isTarget(state, val)) target[prop] = desc(val, state);
+    }
+  }
+
+  function protoName(o) {
+    return /\.prototype$/.test(o.name) || /\.prototype$/.test(o.path);
+  }
+
+  function isSimpleInstance(o, state) {
+    if (o._fromProto) return true;
+
+    if (o.proto && o.proto != state.cx.protos.Object &&
+        o.proto.name && protoName(o.proto) && !protoName(o)) {
+      desc(o.proto, state, "force");
+      o._fromProto = true;
+      var protoDesc = state.paths[o.proto.path];
+      if (protoDesc) setProps(o, protoDesc.structure, state);
+      return true;
     }
   }
 
   infer.Obj.prototype.getDesc = function(state, flag) {
     if (!isTarget(state, this)) return this.path;
-    if (this._fromProto) return "+" + this.proto.path;
+    if (isSimpleInstance(this, state)) return "+" + this.proto.path;
 
     var structure = {}, proto;
     state.paths[this.path] = {structure: structure};
 
     if (this.proto && this.proto != state.cx.protos.Object) {
-      if (this.proto.name && /\.prototype$/.test(this.proto.name) &&
-          !/\.prototype$/.test(this.name)) {
-        proto = desc(this.proto, state, "force");
-        this._fromProto = true;
-        delete state.paths[this.path];
-        var protoDesc = state.paths[this.proto.path];
-        if (protoDesc) setProps(this, protoDesc.structure, state);
-        return "+" + this.proto.path;
-      } else {
-        proto = desc(this.proto, state);
-        if (proto == "?") proto = null;
-      }
+      proto = desc(this.proto, state);
+      if (proto == "?") proto = null;
     }
     if (flag != "force" && !proto && !hasProps(this)) return "?";
     if (proto) structure["!proto"] = proto;
@@ -189,18 +194,24 @@
     setPath(cx.topScope, "", state, 0);
 
     for (var v in cx.topScope.props) {
-      var av = cx.topScope.props[v], typ = av.getType(false);
-      if (typ && (sources.indexOf(typ.origin) > -1 || sources.indexOf(av.origin) > -1))
-        output[v] = desc(typ, state);
+      var av = cx.topScope.props[v];
+      if (!isTarget(state, av)) continue;
+      var typ = av.getType(false);
+      if (typ && isTarget(state, typ)) output[v] = desc(typ, state);
     }
+
     if (state.addedToForeign.length > 0) {
       var list = state.addedToForeign;
       state.addedToForeign = [];
       for (var i = 0; i < list.length; ++i) {
-        var d = list[i], val = desc(list[i], state), parts = d.path.split(".");
-        if (val == "?") continue;
+        var d = list[i], parts = d.path.split(".");
+        var parent = infer.def.parsePath(parts.slice(0, parts.length - 1).join("."));
+        if (isSimpleInstance(parent, state))
+          parts = parent.proto.path.split(".").concat(parts[parts.length - 1]);
+        var val = desc(list[i], state);
+        if (val == "?" || parts.some(function(s) {return s.charAt(0) == "!";})) continue;
         for (var j = 0, cur = output; j < parts.length - 1; ++j) {
-          var part = parts[i];
+          var part = parts[j];
           if (Object.prototype.hasOwnProperty.call(cur, part)) cur = cur[part];
           else cur = cur[part] = {};
         }

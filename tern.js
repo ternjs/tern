@@ -126,6 +126,17 @@
       return findFile(this.files, name);
     },
 
+    flush: function(c) {
+      var cx = this.cx;
+      analyzeAll(this, function(err) {
+        if (err) return c(err);
+        infer.withContext(cx, function() {
+          infer.flush();
+          c(null);
+        });
+      });
+    },
+
     on: function(type, f) {
       (this.handlers[type] || (this.handlers[type] = [])).push(f);
     },
