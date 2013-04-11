@@ -35,25 +35,33 @@
   var AVal = exports.AVal = function(type) {
     this.types = [];
     this.forward = null;
+    this.maxWeight = 0;
     if (type) type.propagate(this);
   };
   AVal.prototype = {
-    addType: function(type) {
-      if (this.types.indexOf(type) > -1) return;
+    addType: function(type, weight) {
+      weight = weight || 100;
+      if (this.maxWeight < weight) {
+        this.types.length = 0;
+        this.maxWeight = weight;
+      } else if (this.maxWeight > weight || this.types.indexOf(type) > -1) {
+        return;
+      }
 
       this.types.push(type);
       var forward = this.forward;
       if (forward) withWorklist(function(add) {
-        for (var i = 0; i < forward.length; ++i) add(type, forward[i]);
+        for (var i = 0; i < forward.length; ++i) add(type, forward[i], weight);
       });
     },
 
-    propagate: function(target) {
+    propagate: function(target, weight) {
       if (target == ANull || (target instanceof Type)) return;
+      if (weight && weight < 100) target = new Muffle(target, weight);
       (this.forward || (this.forward = [])).push(target);
-      var types = this.types;
+      var types = this.types, weight = this.maxWeight;
       if (types.length) withWorklist(function(add) {
-        for (var i = 0; i < types.length; ++i) add(types[i], target);
+        for (var i = 0; i < types.length; ++i) add(types[i], target, weight);
       });
     },
 
@@ -158,10 +166,6 @@
         if (!tp.retval.isEmpty()) ++score;
       } else if (objs) {
         score = tp.name ? 100 : 2;
-        for (var o = tp; o; o = o.proto) if (o.provisionary) {
-          score = 1;
-          break;
-        }
       } else if (prims) {
         score = 1;
       }
@@ -199,9 +203,9 @@
   }
 
   var PropIsSubset = constraint(["prop", "target"], {
-    addType: function(type) {
+    addType: function(type, weight) {
       if (type.getProp)
-        type.getProp(this.prop).propagate(this.target);
+        type.getProp(this.prop).propagate(this.target, weight);
     },
     propHint: function() { return this.prop; },
     propagatesTo: function() {
@@ -210,9 +214,9 @@
   });
 
   var PropHasSubset = exports.PropHasSubset = constraint(["prop", "target"], {
-    addType: function(type) {
+    addType: function(type, weight) {
       if (type.defProp)
-        this.target.propagate(type.defProp(this.prop));
+        this.target.propagate(type.defProp(this.prop), weight);
     },
     propHint: function() { return this.prop; }
   });
@@ -225,15 +229,15 @@
   });
 
   var IsCallee = exports.IsCallee = constraint(["self", "args", "argNodes", "retval"], {
-    addType: function(fn) {
+    addType: function(fn, weight) {
       if (!(fn instanceof Fn)) return;
       for (var i = 0, e = Math.min(this.args.length, fn.args.length); i < e; ++i)
-        this.args[i].propagate(fn.args[i]);
-      this.self.propagate(fn.self);
+        this.args[i].propagate(fn.args[i], weight);
+      this.self.propagate(fn.self, this.self == cx.topScope ? 1 : weight);
       if (!fn.computeRet)
-        fn.retval.propagate(this.retval);
+        fn.retval.propagate(this.retval, weight);
       else if ((this.computed = (this.computed || 0) + 1) < 5)
-        fn.computeRet(this.self, this.args, this.argNodes).propagate(this.retval);
+        fn.computeRet(this.self, this.args, this.argNodes).propagate(this.retval, weight);
     },
     typeHint: function() {
       var names = [];
@@ -243,40 +247,40 @@
   });
 
   var HasMethodCall = constraint(["propName", "args", "argNodes", "retval"], {
-    addType: function(obj) {
-      obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.argNodes, this.retval));
+    addType: function(obj, weight) {
+      obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.argNodes, this.retval), weight);
     },
     propHint: function() { return this.propName; }
   });
 
   var IsCtor = constraint(["target"], {
-    addType: function(f) {
+    addType: function(f, weight) {
       if (!(f instanceof Fn)) return;
-      f.getProp("prototype").propagate(new IsProto(f, this.target));
+      f.getProp("prototype").propagate(new IsProto(f, this.target), weight);
     }
   });
 
   var IsProto = constraint(["ctor", "target"], {
-    addType: function(o) {
+    addType: function(o, weight) {
       if (!(o instanceof Obj)) return;
 
       if (!o.instances) o.instances = [];
       for (var i = 0; i < o.instances.length; ++i) {
         var cur = o.instances[i];
-        if (cur.ctor == this.ctor) return this.target.addType(cur.instance);
+        if (cur.ctor == this.ctor) return this.target.addType(cur.instance, weight);
       }
       var instance = new Obj(o, this.ctor.name);
       o.instances.push({ctor: this.ctor, instance: instance});
-      this.target.addType(instance);
+      this.target.addType(instance, weight);
     }
   });
 
   var IsAdded = constraint(["other", "target"], {
-    addType: function(type) {
+    addType: function(type, weight) {
       if (type == cx.str)
-        this.target.addType(cx.str);
+        this.target.addType(cx.str, weight);
       else if (type == cx.num && this.other.hasType(cx.num))
-        this.target.addType(cx.num);
+        this.target.addType(cx.num, weight);
     },
     typeHint: function() { return this.other; }
   });
@@ -287,17 +291,35 @@
   });
 
   var IfObj = constraint(["target"], {
-    addType: function(t) {
-      if (t instanceof Obj) this.target.addType(t);
+    addType: function(t, weight) {
+      if (t instanceof Obj) this.target.addType(t, weight);
     },
     propagatesTo: function() { return this.target; }
+  });
+
+  var AutoInstance = constraint(["target"], {
+    addType: function(tp, weight) {
+      if (tp instanceof Obj && tp.name && /\.prototype$/.test(tp.name))
+        tp = exports.getInstance(tp);
+      tp.propagate(this.target, weight);
+    },
+    propagatesTo: function() { return this.target; }
+  });
+
+  var Muffle = constraint(["inner", "weight"], {
+    addType: function(tp, weight) {
+      this.inner.addType(tp, Math.min(weight, this.weight));
+    },
+    propagatesTo: function() { return this.innerpropagatesTo && this.inner.propagatesTo(); },
+    typeHint: function() { return this.inner.typeHint && this.inner.typeHint(); },
+    propHint: function() { return this.inner.propHint && this.inner.propHint(); }
   });
 
   // TYPE OBJECTS
 
   var Type = exports.Type = function() {};
   Type.prototype = {
-    propagate: function(c) { c.addType(this); },
+    propagate: function(c, w) { c.addType(this, w); },
     hasType: function(other) { return other == this; },
     isEmpty: function() { return false; },
     typeHint: function() { return this; },
@@ -452,8 +474,7 @@
         known = this.defProp(prop);
         var proto = new Obj(true, this.name && this.name + ".prototype");
         proto.origin = this.origin;
-        proto.provisionary = true;
-        known.addType(proto);
+        known.addType(proto, 5);
       }
       return known;
     }
@@ -534,15 +555,15 @@
     if (cx.workList) return f(cx.workList);
 
     var list = [], depth = 0;
-    var add = cx.workList = function(type, target) {
+    var add = cx.workList = function(type, target, weight) {
       if (depth < baseMaxWorkDepth - reduceMaxWorkDepth * list.length)
-        list.push(type, target, depth);
+        list.push(type, target, weight, depth);
     };
     try {
       var ret = f(add);
-      for (var i = 0; i < list.length; i += 3) {
-        depth = list[i + 2] + 1;
-        list[i + 1].addType(list[i]);
+      for (var i = 0; i < list.length; i += 4) {
+        depth = list[i + 3] + 1;
+        list[i + 1].addType(list[i], list[i + 2]);
       }
       return ret;
     } finally {
@@ -641,19 +662,6 @@
 
   // DELAYED PROPAGATION
 
-  function maybeMethod(node, obj) {
-    if (node.type != "FunctionExpression") return;
-    var fnNode = node.body.scope.fnType;
-    cx.toFlush.push(function() {
-      if (!fnNode.self.isEmpty()) return;
-      obj = obj.getType();
-      if (!obj || !(obj instanceof Obj)) return;
-      if (obj.name && /\.prototype$/.test(obj.name))
-        obj = exports.getInstance(obj);
-      obj.propagate(fnNode.self);
-    });
-  }
-
   function propagateIfSimple(source) {
     if (!(source instanceof AVal)) return source;
     var target = new AVal;
@@ -733,6 +741,11 @@
     return obj.instance || (obj.instance = new Obj(obj));
   };
 
+  function maybeMethod(node, obj) {
+    if (node.type != "FunctionExpression") return;
+    obj.propagate(new AutoInstance(node.body.scope.fnType.self), 2);
+  }
+
   function unopResultType(op) {
     switch (op) {
     case "+": case "-": case "~": return cx.num;
@@ -756,13 +769,6 @@
       if (!val) return ANull;
       return exports.getInstance(cx.protos.RegExp);
     }
-  }
-
-  function join(a, b) {
-    if (a == b) return a;
-    var joined = new AVal;
-    a.propagate(joined); b.propagate(joined);
-    return joined;
   }
 
   function ret(f) {
