@@ -577,7 +577,8 @@
   }
 
   function isInAST(node, ast) {
-    return walk.findNodeAt(ast, node.start, node.end, node.type);
+    var found = walk.findNodeAt(ast, node.start, node.end, node.type, infer.searchVisitor);
+    return found && found.node == node;
   }
 
   function findDef(srv, query, file) {
