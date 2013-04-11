@@ -106,9 +106,9 @@ button {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   overflow: hidden;
+  white-space: pre-wrap;
 }
 .hint-doc {
-  white-space: normal;
   font-size: 12pt;
 }
 
