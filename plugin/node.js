@@ -1,8 +1,8 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../infer"), require("../tern"), require);
+    return mod(require("../lib/infer"), require("../lib/tern"), require);
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../infer", "../tern"], mod);
+    return define(["../lib/infer", "../lib/tern"], mod);
   mod(tern, tern);
 })(function(infer, tern, require) {
   "use strict";

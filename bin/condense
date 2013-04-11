@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var tern = require("../tern"), condense = require("../condense");
+var tern = require("../lib/tern"), condense = require("../lib/condense");
 var path = require("path"), fs = require("fs");
 
 var localDir = process.cwd(), ourDir = path.resolve(__dirname, "..");
@@ -88,5 +88,5 @@ if (!origins.length) usage(1);
 
 server.flush(function(err) {
   if (err) throw err;
-  (JSON.stringify(condense.condense(origins, name), null, 2));
+  console.log(JSON.stringify(condense.condense(origins, name), null, 2));
 });

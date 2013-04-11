@@ -1,10 +1,14 @@
+#!/usr/bin/env node
+
 var fs = require("fs"), path = require("path");
-var infer = require("./infer");
-var tern = require("./tern");
+var infer = require("../lib/infer");
+var tern = require("../lib/tern");
 var acorn = require("acorn");
 var walk = require("acorn/util/walk.js");
-require("./plugin/requirejs.js");
-require("./plugin/node.js");
+require("../plugin/requirejs.js");
+require("../plugin/node.js");
+
+process.chdir(path.resolve(__dirname, ".."));
 
 var ecma5 = JSON.parse(fs.readFileSync("defs/ecma5.json"));
 var defData = {
