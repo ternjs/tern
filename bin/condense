@@ -61,7 +61,7 @@ for (var i = 2, len = process.argv.length; i < len; ++i) {
 }
 
 var server = new tern.Server({
-  getFile: function() {},
+  getFile: function(file) { return fs.readFileSync(path.resolve(localDir, file), "utf8"); },
   defs: defs,
   plugins: plugins,
   debug: true,
