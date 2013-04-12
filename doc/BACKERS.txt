@@ -12,6 +12,7 @@ merynstol
 rahul5
 raynos2
 sgruhier
+Tim Branyen
 
 Further backers:
 
@@ -41,6 +42,7 @@ FAYOLLE
 Pierre Spring
 Douglas Soares de Andrade
 egonelbre
+Gavin Suntop
 ivan4th
 Matt Field
 tiffany.conroy
@@ -50,6 +52,7 @@ A/C Luis Cardoso FeedZai S.A.
 aaron bieber
 Aaron Toth
 Adrian Christopher Schaedle
+Aijaz Mohammad
 Alberto Zaccagni
 Alex Sexton
 Alexandre Gaudencio
@@ -80,6 +83,7 @@ Christoffer Björkskog
 Christoph Schwienheer, bei Zierock
 Christopher Wyllie
 Codevise Solutions / Vangelis Tsoumenis 
+Cristian Carlesso
 Cuong Vo
 Damien Klinnert
 Dan
@@ -118,6 +122,7 @@ holmlundlists
 Jack Franklin
 Jan Lehnardt
 Jan Löfberg
+Jans Aasman
 Jason LeMoine
 Jendrik Johannes
 jeroen14
@@ -141,6 +146,7 @@ Kurt MacDonald
 Kyle Barrow
 Kyle Powers
 Lajos Koszti
+Laurie Kemmerer
 loïc moriamé
 Lukas F. Hartmann
 Luke Arduini
@@ -162,6 +168,7 @@ Max F. Albrecht
 Michael Goulbourn
 Michael Kessler
 Michael Lehenbauer
+Michael Russell
 Michael Zehrer
 Mikael Abrahamsson
 Mikko Ohtamaa
@@ -185,12 +192,14 @@ Per Thulin
 Peter Wong
 Phillip Strong
 pjschaffner
+Raphael LANG
 raycohen
 Richard Powell
 Rick Richardson
 Robert Oroszi
 Robin Brandt
 Ryan Morlok
+RYAN WACHTL
 Røsaker, Sveinung
 Salvatore Formisano
 Scott White
@@ -203,6 +212,7 @@ StefanGojan
 Stephan Hoyer
 steve heron
 tape.io GmbH / Sascha Reuter
+Thanasis Polychronakis
 Thomas Bassetto
 Thomas Roger
 Tiago Rodrigues
@@ -248,6 +258,7 @@ ncoder2000
 oogatta
 owz534
 rekurzija
+shikakaa
 signup1363131450
 sressler1
 StephanSeidt
@@ -259,8 +270,10 @@ andr1
 andrewjones86
 bogdan.durla
 botequilha
+boyerchen
 brauer1
 DmitrySemenov
+dominik.rask
 eliasgs
 haydenchambers
 hugomallet06
@@ -282,18 +295,23 @@ RRTimmerman
 SbastienLebel
 serkanyersen
 signup1345117742
+sindresorhus
 steve228uk
 thomasruoff
 twilightfeel
 wil.moore
 xavier.seignard
+from.indiegogo.71
+tomgreuter
 AndrewBlackshaw
 bitomule
+luiz.felipe.gp
 NagyIstvn
 pembeci
 peterjosling
 spacehelmetboy
 spam58
+xn--mlform-iua
 bryan.poetz
 i.zakurenyi
 KunoWoudt
@@ -311,14 +329,19 @@ daniel.lager
 DanielHjelm
 DariuszMlodnicki
 DevinClark1
+dragos
 dskreppsigg
+dyuri
 eelke
 EkremBykkaya
+erik.a.kronberg
 ErikDasque
+erwinmombay
 excelenter
 fishlevel
 florent.galland
 francescodip
+franz.r
 HenningSchrder
 HugoAgbonon
 Hwulex
@@ -331,12 +354,15 @@ jdduarte
 jdharding
 jose48
 justin.yost
+karl58
 KasperSouren
 korylprince
 kris80
 KristoforCarle
 matjazl
 MatthewDierker
+mcw0933
+mihaipaun01
 mr.pohoda
 naoyuki.kanezawa
 NikitaVasilyev
