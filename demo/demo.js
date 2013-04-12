@@ -312,16 +312,23 @@ function ternHints(cm, c) {
 
   server.request(req.request, function(error, data) {
     if (error) return displayError(error);
-    var completions = [];
+    var completions = [], after = "";
+    var from = incLine(req.offsetLines, data.start), to = incLine(req.offsetLines, data.end);
+    if (cm.getRange(Pos(from.line, from.ch - 2), from) == "[\"" &&
+        cm.getRange(to, Pos(to.line, to.ch + 2)) != "\"]")
+      after = "\"]";
+
     for (var i = 0; i < data.completions.length; ++i) {
       var completion = data.completions[i], className = typeToIcon(completion.type);
       if (data.guess) className += " Tern-completion-guess";
-      completions.push({text: completion.name, className: className, doc: completion.doc});
+      completions.push({text: completion.name + after,
+                        displayText: completion.name,
+                        className: className,
+                        doc: completion.doc});
     }
 
     var out = document.getElementById("out");
-    c({from: incLine(req.offsetLines, data.start),
-       to: incLine(req.offsetLines, data.end),
+    c({from: from, to: to,
        list: completions,
        onSelect: function(cur) {
          out.innerHTML = "";
