@@ -12,6 +12,7 @@ var projectFileName = ".tern-project", portFileName = ".tern-port";
 var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
 
 var persistent = process.argv.indexOf("--persistent") > -1;
+var verbose = process.argv.indexOf("--verbose") > -1;
 
 function findProjectDir() {
   var dir = process.cwd();
@@ -91,10 +92,10 @@ function startServer(dir, config) {
     getFile: function(name, c) {
       fs.readFile(path.resolve(dir, name), "utf8", c);
     },
+    async: true,
     defs: defs,
     plugins: plugins,
-    debug: true,
-    async: true,
+    debug: verbose,
     projectDir: dir
   });
   // FIXME maybe allow globs?
@@ -145,16 +146,18 @@ httpServer.listen(0, "localhost", function() {
 function respondSimple(resp, status, text) {
   resp.writeHead(status, {"content-type": "text/plain"});
   resp.end(text);
+  if (verbose) console.log("Response: " + status + " " + text);
 }
 
 function respond(resp, doc) {
   try { var doc = JSON.parse(doc); }
   catch(e) { return respondSimple(resp, 400, "JSON parse error: " + e.message); }
+  if (verbose) console.log("Request: " + JSON.stringify(doc, null, 2));
 
   server.request(doc, function(err, data) {
     if (err) return respondSimple(resp, 400, String(err));
     resp.writeHead(200, {"content-type": "application/json"});
+    if (verbose) console.log("Response: " + JSON.stringify(data, null, 2) + "\n");
     resp.end(JSON.stringify(data));
   });
 }
-
