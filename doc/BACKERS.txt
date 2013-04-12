@@ -7,7 +7,7 @@ Telerik
 grayrest
 peterlubbers
 remysharp
-anton14
+Anton Kovalyov
 merynstol
 rahul5
 raynos2
