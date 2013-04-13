@@ -157,9 +157,9 @@ def ensureCompletionCached():
     for cmpl in data["completions"]:
       setLast += "{ 'word' : \"" + cmpl["name"] + "\""
       if "type" in cmpl and not cmpl["type"] is None:
-        setLast += ", 'menu' : " + repr(str(cmpl["type"]))
+        setLast += ", 'menu' : " + repr((cmpl["type"]).encode('ascii','xmlcharrefreplace'))
       if "doc" in cmpl and not cmpl["doc"] is None:
-        setLast += ", 'info' : " + repr(str(cmpl["doc"]))
+        setLast += ", 'info' : " + repr((cmpl["doc"]).encode('ascii','xmlcharrefreplace'))
       setLast += "},"
       # TODO: string escaping of cmpl components?
   else:
