@@ -11,7 +11,7 @@
         (url-request-method "POST")
         (url-request-data (json-encode doc))
         (url-show-status nil)
-        (url (url-parse-make-urlobj "http" nil nil "localhost" port "/" nil nil nil)))
+        (url (url-parse-make-urlobj "http" nil nil "127.0.0.1" port "/" nil nil nil)))
     (url-http url #'tern-req-finished (list c))))
 
 (defun tern-req-finished (c)
