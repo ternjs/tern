@@ -16,7 +16,7 @@ Tim Branyen
 
 Further backers:
 
-ChristophePorteneuve
+Christophe Porteneuve
 JAMES MORRIN
 mmikulicic
 Morgan Roderick
@@ -32,7 +32,7 @@ Miguel Castillo
 mihai.bazon
 patrick.wolf
 Rebecca Murphey
-ScottSauyet
+Scott Sauyet
 Todd Wolfson
 Erik Söhnel
 Matt Pass
@@ -227,7 +227,7 @@ Victor Nguyen
 Vitaliy Meshchaninov
 Wolfram Twelker (u+i interact)
 Zachary King
-ZakiManian
+Zaki Manian
 Ziga Ham
 Øystein Kjærnet
 范致宣
@@ -237,24 +237,25 @@ krof.drakula
 LEICHNIG Loyce
 assaf3
 hebrox
-PauldAoust
-RolandWarmerdam
+Kasra Kyanzadeh
+Pauld Aoust
+Roland Warmerdam
 thomas.gorny
-ThomasGreiner
-AndersMadsen
+Thomas Greiner
+Anders Madsen
 ceejceej
 curist.cyc
 dannycoates1
-DavidOwens
+David Owens
 dinalamdany
 dsmlover
 ebraun1
 eugen.tudorancea
-FrodeNilsen
+Frode Nilsen
 glen15
 irakli
 JackEllis1
-JonGjengset
+Jon Gjengset
 mwsherman
 ncoder2000
 oogatta
@@ -264,7 +265,7 @@ rvagg
 shikakaa
 signup1363131450
 sressler1
-StephanSeidt
+Stephan Seidt
 tristen.brown
 volodymyrprokopyuk
 wbinnssmith
@@ -275,7 +276,7 @@ bogdan.durla
 botequilha
 boyerchen
 brauer1
-DmitrySemenov
+Dmitry Semenov
 dominik.rask
 eliasgs
 haydenchambers
@@ -283,12 +284,12 @@ hugomallet06
 ithkuil
 jacek3
 jfromaniello
-JiriZuna
+Jiri Zuna
 johannes20
 kylehardgrave
 larry8
 lorenz.anmey
-MaxShishkin
+Max Shishkin
 Michi-Mueller
 oliverjash
 robingoos
@@ -296,7 +297,7 @@ robmcbride
 roriz87
 RRTimmerman
 Sascha Greiff
-SbastienLebel
+Sbastien Lebel
 serkanyersen
 signup1345117742
 sindresorhus
@@ -307,11 +308,11 @@ wil.moore
 xavier.seignard
 from.indiegogo.71
 tomgreuter
-AndrewBlackshaw
+Andrew Blackshaw
 Ben
 bitomule
 luiz.felipe.gp
-NagyIstvn
+Nagy Istvn
 pembeci
 peterjosling
 spacehelmetboy
@@ -319,9 +320,9 @@ spam58
 xn--mlform-iua
 bryan.poetz
 i.zakurenyi
-KunoWoudt
+Kuno Woudt
 michal17
-AlexKoloskov
+Alex Koloskov
 antonio.murdaca
 bestander
 bjarne.heden
@@ -330,47 +331,49 @@ BrandonWilliams5
 bzmwillemsen
 carwinyoung
 dainstore
+Dan Bravender
+Daniel Hjelm
 daniel.lager
-DanielHjelm
-DariuszMlodnicki
+Dariusz Mlodnicki
 DevinClark1
 dragos
 dskreppsigg
 dyuri
 eelke
-EkremBykkaya
+Ekrem Bykkaya
+Erik Dasque
 erik.a.kronberg
-ErikDasque
 erwinmombay
 excelenter
 fishlevel
 florent.galland
 francescodip
 franz.r
-HenningSchrder
-HugoAgbonon
+Henning Schrder
+Hugo Agbonon
 Hwulex
 iley1
-IvanNikoli
+Isaac Z. Schlueter
+Ivan Nikoli
+James Westgate
 james.r.campos
-JamesWestgate
 Januardo Kusuma
 jdduarte
 jdharding
 jose48
 justin.yost
 karl58
-KasperSouren
+Kasper Souren
 korylprince
 kris80
-KristoforCarle
+Kristofor Carle
 matjazl
-MatthewDierker
+Matthew Dierker
 mcw0933
 mihaipaun01
 mr.pohoda
 naoyuki.kanezawa
-NikitaVasilyev
+Nikita Vasilyev
 NIkkiStevens
 radovan.lozej
 rob.alarcon
