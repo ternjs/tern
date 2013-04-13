@@ -136,6 +136,8 @@ def runCommand(query, pos, mode=None):
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return (data, offset)
 
+ternCompleteConfig = {'types' : True, 'docs': True }
+
 def ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
   curRow, curCol = vim.current.window.cursor
@@ -144,12 +146,25 @@ def ensureCompletionCached():
       vim.current.buffer[curRow-1][int(cached["start"]):int(cached["end"])] == cached["word"]):
     return
 
-  data, offset = runCommand("completions", {"line": curRow - 1, "ch": curCol})
+  data, offset = runCommand({"type" : "completions"
+                            ,"types": ternCompleteConfig["types"]
+                            ,"docs" : ternCompleteConfig["docs"]}
+                           ,{"line": curRow - 1, "ch": curCol})
   if data is None: return
 
   setLast = "let b:ternLastCompletion = ["
-  for cmpl in data["completions"]:
-    setLast += "\"" + cmpl + "\","
+  if ternCompleteConfig["types"] or ternCompleteConfig["docs"]:
+    for cmpl in data["completions"]:
+      setLast += "{ 'word' : \"" + cmpl["name"] + "\""
+      if "type" in cmpl:
+        setLast += ", 'menu' : \"" + cmpl["type"] + "\""
+      if "doc" in cmpl:
+        setLast += ", 'info' : \"" + cmpl["doc"] + "\""
+      setLast += "},"
+      # TODO: string escaping of cmpl components?
+  else:
+    for cmpl in data["completions"]:
+      setLast += "{ 'word' : \"" + cmpl + "\"},"
   vim.command(setLast + "]")
   start, end = (data["start"]["ch"], data["end"]["ch"])
   vim.command("let b:ternLastCompletionPos = {'row': " + str(curRow) +
@@ -157,11 +172,66 @@ def ensureCompletionCached():
               ", 'end': " + str(end) +
               ", 'word': '" + vim.current.buffer[curRow-1][start:end] + "'}")
 
+def ternQuery(query):
+  curRow, curCol = vim.current.window.cursor
+  data, offset = runCommand({"type" : query }
+                           ,{"line": curRow - 1, "ch": curCol})
+  return data
+
 endpy
 
 if !exists('g:tern#command')
   let g:tern#command = ["node", expand('<sfile>:h') . '/../bin/tern']
 endif
+
+" show info in preview window
+function! tern#PreviewInfo(info)
+  silent! wincmd P
+  if &previewwindow
+    silent 1,$d
+  else
+    new +setlocal\ previewwindow|setlocal\ buftype=nofile|setlocal\ noswapfile
+    exe "normal z" . &previewheight . "\<cr>"
+  endif
+  call append(0,split(a:info,"\n"))
+  wincmd p
+endfunction
+
+" just print server responses
+" TernRefs tends to time out..
+command! TernQueryType py print(ternQuery("type"))
+command! TernQueryDoc  py print(ternQuery("documentation"))
+command! TernQueryDef  py print(ternQuery("definition"))
+command! TernQueryRefs py print(ternQuery("refs"))
+
+" lookup documentation and show in preview window
+command! TernDoc call tern#Documentation()
+function! tern#Documentation()
+py <<endpy
+data = ternQuery("documentation")
+if "doc" in data and not data["doc"] is None:
+  vim.command("call tern#PreviewInfo(\""+data["doc"]+"\")")
+else:
+  vim.command("echo 'no documentation found'")
+endpy
+endfunction
+
+" lookup definition and jump to/open in window
+command! TernDef call tern#Definition("edit")
+command! TernDefPreview call tern#Definition("pedit")
+command! TernDefSplit call tern#Definition("split")
+command! TernDefTab call tern#Definition("tabe")
+function! tern#Definition(cmd)
+py <<endpy
+data = ternQuery("definition")
+if "file" in data and not data["file"] is None:
+  vim.command("{0} +{1} {2}".format(vim.eval("a:cmd")
+                                   ,data["start"]["line"]+1
+                                   ,data["file"]))
+else:
+  vim.command("echo 'no definition found'")
+endpy
+endfunction
 
 function! tern#Complete(findstart, complWord)
   if a:findstart
@@ -171,9 +241,9 @@ function! tern#Complete(findstart, complWord)
     return b:ternLastCompletion
   else
     let rest = []
-    for word in b:ternLastCompletion
-      if stridx(word, a:complWord) == 0
-        call add(rest, word)
+    for entry in b:ternLastCompletion
+      if stridx(entry["word"], a:complWord) == 0
+        call add(rest, entry)
       endif
     endfor
     return rest
@@ -186,7 +256,7 @@ function! tern#Enable()
   let b:ternLastCompletion = []
   let b:ternLastCompletionPos = {'row': -1, 'start': 0, 'end': 0}
   let b:ternBufferSentAt = -1
-  set omnifunc=tern#Complete
+  setlocal omnifunc=tern#Complete
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
