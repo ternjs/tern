@@ -7,7 +7,7 @@ Telerik
 grayrest
 peterlubbers
 remysharp
-anton14
+Anton Kovalyov
 merynstol
 rahul5
 raynos2
@@ -205,10 +205,11 @@ Salvatore Formisano
 Scott White
 Seth House
 Simon Cossar
+Simon Goumaz
 Simon Jockers
+Stefan Gojan
 Stefan Hayden
 Stefan Kienzle
-StefanGojan
 Stephan Hoyer
 steve heron
 tape.io GmbH / Sascha Reuter
@@ -231,6 +232,7 @@ Ziga Ham
 Øystein Kjærnet
 范致宣
 aritter
+David Flanagan
 krof.drakula
 LEICHNIG Loyce
 assaf3
@@ -258,6 +260,7 @@ ncoder2000
 oogatta
 owz534
 rekurzija
+rvagg
 shikakaa
 signup1363131450
 sressler1
@@ -292,6 +295,7 @@ robingoos
 robmcbride
 roriz87
 RRTimmerman
+Sascha Greiff
 SbastienLebel
 serkanyersen
 signup1345117742
@@ -304,6 +308,7 @@ xavier.seignard
 from.indiegogo.71
 tomgreuter
 AndrewBlackshaw
+Ben
 bitomule
 luiz.felipe.gp
 NagyIstvn
@@ -373,6 +378,7 @@ roger56
 sngsheftel
 snorremd
 steele
+Stefan Huber (Signalwerk)
 tanel
 tom.p.parker
 travis.heeter
