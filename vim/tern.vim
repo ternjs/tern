@@ -156,10 +156,10 @@ def ensureCompletionCached():
   if ternCompleteConfig["types"] or ternCompleteConfig["docs"]:
     for cmpl in data["completions"]:
       setLast += "{ 'word' : \"" + cmpl["name"] + "\""
-      if "type" in cmpl:
-        setLast += ", 'menu' : \"" + cmpl["type"] + "\""
-      if "doc" in cmpl:
-        setLast += ", 'info' : \"" + cmpl["doc"] + "\""
+      if "type" in cmpl and not cmpl["type"] is None:
+        setLast += ", 'menu' : " + repr(str(cmpl["type"]))
+      if "doc" in cmpl and not cmpl["doc"] is None:
+        setLast += ", 'info' : " + repr(str(cmpl["doc"]))
       setLast += "},"
       # TODO: string escaping of cmpl components?
   else:
@@ -174,8 +174,7 @@ def ensureCompletionCached():
 
 def ternQuery(query):
   curRow, curCol = vim.current.window.cursor
-  data, offset = runCommand({"type" : query }
-                           ,{"line": curRow - 1, "ch": curCol})
+  data, offset = runCommand(query, {"line": curRow - 1, "ch": curCol})
   return data
 
 endpy
@@ -199,16 +198,16 @@ endfunction
 
 " just print server responses
 " TernRefs tends to time out..
-command! TernQueryType py print(ternQuery("type"))
-command! TernQueryDoc  py print(ternQuery("documentation"))
-command! TernQueryDef  py print(ternQuery("definition"))
-command! TernQueryRefs py print(ternQuery("refs"))
+command! TernQueryType py print(ternQuery({"type":"type"}))
+command! TernQueryDoc  py print(ternQuery({"type":"documentation"}))
+command! TernQueryDef  py print(ternQuery({"type":"definition"}))
+command! TernQueryRefs py print(ternQuery({"type":"refs"}))
 
 " lookup documentation and show in preview window
 command! TernDoc call tern#Documentation()
 function! tern#Documentation()
 py <<endpy
-data = ternQuery("documentation")
+data = ternQuery({"type":"documentation"})
 if "doc" in data and not data["doc"] is None:
   vim.command("call tern#PreviewInfo(\""+data["doc"]+"\")")
 else:
@@ -223,7 +222,7 @@ command! TernDefSplit call tern#Definition("split")
 command! TernDefTab call tern#Definition("tabe")
 function! tern#Definition(cmd)
 py <<endpy
-data = ternQuery("definition")
+data = ternQuery({"type":"definition"})
 if "file" in data and not data["file"] is None:
   vim.command("{0} +{1} {2}".format(vim.eval("a:cmd")
                                    ,data["start"]["line"]+1
