@@ -138,6 +138,9 @@ def runCommand(query, pos, mode=None):
 
 ternCompleteConfig = {'types' : True, 'docs': True }
 
+def encode(s):
+  return repr(s.encode('ascii','xmlcharrefreplace'))
+
 def ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
   curRow, curCol = vim.current.window.cursor
@@ -157,11 +160,10 @@ def ensureCompletionCached():
     for cmpl in data["completions"]:
       setLast += "{ 'word' : \"" + cmpl["name"] + "\""
       if "type" in cmpl and not cmpl["type"] is None:
-        setLast += ", 'menu' : " + repr((cmpl["type"]).encode('ascii','xmlcharrefreplace'))
+        setLast += ", 'menu' : " + encode(cmpl["type"])
       if "doc" in cmpl and not cmpl["doc"] is None:
-        setLast += ", 'info' : " + repr((cmpl["doc"]).encode('ascii','xmlcharrefreplace'))
+        setLast += ", 'info' : " + encode(cmpl["doc"])
       setLast += "},"
-      # TODO: string escaping of cmpl components?
   else:
     for cmpl in data["completions"]:
       setLast += "{ 'word' : \"" + cmpl + "\"},"
@@ -209,7 +211,7 @@ function! tern#Documentation()
 py <<endpy
 data = ternQuery({"type":"documentation"})
 if "doc" in data and not data["doc"] is None:
-  vim.command("call tern#PreviewInfo(\""+data["doc"]+"\")")
+  vim.command("call tern#PreviewInfo("+encode(data["doc"])+")")
 else:
   vim.command("echo 'no documentation found'")
 endpy
