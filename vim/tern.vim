@@ -30,7 +30,7 @@ def projectDir():
         break
       mydir = parent
 
-  vim.command("let b:ternProjectDir = \"" + projectdir + "\"")
+  vim.command("let b:ternProjectDir = " + json.dumps(projectdir))
   return projectdir
 
 def findServer(ignorePort=False):
@@ -83,7 +83,7 @@ def bufferFragment():
   start = None
 
   for i in range(max(0, line - 50), line):
-    if not re.match("\\bfunction\\b", buf[i]): continue
+    if not re.match(".*\\bfunction\\b", buf[i]): continue
     indent = len(re.match("^\\s*", buf[i]).group(0))
     if minIndent is None or indent <= minIndent:
       minIndent = indent
@@ -147,15 +147,14 @@ def ensureCompletionCached():
   data, offset = runCommand("completions", {"line": curRow - 1, "ch": curCol})
   if data is None: return
 
-  setLast = "let b:ternLastCompletion = ["
-  for cmpl in data["completions"]:
-    setLast += "\"" + cmpl + "\","
-  vim.command(setLast + "]")
+  vim.command("let b:ternLastCompletion = " + json.dumps(data["completions"]))
   start, end = (data["start"]["ch"], data["end"]["ch"])
-  vim.command("let b:ternLastCompletionPos = {'row': " + str(curRow) +
-              ", 'start': " + str(start) +
-              ", 'end': " + str(end) +
-              ", 'word': '" + vim.current.buffer[curRow-1][start:end] + "'}")
+  vim.command("let b:ternLastCompletionPos = " + json.dumps({
+    "row": curRow,
+    "start": start,
+    "end": end,
+    "word": vim.current.buffer[curRow - 1][start:end]
+  }))
 
 endpy
 
@@ -190,5 +189,3 @@ function! tern#Enable()
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
-
-" FIXME String escaping in commands
