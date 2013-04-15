@@ -178,7 +178,7 @@ def tern_ensureCompletionCached():
   for rec in data["completions"]:
     completions.append({"word": rec["name"],
                         "menu": tern_asCompletionIcon(rec.get("type")),
-                        "info": rec.get("doc", "")})
+                        "info": tern_type_doc(rec) })
   vim.command("let b:ternLastCompletion = " + json.dumps(completions))
   start, end = (data["start"]["ch"], data["end"]["ch"])
   vim.command("let b:ternLastCompletionPos = " + json.dumps({
@@ -187,6 +187,9 @@ def tern_ensureCompletionCached():
     "end": end,
     "word": curLine[start:end]
   }))
+
+def tern_type_doc(rec):
+  return ((rec["type"] and rec["type"] + "\n") or "") + rec.get("doc", "")
 
 def tern_lookupDocumentation():
   data = tern_runCommand("documentation")
