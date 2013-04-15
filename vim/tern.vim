@@ -164,6 +164,18 @@ if !exists('g:tern#command')
   let g:tern#command = ["node", expand('<sfile>:h') . '/../bin/tern']
 endif
 
+function! tern#PreviewInfo(info)
+  silent! wincmd P
+  if &previewwindow
+    silent 1, $d
+  else
+    new +setlocal\ previewwindow|setlocal\ buftype=nofile|setlocal\ noswapfile
+    exe "normal z" . &previewheight . "\<cr>"
+  endif
+  call append(0, split(a:info, "\n"))
+  wincmd p
+endfunction
+
 function! tern#Complete(findstart, complWord)
   if a:findstart
     python ensureCompletionCached()
