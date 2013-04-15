@@ -223,13 +223,9 @@ if !exists('g:tern#command')
 endif
 
 function! tern#PreviewInfo(info)
-  silent! wincmd P
-  if &previewwindow
-    silent 1, $d
-  else
-    new +setlocal\ previewwindow|setlocal\ buftype=nofile|setlocal\ noswapfile
-    exe "normal z" . &previewheight . "\<cr>"
-  endif
+  pclose
+  new +setlocal\ previewwindow|setlocal\ buftype=nofile|setlocal\ noswapfile
+  exe "normal z" . &previewheight . "\<cr>"
   call append(0, split(a:info, "\n"))
   wincmd p
 endfunction
