@@ -1,6 +1,6 @@
 py << endpy
 
-import vim, os, platform, subprocess, urllib2, json, re
+import vim, os, platform, subprocess, urllib2, webbrowser, json, re
 
 def tern_displayError(err):
   vim.command("echoerr '" + str(err) + "'")
@@ -133,7 +133,7 @@ def tern_runCommand(query, pos=None, mode=None):
     except Exception as e:
       tern_displayError(e)
 
-  if sendingFile:
+  if sendingFile and vim.eval("b:ternInsertActive") == "0":
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return data
 
@@ -147,9 +147,10 @@ def tern_sendBuffer():
     return False
 
 def tern_sendBufferIfDirty():
-  curSeq = vim.eval("undotree()['seq_cur']")
-  if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
-    vim.command("let b:ternBufferSentAt = " + str(curSeq))
+  if vim.eval("exists('b:ternBufferSentAt')") == "1":
+    curSeq = vim.eval("undotree()['seq_cur']")
+    if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
+      vim.command("let b:ternBufferSentAt = " + str(curSeq))
 
 def tern_asCompletionIcon(type):
   if type is None or type == "?": return "(?)"
@@ -195,13 +196,14 @@ def tern_typeDoc(rec):
      result = tp + "\n" + result
   return result
 
-def tern_lookupDocumentation():
+def tern_lookupDocumentation(browse=False):
   data = tern_runCommand("documentation")
   if data is None: return
 
   doc = data.get("doc")
   url = data.get("url")
   if url:
+    if browse: return webbrowser.open(url)
     doc = ((doc and doc + "\n\n") or "") + "See " + url
   if doc:
     vim.command("call tern#PreviewInfo(" + json.dumps(doc) + ")")
@@ -255,6 +257,7 @@ function! tern#Complete(findstart, complWord)
 endfunction
 
 command! TernDoc py tern_lookupDocumentation()
+command! TernDocBrowse py tern_lookupDocumentation(browse=True)
 command! TernType py tern_lookupType()
 command! TernDef py tern_lookupDefinition("edit")
 command! TernDefPreview py tern_lookupDefinition("pedit")
@@ -267,8 +270,11 @@ function! tern#Enable()
   let b:ternLastCompletion = []
   let b:ternLastCompletionPos = {'row': -1, 'start': 0, 'end': 0}
   let b:ternBufferSentAt = -1
+  let b:ternInsertActive = 0
   setlocal omnifunc=tern#Complete
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
 autocmd BufLeave *.js :py tern_sendBufferIfDirty()
+autocmd InsertEnter *.js :if exists('b:ternInsertActive')|let b:ternInsertActive = 1|endif
+autocmd InsertLeave *.js :if exists('b:ternInsertActive')|let b:ternInsertActive = 0|endif
