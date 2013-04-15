@@ -23,6 +23,7 @@ Morgan Roderick
 Paul Irish
 wesen
 Aron Woost
+Brandon Frohs
 Dan Rogers
 Jan Krems
 Jörn Zaefferer
@@ -218,6 +219,7 @@ Thomas Bassetto
 Thomas Roger
 Tiago Rodrigues
 Tobias Kaatz
+Tom MacWright
 Tomasz Stryjewski
 Tommi Laine
 Tony Atkins
@@ -289,6 +291,7 @@ johannes20
 kylehardgrave
 larry8
 lorenz.anmey
+Martin Hečko
 Max Shishkin
 Michi-Mueller
 oliverjash
@@ -302,6 +305,7 @@ serkanyersen
 signup1345117742
 sindresorhus
 steve228uk
+tbartels
 thomasruoff
 twilightfeel
 wil.moore
