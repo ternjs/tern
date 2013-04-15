@@ -139,9 +139,11 @@ def runCommand(query, pos, mode=None):
 def ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
   curRow, curCol = vim.current.window.cursor
+  curLine = vim.current.buffer[curRow - 1]
 
   if (curRow == int(cached["row"]) and curCol >= int(cached["end"]) and
-      vim.current.buffer[curRow-1][int(cached["start"]):int(cached["end"])] == cached["word"]):
+      curLine[int(cached["start"]):int(cached["end"])] == cached["word"] and
+      (not re.match(".*\\W", curLine[int(cached["end"]):curCol]))):
     return
 
   data, offset = runCommand("completions", {"line": curRow - 1, "ch": curCol})
@@ -153,7 +155,7 @@ def ensureCompletionCached():
     "row": curRow,
     "start": start,
     "end": end,
-    "word": vim.current.buffer[curRow - 1][start:end]
+    "word": curLine[start:end]
   }))
 
 endpy
