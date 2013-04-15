@@ -73,7 +73,7 @@ def tern_bufferSlice(buf, pos, end):
 def tern_fullBuffer():
   return {"type": "full",
           "name": tern_relativeFile(),
-          "text": tern_bufferSlice(vim.current.buffer, 0, len(vim.current.buffer))};
+          "text": tern_bufferSlice(vim.current.buffer, 0, len(vim.current.buffer))}
 
 def tern_bufferFragment():
   curRow, curCol = vim.current.window.cursor
@@ -94,7 +94,7 @@ def tern_bufferFragment():
   return {"type": "part",
           "name": tern_relativeFile(),
           "text": tern_bufferSlice(buf, start, end),
-          "offsetLines": start};
+          "offsetLines": start}
 
 def tern_runCommand(query, pos=None, mode=None):
   if isinstance(query, str): query = {"type": query}
@@ -137,6 +137,20 @@ def tern_runCommand(query, pos=None, mode=None):
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return data
 
+def tern_sendBuffer():
+  port = tern_findServer()
+  if not port: return False
+  try:
+    tern_makeRequest(port, {"files": [tern_fullBuffer()]})
+    return True
+  except:
+    return False
+
+def tern_sendBufferIfDirty():
+  curSeq = vim.eval("undotree()['seq_cur']")
+  if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
+    vim.command("let b:ternBufferSentAt = " + str(curSeq))
+
 def tern_ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
   curRow, curCol = vim.current.window.cursor
@@ -161,28 +175,31 @@ def tern_ensureCompletionCached():
 
 def tern_lookupDocumentation():
   data = tern_runCommand("documentation")
+  if data is None: return
+
   doc = data.get("doc")
   url = data.get("url")
   if url:
-    doc = ((doc and doc + "\n\n") or "") + "See " + url;
+    doc = ((doc and doc + "\n\n") or "") + "See " + url
   if doc:
-    vim.command("call tern#PreviewInfo(" + json.dumps(doc) + ")");
+    vim.command("call tern#PreviewInfo(" + json.dumps(doc) + ")")
   else:
     vim.command("echo 'no documentation found'")
 
-def tern_sendBufferIfDirty():
-  curSeq = vim.eval("undotree()['seq_cur']")
-  if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
-    vim.command("let b:ternBufferSentAt = " + str(curSeq))
+def tern_lookupType():
+  data = tern_runCommand("type")
+  if data: vim.command("echo " + json.dumps(data.get("type", "not found")))
 
-def tern_sendBuffer():
-  port = tern_findServer()
-  if not port: return False
-  try:
-    tern_makeRequest(port, {"files": [tern_fullBuffer()]})
-    return True
-  except:
-    return False
+def tern_lookupDefinition(cmd):
+  data = tern_runCommand("definition")
+  if data is None: return
+
+  if "file" in data:
+    vim.command(cmd + " +" + str(data["start"]["line"] + 1) + " " + data["file"])
+  elif "url" in data:
+    vim.command("echo " + json.dumps("see " + data["url"]))
+  else:
+    vim.command("echo 'no definition found'")
 
 endpy
 
@@ -220,6 +237,11 @@ function! tern#Complete(findstart, complWord)
 endfunction
 
 command! TernDoc py tern_lookupDocumentation()
+command! TernType py tern_lookupType()
+command! TernDef py tern_lookupDefinition("edit")
+command! TernDefPreview py tern_lookupDefinition("pedit")
+command! TernDefSplit py tern_lookupDefinition("split")
+command! TernDefTab py tern_lookupDefinition("tabe")
 
 function! tern#Enable()
   let b:ternPort = 0
