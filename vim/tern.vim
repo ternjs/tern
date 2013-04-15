@@ -186,7 +186,7 @@ function! tern#Enable()
   let b:ternLastCompletion = []
   let b:ternLastCompletionPos = {'row': -1, 'start': 0, 'end': 0}
   let b:ternBufferSentAt = -1
-  set omnifunc=tern#Complete
+  setlocal omnifunc=tern#Complete
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
