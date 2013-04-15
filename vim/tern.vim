@@ -172,6 +172,20 @@ def lookupDocumentation():
   else:
     vim.command("echo 'no documentation found'")
 
+def sendBufferIfDirty():
+  curSeq = vim.eval("undotree()['seq_cur']")
+  if curSeq > vim.eval("b:ternBufferSentAt") and sendBuffer():
+    vim.command("let b:ternBufferSentAt = " + str(curSeq))
+
+def sendBuffer():
+  port = findServer()
+  if not port: return False
+  try:
+    makeRequest(port, {"files": [fullBuffer()]})
+    return True
+  except:
+    return False
+
 endpy
 
 if !exists('g:tern#command')
@@ -219,3 +233,4 @@ function! tern#Enable()
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
+autocmd BufLeave *.js :py sendBufferIfDirty()
