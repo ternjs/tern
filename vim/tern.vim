@@ -1,6 +1,6 @@
 py << endpy
 
-import vim, os, platform, subprocess, urllib2, json, re
+import vim, os, platform, subprocess, urllib2, webbrowser, json, re
 
 def tern_displayError(err):
   vim.command("echoerr '" + str(err) + "'")
@@ -188,13 +188,14 @@ def tern_ensureCompletionCached():
     "word": curLine[start:end]
   }))
 
-def tern_lookupDocumentation():
+def tern_lookupDocumentation(browse=False):
   data = tern_runCommand("documentation")
   if data is None: return
 
   doc = data.get("doc")
   url = data.get("url")
   if url:
+    if browse: return webbrowser.open(url)
     doc = ((doc and doc + "\n\n") or "") + "See " + url
   if doc:
     vim.command("call tern#PreviewInfo(" + json.dumps(doc) + ")")
@@ -252,6 +253,7 @@ function! tern#Complete(findstart, complWord)
 endfunction
 
 command! TernDoc py tern_lookupDocumentation()
+command! TernDocBrowse py tern_lookupDocumentation(browse=True)
 command! TernType py tern_lookupType()
 command! TernDef py tern_lookupDefinition("edit")
 command! TernDefPreview py tern_lookupDefinition("pedit")
