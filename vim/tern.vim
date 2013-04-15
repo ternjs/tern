@@ -96,8 +96,11 @@ def bufferFragment():
           "text": bufferSlice(buf, start, end),
           "offsetLines": start};
 
-def runCommand(query, pos, mode=None):
+def runCommand(query, pos=None, mode=None):
   if isinstance(query, str): query = {"type": query}
+  if (pos is None):
+    curRow, curCol = vim.current.window.cursor
+    pos = {"line": curRow - 1, "ch": curCol}
   port = findServer()
   if not port: return
   data = None
@@ -158,6 +161,17 @@ def ensureCompletionCached():
     "word": curLine[start:end]
   }))
 
+def lookupDocumentation():
+  data, _offset = runCommand("documentation")
+  doc = data.get("doc")
+  url = data.get("url")
+  if url:
+    doc = ((doc and doc + "\n\n") or "") + "See " + url;
+  if doc:
+    vim.command("call tern#PreviewInfo(" + json.dumps(doc) + ")");
+  else:
+    vim.command("echo 'no documentation found'")
+
 endpy
 
 if !exists('g:tern#command')
@@ -192,6 +206,8 @@ function! tern#Complete(findstart, complWord)
     return rest
   endif
 endfunction
+
+command! TernDoc py lookupDocumentation()
 
 function! tern#Enable()
   let b:ternPort = 0
