@@ -2,17 +2,17 @@ py << endpy
 
 import vim, os, platform, subprocess, urllib2, json, re
 
-def displayError(err):
+def tern_displayError(err):
   vim.command("echoerr '" + str(err) + "'")
 
-def makeRequest(port, doc):
+def tern_makeRequest(port, doc):
   req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
   data = req.read()
   if req.getcode() >= 300:
     raise IOError(data)
   return json.loads(data)
 
-def projectDir():
+def tern_projectDir():
   cur = vim.eval("b:ternProjectDir")
   if cur: return cur
 
@@ -33,11 +33,11 @@ def projectDir():
   vim.command("let b:ternProjectDir = " + json.dumps(projectdir))
   return projectdir
 
-def findServer(ignorePort=False):
+def tern_findServer(ignorePort=False):
   cur = int(vim.eval("b:ternPort"))
   if cur != 0 and cur != ignorePort: return cur
 
-  dir = projectDir()
+  dir = tern_projectDir()
   if not dir: return None
   portFile = os.path.join(dir, ".tern-port")
   if os.path.isfile(portFile):
@@ -45,11 +45,11 @@ def findServer(ignorePort=False):
     if port != ignorePort:
       vim.command("let b:ternPort = " + str(port))
       return port
-  return startServer()
+  return tern_startServer()
 
-def startServer():
+def tern_startServer():
   win = platform.system() == "Windows"
-  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=projectDir(),
+  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=tern_projectDir(),
                           stdout=subprocess.PIPE, shell=win)
   status = proc.stdout.readline()
   match = re.match("Listening on port (\\d+)", status)
@@ -59,23 +59,23 @@ def startServer():
     return port
   return None
 
-def relativeFile():
+def tern_relativeFile():
   filename = vim.eval("expand('%:p')")
-  return filename[len(projectDir()) + 1:]
+  return filename[len(tern_projectDir()) + 1:]
 
-def bufferSlice(buf, pos, end):
+def tern_bufferSlice(buf, pos, end):
   text = ""
   while pos < end:
     text += buf[pos] + "\n"
     pos += 1
   return text
 
-def fullBuffer():
+def tern_fullBuffer():
   return {"type": "full",
-          "name": relativeFile(),
-          "text": bufferSlice(vim.current.buffer, 0, len(vim.current.buffer))};
+          "name": tern_relativeFile(),
+          "text": tern_bufferSlice(vim.current.buffer, 0, len(vim.current.buffer))};
 
-def bufferFragment():
+def tern_bufferFragment():
   curRow, curCol = vim.current.window.cursor
   line = curRow - 1
   buf = vim.current.buffer
@@ -92,16 +92,16 @@ def bufferFragment():
   if start is None: start = max(0, line - 50)
   end = min(len(buf) - 1, line + 20)
   return {"type": "part",
-          "name": relativeFile(),
-          "text": bufferSlice(buf, start, end),
+          "name": tern_relativeFile(),
+          "text": tern_bufferSlice(buf, start, end),
           "offsetLines": start};
 
-def runCommand(query, pos=None, mode=None):
+def tern_runCommand(query, pos=None, mode=None):
   if isinstance(query, str): query = {"type": query}
   if (pos is None):
     curRow, curCol = vim.current.window.cursor
     pos = {"line": curRow - 1, "ch": curCol}
-  port = findServer()
+  port = tern_findServer()
   if not port: return
   data = None
   offset = 0
@@ -109,37 +109,37 @@ def runCommand(query, pos=None, mode=None):
 
   doc = {"query": query, "files": []}
   if curSeq == vim.eval("b:ternBufferSentAt"):
-    fname, sendingFile = (relativeFile(), False)
+    fname, sendingFile = (tern_relativeFile(), False)
   elif len(vim.current.buffer) > 250:
-    f = bufferFragment()
+    f = tern_bufferFragment()
     doc["files"].append(f)
     offset = f["offsetLines"]
     pos = {"line": pos["line"] - offset, "ch": pos["ch"]}
     fname, sendingFile = ("#0", False)
   else:
-    doc["files"].append(fullBuffer())
+    doc["files"].append(tern_fullBuffer())
     fname, sendingFile = ("#0", True)
   query["file"] = fname
   query["end"] = pos
   query["lineCharPositions"] = True
 
   try:
-    data = makeRequest(port, doc)
+    data = tern_makeRequest(port, doc)
   except:
     pass
 
   if not data:
     try:
-      port = findServer(port)
-      data = makeRequest(port, doc)
+      port = tern_findServer(port)
+      data = tern_makeRequest(port, doc)
     except Exception as e:
-      displayError(e)
+      tern_displayError(e)
 
   if sendingFile:
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return (data, offset)
 
-def ensureCompletionCached():
+def tern_ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
   curRow, curCol = vim.current.window.cursor
   curLine = vim.current.buffer[curRow - 1]
@@ -149,7 +149,7 @@ def ensureCompletionCached():
       (not re.match(".*\\W", curLine[int(cached["end"]):curCol]))):
     return
 
-  data, offset = runCommand("completions", {"line": curRow - 1, "ch": curCol})
+  data, offset = tern_runCommand("completions", {"line": curRow - 1, "ch": curCol})
   if data is None: return
 
   vim.command("let b:ternLastCompletion = " + json.dumps(data["completions"]))
@@ -161,8 +161,8 @@ def ensureCompletionCached():
     "word": curLine[start:end]
   }))
 
-def lookupDocumentation():
-  data, _offset = runCommand("documentation")
+def tern_lookupDocumentation():
+  data, _offset = tern_runCommand("documentation")
   doc = data.get("doc")
   url = data.get("url")
   if url:
@@ -172,16 +172,16 @@ def lookupDocumentation():
   else:
     vim.command("echo 'no documentation found'")
 
-def sendBufferIfDirty():
+def tern_sendBufferIfDirty():
   curSeq = vim.eval("undotree()['seq_cur']")
-  if curSeq > vim.eval("b:ternBufferSentAt") and sendBuffer():
+  if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
 
-def sendBuffer():
-  port = findServer()
+def tern_sendBuffer():
+  port = tern_findServer()
   if not port: return False
   try:
-    makeRequest(port, {"files": [fullBuffer()]})
+    tern_makeRequest(port, {"files": [tern_fullBuffer()]})
     return True
   except:
     return False
@@ -206,7 +206,7 @@ endfunction
 
 function! tern#Complete(findstart, complWord)
   if a:findstart
-    python ensureCompletionCached()
+    python tern_ensureCompletionCached()
     return b:ternLastCompletionPos['start']
   elseif b:ternLastCompletionPos['end'] - b:ternLastCompletionPos['start'] == len(a:complWord)
     return b:ternLastCompletion
@@ -221,7 +221,7 @@ function! tern#Complete(findstart, complWord)
   endif
 endfunction
 
-command! TernDoc py lookupDocumentation()
+command! TernDoc py tern_lookupDocumentation()
 
 function! tern#Enable()
   let b:ternPort = 0
@@ -233,4 +233,4 @@ function! tern#Enable()
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
-autocmd BufLeave *.js :py sendBufferIfDirty()
+autocmd BufLeave *.js :py tern_sendBufferIfDirty()
