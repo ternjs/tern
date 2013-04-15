@@ -104,7 +104,6 @@ def tern_runCommand(query, pos=None, mode=None):
   port = tern_findServer()
   if not port: return
   data = None
-  offset = 0
   curSeq = vim.eval("undotree()['seq_cur']")
 
   doc = {"query": query, "files": []}
@@ -113,8 +112,7 @@ def tern_runCommand(query, pos=None, mode=None):
   elif len(vim.current.buffer) > 250:
     f = tern_bufferFragment()
     doc["files"].append(f)
-    offset = f["offsetLines"]
-    pos = {"line": pos["line"] - offset, "ch": pos["ch"]}
+    pos = {"line": pos["line"] - f["offsetLines"], "ch": pos["ch"]}
     fname, sendingFile = ("#0", False)
   else:
     doc["files"].append(tern_fullBuffer())
@@ -137,7 +135,7 @@ def tern_runCommand(query, pos=None, mode=None):
 
   if sendingFile:
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
-  return (data, offset)
+  return data
 
 def tern_ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
@@ -149,7 +147,7 @@ def tern_ensureCompletionCached():
       (not re.match(".*\\W", curLine[int(cached["end"]):curCol]))):
     return
 
-  data, offset = tern_runCommand("completions", {"line": curRow - 1, "ch": curCol})
+  data = tern_runCommand("completions", {"line": curRow - 1, "ch": curCol})
   if data is None: return
 
   vim.command("let b:ternLastCompletion = " + json.dumps(data["completions"]))
@@ -162,7 +160,7 @@ def tern_ensureCompletionCached():
   }))
 
 def tern_lookupDocumentation():
-  data, _offset = tern_runCommand("documentation")
+  data = tern_runCommand("documentation")
   doc = data.get("doc")
   url = data.get("url")
   if url:
