@@ -151,6 +151,15 @@ def tern_sendBufferIfDirty():
   if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
 
+def tern_asCompletionIcon(type):
+  if type is None or type == "?": return "(?)"
+  if type.startswith("fn("): return "(fn)"
+  if type.startswith("["): return "([])"
+  if type == "number": return "(num)"
+  if type == "string": return "(str)"
+  if type == "bool": return "(bool)"
+  return "(obj)"
+
 def tern_ensureCompletionCached():
   cached = vim.eval("b:ternLastCompletionPos")
   curRow, curCol = vim.current.window.cursor
@@ -161,10 +170,16 @@ def tern_ensureCompletionCached():
       (not re.match(".*\\W", curLine[int(cached["end"]):curCol]))):
     return
 
-  data = tern_runCommand("completions", {"line": curRow - 1, "ch": curCol})
+  data = tern_runCommand({"type": "completions", "types": True, "docs": True},
+                         {"line": curRow - 1, "ch": curCol})
   if data is None: return
 
-  vim.command("let b:ternLastCompletion = " + json.dumps(data["completions"]))
+  completions = []
+  for rec in data["completions"]:
+    completions.append({"word": rec["name"],
+                        "menu": tern_asCompletionIcon(rec.get("type")),
+                        "info": rec.get("doc", "")})
+  vim.command("let b:ternLastCompletion = " + json.dumps(completions))
   start, end = (data["start"]["ch"], data["end"]["ch"])
   vim.command("let b:ternLastCompletionPos = " + json.dumps({
     "row": curRow,
@@ -227,9 +242,9 @@ function! tern#Complete(findstart, complWord)
     return b:ternLastCompletion
   else
     let rest = []
-    for word in b:ternLastCompletion
-      if stridx(word, a:complWord) == 0
-        call add(rest, word)
+    for entry in b:ternLastCompletion
+      if stridx(entry["word"], a:complWord) == 0
+        call add(rest, entry)
       endif
     endfor
     return rest
