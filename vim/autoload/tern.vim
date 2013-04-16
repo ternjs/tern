@@ -160,7 +160,7 @@ def ensureCompletionCached():
 endpy
 
 if !exists('g:tern#command')
-  let g:tern#command = ["node", expand('<sfile>:h') . '/../bin/tern']
+  let g:tern#command = ["node", expand('<sfile>:h') . '/../../bin/tern']
 endif
 
 function! tern#Complete(findstart, complWord)
@@ -188,7 +188,5 @@ function! tern#Enable()
   let b:ternBufferSentAt = -1
   set omnifunc=tern#Complete
 endfunction
-
-autocmd FileType javascript :call tern#Enable()
 
 " FIXME String escaping in commands
