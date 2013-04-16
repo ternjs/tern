@@ -245,7 +245,7 @@ function buildRequest(cm, query, allowFragments) {
         curDoc.changed.from <= startPos.line && curDoc.changed.to > query.end.line) {
       files.push(getFragmentAround(cm, startPos, query.end));
       query.file = "#0";
-      offsetLines = files[0].offsetLines;
+      var offsetLines = files[0].offsetLines;
       if (query.start != null) query.start = incLine(-offsetLines, query.start);
       query.end = incLine(-offsetLines, query.end);
     } else {
@@ -266,8 +266,7 @@ function buildRequest(cm, query, allowFragments) {
     }
   }
 
-  return {request: {query: query, files: files},
-          offsetLines: offsetLines};
+  return {query: query, files: files};
 }
 
 function sendDoc(doc) {
@@ -278,7 +277,7 @@ function sendDoc(doc) {
 }
 
 function findType(cm) {
-  server.request(buildRequest(cm, "type").request, function(error, data) {
+  server.request(buildRequest(cm, "type"), function(error, data) {
     if (error) return displayError(error);
     var out = document.getElementById("out");
     out.innerHTML = "";
@@ -310,10 +309,10 @@ function typeToIcon(type) {
 function ternHints(cm, c) {
   var req = buildRequest(cm, {type: "completions", types: true, docs: true});
 
-  server.request(req.request, function(error, data) {
+  server.request(req, function(error, data) {
     if (error) return displayError(error);
     var completions = [], after = "";
-    var from = incLine(req.offsetLines, data.start), to = incLine(req.offsetLines, data.end);
+    var from = data.start, to = data.end;
     if (cm.getRange(Pos(from.line, from.ch - 2), from) == "[\"" &&
         cm.getRange(to, Pos(to.line, to.ch + 2)) != "\"]")
       after = "\"]";
@@ -400,7 +399,7 @@ function updateArgumentHints(cm) {
     cache.line = line; cache.ch = ch; cache.bad = true;
 
     var query = {type: "type", preferFunction: true, end: Pos(line, ch)}
-    server.request(buildRequest(cm, query).request, function(error, data) {
+    server.request(buildRequest(cm, query), function(error, data) {
       if (error) return;
       if (!data.type || !(/^fn\(/).test(data.type)) return;
     
@@ -453,7 +452,7 @@ function findContext(data) {
   var doc = findDoc(data.file).doc;
   var before = data.context.slice(0, data.contextOffset).split("\n");
   var startLine = data.start.line - (before.length - 1);
-  var start = Pos(startLine, (before.length == 1 ? start.ch : doc.getLine(startLine).length) - before[0].length);
+  var start = Pos(startLine, (before.length == 1 ? data.start.ch : doc.getLine(startLine).length) - before[0].length);
 
   var text = doc.getLine(startLine).slice(start.ch), off = 0;
   for (var cur = startLine + 1; cur < doc.lineCount() && text.length < data.context.length; ++cur)
@@ -493,7 +492,7 @@ function jumpToDef(cm, named) {
     inner();
 
   function inner(v) {
-    server.request(buildRequest(cm, {type: "definition", variable: v || null}).request, function(error, data) {
+    server.request(buildRequest(cm, {type: "definition", variable: v || null}), function(error, data) {
       if (error) return displayError(error);
       if (data.file) {
         var found = findContext(data);
@@ -544,7 +543,7 @@ function renameVar(cm) {
     if (!/^variable|^def$/.test(token.type)) return displayError("Not at a variable name");
   }
   cm.openDialog("New name for " + token.string + ": <input type=text>", function(newName) {
-    server.request(buildRequest(cm, {type: "rename", newName: newName}, false).request, function(error, data) {
+    server.request(buildRequest(cm, {type: "rename", newName: newName}, false), function(error, data) {
       if (error) return displayError(error);
       applyChanges(data.changes);
     });
