@@ -228,7 +228,7 @@ def tern_lookupDefinition(cmd):
 endpy
 
 if !exists('g:tern#command')
-  let g:tern#command = ["node", expand('<sfile>:h') . '/../bin/tern']
+  let g:tern#command = ["node", expand('<sfile>:h') . '/../../bin/tern']
 endif
 
 function! tern#PreviewInfo(info)
@@ -274,6 +274,7 @@ function! tern#Enable()
   setlocal omnifunc=tern#Complete
 endfunction
 
+" FIXME String escaping in commands
 autocmd FileType javascript :call tern#Enable()
 autocmd BufLeave *.js :py tern_sendBufferIfDirty()
 autocmd InsertEnter *.js :if exists('b:ternInsertActive')|let b:ternInsertActive = 1|endif

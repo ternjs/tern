@@ -51,16 +51,47 @@ The following keys are bound:
 
 ## Setting up the Vim plugin
 
+### Installation
+
+If you don't have a preferred installation method, I recommend
+installing [NeoBundle.vim](https://github.com/Shougo/neobundle.vim),
+and then simply copy and paste:
+
+*Example for neobundle:*
+
+```
+NeoBundle 'marijnh/tern', {
+      \ "rtp" : 'vim',
+      \ 'build' : {
+      \   'mac': 'npm install',
+      \   'unix': 'npm install',
+      \   'windows': 'npm install',
+      \   'cygwin': 'npm install',
+      \   'others': 'npm install',
+      \ }}
+```
+
+*Or for [Vundle](https://github.com/gmarik/vundle) users:*
+
+Add `Bundle 'marijnh/tern', {'rtp': 'vim/'}` to your `~/.vimrc` and then
+
+- either withn Vim: `BundleInstall`
+- and in your shell: `npm install`
+
+*Or for else:*
+
+```
+" vimrc
+set runtimepath+=path/to/tern/vim
+autocmd FileType javascript :call tern#Enable()
+```
+
+- and in your shell: `npm install`
+
  1. Clone this repository somewhere. Do `npm install` to get the
     dependencies.
 
  1. Make sure your Vim has Python support.
-
- 1. Source the `vim/tern.vim` script in your `.vimrc`. Don't copy it
-    anywhere, leave it in the Tern checkout so that it can find the
-    Tern server code.
-    
-        so /path/to/tern/vim/tern.vim
 
 When editing a JavaScript (`.js`) file, your omni-complete will be
 hooked into Tern. Use `C-x C-o` in insert mode to activate it.
