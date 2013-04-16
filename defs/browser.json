@@ -908,7 +908,7 @@
       "scrollWidth": {
         "!type": "number",
         "!url": "https://developer.mozilla.org/en/docs/DOM/element.scrollWidth",
-        "!doc": "Read–only property that returns either the width in pixels of the content of an element or the width of the element itself, whichever is greater."
+        "!doc": "Read-only property that returns either the width in pixels of the content of an element or the width of the element itself, whichever is greater."
       },
       "clientTop": {
         "!type": "number",
@@ -918,7 +918,7 @@
       "clientLeft": {
         "!type": "number",
         "!url": "https://developer.mozilla.org/en/docs/DOM/element.clientLeft",
-        "!doc": "The width of the left border of an element in pixels. It includes the width of the vertical scrollbar if the text direction of the element is right–to–left and if there is an overflow causing a left vertical scrollbar to be rendered. clientLeft does not include the left margin or the left padding. clientLeft is read-only."
+        "!doc": "The width of the left border of an element in pixels. It includes the width of the vertical scrollbar if the text direction of the element is right-to-left and if there is an overflow causing a left vertical scrollbar to be rendered. clientLeft does not include the left margin or the left padding. clientLeft is read-only."
       },
       "clientHeight": {
         "!type": "number",
@@ -1520,8 +1520,7 @@
       },
       "snapshotItem": {
         "!type": "fn()",
-        "!url": "https://developer.mozilla.org/fr/docs/XPathResult.SnapshotItem()",
-        "!doc": "Retourne un nœud spécifique de l'objet XPathResult, où itemNumber est l'indice du nœud à récupérer. On peut accéder au nombre total de nœuds contenus dans l'ensemble par la propriété XPathResult.snapshotLength"
+        "!url": "https://developer.mozilla.org/en-US/docs/XPathResult#snapshotItem()"
       },
       "ANY_TYPE": "number",
       "NUMBER_TYPE": "number",

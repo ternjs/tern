@@ -103,12 +103,12 @@
       "blur": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/blur/",
-        "!doc": "Bind an event handler to the “blur” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'blur' JavaScript event, or trigger that event on an element."
       },
       "change": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/change/",
-        "!doc": "Bind an event handler to the “change” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'change' JavaScript event, or trigger that event on an element."
       },
       "children": {
         "!type": "fn(selector?: string) -> jQuery.fn",
@@ -118,7 +118,7 @@
       "click": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/click/",
-        "!doc": "Bind an event handler to the “click” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'click' JavaScript event, or trigger that event on an element."
       },
       "clone": {
         "!type": "fn(dataAndEvents?: bool, deep?: bool) -> jQuery.fn",
@@ -153,7 +153,7 @@
       "dblclick": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/dblclick/",
-        "!doc": "Bind an event handler to the “dblclick” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'dblclick' JavaScript event, or trigger that event on an element."
       },
       "delay": {
         "!type": "fn(duration: number, queue?: string) -> jQuery.fn",
@@ -203,7 +203,7 @@
       "error": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/error/",
-        "!doc": "Bind an event handler to the “error” JavaScript event."
+        "!doc": "Bind an event handler to the 'error' JavaScript event."
       },
       "fadeIn": {
         "!type": "fn(duration?: number, complete?: fn()) -> jQuery.fn",
@@ -228,7 +228,7 @@
       "filter": {
         "!type": "fn(selector: string) -> jQuery.fn",
         "!url": "http://api.jquery.com/filter/",
-        "!doc": "Reduce the set of matched elements to those that match the selector or pass the function’s test."
+        "!doc": "Reduce the set of matched elements to those that match the selector or pass the function's test."
       },
       "find": {
         "!type": "fn(selector: string) -> jQuery.fn",
@@ -248,12 +248,12 @@
       "focusin": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/focusin/",
-        "!doc": "Bind an event handler to the “focusin” event."
+        "!doc": "Bind an event handler to the 'focusin' event."
       },
       "focusout": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/focusout/",
-        "!doc": "Bind an event handler to the “focusout” JavaScript event."
+        "!doc": "Bind an event handler to the 'focusout' JavaScript event."
       },
       "get": {
         "!type": "fn(i: number) -> +Element",
@@ -328,17 +328,17 @@
       "keydown": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/keydown/",
-        "!doc": "Bind an event handler to the “keydown” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'keydown' JavaScript event, or trigger that event on an element."
       },
       "keypress": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/keypress/",
-        "!doc": "Bind an event handler to the “keypress” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'keypress' JavaScript event, or trigger that event on an element."
       },
       "keyup": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/keyup/",
-        "!doc": "Bind an event handler to the “keyup” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'keyup' JavaScript event, or trigger that event on an element."
       },
       "last": {
         "!type": "fn() -> jQuery.fn",
@@ -368,7 +368,7 @@
       "mousedown": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/mousedown/",
-        "!doc": "Bind an event handler to the “mousedown” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'mousedown' JavaScript event, or trigger that event on an element."
       },
       "mouseenter": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
@@ -383,22 +383,22 @@
       "mousemove": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/mousemouve/",
-        "!doc": "Bind an event handler to the “mousemove” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'mousemove' JavaScript event, or trigger that event on an element."
       },
       "mouseout": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/mouseout/",
-        "!doc": "Bind an event handler to the “mouseout” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'mouseout' JavaScript event, or trigger that event on an element."
       },
       "mouseover": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/mouseover/",
-        "!doc": "Bind an event handler to the “mouseover” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'mouseover' JavaScript event, or trigger that event on an element."
       },
       "mouseup": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/mouseup/",
-        "!doc": "Bind an event handler to the “mouseup” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'mouseup' JavaScript event, or trigger that event on an element."
       },
       "next": {
         "!type": "fn(selector?: string) -> jQuery.fn",
@@ -448,7 +448,7 @@
       "outerHeight": {
         "!type": "fn(includeMargin?: bool) -> number",
         "!url": "http://api.jquery.com/outerHeight/",
-        "!doc": "Get the current computed height for the first element in the set of matched elements, including padding, border, and optionally margin. Returns an integer (without “px”) representation of the value or null if called on an empty set of elements."
+        "!doc": "Get the current computed height for the first element in the set of matched elements, including padding, border, and optionally margin. Returns an integer (without 'px') representation of the value or null if called on an empty set of elements."
       },
       "outerWidth": {
         "!type": "fn(includeMargin?: bool) -> number",
@@ -563,12 +563,12 @@
       "resize": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/resize/",
-        "!doc": "Bind an event handler to the “resize” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'resize' JavaScript event, or trigger that event on an element."
       },
       "scroll": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/scroll/",
-        "!doc": "Bind an event handler to the “scroll” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'scroll' JavaScript event, or trigger that event on an element."
       },
       "scrollLeft": {
         "!type": "number",
@@ -583,7 +583,7 @@
       "select": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/select/",
-        "!doc": "Bind an event handler to the “select” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'select' JavaScript event, or trigger that event on an element."
       },
       "selector": {
         "!type": "string",
@@ -643,7 +643,7 @@
       "submit": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/submit/",
-        "!doc": "Bind an event handler to the “submit” JavaScript event, or trigger that event on an element."
+        "!doc": "Bind an event handler to the 'submit' JavaScript event, or trigger that event on an element."
       },
       "text": {
         "!type": "fn() -> string",
@@ -663,7 +663,7 @@
       "toggleClass": {
         "!type": "fn(className: string) -> jQuery.fn",
         "!url": "http://api.jquery.com/toggleClass/",
-        "!doc": "Add or remove one or more classes from each element in the set of matched elements, depending on either the class’s presence or the value of the switch argument."
+        "!doc": "Add or remove one or more classes from each element in the set of matched elements, depending on either the class's presence or the value of the switch argument."
       },
       "trigger": {
         "!type": "fn(eventType: string, params: ?) -> jQuery.fn",
@@ -688,7 +688,7 @@
       "unload": {
         "!type": "fn(handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/unload/",
-        "!doc": "Bind an event handler to the “unload” JavaScript event."
+        "!doc": "Bind an event handler to the 'unload' JavaScript event."
       },
       "unwrap": {
         "!type": "fn() -> jQuery.fn",
@@ -931,7 +931,7 @@
         "promise":{
           "!type": "fn(target: ?) -> +jQuery.Deferred",
           "!url": "http://api.jquery.com/deferred.promise/",
-          "!doc": "Return a Deferred’s Promise object."
+          "!doc": "Return a Deferred's Promise object."
         },
         "reject":{
           "!type": "fn(args?: ?) -> +jQuery.Deferred",
@@ -1067,7 +1067,7 @@
     "isPlainObject": {
       "!type": "fn(obj: ?) -> bool",
       "!url": "http://api.jquery.com/jquery.isPlainObject/",
-      "!doc": "Check to see if an object is a plain object (created using “{}” or “new Object”)."
+      "!doc": "Check to see if an object is a plain object (created using '{}' or 'new Object')."
     },
     "isWindow": {
       "!type": "fn(obj: ?) -> bool",
@@ -1162,7 +1162,7 @@
     },
     "support": {
       "!url": "http://api.jquery.com/jquery.support/",
-      "!doc": "A collection of properties that represent the presence of different browser features or bugs. Primarily intended for jQuery’s internal use; specific properties may be removed when they are no longer needed internally to improve page startup performance.",
+      "!doc": "A collection of properties that represent the presence of different browser features or bugs. Primarily intended for jQuery's internal use; specific properties may be removed when they are no longer needed internally to improve page startup performance.",
       "getSetAttribute": "bool",
       "leadingWhitespace": "bool",
       "tbody": "bool",
