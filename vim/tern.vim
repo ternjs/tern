@@ -1,9 +1,9 @@
 py << endpy
 
-import vim, os, platform, subprocess, urllib2, webbrowser, json, re
+import vim, os, platform, subprocess, urllib2, webbrowser, json, re, select
 
 def tern_displayError(err):
-  vim.command("echoerr '" + str(err) + "'")
+  vim.command("echo " + json.dumps(str(err)))
 
 def tern_makeRequest(port, doc):
   req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
@@ -50,13 +50,24 @@ def tern_findServer(ignorePort=False):
 def tern_startServer():
   win = platform.system() == "Windows"
   proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=tern_projectDir(),
-                          stdout=subprocess.PIPE, shell=win)
-  status = proc.stdout.readline()
-  match = re.match("Listening on port (\\d+)", status)
-  if match:
-    port = int(match.group(1))
-    vim.command("let b:ternPort = " + str(port))
-    return port
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=win)
+  output = ""
+  fds = [proc.stdout, proc.stderr]
+  while len(fds):
+    ready = select.select(fds, [], [], .2)[0]
+    if not len(ready): break
+    line = ready[0].readline()
+    if not line:
+      fds.remove(ready[0])
+      continue
+    match = re.match("Listening on port (\\d+)", line)
+    if match:
+      port = int(match.group(1))
+      vim.command("let b:ternPort = " + str(port))
+      return port
+    else:
+      output += line
+  tern_displayError("Failed to start server" + (output and ":\n" + output))
   return None
 
 def tern_relativeFile():
@@ -102,8 +113,7 @@ def tern_runCommand(query, pos=None, mode=None):
     curRow, curCol = vim.current.window.cursor
     pos = {"line": curRow - 1, "ch": curCol}
   port = tern_findServer()
-  if not port: return
-  data = None
+  if port is None: return
   curSeq = vim.eval("undotree()['seq_cur']")
 
   doc = {"query": query, "files": []}
@@ -121,6 +131,7 @@ def tern_runCommand(query, pos=None, mode=None):
   query["end"] = pos
   query["lineCharPositions"] = True
 
+  data = None
   try:
     data = tern_makeRequest(port, doc)
   except:
@@ -129,6 +140,7 @@ def tern_runCommand(query, pos=None, mode=None):
   if not data:
     try:
       port = tern_findServer(port)
+      if port is None: return
       data = tern_makeRequest(port, doc)
     except Exception as e:
       tern_displayError(e)
@@ -139,7 +151,7 @@ def tern_runCommand(query, pos=None, mode=None):
 
 def tern_sendBuffer():
   port = tern_findServer()
-  if not port: return False
+  if port is None: return False
   try:
     tern_makeRequest(port, {"files": [tern_fullBuffer()]})
     return True
