@@ -43,9 +43,11 @@
 (defun tern-find-server (c &optional ignore-port)
   (block nil
     (when tern-known-port
-      (return (funcall c tern-known-port)))
+      (return (if (consp tern-known-port)
+                  (funcall c nil (cdr tern-known-port))
+                (funcall c tern-known-port nil))))
     (unless (buffer-file-name)
-      (return (funcall c nil)))
+      (return (funcall c nil "Buffer is not associated with a file")))
     (let ((port-file (expand-file-name ".tern-port" (tern-project-dir))))
       (when (file-exists-p port-file)
         (let ((port (string-to-number (with-temp-buffer
@@ -53,7 +55,7 @@
                                         (buffer-string)))))
           (unless (eq port ignore-port)
             (setf tern-known-port port)
-            (return (funcall c port))))))
+            (return (funcall c port nil))))))
     (tern-start-server c)))
 
 (defvar tern-command
@@ -67,19 +69,27 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-start-server (c)
   (let* ((default-directory tern-project-dir)
-         (proc (apply #'start-process "Tern" nil tern-command)))
+         (proc (apply #'start-process "Tern" nil tern-command))
+         (all-output ""))
     (set-process-query-on-exit-flag proc nil)
     (set-process-sentinel proc (lambda (_proc _event)
                                  (delete-process proc)
-                                 (funcall c nil)))
+                                 (setf tern-known-port (cons :failed (concat "Could not start Tern server\n" all-output)))
+                                 (run-at-time "30 sec" nil
+                                              (lambda (buf)
+                                                (with-current-buffer buf
+                                                  (when (consp tern-known-port) (setf tern-known-port nil))))
+                                              (current-buffer))
+                                 (funcall c nil tern-known-port)))
     (set-process-filter proc (lambda (proc output)
-                               (when (string-match "Listening on port \\([0-9][0-9]*\\)" output)
+                               (if (not (string-match "Listening on port \\([0-9][0-9]*\\)" output))
+                                   (setf all-output (concat all-output output))
                                  (setf tern-known-port (string-to-number (match-string 1 output)))
                                  (set-process-sentinel proc (lambda (proc _event)
                                                               (delete-process proc)
                                                               (setf tern-known-port nil)))
                                  (set-process-filter proc nil)
-                                 (funcall c tern-known-port))))))
+                                 (funcall c tern-known-port nil))))))
 
 (defvar tern-command-generation 0)
 (defvar tern-activity-since-command -1)
@@ -134,10 +144,10 @@ list of strings, giving the binary name and arguments.")
 (defun tern-run-request (f doc)
   (let ((buffer (current-buffer))
         (retrying nil))
-    (labels ((callback (port)
+    (labels ((callback (port err)
                (if port
                    (tern-req port doc #'runner)
-                 (message "Could not find a Tern server")))
+                 (funcall f err nil)))
              (runner (err data)
                (with-current-buffer buffer
                  (cond ((and err (eq (cadar err) 'connection-failed) (not retrying))
@@ -423,10 +433,13 @@ list of strings, giving the binary name and arguments.")
             (cdr tern-buffer-is-dirty) (max (cdr tern-buffer-is-dirty) end))
     (setf tern-buffer-is-dirty (cons start end)))
   (when (> (- (cdr tern-buffer-is-dirty) (car tern-buffer-is-dirty)) 4000)
-    (run-at-time "200 millisec" nil (lambda ()
-                                      (when tern-buffer-is-dirty
-                                        (setf tern-buffer-is-dirty nil)
-                                        (tern-send-buffer-to-server)))))
+    (run-at-time "200 millisec" nil
+                 (lambda (buf)
+                   (with-current-buffer buf
+                     (when tern-buffer-is-dirty
+                       (setf tern-buffer-is-dirty nil)
+                       (tern-send-buffer-to-server))))
+                 (current-buffer)))
   (setf tern-last-point-pos nil)
   (when (and tern-last-argument-hints (<= (point) (car tern-last-argument-hints)))
     (setf tern-last-argument-hints nil)))
