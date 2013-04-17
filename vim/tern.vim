@@ -147,7 +147,8 @@ def tern_sendBuffer():
     return False
 
 def tern_sendBufferIfDirty():
-  if vim.eval("exists('b:ternBufferSentAt')") == "1":
+  if (vim.eval("exists('b:ternInsertActive')") == "1" and
+      vim.eval("b:ternInsertActive") == "0"):
     curSeq = vim.eval("undotree()['seq_cur']")
     if curSeq > vim.eval("b:ternBufferSentAt") and tern_sendBuffer():
       vim.command("let b:ternBufferSentAt = " + str(curSeq))
