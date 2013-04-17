@@ -3,12 +3,23 @@ py << endpy
 import vim, os, platform, subprocess, urllib2, webbrowser, json, re, select
 
 def tern_displayError(err):
-  vim.command("echo " + json.dumps(str(err)))
+  vim.command("echoerr " + json.dumps(str(err)))
+
+# set to True to enable request/response logging
+tern_Debug = False
+def tern_displayMessage(msg):
+  if tern_Debug:
+    vim.command("echomsg " + json.dumps(str(msg)))
 
 def tern_makeRequest(port, doc):
-  req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
-  data = req.read()
-  if req.getcode() >= 300:
+  tern_displayMessage(json.dumps(doc))
+  try:
+    req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
+    data = req.read()
+    tern_displayMessage(json.dumps(data))
+  except urllib2.HTTPError, e:
+    data = e.read()
+    tern_displayMessage(json.dumps(data))
     raise IOError(data)
   return json.loads(data)
 
