@@ -2379,11 +2379,6 @@
     "!doc": "Selection is the class of the object returned by window.getSelection() and other methods. It represents the text selection in the greater page, possibly spanning multiple elements, when the user drags over static text and other parts of the page. For information about text selection in an individual text editing element."
   },
   "console": {
-    "debug": {
-      "!type": "fn(text: string)",
-      "!url": "https://developer.mozilla.org/en/docs/Debugging_JavaScript",
-      "!doc": "This document is intended to help developers writing JavaScript code in Mozilla, mainly for Mozilla itself, but it may also be useful for web developers. It should give pointers to tools, aids and tricks which make debugging your code easier."
-    },
     "error": {
       "!type": "fn(text: string)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.error",
