@@ -246,10 +246,10 @@ def tern_refs():
   if data is None: return
 
   refs = []
-  for change in data["refs"]:
-    lnum     = change["start"]["line"]+1
-    col      = change["start"]["ch"]+1
-    filename = change["file"]
+  for ref in data["refs"]:
+    lnum     = ref["start"]["line"]+1
+    col      = ref["start"]["ch"]+1
+    filename = ref["file"]
     name     = data["name"]
     text     = vim.eval("getbufline('"+filename+"',"+str(lnum)+")")
     refs.append({"lnum":     lnum
