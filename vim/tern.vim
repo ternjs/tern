@@ -244,7 +244,6 @@ def tern_lookupDefinition(cmd):
 def tern_refs():
   data = tern_runCommand("refs",fragments=False)
   if data is None: return
-  print json.dumps(data)
 
   refs = []
   for change in data["refs"]:
