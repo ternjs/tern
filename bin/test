@@ -66,7 +66,7 @@ function runTests(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(\+|::?|:\?|~)\s+([^\n]*)/g, m;
+    var typedef = /\/\/(\+|::?|:\?|doc:)\s+([^\n]*)/g, m;
     while (m = typedef.exec(text)) {
       var args = m[2], kind = m[1];
       ++tests;
@@ -101,14 +101,14 @@ function runTests(filter) {
           ++failed;
           continue;
         }
-        var query = {type: kind == "~" ? "documentation" : "type",
+        var query = {type: kind == "doc:" ? "documentation" : "type",
                      start: expr.node.start, end: expr.node.end,
                      file: fname,
                      depth: kind == "::" ? 2 : null};
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
 
-          if (kind == "~") { // Docstring test
+          if (kind == "doc:") { // Docstring test
             if (resp.doc != args) {
               console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line + " has " +
                           (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
