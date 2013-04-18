@@ -290,8 +290,6 @@ function! tern#Enable()
   setlocal omnifunc=tern#Complete
 endfunction
 
-command! TernFiles py vim.command("call tern#PreviewInfo(" + json.dumps(tern_runCommand("files")) + ")")
-
 autocmd FileType javascript :call tern#Enable()
 autocmd BufLeave *.js :py tern_sendBufferIfDirty()
 autocmd InsertEnter *.js :if exists('b:ternInsertActive')|let b:ternInsertActive = 1|endif
