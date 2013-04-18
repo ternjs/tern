@@ -3,14 +3,15 @@ py << endpy
 import vim, os, platform, subprocess, urllib2, webbrowser, json, re, select
 
 def tern_displayError(err):
-  vim.command("echo " + json.dumps(str(err)))
+  vim.command("echomsg " + json.dumps(str(err)))
 
 def tern_makeRequest(port, doc):
-  req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
-  data = req.read()
-  if req.getcode() >= 300:
-    raise IOError(data)
-  return json.loads(data)
+  try:
+    req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
+    return json.loads(req.read())
+  except urllib2.HTTPError, error:
+    tern_displayError(error.read())
+    return None
 
 def tern_projectDir():
   cur = vim.eval("b:ternProjectDir")
@@ -35,16 +36,16 @@ def tern_projectDir():
 
 def tern_findServer(ignorePort=False):
   cur = int(vim.eval("b:ternPort"))
-  if cur != 0 and cur != ignorePort: return cur
+  if cur != 0 and cur != ignorePort: return (cur, True)
 
   dir = tern_projectDir()
-  if not dir: return None
+  if not dir: return (None, False)
   portFile = os.path.join(dir, ".tern-port")
   if os.path.isfile(portFile):
     port = int(open(portFile, "r").read())
     if port != ignorePort:
       vim.command("let b:ternPort = " + str(port))
-      return port
+      return (port, True)
   return tern_startServer()
 
 def tern_startServer():
@@ -54,7 +55,7 @@ def tern_startServer():
   output = ""
   fds = [proc.stdout, proc.stderr]
   while len(fds):
-    ready = select.select(fds, [], [], .2)[0]
+    ready = select.select(fds, [], [], .4)[0]
     if not len(ready): break
     line = ready[0].readline()
     if not line:
@@ -64,11 +65,11 @@ def tern_startServer():
     if match:
       port = int(match.group(1))
       vim.command("let b:ternPort = " + str(port))
-      return port
+      return (port, False)
     else:
       output += line
   tern_displayError("Failed to start server" + (output and ":\n" + output))
-  return None
+  return (None, False)
 
 def tern_relativeFile():
   filename = vim.eval("expand('%:p')")
@@ -112,7 +113,7 @@ def tern_runCommand(query, pos=None, mode=None):
   if (pos is None):
     curRow, curCol = vim.current.window.cursor
     pos = {"line": curRow - 1, "ch": curCol}
-  port = tern_findServer()
+  port, portIsOld = tern_findServer()
   if port is None: return
   curSeq = vim.eval("undotree()['seq_cur']")
 
@@ -134,14 +135,16 @@ def tern_runCommand(query, pos=None, mode=None):
   data = None
   try:
     data = tern_makeRequest(port, doc)
+    if data is None: return None
   except:
     pass
 
-  if not data:
+  if data is None and portIsOld:
     try:
-      port = tern_findServer(port)
+      port, portIsOld = tern_findServer(port)
       if port is None: return
       data = tern_makeRequest(port, doc)
+      if data is None: return None
     except Exception as e:
       tern_displayError(e)
 
@@ -150,7 +153,7 @@ def tern_runCommand(query, pos=None, mode=None):
   return data
 
 def tern_sendBuffer():
-  port = tern_findServer()
+  port, _portIsOld = tern_findServer()
   if port is None: return False
   try:
     tern_makeRequest(port, {"files": [tern_fullBuffer()]})
