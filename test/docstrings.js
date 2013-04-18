@@ -1,4 +1,5 @@
 Date; //doc: Creates JavaScript Date instances which let you work with dates and times.
+new Date; //doc: Creates JavaScript Date instances which let you work with dates and times.
 
 var myalias = Date;
 
