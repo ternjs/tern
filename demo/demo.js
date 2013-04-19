@@ -327,18 +327,17 @@ function ternHints(cm, c) {
     }
 
     var out = document.getElementById("out");
-    c({from: from, to: to,
-       list: completions,
-       onSelect: function(cur) {
-         out.innerHTML = "";
-         if (cur.doc) {
-           var node = out.appendChild(document.createElement("div"));
-           node.className = "hint-doc";
-           node.appendChild(document.createTextNode(cur.doc));
-         }
-       },
-       onClose: function() { out.innerHTML = ""; }
-      });
+    var obj = {from: from, to: to, list: completions};
+    CodeMirror.on(obj, "close", function() { out.innerHTML = ""; });
+    CodeMirror.on(obj, "select", function(cur) {
+      out.innerHTML = "";
+      if (cur.doc) {
+        var node = out.appendChild(document.createElement("div"));
+        node.className = "hint-doc";
+        node.appendChild(document.createTextNode(cur.doc));
+      }
+    });
+    c(obj);
   });
 }
 
