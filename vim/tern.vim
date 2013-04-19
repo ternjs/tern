@@ -19,6 +19,7 @@ def tern_projectDir():
 
   projectdir = ""
   mydir = vim.eval("expand('%:p:h')")
+  if not os.path.isdir(mydir): return ""
 
   if mydir:
     projectdir = mydir
