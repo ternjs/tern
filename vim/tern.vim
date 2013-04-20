@@ -1,6 +1,8 @@
 py << endpy
 
 import vim, os, platform, subprocess, urllib2, webbrowser, json, re, select
+from functools import cmp_to_key
+from itertools import groupby
 
 def tern_displayError(err):
   vim.command("echomsg " + json.dumps(str(err)))
@@ -109,7 +111,7 @@ def tern_bufferFragment():
           "text": tern_bufferSlice(buf, start, end),
           "offsetLines": start}
 
-def tern_runCommand(query, pos=None, mode=None):
+def tern_runCommand(query, pos=None, mode=None, fragments=True):
   if isinstance(query, str): query = {"type": query}
   if (pos is None):
     curRow, curCol = vim.current.window.cursor
@@ -121,7 +123,7 @@ def tern_runCommand(query, pos=None, mode=None):
   doc = {"query": query, "files": []}
   if curSeq == vim.eval("b:ternBufferSentAt"):
     fname, sendingFile = (tern_relativeFile(), False)
-  elif len(vim.current.buffer) > 250:
+  elif len(vim.current.buffer) > 250 and fragments:
     f = tern_bufferFragment()
     doc["files"].append(f)
     pos = {"line": pos["line"] - f["offsetLines"], "ch": pos["ch"]}
@@ -242,6 +244,53 @@ def tern_lookupDefinition(cmd):
   else:
     vim.command("echo 'no definition found'")
 
+def tern_rename(newName):
+  data = tern_runCommand({"type":"rename","newName":newName},fragments=False)
+  if data is None: return
+
+  def mycmp(a,b):
+    return (cmp(a["file"],b["file"]) or
+            cmp(a["start"]["line"],b["start"]["line"]) or
+            cmp(a["start"]["ch"],b["start"]["ch"]))
+  data["changes"].sort(key=cmp_to_key(mycmp))
+  changes_byfile = groupby(data["changes"],key=lambda c: c["file"])
+
+  name = data["name"]
+  changes = []
+  for file, filechanges in changes_byfile:
+    bufnr = int(vim.eval("bufloaded('"+file+"') ? bufnr('"+file+"') : -1"))
+    if bufnr!=-1:
+      lines = vim.buffers[bufnr-1]
+    else:
+      with open(file,"r") as f:
+        lines = f.readlines()
+    for linenr, linechanges in groupby(filechanges,key=lambda c: c["start"]["line"]):
+      line = {"text":lines[linenr], "offset":0 }
+      changed = []
+      for change in linechanges:
+        colStart = change["start"]["ch"]
+        colEnd   = change["end"]["ch"]
+        offset   = line["offset"]
+        text     = line["text"]
+        text     = text[0:colStart+offset]+newName+text[colEnd+offset:]
+        line["text"]    = text
+        line["offset"] += len(newName)-len(name)
+        changed.append({"lnum":     linenr+1
+                       ,"col":      colStart+1 +offset
+                       ,"filename": file
+                       })
+      for change in changed:
+        if bufnr!=-1:
+          lines[linenr] = change["text"] = line["text"]
+        else:
+          change["text"] = "[not loaded] "+line["text"]
+          lines[linenr]  = line["text"]
+          # TODO: change file on disk
+          with open(file,"w") as f:
+            f.writelines(lines)
+      changes.extend(changed)
+  vim.command("call setloclist(0,"+json.dumps(changes)+") | lopen")
+
 endpy
 
 if !exists('g:tern#command')
@@ -280,6 +329,7 @@ command! TernDef py tern_lookupDefinition("edit")
 command! TernDefPreview py tern_lookupDefinition("pedit")
 command! TernDefSplit py tern_lookupDefinition("split")
 command! TernDefTab py tern_lookupDefinition("tabe")
+command! TernRename exe 'py tern_rename("'.input("new name? ",expand("<cword>")).'")'
 
 function! tern#Enable()
   let b:ternPort = 0
