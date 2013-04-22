@@ -76,10 +76,15 @@
         } catch(e) { return infer.ANull; }
         file = name + "/" + pkg.main;
       }
-      if (!/\.js$/.test(file)) file += ".js";
 
       file = path.resolve(modDir, file);
-      if (!fs.existsSync(file)) return infer.ANull;
+      try { if (fs.statSync(file).isDirectory()) file = path.resolve(file, "index.js"); }
+      catch(e) {}
+      if (!/\.js$/.test(file)) file += ".js";
+
+      try { if (!fs.statSync(file).isFile()) return infer.ANull; }
+      catch(e) { return infer.ANull; }
+
       server.addFile(file);
       return data.modules[file] = data.modules[name] = new infer.AVal;
     };
