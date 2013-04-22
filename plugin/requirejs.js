@@ -61,7 +61,11 @@
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
-    var deps = [], value, fn;
+    var name = data.currentFile;
+    var out = data.interfaces[name];
+    if (!out) out = data.interfaces[name] = new infer.AVal;
+
+    var deps = [], fn;
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length == 2 ? 0 : 1];
       if (node.type == "Literal" && typeof node.value == "string") {
@@ -69,35 +73,30 @@
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") {
-          if (elt.value == "exports")
-            deps.push(value = new infer.Obj());
-          else
+          if (elt.value == "exports") {
+            var exports = new infer.Obj(true);
+            deps.push(exports);
+            out.addType(exports);
+          } else {
             deps.push(getInterface(elt.value, data));
+          }
         }
       }
-    } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression") {
+    } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
-      deps.push(getInterface("require", data), value = new infer.Obj());
+      var exports = new infer.Obj(true);
+      deps.push(getInterface("require", data), exports);
+      out.addType(exports);
       fn = args[0];
     }
 
     if (!fn) {
       fn = args[Math.min(args.length - 1, 2)];
-      if (!fn.isEmpty() && !fn.getFunctionType()) {
-        if (!value) value = fn;
-        fn = null;
-      }
-    }
-    if (fn) {
-      var retval = new infer.AVal;
-      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, retval));
-      if (!value) value = retval;
+      if (!fn.isEmpty() && !fn.getFunctionType()) fn = null;
     }
 
-    var name = data.currentFile;
-    var known = data.interfaces[name];
-    if (!known) known = data.interfaces[name] = new infer.AVal;
-    value.propagate(known);
+    if (fn) fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out));
+    else if (args.length) args[0].propagate(out);
 
     return infer.ANull;
   });
