@@ -233,7 +233,14 @@ def tern_lookupDefinition(cmd):
   if data is None: return
 
   if "file" in data:
-    vim.command(cmd + " +" + str(data["start"]["line"] + 1) + " " + data["file"])
+    lnum     = data["start"]["line"] + 1
+    col      = data["start"]["ch"] + 1
+    filename = data["file"]
+
+    if cmd == "edit" and filename == tern_relativeFile():
+      vim.command("call cursor(" + str(lnum) + "," + str(col) + ")")
+    else:
+      vim.command(cmd + " +call\ cursor(" + str(lnum) + "," + str(col) + ") " + tern_projectDir() + "/" + filename)
   elif "url" in data:
     vim.command("echo " + json.dumps("see " + data["url"]))
   else:
