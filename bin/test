@@ -66,7 +66,12 @@ function runTests(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(\+|::?|:\?|doc:|loc:)\s+([^\n]*)/g, m;
+    var typedef = /\/\/(\+|::?|:\?|doc:|loc:|refs:)\s+([^\n]*)/g, m;
+    function fail(str) {
+      console.log(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
+      ++failed;
+    }
+
     while (m = typedef.exec(text)) {
       var args = m[2], kind = m[1];
       ++tests;
@@ -88,20 +93,17 @@ function runTests(filter) {
           var match = andOthers || parts.length == resp.completions.length;
           for (var i = 0; i < parts.length && match; ++i)
             if (resp.completions.indexOf(parts[i]) < 0) match = false;
-          if (!match) {
-            console.log(name + ": Wrong completion set at line " + acorn.getLineInfo(text, m.index).line +
-                        "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
-            ++failed;
-          }
+          if (!match)
+            fail("Wrong completion set\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
         });
       } else {
         var expr = walk.findNodeBefore(ast, m.index, "Expression");
         if (!expr) {
-          console.log(name + ": No expression found at line " + acorn.getLineInfo(text, m.index).line);
+          fail("No expresion found");
           ++failed;
           continue;
         }
-        var query = {type: kind == "doc:" ? "documentation" : kind == "loc:" ? "definition" : "type",
+        var query = {type: kind == "doc:" ? "documentation" : kind == "loc:" ? "definition" : kind == "refs:" ? "refs" : "type",
                      start: expr.node.start, end: expr.node.end,
                      file: fname,
                      depth: kind == "::" ? 2 : null,
@@ -111,30 +113,31 @@ function runTests(filter) {
 
           if (kind == "doc:") { // Docstring test
             if (resp.doc != args) {
-              console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line + " has " +
-                          (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
-                          "instead of expected docstring\n  " + args);
+              fail("Found " + (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
+                   "instead of expected docstring\n  " + args);
               ++failed;
             }
           } else if (kind == "loc:") { // Definition finding test
             var pos = args.match(/^\s*(\d+),\s*(\d+)/), line = Number(pos[1]), col = Number(pos[2]), bad;
-            if (!resp.start) {
-              bad = " does not have a definition.";
-            } else if (resp.start.line + 1 != line || resp.start.ch != col) {
-              bad = " is defined at " + (resp.start.line + 1) + ":" + resp.start.ch +
-                " instead of expected " + line + ":" + col;
-            }
-            if (bad) {
-              console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line + bad);
-              ++failed;
+            if (!resp.start)
+              fail("Did not find a definition.");
+            else if (resp.start.line + 1 != line || resp.start.ch != col)
+              fail("Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
+                   " instead of expected " + line + ":" + col);
+          } else if (kind == "refs:") { // Reference finding test
+            var pos = /\s*(\d+),\s*(\d+)/g, m, refs = [];
+            while (m = pos.exec(args)) {
+              var line = Number(m[1]), col = Number(m[2]), found = false;
+              for (var i = 0; i < resp.refs.length; ++i) {
+                var ref = resp.refs[i];
+                if (ref.start.line + 1 == line && ref.start.ch == col) { found = true; break; }
+              }
+              if (!found) fail("Did not find reference at line " + line + ", column " + col + ".");
             }
           } else { // Type test
             var type = resp.guess && kind != ":?" ? "?" : resp.type || "?";
-            if (type != args) {
-              console.log(name + ": Expression at line " + acorn.getLineInfo(text, m.index).line +
-                          " has type\n  " + type + "\ninstead of expected type\n  " + args);
-              ++failed;
-            }
+            if (type != args)
+              fail("Expression has type\n  " + type + "\ninstead of expected type\n  " + args);
           }
         });
       }
