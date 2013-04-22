@@ -256,6 +256,7 @@ def tern_lookupDefinition(cmd):
     filename = data["file"]
 
     if cmd == "edit" and filename == tern_relativeFile():
+      vim.command("normal! m`")
       vim.command("call cursor(" + str(lnum) + "," + str(col) + ")")
     else:
       vim.command(cmd + " +call\ cursor(" + str(lnum) + "," + str(col) + ") " + tern_projectDir() + "/" + filename)
