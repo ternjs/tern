@@ -300,6 +300,9 @@ command! TernDefTab py tern_lookupDefinition("tabe")
 command! TernRefs py tern_refs()
 
 function! tern#Enable()
+  if stridx(&buftype, "nofile") > -1 || stridx(&buftype, "nowrite") > -1
+    return
+  endif
   let b:ternPort = 0
   let b:ternProjectDir = ''
   let b:ternLastCompletion = []
