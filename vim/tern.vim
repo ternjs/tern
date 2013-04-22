@@ -109,7 +109,7 @@ def tern_bufferFragment():
           "text": tern_bufferSlice(buf, start, end),
           "offsetLines": start}
 
-def tern_runCommand(query, pos=None, mode=None, fragments=True):
+def tern_runCommand(query, pos=None, fragments=True):
   if isinstance(query, str): query = {"type": query}
   if (pos is None):
     curRow, curCol = vim.current.window.cursor
@@ -243,22 +243,21 @@ def tern_lookupDefinition(cmd):
     vim.command("echo 'no definition found'")
 
 def tern_refs():
-  data = tern_runCommand("refs",fragments=False)
+  data = tern_runCommand("refs", fragments=False)
   if data is None: return
 
   refs = []
   for ref in data["refs"]:
-    lnum     = ref["start"]["line"]+1
-    col      = ref["start"]["ch"]+1
+    lnum     = ref["start"]["line"] + 1
+    col      = ref["start"]["ch"] + 1
     filename = ref["file"]
     name     = data["name"]
-    text     = vim.eval("getbufline('"+filename+"',"+str(lnum)+")")
-    refs.append({"lnum":     lnum
-                ,"col":      col
-                ,"filename": filename
-                ,"text":     name+" (file not loaded)" if len(text)==0 else text[0]
-                })
-  vim.command("call setloclist(0,"+json.dumps(refs)+") | lopen")
+    text     = vim.eval("getbufline('" + filename + "'," + str(lnum) + ")")
+    refs.append({"lnum": lnum,
+                 "col": col,
+                 "filename": filename,
+                 "text": name + " (file not loaded)" if len(text)==0 else text[0]})
+  vim.command("call setloclist(0," + json.dumps(refs) + ") | lopen")
 
 endpy
 
