@@ -94,7 +94,8 @@ function runTests(filter) {
           for (var i = 0; i < parts.length && match; ++i)
             if (resp.completions.indexOf(parts[i]) < 0) match = false;
           if (!match)
-            fail("Wrong completion set\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
+            fail("Completion set failed at hint: " + parts[i - 1] +
+                 "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
         });
       } else {
         var start, end;
