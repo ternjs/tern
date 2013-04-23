@@ -361,5 +361,22 @@ class TernJumpToDef(sublime_plugin.TextCommand):
 
 class TernJumpBack(sublime_plugin.TextCommand):
   def run(self, edit, **args):
-    if len(jump_stack) == 0: return
-    sublime.active_window().open_file(jump_stack.pop(), sublime.ENCODED_POSITION)
+    if len(jump_stack) > 0:
+      sublime.active_window().open_file(jump_stack.pop(), sublime.ENCODED_POSITION)
+
+class TernSelectVariable(sublime_plugin.TextCommand):
+  def run(self, edit, **args):
+    data = run_command(self.view, "refs", fragments=False)
+    if data is None: return
+    file = relative_file(get_pfile(self.view))
+    shown_error = False
+    regions = []
+    for ref in data["refs"]:
+      if ref["file"] != file:
+        if not shown_error:
+          sublime.error_message("Not all uses of this variable are file-local. Selecting only local ones.");
+          shown_error = True
+      else:
+        regions.append(sublime.Region(ref["start"], ref["end"]))
+    self.view.sel().clear()
+    for r in regions: self.view.sel().add(r)
