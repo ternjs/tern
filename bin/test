@@ -87,7 +87,7 @@ function runTests(filter) {
         var query = {type: "completions", end: pos, file: fname};
         var andOthers = /,\s*\.\.\.$/.test(args);
         if (andOthers) args = args.slice(0, args.lastIndexOf(","));
-        var parts = args.split(/\s*,\s*/);
+        var parts = args ? args.split(/\s*,\s*/) : [];
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
           var match = andOthers || parts.length == resp.completions.length;
