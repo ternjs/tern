@@ -258,51 +258,49 @@ def tern_refs():
   vim.command("call setloclist(0," + json.dumps(refs) + ") | lopen")
 
 def tern_rename(newName):
-  data = tern_runCommand({"type":"rename","newName":newName},fragments=False)
+  data = tern_runCommand({"type": "rename", "newName": newName}, fragments=False)
   if data is None: return
 
   def mycmp(a,b):
-    return (cmp(a["file"],b["file"]) or
-            cmp(a["start"]["line"],b["start"]["line"]) or
-            cmp(a["start"]["ch"],b["start"]["ch"]))
+    return (cmp(a["file"], b["file"]) or
+            cmp(a["start"]["line"], b["start"]["line"]) or
+            cmp(a["start"]["ch"], b["start"]["ch"]))
   data["changes"].sort(key=cmp_to_key(mycmp))
-  changes_byfile = groupby(data["changes"],key=lambda c: c["file"])
+  changes_byfile = groupby(data["changes"], key=lambda c: c["file"])
 
   name = data["name"]
   changes = []
   for file, filechanges in changes_byfile:
-    bufnr = int(vim.eval("bufloaded('"+file+"') ? bufnr('"+file+"') : -1"))
-    if bufnr!=-1:
-      lines = vim.buffers[bufnr-1]
+    print file
+    bufnr = int(vim.eval("bufloaded('" + file + "') ? bufnr('" + file + "') : -1"))
+    if bufnr != -1:
+      lines = vim.buffers[bufnr - 1]
     else:
-      with open(file,"r") as f:
+      with open(file, "r") as f:
         lines = f.readlines()
-    for linenr, linechanges in groupby(filechanges,key=lambda c: c["start"]["line"]):
-      line = {"text":lines[linenr], "offset":0 }
+    for linenr, linechanges in groupby(filechanges, key=lambda c: c["start"]["line"]):
+      text = lines[linenr]
+      offset = 0
       changed = []
       for change in linechanges:
         colStart = change["start"]["ch"]
-        colEnd   = change["end"]["ch"]
-        offset   = line["offset"]
-        text     = line["text"]
-        text     = text[0:colStart+offset]+newName+text[colEnd+offset:]
-        line["text"]    = text
-        line["offset"] += len(newName)-len(name)
-        changed.append({"lnum":     linenr+1
-                       ,"col":      colStart+1 +offset
-                       ,"filename": file
-                       })
+        colEnd = change["end"]["ch"]
+        text = text[0:colStart + offset] + newName + text[colEnd + offset:]
+        offset += len(newName) - len(name)
+        changed.append({"lnum": linenr + 1,
+                        "col": colStart + 1 + offset,
+                        "filename": file})
       for change in changed:
-        if bufnr!=-1:
-          lines[linenr] = change["text"] = line["text"]
+        if bufnr != -1:
+          lines[linenr] = change["text"] = text
         else:
-          change["text"] = "[not loaded] "+line["text"]
-          lines[linenr]  = line["text"]
-          # TODO: change file on disk
-          with open(file,"w") as f:
-            f.writelines(lines)
+          change["text"] = "[not loaded] " + text
+          lines[linenr] = text
       changes.extend(changed)
-  vim.command("call setloclist(0,"+json.dumps(changes)+") | lopen")
+    if bufnr == -1:
+      with open(file, "w") as f:
+        f.writelines(lines)
+  vim.command("call setloclist(0," + json.dumps(changes) + ") | lopen")
 
 endpy
 
