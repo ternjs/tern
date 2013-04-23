@@ -2,11 +2,14 @@ import sublime, sublime_plugin
 import os, platform, subprocess, urllib2, webbrowser, json, re, select, time
 
 windows = platform.system() == "Windows"
+settings = sublime.load_settings("Preferences.sublime-settings")
 
 def is_js_file(view):
   return view.score_selector(0, "source.js") > 0
 
 files = {}
+
+arghints_enabled = settings.get("tern_argument_hints", True)
 
 class Listeners(sublime_plugin.EventListener):
   def on_close(self, view):
@@ -20,6 +23,11 @@ class Listeners(sublime_plugin.EventListener):
   def on_modified(self, view):
     pfile = files.get(view.file_name(), None)
     if pfile: pfile.modified(view)
+
+  def on_selection_modified(self, view):
+    if not is_js_file(view) or not arghints_enabled: return
+    pfile = get_pfile(view)
+    if pfile is not None: show_argument_hints(pfile, view)
 
   def on_query_completions(self, view, prefix, _locations):
     if not is_js_file(view): return
@@ -39,11 +47,14 @@ class ProjectFile(object):
     self.name = name
     self.dirty = view.is_dirty()
     self.cached_completions = None
+    self.cached_arguments = None
 
   def modified(self, view):
     self.dirty = True
     if self.cached_completions and view.sel()[0].a < self.cached_completions[0]:
       self.cached_completions = None
+    if self.cached_arguments and view.sel()[0].a < self.cached_arguments[0]:
+      self.cached_arguments = None
 
 class Project(object):
   def __init__(self, dir):
@@ -96,8 +107,7 @@ def server_port(project, ignored=None):
   return (started, False)
 
 plugin_dir = os.path.abspath(os.path.dirname(__file__))
-# FIXME make configurable
-tern_command = ["node",  os.path.join(plugin_dir, "../bin/tern")]
+tern_command = settings.get("tern_command", None) or ["node",  os.path.join(plugin_dir, "../bin/tern")]
 
 def start_server(project):
   proc = subprocess.Popen(tern_command, cwd=project.dir,
@@ -222,7 +232,7 @@ def completion_icon(type):
 def ensure_completions_cached(pfile, view):
   pos = view.sel()[0].b
   if pfile.cached_completions is not None:
-    (c_start, c_word, c_completions) = pfile.cached_completions
+    c_start, c_word, c_completions = pfile.cached_completions
     if c_start <= pos:
       slice = view.substr(sublime.Region(c_start, pos))
       if slice.startswith(c_word) and not re.match(".*\\W", slice):
@@ -236,3 +246,81 @@ def ensure_completions_cached(pfile, view):
     completions.append((rec.get("name") + completion_icon(rec.get("type", None)), rec.get("name")))
   pfile.cached_completions = (data["start"], view.substr(sublime.Region(data["start"], pos)), completions)
   return (completions, True)
+
+def locate_call(view):
+  sel = view.sel()[0]
+  if sel.a != sel.b: return (None, 0)
+  context = view.substr(sublime.Region(max(0, sel.b - 500), sel.b))
+  pos = len(context)
+  depth = argpos = 0
+  while pos > 0:
+    pos -= 1
+    ch = context[pos]
+    if ch == "}" or ch == ")" or ch == "]":
+      depth += 1
+    elif ch == "{" or ch == "(" or ch == "[":
+      if depth > 0: depth -= 1
+      elif ch == "(": return (pos + sel.b - len(context), argpos)
+      else: return (None, 0)
+    elif ch == "," and depth == 0:
+      argpos += 1
+  return (None, 0)
+
+def show_argument_hints(pfile, view):
+  call_start, argpos = locate_call(view)
+  if call_start is None: return
+  if pfile.cached_arguments is not None and pfile.cached_arguments[0] == call_start:
+    return render_argument_hints(pfile.cached_arguments[1], argpos)
+
+  data = run_command(view, {"type": "type", "preferFunction": True}, call_start)
+  if data is None: return
+
+  parsed = parse_function_type(data)
+  if parsed is None: return
+  pfile.cached_arguments = (call_start, parsed)
+  render_argument_hints(parsed, argpos)
+
+def parse_function_type(data):
+  type = data["type"]
+  if not re.match("fn\\(", type): return None
+  pos = 3
+  args, retval = ([], None)
+  while pos < len(type) and type[pos] != ")":
+    colon = type.find(":", pos)
+    name = "?"
+    if colon != -1:
+      name = type[pos:colon]
+      if not re.match("[\\w_$]+$", name): name = "?"
+      else: pos = colon + 2
+    type_start = pos
+    depth = 0
+    while pos < len(type):
+      ch = type[pos]
+      if ch == "(" or ch == "[" or ch == "{":
+        depth += 1
+      elif ch == ")" or ch == "]" or ch == "}":
+        if depth > 0: depth -= 1
+        else: break
+      elif ch == "," and depth == 0:
+        break
+      pos += 1
+    args.append((name, type[type_start:pos]))
+    if type[pos] == ",": pos += 2
+  if type[pos:pos + 5] == ") -> ":
+    retval = type[pos + 5:]
+  return {"name": data.get("exprName", None) or data.get("name", None) or "fn",
+          "args": args,
+          "retval": retval}
+
+def render_argument_hints(ftype, argpos):
+  msg = ftype["name"] + "("
+  i = 0
+  for name, type in ftype["args"]:
+    if i > 0: msg += ", "
+    if i == argpos: msg += "*"
+    msg += name + ("" if type == "?" else ": " + type)
+    i += 1
+  msg += ")"
+  if ftype["retval"] is not None:
+    msg += " -> " + ftype["retval"]
+  sublime.status_message(msg)
