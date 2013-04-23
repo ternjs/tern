@@ -66,14 +66,14 @@ function runTests(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(\+|::?|:\?|doc:|loc:|refs:) *([^\n]*)/g, m;
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\n]*)/g, m;
     function fail(str) {
       console.log(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
       ++failed;
     }
 
     while (m = typedef.exec(text)) {
-      var args = m[2], kind = m[1];
+      var args = m[3], kind = m[2], directlyHere = m[1];
       ++tests;
       if (kind == "+") { // Completion test
         var columnInfo = /\s*@(\d+)$/.exec(args), pos = m.index;
@@ -97,14 +97,21 @@ function runTests(filter) {
             fail("Wrong completion set\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
         });
       } else {
-        var expr = walk.findNodeBefore(ast, m.index, "Expression");
-        if (!expr) {
-          fail("No expresion found");
-          ++failed;
-          continue;
+        var start, end;
+        if (directlyHere) {
+          for (end = m.index; end && /[\s:,;]/.test(text.charAt(end - 1)); --end) {}
+          start = null;
+        } else {
+          var expr = walk.findNodeBefore(ast, m.index, "Expression");
+          if (!expr) {
+            fail("No expresion found");
+            ++failed;
+            continue;
+          }
+          start = expr.node.start; end = expr.node.end;
         }
         var query = {type: kind == "doc:" ? "documentation" : kind == "loc:" ? "definition" : kind == "refs:" ? "refs" : "type",
-                     start: expr.node.start, end: expr.node.end,
+                     start: start, end: end,
                      file: fname,
                      depth: kind == "::" ? 2 : null,
                      lineCharPositions: true};

@@ -8,12 +8,13 @@ function hello(a, b) {
 hello; //refs: 1,9 3,2 8,0
 
 var obj = {
-  x: 10,
+  x //<refs: 11,2 16,4 19,4
+  : 10,
   y: 20
 };
 
 obj.x = 30;
 obj.z = "hi";
 
-obj.x; //refs: 11,2 15,4 18,4
-obj.z; //refs: 16,4 19,4
+obj.x;
+obj.z; //refs: 17,4 20,4
