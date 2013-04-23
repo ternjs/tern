@@ -25,3 +25,5 @@ new Date; //: Date
 
 var num = new Number(1);
 num; //: Number
+
+"foo".toString(); //: string
