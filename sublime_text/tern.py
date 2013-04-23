@@ -1,9 +1,10 @@
 # Sublime Text 2 plugin for Tern
 
 import sublime, sublime_plugin
-import os, platform, subprocess, urllib2, webbrowser, json, re, select, time
+import os, sys, platform, subprocess, webbrowser, json, re, select, time
 
 windows = platform.system() == "Windows"
+python3 = sys.version_info[0] > 2
 settings = sublime.load_settings("Preferences.sublime-settings")
 
 def is_js_file(view):
@@ -67,7 +68,7 @@ def get_pfile(view):
   if not is_js_file(view): return None
   fname = view.file_name()
   if fname is None: return None
-  if files.has_key(fname): return files[fname]
+  if fname in files: return files[fname]
 
   pdir = project_dir(fname)
   if pdir is None: return None
@@ -119,7 +120,7 @@ def start_server(project):
   output = ""
 
   while True:
-    line = proc.stdout.readline()
+    line = proc.stdout.readline().decode("utf-8")
     if not line:
       sublime.error_message("Failed to start server" + (output and ":\n" + output))
       return None
@@ -157,10 +158,26 @@ def count_indentation(line):
   return count
 
 def make_request(port, doc, silent=False):
+  if python3:
+    return make_request_py3(port, doc, silent)
+  else:
+    return make_request_py2(port, doc, silent)
+
+def make_request_py2(port, doc, silent):
+  import urllib2
   try:
     req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
     return json.loads(req.read())
-  except urllib2.HTTPError, error:
+  except urllib2.HTTPError as error:
+    if not silent: sublime.error_message(error.read())
+    return None
+
+def make_request_py3(port, doc, silent):
+  import urllib
+  try:
+    req = urllib.request.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
+    return json.loads(req.read())
+  except urllib.error.URLError as error:
     if not silent: sublime.error_message(error.read())
     return None
 
