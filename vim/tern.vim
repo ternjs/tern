@@ -3,7 +3,7 @@ py << endpy
 import vim, os, platform, subprocess, urllib2, webbrowser, json, re, select, time
 
 def tern_displayError(err):
-  vim.command("echomsg " + json.dumps(str(err)))
+  vim.command("echo " + json.dumps(str(err)))
 
 def tern_makeRequest(port, doc):
   try:
@@ -51,41 +51,21 @@ def tern_findServer(ignorePort=False):
 
 def tern_startServer():
   win = platform.system() == "Windows"
-  pdir = tern_projectDir()
-  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=pdir,
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=win)
+  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=tern_projectDir(),
+                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=win)
   output = ""
-
-  if not win:
-    fds = [proc.stdout, proc.stderr]
-    while len(fds):
-      ready = select.select(fds, [], [], .4)[0]
-      if not len(ready): break
-      line = ready[0].readline()
-      if not line:
-        fds.remove(ready[0])
-        continue
-      match = re.match("Listening on port (\\d+)", line)
-      if match:
-        port = int(match.group(1))
-        vim.command("let b:ternPort = " + str(port))
-        return port
-      else:
-        output += line
-  else:
-    # The relatively sane approach above doesn't work on windows, so
-    # we poll for the file
-    portFile = os.path.join(pdir, ".tern-port")
-    slept = 0
-    while True:
-      if os.path.isfile(portFile): return int(open(portFile, "r").read())
-      if slept > 8: break
-      time.sleep(.05)
-      slept += 1
-    output = proc.stderr.read() + proc.stdout.read()
-
-  tern_displayError("Failed to start server" + (output and ":\n" + output))
-  return None
+  while True:
+    line = proc.stdout.readline()
+    if not line:
+      tern_displayError("Failed to start server" + (output and ":\n" + output))
+      return None
+    match = re.match("Listening on port (\\d+)", line)
+    if match:
+      port = int(match.group(1))
+      vim.command("let b:ternPort = " + str(port))
+      return port
+    else:
+      output += line
 
 def tern_relativeFile():
   filename = vim.eval("expand('%:p')")

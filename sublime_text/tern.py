@@ -101,35 +101,19 @@ tern_command = ["node",  os.path.join(plugin_dir, "../bin/tern")]
 
 def start_server(project):
   proc = subprocess.Popen(tern_command, cwd=project.dir,
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=windows)
+                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=windows)
   output = ""
 
-  if not windows:
-    fds = [proc.stdout, proc.stderr]
-    while len(fds):
-      ready = select.select(fds, [], [], .4)[0]
-      if not len(ready): break
-      line = ready[0].readline()
-      if not line:
-        fds.remove(ready[0])
-        continue
-      match = re.match("Listening on port (\\d+)", line)
-      if match: return int(match.group(1))
-      else: output += line
-  else:
-    # The relatively sane approach above doesn't work on windows, so
-    # we poll for the file
-    portFile = os.path.join(project.dir, ".tern-port")
-    slept = 0
-    while True:
-      if os.path.isfile(portFile): return int(open(portFile, "r").read())
-      if slept > 8: break
-      time.sleep(.05)
-      slept += 1
-    output = proc.stderr.read() + proc.stdout.read()
-
-  sublime.error_message("Failed to start server" + (output and ":\n" + output))
-  return None
+  while True:
+    line = proc.stdout.readline()
+    if not line:
+      sublime.error_message("Failed to start server" + (output and ":\n" + output))
+      return None
+    match = re.match("Listening on port (\\d+)", line)
+    if match:
+      return int(match.group(1))
+    else:
+      output += line
 
 def relative_file(pfile):
   return pfile.name[len(pfile.project.dir) + 1:]

@@ -112,7 +112,7 @@ function doShutdown() {
 }
 
 var shutdown = setTimeout(doShutdown, maxIdleTime);
-
+]]]
 var httpServer = require("http").createServer(function(req, resp) {
   clearTimeout(shutdown);
   shutdown = setTimeout(doShutdown, maxIdleTime);
