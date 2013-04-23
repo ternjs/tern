@@ -1,0 +1,16 @@
+[
+  {
+    "keys": ["alt+."], 
+    "command": "tern_jump_to_def",
+    "context": [
+      {"key": "selector", "operand": "source.js"}
+    ]
+  },
+  {
+    "keys": ["alt+,"], 
+    "command": "tern_jump_back",
+    "context": [
+      {"key": "selector", "operand": "source.js"}
+    ]
+  }
+]

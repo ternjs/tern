@@ -1,3 +1,5 @@
+# Sublime Text 2 plugin for Tern
+
 import sublime, sublime_plugin
 import os, platform, subprocess, urllib2, webbrowser, json, re, select, time
 
@@ -25,12 +27,11 @@ class Listeners(sublime_plugin.EventListener):
     if pfile: pfile.modified(view)
 
   def on_selection_modified(self, view):
-    if not is_js_file(view) or not arghints_enabled: return
+    if not arghints_enabled: return
     pfile = get_pfile(view)
     if pfile is not None: show_argument_hints(pfile, view)
 
   def on_query_completions(self, view, prefix, _locations):
-    if not is_js_file(view): return
     pfile = get_pfile(view)
     if pfile is None: return (None, False)
 
@@ -48,6 +49,7 @@ class ProjectFile(object):
     self.dirty = view.is_dirty()
     self.cached_completions = None
     self.cached_arguments = None
+    self.showing_arguments = False
 
   def modified(self, view):
     self.dirty = True
@@ -62,6 +64,7 @@ class Project(object):
     self.port = None
 
 def get_pfile(view):
+  if not is_js_file(view): return None
   fname = view.file_name()
   if fname is None: return None
   if files.has_key(fname): return files[fname]
@@ -93,12 +96,13 @@ def project_dir(fname):
 
 def server_port(project, ignored=None):
   if project.port is not None and project.port != ignored:
-    return (project, True)
+    return (project.port, True)
 
   port_file = os.path.join(project.dir, ".tern-port")
   if os.path.isfile(port_file):
     port = int(open(port_file, "r").read())
     if port != ignored:
+      project.port = port
       return (port, True)
 
   started = start_server(project)
@@ -152,20 +156,21 @@ def count_indentation(line):
     pos += 1
   return count
 
-def make_request(port, doc):
+def make_request(port, doc, silent=False):
   try:
     req = urllib2.urlopen("http://localhost:" + str(port) + "/", json.dumps(doc), 1)
     return json.loads(req.read())
   except urllib2.HTTPError, error:
-    sublime.error_message(error.read())
+    if not silent: sublime.error_message(error.read())
     return None
 
-def run_command(view, query, pos=None, fragments=True):
+def run_command(view, query, pos=None, fragments=True, silent=False):
+  pfile = get_pfile(view)
+  if pfile is None: return
+
   if isinstance(query, str): query = {"type": query}
   if (pos is None): pos = view.sel()[0].b
 
-  pfile = get_pfile(view)
-  if pfile is None: return
   port, port_is_old = server_port(pfile.project)
   if port is None: return
 
@@ -191,7 +196,7 @@ def run_command(view, query, pos=None, fragments=True):
 
   data = None
   try:
-    data = make_request(port, doc)
+    data = make_request(port, doc, silent=silent)
     if data is None: return None
   except:
     pass
@@ -200,10 +205,10 @@ def run_command(view, query, pos=None, fragments=True):
     try:
       port = server_port(pfile.project, port)[0]
       if port is None: return
-      data = make_request(port, doc)
+      data = make_request(port, doc, silent=silent)
       if data is None: return None
     except Exception as e:
-      sublime.error_message(str(e))
+      if not silent: sublime.error_message(str(e))
 
   if sending_file: pfile.dirty = False
   return data
@@ -212,9 +217,11 @@ def send_buffer(pfile, view):
   port = server_port(pfile.project)[0]
   if port is None: return False
   try:
-    make_request(port, {"files": [{"type": "full",
-                                   "name": relative_file(pfile),
-                                   "text": view.substr(sublime.Region(0, view.size()))}]})
+    make_request(port,
+                 {"files": [{"type": "full",
+                             "name": relative_file(pfile),
+                             "text": view.substr(sublime.Region(0, view.size()))}]},
+                 silent=true)
     pfile.dirty = False
     return True
   except:
@@ -268,17 +275,34 @@ def locate_call(view):
 
 def show_argument_hints(pfile, view):
   call_start, argpos = locate_call(view)
-  if call_start is None: return
+  if call_start is None: return render_argument_hints(pfile, None, 0)
   if pfile.cached_arguments is not None and pfile.cached_arguments[0] == call_start:
-    return render_argument_hints(pfile.cached_arguments[1], argpos)
+    return render_argument_hints(pfile, pfile.cached_arguments[1], argpos)
 
-  data = run_command(view, {"type": "type", "preferFunction": True}, call_start)
-  if data is None: return
-
-  parsed = parse_function_type(data)
-  if parsed is None: return
+  data = run_command(view, {"type": "type", "preferFunction": True}, call_start, silent=True)
+  parsed = data and parse_function_type(data)
   pfile.cached_arguments = (call_start, parsed)
-  render_argument_hints(parsed, argpos)
+  render_argument_hints(pfile, parsed, argpos)
+
+def render_argument_hints(pfile, ftype, argpos):
+  if ftype is None:
+    if pfile.showing_arguments:
+      sublime.status_message("")
+      pfile.showing_arguments = False
+    return
+
+  msg = ftype["name"] + "("
+  i = 0
+  for name, type in ftype["args"]:
+    if i > 0: msg += ", "
+    if i == argpos: msg += "*"
+    msg += name + ("" if type == "?" else ": " + type)
+    i += 1
+  msg += ")"
+  if ftype["retval"] is not None:
+    msg += " -> " + ftype["retval"]
+  sublime.status_message(msg)
+  pfile.showing_arguments = True
 
 def parse_function_type(data):
   type = data["type"]
@@ -312,15 +336,30 @@ def parse_function_type(data):
           "args": args,
           "retval": retval}
 
-def render_argument_hints(ftype, argpos):
-  msg = ftype["name"] + "("
-  i = 0
-  for name, type in ftype["args"]:
-    if i > 0: msg += ", "
-    if i == argpos: msg += "*"
-    msg += name + ("" if type == "?" else ": " + type)
-    i += 1
-  msg += ")"
-  if ftype["retval"] is not None:
-    msg += " -> " + ftype["retval"]
-  sublime.status_message(msg)
+jump_stack = []
+
+class TernJumpToDef(sublime_plugin.TextCommand):
+  def run(self, edit, **args):
+    data = run_command(self.view, {"type": "definition", "lineCharPositions": True})
+    if data is None: return
+    file = data.get("file", None)
+    if file is not None:
+      # Found an actual definition
+      row, col = self.view.rowcol(self.view.sel()[0].b)
+      cur_pos = self.view.file_name() + ":" + str(row + 1) + ":" + str(col + 1)
+      jump_stack.append(cur_pos)
+      if len(jump_stack) > 50: jump_stack.pop(0)
+      real_file = (os.path.join(get_pfile(self.view).project.dir, file) +
+        ":" + str(data["start"]["line"] + 1) + ":" + str(data["start"]["ch"] + 1))
+      sublime.active_window().open_file(real_file, sublime.ENCODED_POSITION)
+    else:
+      url = data.get("url", None)
+      if url is None:
+        sublime.error_message("Could not find a definition")
+      else:
+        webbrowser.open(url)
+
+class TernJumpBack(sublime_plugin.TextCommand):
+  def run(self, edit, **args):
+    if len(jump_stack) == 0: return
+    sublime.active_window().open_file(jump_stack.pop(), sublime.ENCODED_POSITION)
