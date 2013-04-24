@@ -7,4 +7,5 @@ requirejs(["foo", "bar", "useexports", "simplifiedcommon"], function(foo, bar, u
   bar.baz.bazFooProp; //: string
   useexports.hello; //: bool
   simplified.hello; //: string
+  simplified.func; //: fn() -> bool
 });

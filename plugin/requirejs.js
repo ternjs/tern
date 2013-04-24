@@ -57,6 +57,8 @@
     return known;
   }
 
+  var EXPORT_OBJ_WEIGHT = 50;
+
   infer.registerFunction("requireJS", function(_self, args, argNodes) {
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
@@ -76,7 +78,7 @@
           if (elt.value == "exports") {
             var exports = new infer.Obj(true);
             deps.push(exports);
-            out.addType(exports);
+            out.addType(exports, EXPORT_OBJ_WEIGHT);
           } else {
             deps.push(getInterface(elt.value, data));
           }
@@ -86,7 +88,7 @@
       // Simplified CommonJS call
       var exports = new infer.Obj(true);
       deps.push(getInterface("require", data), exports);
-      out.addType(exports);
+      out.addType(exports, EXPORT_OBJ_WEIGHT);
       fn = args[0];
     }
 
