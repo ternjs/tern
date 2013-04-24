@@ -1,7 +1,7 @@
 # Sublime Text 2 plugin for Tern
 
 import sublime, sublime_plugin
-import os, sys, platform, subprocess, webbrowser, json, re, select, time
+import os, sys, platform, subprocess, webbrowser, json, re, time
 
 windows = platform.system() == "Windows"
 python3 = sys.version_info[0] > 2
@@ -25,7 +25,7 @@ class Listeners(sublime_plugin.EventListener):
 
   def on_modified(self, view):
     pfile = files.get(view.file_name(), None)
-    if pfile: pfile.modified(view)
+    if pfile: pfile_modified(pfile, view)
 
   def on_selection_modified(self, view):
     if not arghints_enabled: return
@@ -43,6 +43,7 @@ class Listeners(sublime_plugin.EventListener):
       completions = [c for c in completions if c[1].startswith(prefix)]
     return completions
 
+
 class ProjectFile(object):
   def __init__(self, name, view, project):
     self.project = project
@@ -51,18 +52,13 @@ class ProjectFile(object):
     self.cached_completions = None
     self.cached_arguments = None
     self.showing_arguments = False
-
-  def modified(self, view):
-    self.dirty = True
-    if self.cached_completions and view.sel()[0].a < self.cached_completions[0]:
-      self.cached_completions = None
-    if self.cached_arguments and view.sel()[0].a < self.cached_arguments[0]:
-      self.cached_arguments = None
+    self.last_modified = 0
 
 class Project(object):
   def __init__(self, dir):
     self.dir = dir
     self.port = None
+
 
 def get_pfile(view):
   if not is_js_file(view): return None
@@ -94,6 +90,21 @@ def project_dir(fname):
       return cur
     cur = parent
   return dir
+
+def pfile_modified(pfile, view):
+  pfile.dirty = True
+  now = time.time()
+  if now - pfile.last_modified > .5:
+    pfile.last_modified = now
+    sublime.set_timeout(lambda: maybe_save_pfile(pfile, view, now), 5000)
+  if pfile.cached_completions and view.sel()[0].a < pfile.cached_completions[0]:
+    pfile.cached_completions = None
+  if pfile.cached_arguments and view.sel()[0].a < pfile.cached_arguments[0]:
+    pfile.cached_arguments = None
+
+def maybe_save_pfile(pfile, view, timestamp):
+  if pfile.last_modified == timestamp and pfile.dirty:
+    send_buffer(pfile, view)
 
 def server_port(project, ignored=None):
   if project.port is not None and project.port != ignored:
@@ -238,7 +249,7 @@ def send_buffer(pfile, view):
                  {"files": [{"type": "full",
                              "name": relative_file(pfile),
                              "text": view.substr(sublime.Region(0, view.size()))}]},
-                 silent=true)
+                 silent=True)
     pfile.dirty = False
     return True
   except:
