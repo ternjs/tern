@@ -241,14 +241,14 @@ def tern_lookupDefinition(cmd):
       vim.command("normal! m`")
       vim.command("call cursor(" + str(lnum) + "," + str(col) + ")")
     else:
-      vim.command(cmd + " +call\ cursor(" + str(lnum) + "," + str(col) + ") " + tern_projectDir() + "/" + filename)
+      vim.command(cmd + " +call\ cursor(" + str(lnum) + "," + str(col) + ") " + tern_projectFilePath(filename))
   elif "url" in data:
     vim.command("echo " + json.dumps("see " + data["url"]))
   else:
     vim.command("echo 'no definition found'")
 
 def tern_projectFilePath(path):
-  return tern_projectDir() + "/" + path
+  return os.path.join(tern_projectDir(), path)
 
 def tern_refs():
   data = tern_runCommand("refs", fragments=False)
