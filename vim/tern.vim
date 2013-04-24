@@ -150,6 +150,15 @@ def tern_runCommand(query, pos=None, fragments=True):
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return data
 
+def tern_reloadFiles(paths):
+  port, _portIsOld = tern_findServer()
+  if port is None: return False
+  try:
+    tern_makeRequest(port, {"files": [{"name": p,"type": "file"} for p in paths]})
+    return True
+  except:
+    return False
+
 def tern_sendBuffer():
   port, _portIsOld = tern_findServer()
   if port is None: return False
@@ -276,12 +285,13 @@ def tern_rename(newName):
             cmp(a["start"]["line"], b["start"]["line"]) or
             cmp(a["start"]["ch"], b["start"]["ch"]))
   data["changes"].sort(key=cmp_to_key(mycmp))
-  changes_byfile = groupby(data["changes"]
-                          ,key=lambda c: tern_projectFilePath(c["file"]))
+  changes_byfile = groupby(data["changes"], key=lambda c: c["file"])
 
   name = data["name"]
   changes = []
-  for file, filechanges in changes_byfile:
+  files = []
+  for ternFile, filechanges in changes_byfile:
+    file = tern_projectFilePath(ternFile)
     print file
     bufnr = int(vim.eval("bufloaded('" + file + "') ? bufnr('" + file + "') : -1"))
     if bufnr != -1:
@@ -309,8 +319,10 @@ def tern_rename(newName):
           lines[linenr] = text
       changes.extend(changed)
     if bufnr == -1:
+      files.append(ternFile)
       with open(file, "w") as f:
         f.writelines(lines)
+  tern_reloadFiles(files)
   vim.command("call setloclist(0," + json.dumps(changes) + ") | lopen")
 
 endpy
