@@ -13,6 +13,12 @@ var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
 
 var persistent = process.argv.indexOf("--persistent") > -1;
 var verbose = process.argv.indexOf("--verbose") > -1;
+var port = 0;
+var portArg = process.argv.indexOf("--port");
+if (portArg > -1) {
+   port = Number(process.argv[portArg + 1]);
+   if (isNaN(port)) port = 0;
+}
 
 function findProjectDir() {
   var dir = process.cwd();
@@ -130,7 +136,7 @@ var httpServer = require("http").createServer(function(req, resp) {
     else respondSimple(resp, 400, "Missing query document");
   }
 });
-httpServer.listen(0, "127.0.0.1", function() {
+httpServer.listen(port, "127.0.0.1", function() {
   var portFile = path.resolve(projectDir, portFileName), port = httpServer.address().port;
   fs.writeFileSync(portFile, String(port), "utf8");
   process.on("exit", function() {
