@@ -247,6 +247,8 @@ def tern_lookupDefinition(cmd):
   else:
     vim.command("echo 'no definition found'")
 
+def tern_projectFilePath(path):
+  return tern_projectDir() + "/" + path
 
 def tern_refs():
   data = tern_runCommand("refs", fragments=False)
@@ -256,7 +258,7 @@ def tern_refs():
   for ref in data["refs"]:
     lnum     = ref["start"]["line"] + 1
     col      = ref["start"]["ch"] + 1
-    filename = ref["file"]
+    filename = tern_projectFilePath(ref["file"])
     name     = data["name"]
     text     = vim.eval("getbufline('" + filename + "'," + str(lnum) + ")")
     refs.append({"lnum": lnum,
@@ -274,7 +276,8 @@ def tern_rename(newName):
             cmp(a["start"]["line"], b["start"]["line"]) or
             cmp(a["start"]["ch"], b["start"]["ch"]))
   data["changes"].sort(key=cmp_to_key(mycmp))
-  changes_byfile = groupby(data["changes"], key=lambda c: c["file"])
+  changes_byfile = groupby(data["changes"]
+                          ,key=lambda c: tern_projectFilePath(c["file"]))
 
   name = data["name"]
   changes = []
