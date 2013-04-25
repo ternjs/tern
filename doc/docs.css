@@ -104,7 +104,8 @@ dt { text-indent: -1em; padding-left: 1em; }
 
 a[id] {
   position: relative;
-  display: block;
+  display: inline-block;
+  vertical-align: top;
   top: -60px;
 }
  
