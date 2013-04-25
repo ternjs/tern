@@ -31,33 +31,34 @@ body {
 }
 
 #head {
-  border: 1px solid #276c81;
   border-radius: 5px;
   background: #1c5b64;
   box-shadow: 0px 3px 3px rgba(0, 0, 0, .5);
   position: relative;
   font-family: "Signika", sans-serif;
   font-weight: 700;
-  line-height: 1.2;
 }
 
 #head > a {
   border-right: 1px solid #276c81;
   display: inline-block;
+  height: 25px;
   padding: 5px 20px;
   color: white;
-  text-align: middle;
-  font-size: 13pt;
   text-decoration: none;
+  line-height: 25px;
+  font-size: 17px;
 }
 
 #head > a.title {
-  font-size: 15pt;
+  font-size: 20px;
   padding-left: 80px;
   background: url(logo.png);
   background-position: 45px center;
   background-size: auto 80%;
   background-repeat: no-repeat;
+  border-bottom-left-radius: 5px;
+  border-top-left-radius: 5px;
 }
 
 #head > a:hover {
@@ -65,7 +66,7 @@ body {
 }
 
 .title span {
-  font-size: 10pt;
+  font-size: 13px;
 }
 
 code, pre { font-family: "Ubuntu Mono", monospace; }
