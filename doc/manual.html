@@ -15,8 +15,17 @@
   </div>
 </div>
 <h1>Tern Reference Manual</h1>
+<div id="preamble">
+<div class="sectionbody">
+<p >Tern consists of several components. Depending on what you are trying
+to do with it, you will be interested in a different layer. At the
+very top are the <a href="#editor">editor plugins</a>. These talk to a
+<a href="#server">Tern server</a>, which is implemented on top of the
+<a href="#server_api">server module</a>, which uses the <a href="#infer">inference engine</a> to do the actual type inference.</p>
+</div>
+</div>
 <div class="sect1">
-<h2 id="_contents">Contents</h2>
+<h2 id="contents">Contents</h2>
 <div class="sectionbody">
 <div class="ulist"><ul>
 <li>
@@ -63,7 +72,7 @@
 <div class="ulist"><ul>
 <li>
 <p>
-<a href="#infer_api">Programming interface</a>
+<a href="#infer_context">Context</a>
 </p>
 </li>
 </ul></div>
@@ -89,8 +98,8 @@ especially those running client-side in a browser, will want to use
 that instead of the HTTP server described here.)</p>
 <p >When started, the server will look for a <code>.tern-project</code> file in the
 current directory or one of the directories above that, and use it for
-its <a href="#configuration">[configuration]</a>. If no project file is found, it&#8217;ll fall back to
-an empty default configuration.</p>
+its <a href="#configuration">configuration</a>. If no project file is found,
+it&#8217;ll fall back to an empty default configuration.</p>
 <p >A server write the port it is listening on (which is random) to
 standard output on startup. It will serve a <a href="#protocol">simple JSON protocol</a> via HTTP on that port. Clients can upload code and ask
 questions about the code through this protocol.</p>
@@ -767,7 +776,7 @@ built-in libraries).</p>
 <p >A plugin can use several hooks to add custom behavior.</p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="infer.registerFunction"></a><code>infer.registerFunction(name: string, f: fn(self, args, argnodes))</code>
+<a id="infer.registerFunction"></a><code>infer.registerFunction(name: string, f: fn(self, args, argnodes))</code>
 </dt>
 <dd>
 <p>
@@ -807,7 +816,7 @@ name. It may also have a <code>takesFile</code> property which, if true, will
 cause the server to try and resolve the file on which the query
 operates (from its <code>file</code> property) and pass that (a <code>{name, text,
 scope, ast}</code> object) as a third argument to the <code>run</code> function. You
-will probably need to use the <a href="#infer_api">inference module&#8217;s API</a> to
+will probably need to use the <a href="#infer">inference module&#8217;s API</a> to
 do someting useful in this function.
 </p>
 </dd>
@@ -888,10 +897,576 @@ Tern-style <a href="#typedef">JSON definition</a> file.
 <div class="sect1">
 <h2 id="infer">Inference engine</h2>
 <div class="sectionbody">
-<p >FIXME</p>
+<p >The inference engine module (<code>lib/infer.js</code>) implements a system that,
+given a context and an abstract syntax tree (parsed representation of
+the code), tries to infer the types of the variables and properties in
+the code.</p>
+<p >The parser is implemented in a separate module,
+<a href="http:://marijnhaverbeke.nl/acorn">Acorn</a>, which provides a regular
+JavaScript parser, an error-tolerant parser, and a number of utilities
+for iterating through and searching in abstract syntax trees. The
+syntax tree format used by Acorn and Tern is described in the
+<a href="https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API">Mozilla
+parser API</a> document (though support for features that are not in
+ECMAScript 5, such as <code>let</code>, is omitted).</p>
+<p >A high-level description of the way Tern&#8217;s type inference algorithm
+works can be found in a <a href="http://marijnhaverbeke.nl/blog/tern.html">blog
+post</a> I wrote on the subject.</p>
+<p >This module also exposes some utility functions that are useful to
+implement the <a href="#protocol">services</a> the server exposes.</p>
 <div class="sect2">
-<h3 id="infer_api">Programming interface</h3>
-<p >FIXME</p>
+<h3 id="infer_context">Context</h3>
+<p >A context is an object that holds a global JavaScript scope, as well
+as some meta-information and state used by the type inference process.
+Almost all operations in the inference module require a context.</p>
+<p >To prevent having to pass the context around through every function, a
+form of dynamic binding is used—the <code>withContext</code> function executes a
+function body with a given object used as the current context.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.Context"></a><code>infer.Context(defs: [object])</code>
+</dt>
+<dd>
+<p>
+A constructor
+function for contexts. <code>defs</code> should be an array of <a href="#typedef">type definition objects</a>, which will be used to initialize the
+global scope.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.withContext"></a><code>infer.withContext(context: Context, f: fn())</code>
+</dt>
+<dd>
+<p>
+Calls <code>f</code> with the current context bound to <code>context</code>. Basically, all
+code that does something with the inference engine should be wrapped
+in such a call.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.cx"></a><code>infer.cx() → Context</code>
+</dt>
+<dd>
+<p>
+Returns the current context
+object.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Context.topScope"></a><code>context.topScope</code>
+</dt>
+<dd>
+<p>
+The top-level
+<a href="#infer_scopes">scope</a> of the context.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="infer_analysis">Analysis</h3>
+<p >To push code into a context, you first parse it, yielding a syntax
+tree, and then tell Tern to analyze that.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.parse"></a><code>infer.parse(text: string) → AST</code>
+</dt>
+<dd>
+<p>
+Parse a piece of
+code for use by Tern. Will automatically fall back to the
+error-tolerant parser if the regular parser can&#8217;t parse the code.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.analyze"></a><code>infer.analyze(ast: AST, name: string, scope?: Scope)</code>
+</dt>
+<dd>
+<p>
+Analyze a syntax tree. <code>name</code> will be used to set the origin of types,
+properties, and variables produced by this code. The optional <code>scope</code>
+argument can be used to specify a <a href="#infer_scopes">scope</a> in which the
+code should be analyzed. It will default to the top-level scope.
+</p>
+</dd>
+</dl></div>
+<p >The same code, or slightly modified variants of the same code, can be
+analyzed in a context multiple times. The variables and properties
+that the context knows, as well as the types it assigns to them, will
+become the union of the variables and types created by the various
+forms of the code. When incrementally re-analyzing code as it is being
+edited, this leads to an degradation in the preciseness of the
+results. To prevent that, it is possible to <em>purge</em> all elements that
+come from a specific origin from a context.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.purgeTypes"></a><code>infer.purgeTypes(origins: [string], start?: number, end?: number)</code>
+</dt>
+<dd>
+<p>
+Purges the types that have one of the origins given from the context.
+<code>start</code> and <code>end</code> can be given to only purge types that occurred in
+the source code between those offsets. This is not entirely
+precise—the state of the context won&#8217;t be back where it was before the
+file was analyzed—but it prevents most of the noticeable inaccuracies
+that re-analysis tends to produce.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.markVariablesDefinedBy"></a><code>infer.markVariablesDefinedBy(scope: Scope, origins: [string], start?: number, end?: number)</code>
+</dt>
+<dd>
+<p>
+Cleaning up variables is slightly trickier than cleaning up types.
+This does a first pass over the given scope, and marks variables
+defined by the given origins. This is indended to be followed by a
+call to <a href="#infer.analyze"><code>analyze</code></a> and then a call to
+<a href="#infer.purgeMarkedVariables"><code>purgeMarkedVariables</code></a>.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.purgeMarkedVariables"></a><code>infer.purgeMarkedVariables</code>
+</dt>
+<dd>
+<p>
+Purges
+variables that were marked by a call to
+<a href="#infer.markVariablesDefinedBy"><code>markVariablesDefinedBy</code></a> and not
+re-defined in the meantime.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="infer_types">Types</h3>
+<p >Tern has a more or less complete implementation of the JavaScript type
+system.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.Obj"></a><code>infer.Obj(proto, name?: string)</code>
+</dt>
+<dd>
+<p>
+Constructor for the
+type that represents JavaScript objects. <code>proto</code> may be another
+object, or <code>true</code> as a short-hand for <code>Object.prototype</code>, or <code>null</code>
+for prototype-less objects.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Fn"></a><code>infer.Fn(name: string?, self: AVal, args: [AVal], argNames: [string], retval: AVal)</code>
+</dt>
+<dd>
+<p>
+Constructor for the type that implements functions. Inherits from
+<a href="#infer.Obj">Obj</a>. The <a href="#infer_aval"><code>AVal</code></a> types are used to track
+the input and output types of the function.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Arr"></a><code>infer.Arr(contentType: AVal)</code>
+</dt>
+<dd>
+<p>
+Constructor that creates
+an array type with the given content type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Context.num"></a><code>context.num</code>
+</dt>
+<dd>
+<p>
+The primitive number type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Context.str"></a><code>context.str</code>
+</dt>
+<dd>
+<p>
+The primitive string type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Context.bool"></a><code>context.bool</code>
+</dt>
+<dd>
+<p>
+The primitive boolean type.
+</p>
+</dd>
+</dl></div>
+<p >Types expose the following interface (plus some <code>AVal</code>-compatibility
+methods, see <a href="#type_is_aval">below</a>).</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.Type.name"></a><code>type.name: string</code>
+</dt>
+<dd>
+<p>
+The name of the type, if any.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Type.origin"></a><code>type.origin: string</code>
+</dt>
+<dd>
+<p>
+The origin file of the type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Type.originNode"></a><code>type.originNode: AST</code>
+</dt>
+<dd>
+<p>
+The syntax node that
+defined the type. Only present for object and function types, and even
+for those it may be missing (if the type was created by a type
+definition file, or synthesized in some other way).
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Type.toString"></a><code>type.toString(maxDepth: number) → string</code>
+</dt>
+<dd>
+<p>
+Return
+a string that describes the type. <code>maxDepth</code> indicates the depth to
+which inner types should be shown.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Type.getProp"></a><code>type.getProp(prop: string) → AVal</code>
+</dt>
+<dd>
+<p>
+Get an
+<a href="#infer_aval"><code>AVal</code></a> that represents the named property of this type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Type.forAllProps"></a><code>type.forAllProps(f: fn(prop: string, val: AVal, local: bool))</code>
+</dt>
+<dd>
+<p>
+Call the given function for all properties of the object, including
+properties that are added in the future.
+</p>
+</dd>
+</dl></div>
+<p >Object types have a few extra methods and properties.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.Obj.proto"></a><code>obj.proto</code>
+</dt>
+<dd>
+<p>
+The prototype of the object, or <code>null</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Obj.props"></a><code>obj.props</code>
+</dt>
+<dd>
+<p>
+An object mapping the object&#8217;s known
+properties to AVals. Don&#8217;t manipulate this directly (ever), only use
+it if you have to iterate over the properties.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Obj.hasProp"></a><code>obj.hasProp(prop: string) → AVal?</code>
+</dt>
+<dd>
+<p>
+Looks up
+the AVal associated with the given property, or returns <code>null</code> if it
+doesn&#8217;t exist.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Obj.defProp"></a><code>obj.defProp(prop: string) → AVal</code>
+</dt>
+<dd>
+<p>
+Looks up the
+given property, or defines it if it did not yet exist.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="infer_aval">Abstract values</h3>
+<p >Abstract values are objects used to represent sets of types. Each
+variable and property has an abstract value associated with it, but
+they are also used for other purposes, such as tracking the return
+type of a function, or building up the type for some kinds of
+expressions.</p>
+<p >In a cleanly typed program where each thing has only a single type,
+abstract values will all have one type associated with them. When, for
+example, a variable can hold two different types of values, the
+associated abstract value will hold both these types. In some cases,
+no type can be assigned to something at all, in which case the
+abstract value remains empty.</p>
+<p >Abstract values expose the following interface:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.AVal"></a><code>infer.AVal()</code>
+</dt>
+<dd>
+<p>
+Constructor. Creates an empty AVal.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.AVal.addType"></a><code>aval.addType(type: Type, weight?: number)</code>
+</dt>
+<dd>
+<p>
+Add a type to this abstract value. If the type is already in there,
+this is a no-op. <code>weight</code> can be given to give this type a non-default
+weight, which is mostly useful when adding a provisionary type that
+should be overridden later if a real type is found. The default weight
+is <code>100</code>, and passing a weight lower than that will make the type
+assignment &#8220;weak&#8221;.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.AVal.propagate"></a><code>aval.propagate(target: Constraint)</code>
+</dt>
+<dd>
+<p>
+Sets
+this AVal to propagate all types it receives to the given
+<a href="#infer_constraint">constraint</a>. This is the mechanism by which types
+are propagated through the type graph.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.AVal.hasType"></a><code>aval.hasType(type: Type) → bool</code>
+</dt>
+<dd>
+<p>
+Queries whether the
+AVal <em>currently</em> holds the given type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.AVal.isEmpty"></a><code>aval.isEmpty() → bool</code>
+</dt>
+<dd>
+<p>
+Queries whether the
+AVal is empty.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.AVal.getType"></a><code>aval.getType(guess?: bool) → Type?</code>
+</dt>
+<dd>
+<p>
+Asks the
+abstract value for its current type. May return <code>null</code> when there is
+no type, or conflicting types are present. When <code>guess</code> is <code>true</code> or
+not given, an empty AVal will try to use heuristics based on its
+propagation edges to guess a type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.AVal.getFunctionType"></a><code>aval.getFunctionType() → Type?</code>
+</dt>
+<dd>
+<p>
+Asks
+the AVal if it contains a function type. Useful when you aren&#8217;t
+interested in other kinds of types.
+</p>
+</dd>
+</dl></div>
+<p >Abstract values that are used to represent variables or properties
+will have, when possible, an <code>originNode</code> property pointing to an AST
+node.</p>
+<p ><a id="type_is_aval"></a> As a memory-consuming hack, <a href="#infer_types">types</a>
+also expose the interface of abstact values, so that in cases where an
+AVal is expected, but the precise type is known, the type object can
+simply be used.</p>
+<p ><a id="infer.ANull"></a>The <code>infer.ANull</code> value is a special AVal-like object
+that never holds any types, and discards types added to it. It can be
+used as a placeholder in situations where we either aren&#8217;t interested
+in the types, or there simply are no types.</p>
+</div>
+<div class="sect2">
+<h3 id="infer_constraint">Constraints</h3>
+<p >Constraints are things that can receive values. They use the same
+<code>addType</code> method to receive them, which causes all AVals to also be
+useable as constraints. The inference engine defines a number of
+additional constraints to propagate values in more indirect ways. See
+the <a href="http://marijnhaverbeke.nl/blog/tern.html">blog post</a> on the
+inference algorithm for some examples.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.constraint"></a><code>infer.constraint(props: string, methods: object) → constructor</code>
+</dt>
+<dd>
+<p>
+This is a constructor-constructor for constraints. Given a
+comma-separated list of fields (for example <code>"prop, target"</code>), it will
+return a constructor that takes those fields as arguments and stores
+them in <code>this</code>, with a prototype that derives from a generic
+constraint type, extended with the properties specified in <code>methods</code>.
+</p>
+</dd>
+</dl></div>
+<p >Beyond <a href="#infer.AVal.addType"><code>addType</code></a>, there are a few optional
+methods that constraints can expose to tell the system something about
+itself.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.Constraint.typeHint"></a><code>constraint.typeHint() → Type?</code>
+</dt>
+<dd>
+<p>
+May return a type
+that <a href="#infer.AVal.getType"><code>getType</code></a> can use to &#8220;guess&#8221; its type
+based on the fact that it propagates to this constraint.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Constraint.propHint"></a><code>constraint.propHint() → string?</code>
+</dt>
+<dd>
+<p>
+May return a
+string when this constraint is indicative of the presence of a
+specific property in the source AVal.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="infer_scopes">Scopes</h3>
+<p >Scopes are derived from the <a href="#infer.Obj"><code>Obj</code></a> type, and variables
+are represented the same way as properties.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.Scope"></a><code>infer.Scope(parent?: Scope)</code>
+</dt>
+<dd>
+<p>
+Constructor for scope
+objects. The top scope won&#8217;t have a parent.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.Scope.defVar"></a><code>scope.defVar(name: string, originNode: AST) → AVal</code>
+</dt>
+<dd>
+<p>
+Ensures that this scope or some scope above it has a property by the
+given name (defining it in the top scope if it is missing), and, if
+the property doesn&#8217;t already have an
+<a href="#infer.Type.originNode"><code>originNode</code></a>, assigns the given node to it.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_utilities">Utilities</h3>
+<p >These are miscellaneous utilities that come in helpful when doing code
+analysis.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.findExpressionAt"></a><code>infer.findExpressionAt(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}</code>
+</dt>
+<dd>
+<p>
+Searches the given syntax tree for an expression that ends at the
+given end offset and, if <code>start</code> is given, starts at the given start
+offset. <code>scope</code> can be given to override the outer scope, which
+defaults to the context&#8217;s top scope. Will return a <code>{node, state}</code>
+object if successful, where <code>node</code> is AST node, and <code>state</code> is the
+scope at that point. Returns <code>null</code> if unsuccessful.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.findExpressionAround"></a><code>infer.findExpressionAround(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}</code>
+</dt>
+<dd>
+<p>
+Similar to <a href="#infer.findExpressionAround"><code>findExpressionAround</code></a>,
+except that it will return the innermost expression node that spans
+the given range, rather than only exact matches.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.expressionType"></a><code>infer.expressionType(expr: {node, state}) → AVal</code>
+</dt>
+<dd>
+<p>
+Determine an expression for the given node and scope (as returned by
+the functions above). Will return an <a href="#infer_aval"><code>AVal</code></a> or plain
+<a href="#infer_types"><code>Type</code></a>.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.scopeAt"></a><code>infer.scopeAt(ast: AST, pos: number, scope?: Scope) → Scope</code>
+</dt>
+<dd>
+<p>
+Find the scope at a given position in the syntax tree. The <code>scope</code>
+parameter can be used to override the scope used for code that isn&#8217;t
+wrapped in any function.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.findRefs"></a><code>infer.findRefs(ast: AST, scope: Scope, name: string, refScope: Scope, f: fn(AST, Scope))</code>
+</dt>
+<dd>
+<p>
+Will traverse the given syntax tree, using <code>scope</code> as the starting
+scope, looking for references to variable <code>name</code> that resolve to scope
+<code>refScope</code>, and call <code>f</code> with the node of the reference and its local
+scope for each of them.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.findPropRefs"></a><code>infer.findPropRefs(ast: AST, scope: Scope, objType: Obj, propName: string, f: fn(AST))</code>
+</dt>
+<dd>
+<p>
+Analogous to <a href="#infer.findRefs"><code>findRefs</code></a>, but used to look for
+references to a specific property instead. Whereas <code>findRefs</code> is
+precise, this is dependent on type inference, and thus can not be
+relied on to be precise.
+</p>
+</dd>
+</dl></div>
+<p >Whenever the code in <code>lib/infer.js</code> guesses a type through fuzzy
+heuristics (through <a href="#infer.AVal.getType"><code>getType</code></a> or
+<a href="#infer.expressionType"><code>expressionType</code></a>), it sets a flag. The
+following two function allow access to this flag:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.didGuess"></a><code>infer.didGuess() → bool</code>
+</dt>
+<dd>
+<p>
+Test whether the
+guessing flag is set.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="infer.resetGuessing"></a><code>infer.resetGuessing(val?: bool)</code>
+</dt>
+<dd>
+<p>
+Reset the
+guessing flag.
+</p>
+</dd>
+</dl></div>
 </div>
 </div>
 </div>

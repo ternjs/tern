@@ -1,5 +1,13 @@
 = Tern Reference Manual =
 
+Tern consists of several components. Depending on what you are trying
+to do with it, you will be interested in a different layer. At the
+very top are the <<editor,editor plugins>>. These talk to a
+<<server,Tern server>>, which is implemented on top of the
+<<server_api,server module>>, which uses the <<infer,inference
+engine>> to do the actual type inference.
+
+[[contents]]
 == Contents ==
 
 * <<server,The Tern server>>
@@ -10,7 +18,7 @@
 ** <<configuration,Project configuration>>
 ** <<utils,Utilities>>
 * <<infer,Inference engine>>
-** <<infer_api,Programming interface>>
+** <<infer_context,Context>>
 * <<editor,Editor plugins>>
 
 [[server]]
@@ -28,8 +36,8 @@ that instead of the HTTP server described here.)
 
 When started, the server will look for a `.tern-project` file in the
 current directory or one of the directories above that, and use it for
-its <<configuration>>. If no project file is found, it'll fall back to
-an empty default configuration.
+its <<configuration,configuration>>. If no project file is found,
+it'll fall back to an empty default configuration.
 
 A server write the port it is listening on (which is random) to
 standard output on startup. It will serve a <<protocol,simple JSON
@@ -440,7 +448,7 @@ built-in libraries).
 
 A plugin can use several hooks to add custom behavior.
 
-[[infer.registerFunction]]`infer.registerFunction(name: string, f: fn(self, args, argnodes))`::
+[[infer.registerFunction]]`infer.registerFunction(name: string, f: fn(self, args, argnodes))`::
 This is a function in the <<infer,inference engine module>> that
 allows custom ways to compute function return types or effects. When a
 function is specified to return `!custom:myname` or has an effect
@@ -467,7 +475,7 @@ name. It may also have a `takesFile` property which, if true, will
 cause the server to try and resolve the file on which the query
 operates (from its `file` property) and pass that (a `{name, text,
 scope, ast}` object) as a third argument to the `run` function. You
-will probably need to use the <<infer_api,inference module's API>> to
+will probably need to use the <<infer,inference module's API>> to
 do someting useful in this function.
 
 [[configuration]]
@@ -539,12 +547,319 @@ Tern-style <<typedef,JSON definition>> file.
 [[infer]]
 == Inference engine ==
 
-FIXME
+The inference engine module (`lib/infer.js`) implements a system that,
+given a context and an abstract syntax tree (parsed representation of
+the code), tries to infer the types of the variables and properties in
+the code.
 
-[[infer_api]]
-=== Programming interface ===
+The parser is implemented in a separate module,
+http:://marijnhaverbeke.nl/acorn[Acorn], which provides a regular
+JavaScript parser, an error-tolerant parser, and a number of utilities
+for iterating through and searching in abstract syntax trees. The
+syntax tree format used by Acorn and Tern is described in the
+https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API[Mozilla
+parser API] document (though support for features that are not in
+ECMAScript 5, such as `let`, is omitted).
 
-FIXME
+A high-level description of the way Tern's type inference algorithm
+works can be found in a http://marijnhaverbeke.nl/blog/tern.html[blog
+post] I wrote on the subject.
+
+This module also exposes some utility functions that are useful to
+implement the <<protocol,services>> the server exposes.
+
+[[infer_context]]
+=== Context ===
+
+A context is an object that holds a global JavaScript scope, as well
+as some meta-information and state used by the type inference process.
+Almost all operations in the inference module require a context.
+
+To prevent having to pass the context around through every function, a
+form of dynamic binding is used—the `withContext` function executes a
+function body with a given object used as the current context.
+
+[[infer.Context]]`infer.Context(defs: [object])`:: A constructor
+function for contexts. `defs` should be an array of <<typedef,type
+definition objects>>, which will be used to initialize the
+global scope.
+
+[[infer.withContext]]`infer.withContext(context: Context, f: fn())`::
+Calls `f` with the current context bound to `context`. Basically, all
+code that does something with the inference engine should be wrapped
+in such a call.
+
+[[infer.cx]]`infer.cx() → Context`:: Returns the current context
+object.
+
+[[infer.Context.topScope]]`context.topScope`:: The top-level
+<<infer_scopes,scope>> of the context.
+
+[[infer_analysis]]
+=== Analysis ===
+
+To push code into a context, you first parse it, yielding a syntax
+tree, and then tell Tern to analyze that.
+
+[[infer.parse]]`infer.parse(text: string) → AST`:: Parse a piece of
+code for use by Tern. Will automatically fall back to the
+error-tolerant parser if the regular parser can't parse the code.
+
+[[infer.analyze]]`infer.analyze(ast: AST, name: string, scope?: Scope)`::
+Analyze a syntax tree. `name` will be used to set the origin of types,
+properties, and variables produced by this code. The optional `scope`
+argument can be used to specify a <<infer_scopes,scope>> in which the
+code should be analyzed. It will default to the top-level scope.
+
+The same code, or slightly modified variants of the same code, can be
+analyzed in a context multiple times. The variables and properties
+that the context knows, as well as the types it assigns to them, will
+become the union of the variables and types created by the various
+forms of the code. When incrementally re-analyzing code as it is being
+edited, this leads to an degradation in the preciseness of the
+results. To prevent that, it is possible to _purge_ all elements that
+come from a specific origin from a context.
+
+[[infer.purgeTypes]]`infer.purgeTypes(origins: [string], start?: number, end?: number)`::
+Purges the types that have one of the origins given from the context.
+`start` and `end` can be given to only purge types that occurred in
+the source code between those offsets. This is not entirely
+precise—the state of the context won't be back where it was before the
+file was analyzed—but it prevents most of the noticeable inaccuracies
+that re-analysis tends to produce.
+
+[[infer.markVariablesDefinedBy]]`infer.markVariablesDefinedBy(scope: Scope, origins: [string], start?: number, end?: number)`::
+Cleaning up variables is slightly trickier than cleaning up types.
+This does a first pass over the given scope, and marks variables
+defined by the given origins. This is indended to be followed by a
+call to <<infer.analyze,`analyze`>> and then a call to
+<<infer.purgeMarkedVariables,`purgeMarkedVariables`>>.
+
+[[infer.purgeMarkedVariables]]`infer.purgeMarkedVariables`:: Purges
+variables that were marked by a call to
+<<infer.markVariablesDefinedBy,`markVariablesDefinedBy`>> and not
+re-defined in the meantime.
+
+[[infer_types]]
+=== Types ===
+
+Tern has a more or less complete implementation of the JavaScript type
+system.
+
+[[infer.Obj]]`infer.Obj(proto, name?: string)`:: Constructor for the
+type that represents JavaScript objects. `proto` may be another
+object, or `true` as a short-hand for `Object.prototype`, or `null`
+for prototype-less objects.
+
+[[infer.Fn]]`infer.Fn(name: string?, self: AVal, args: [AVal], argNames: [string], retval: AVal)`::
+Constructor for the type that implements functions. Inherits from
+<<infer.Obj,Obj>>. The <<infer_aval,`AVal`>> types are used to track
+the input and output types of the function.
+
+[[infer.Arr]]`infer.Arr(contentType: AVal)`:: Constructor that creates
+an array type with the given content type.
+
+[[infer.Context.num]]`context.num`:: The primitive number type.
+
+[[infer.Context.str]]`context.str`:: The primitive string type.
+
+[[infer.Context.bool]]`context.bool`:: The primitive boolean type.
+
+Types expose the following interface (plus some `AVal`-compatibility
+methods, see <<type_is_aval,below>>).
+
+[[infer.Type.name]]`type.name: string`:: The name of the type, if any.
+
+[[infer.Type.origin]]`type.origin: string`:: The origin file of the type.
+
+[[infer.Type.originNode]]`type.originNode: AST`:: The syntax node that
+defined the type. Only present for object and function types, and even
+for those it may be missing (if the type was created by a type
+definition file, or synthesized in some other way).
+
+[[infer.Type.toString]]`type.toString(maxDepth: number) → string`:: Return
+a string that describes the type. `maxDepth` indicates the depth to
+which inner types should be shown.
+
+[[infer.Type.getProp]]`type.getProp(prop: string) → AVal`:: Get an
+<<infer_aval,`AVal`>> that represents the named property of this type.
+
+[[infer.Type.forAllProps]]`type.forAllProps(f: fn(prop: string, val: AVal, local: bool))`::
+Call the given function for all properties of the object, including
+properties that are added in the future.
+
+Object types have a few extra methods and properties.
+
+[[infer.Obj.proto]]`obj.proto`:: The prototype of the object, or `null`.
+
+[[infer.Obj.props]]`obj.props`:: An object mapping the object's known
+properties to AVals. Don't manipulate this directly (ever), only use
+it if you have to iterate over the properties.
+
+[[infer.Obj.hasProp]]`obj.hasProp(prop: string) → AVal?`:: Looks up
+the AVal associated with the given property, or returns `null` if it
+doesn't exist.
+
+[[infer.Obj.defProp]]`obj.defProp(prop: string) → AVal`:: Looks up the
+given property, or defines it if it did not yet exist.
+
+[[infer_aval]]
+=== Abstract values ===
+
+Abstract values are objects used to represent sets of types. Each
+variable and property has an abstract value associated with it, but
+they are also used for other purposes, such as tracking the return
+type of a function, or building up the type for some kinds of
+expressions.
+
+In a cleanly typed program where each thing has only a single type,
+abstract values will all have one type associated with them. When, for
+example, a variable can hold two different types of values, the
+associated abstract value will hold both these types. In some cases,
+no type can be assigned to something at all, in which case the
+abstract value remains empty.
+
+Abstract values expose the following interface:
+
+[[infer.AVal]]`infer.AVal()`:: Constructor. Creates an empty AVal.
+
+[[infer.AVal.addType]]`aval.addType(type: Type, weight?: number)`::
+Add a type to this abstract value. If the type is already in there,
+this is a no-op. `weight` can be given to give this type a non-default
+weight, which is mostly useful when adding a provisionary type that
+should be overridden later if a real type is found. The default weight
+is `100`, and passing a weight lower than that will make the type
+assignment ``weak''.
+
+[[infer.AVal.propagate]]`aval.propagate(target: Constraint)`:: Sets
+this AVal to propagate all types it receives to the given
+<<infer_constraint,constraint>>. This is the mechanism by which types
+are propagated through the type graph.
+
+[[infer.AVal.hasType]]`aval.hasType(type: Type) → bool`:: Queries whether the
+AVal _currently_ holds the given type.
+
+[[infer.AVal.isEmpty]]`aval.isEmpty() → bool`:: Queries whether the
+AVal is empty.
+
+[[infer.AVal.getType]]`aval.getType(guess?: bool) → Type?`:: Asks the
+abstract value for its current type. May return `null` when there is
+no type, or conflicting types are present. When `guess` is `true` or
+not given, an empty AVal will try to use heuristics based on its
+propagation edges to guess a type.
+
+[[infer.AVal.getFunctionType]]`aval.getFunctionType() → Type?`:: Asks
+the AVal if it contains a function type. Useful when you aren't
+interested in other kinds of types.
+
+Abstract values that are used to represent variables or properties
+will have, when possible, an `originNode` property pointing to an AST
+node.
+
+[[type_is_aval]] As a memory-consuming hack, <<infer_types,types>>
+also expose the interface of abstact values, so that in cases where an
+AVal is expected, but the precise type is known, the type object can
+simply be used.
+
+[[infer.ANull]]The `infer.ANull` value is a special AVal-like object
+that never holds any types, and discards types added to it. It can be
+used as a placeholder in situations where we either aren't interested
+in the types, or there simply are no types.
+
+[[infer_constraint]]
+=== Constraints ===
+
+Constraints are things that can receive values. They use the same
+`addType` method to receive them, which causes all AVals to also be
+useable as constraints. The inference engine defines a number of
+additional constraints to propagate values in more indirect ways. See
+the http://marijnhaverbeke.nl/blog/tern.html[blog post] on the
+inference algorithm for some examples.
+
+[[infer.constraint]]`infer.constraint(props: string, methods: object) → constructor`::
+This is a constructor-constructor for constraints. Given a
+comma-separated list of fields (for example `"prop, target"`), it will
+return a constructor that takes those fields as arguments and stores
+them in `this`, with a prototype that derives from a generic
+constraint type, extended with the properties specified in `methods`.
+
+Beyond <<infer.AVal.addType,`addType`>>, there are a few optional
+methods that constraints can expose to tell the system something about
+itself.
+
+[[infer.Constraint.typeHint]]`constraint.typeHint() → Type?`:: May return a type
+that <<infer.AVal.getType,`getType`>> can use to ``guess'' its type
+based on the fact that it propagates to this constraint.
+
+[[infer.Constraint.propHint]]`constraint.propHint() → string?`:: May return a
+string when this constraint is indicative of the presence of a
+specific property in the source AVal.
+
+[[infer_scopes]]
+=== Scopes ===
+
+Scopes are derived from the <<infer.Obj,`Obj`>> type, and variables
+are represented the same way as properties.
+
+[[infer.Scope]]`infer.Scope(parent?: Scope)`:: Constructor for scope
+objects. The top scope won't have a parent.
+
+[[infer.Scope.defVar]]`scope.defVar(name: string, originNode: AST) → AVal`::
+Ensures that this scope or some scope above it has a property by the
+given name (defining it in the top scope if it is missing), and, if
+the property doesn't already have an
+<<infer.Type.originNode,`originNode`>>, assigns the given node to it.
+
+=== Utilities ===
+
+These are miscellaneous utilities that come in helpful when doing code
+analysis.
+
+[[infer.findExpressionAt]]`infer.findExpressionAt(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}`::
+Searches the given syntax tree for an expression that ends at the
+given end offset and, if `start` is given, starts at the given start
+offset. `scope` can be given to override the outer scope, which
+defaults to the context's top scope. Will return a `{node, state}`
+object if successful, where `node` is AST node, and `state` is the
+scope at that point. Returns `null` if unsuccessful.
+
+[[infer.findExpressionAround]]`infer.findExpressionAround(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}`::
+Similar to <<infer.findExpressionAround,`findExpressionAround`>>,
+except that it will return the innermost expression node that spans
+the given range, rather than only exact matches.
+
+[[infer.expressionType]]`infer.expressionType(expr: {node, state}) → AVal`::
+Determine an expression for the given node and scope (as returned by
+the functions above). Will return an <<infer_aval,`AVal`>> or plain
+<<infer_types,`Type`>>.
+
+[[infer.scopeAt]]`infer.scopeAt(ast: AST, pos: number, scope?: Scope) → Scope`::
+Find the scope at a given position in the syntax tree. The `scope`
+parameter can be used to override the scope used for code that isn't
+wrapped in any function.
+
+[[infer.findRefs]]`infer.findRefs(ast: AST, scope: Scope, name: string, refScope: Scope, f: fn(AST, Scope))`::
+Will traverse the given syntax tree, using `scope` as the starting
+scope, looking for references to variable `name` that resolve to scope
+`refScope`, and call `f` with the node of the reference and its local
+scope for each of them.
+
+[[infer.findPropRefs]]`infer.findPropRefs(ast: AST, scope: Scope, objType: Obj, propName: string, f: fn(AST))`::
+Analogous to <<infer.findRefs,`findRefs`>>, but used to look for
+references to a specific property instead. Whereas `findRefs` is
+precise, this is dependent on type inference, and thus can not be
+relied on to be precise.
+
+Whenever the code in `lib/infer.js` guesses a type through fuzzy
+heuristics (through <<infer.AVal.getType,`getType`>> or
+<<infer.expressionType,`expressionType`>>), it sets a flag. The
+following two function allow access to this flag:
+
+[[infer.didGuess]]`infer.didGuess() → bool`:: Test whether the
+guessing flag is set.
+
+[[infer.resetGuessing]]`infer.resetGuessing(val?: bool)`:: Reset the
+guessing flag.
 
 [[editor]]
 == Editor plugins ==
