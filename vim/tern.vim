@@ -365,9 +365,18 @@ function! tern#Enable()
   let b:ternBufferSentAt = -1
   let b:ternInsertActive = 0
   setlocal omnifunc=tern#Complete
+  augroup TernAutoCmd
+    autocmd!
+    autocmd BufLeave <buffer> :py tern_sendBufferIfDirty()
+    autocmd InsertEnter <buffer> let b:ternInsertActive = 1
+    autocmd InsertLeave <buffer> let b:ternInsertActive = 0
+  augroup END
+endfunction
+
+function! tern#Disable()
+  augroup TernAutoCmd
+    autocmd!
+  augroup END
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
-autocmd BufLeave *.js :py tern_sendBufferIfDirty()
-autocmd InsertEnter *.js :if exists('b:ternInsertActive')|let b:ternInsertActive = 1|endif
-autocmd InsertLeave *.js :if exists('b:ternInsertActive')|let b:ternInsertActive = 0|endif
