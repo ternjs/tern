@@ -225,9 +225,24 @@ def tern_lookupDocumentation(browse=False):
   else:
     vim.command("echo 'no documentation found'")
 
+def tern_echoWrap(data, name=""):
+  text = json.dumps(data)
+  if len(name) > 0:
+    text = "'"+name+": ' " + text
+  col = int(vim.eval("&columns"))-23
+  if len(text) > col:
+    text = text[0:col]+"...\""
+  vim.command("echo " + text)
+
 def tern_lookupType():
   data = tern_runCommand("type")
-  if data: vim.command("echo " + json.dumps(data.get("type", "not found")))
+  if data: tern_echoWrap(data.get("type", ""))
+
+def tern_lookupArgumentHints(fname, apos):
+  curRow, curCol = vim.current.window.cursor
+  data = tern_runCommand({"type": "type", "preferFunction": True},
+                         {"line": curRow - 1, "ch": apos})
+  if data: tern_echoWrap(data.get("type", ""),name=fname)
 
 def tern_lookupDefinition(cmd):
   data = tern_runCommand("definition")
@@ -345,6 +360,25 @@ function! tern#Complete(findstart, complWord)
   endif
 endfunction
 
+function! tern#LookupType()
+  python tern_lookupType()
+  return ''
+endfunction
+
+function! tern#LookupArgumentHints()
+  if !tern#is_show_argument_hints_enabled()
+    return
+  endif
+  let fname = get(matchlist(getline('.')[:col('.')-2],'\([a-zA-Z0-9_]*\)([^()]*$'),1)
+  let pos   = match(getline('.')[:col('.')-2],'[a-zA-Z0-9_]*([^()]*$')
+  if pos >= 0
+    python tern_lookupArgumentHints(vim.eval('fname'),int(vim.eval('pos')))
+  else
+    python tern_lookupType()
+  endif
+  return ''
+endfunction
+
 command! TernDoc py tern_lookupDocumentation()
 command! TernDocBrowse py tern_lookupDocumentation(browse=True)
 command! TernType py tern_lookupType()
@@ -354,6 +388,10 @@ command! TernDefSplit py tern_lookupDefinition("split")
 command! TernDefTab py tern_lookupDefinition("tabe")
 command! TernRefs py tern_refs()
 command! TernRename exe 'py tern_rename("'.input("new name? ",expand("<cword>")).'")'
+
+function! tern#is_show_argument_hints_enabled()
+  return exists('g:tern_show_argument_hints') && g:tern_show_argument_hints
+endfunction
 
 function! tern#Enable()
   if stridx(&buftype, "nofile") > -1 || stridx(&buftype, "nowrite") > -1
@@ -369,6 +407,7 @@ function! tern#Enable()
   augroup TernAutoCmd
     autocmd!
     autocmd BufLeave <buffer> :py tern_sendBufferIfDirty()
+    autocmd CursorMoved,CursorMovedI <buffer> call tern#LookupArgumentHints()
     autocmd InsertEnter <buffer> let b:ternInsertActive = 1
     autocmd InsertLeave <buffer> let b:ternInsertActive = 0
   augroup END
