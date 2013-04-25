@@ -19,6 +19,12 @@ engine>> to do the actual type inference.
 ** <<utils,Utilities>>
 * <<infer,Inference engine>>
 ** <<infer_context,Context>>
+** <<infer_analysis,Analysis>>
+** <<infer_types,Types>>
+** <<infer_aval,Abstract values>>
+** <<infer_constraint,Constraints>>
+** <<infer_scopes,Scopes>>
+** <<infer_util,Utilities>>
 * <<editor,Editor plugins>>
 
 [[server]]
@@ -810,6 +816,7 @@ given name (defining it in the top scope if it is missing), and, if
 the property doesn't already have an
 <<infer.Type.originNode,`originNode`>>, assigns the given node to it.
 
+[[infer_util]]
 === Utilities ===
 
 These are miscellaneous utilities that come in helpful when doing code

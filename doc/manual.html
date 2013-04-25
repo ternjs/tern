@@ -73,6 +73,36 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 <a href="#infer_context">Context</a>
 </p>
 </li>
+<li>
+<p>
+<a href="#infer_analysis">Analysis</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#infer_types">Types</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#infer_aval">Abstract values</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#infer_constraint">Constraints</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#infer_scopes">Scopes</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#infer_util">Utilities</a>
+</p>
+</li>
 </ul></div>
 </li>
 <li>
@@ -98,8 +128,8 @@ it&#8217;ll fall back to an empty default configuration.</p>
 standard output on startup. It will serve a <a href="#protocol">simple JSON protocol</a> via HTTP on that port. Clients can upload code and ask
 questions about the code through this protocol.</p>
 <p >The following command-line flags are supported:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>--port &lt;number&gt;</code>
 </dt>
 <dd>
@@ -108,7 +138,7 @@ Specify a port to listen on, instead of the default behavior of
 letting the OS pick a random unused port.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>--persistent</code>
 </dt>
 <dd>
@@ -117,7 +147,7 @@ By default, the server will shut itself down after five minutes of
 inactivity. Pass it a this option to disable auto-shutdown.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>--verbose</code>
 </dt>
 <dd>
@@ -127,7 +157,7 @@ responses that it handles, and any errors that are raised. Useful for
 debugging.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="protocol"></a>JSON protocol</h3>
 <p >Sending queries to a Tern server is done by making <code>POST</code> requests to
 the server&#8217;s port (using <code>/</code> as the requests&#8217;s path) with a
@@ -145,8 +175,8 @@ what kind of query it is. Depending on the type, other properties must
 or may be present in order to provide further details.</p>
 <p >These are the queries that a Tern server understands by default.
 (Plug-ins may add custom query types.)</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="req_completions"></a><code>completions</code>
 </dt>
 <dd>
@@ -154,8 +184,8 @@ or may be present in order to provide further details.</p>
 Asks the server for a set of completions at the given point.
 </p>
 <p >Accepted fields are:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>file</code>, <code>end</code> (required)
 </dt>
 <dd>
@@ -164,7 +194,7 @@ Specify the location to complete at.
 <a href="#loc_spec">See below</a>.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>types</code> (optional, default <code>false</code>)
 </dt>
 <dd>
@@ -173,7 +203,7 @@ Whether to include the types of
 the completions in the result data.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>depths</code> (optional, default <code>false</code>)
 </dt>
 <dd>
@@ -183,7 +213,7 @@ Whether to include the distance
 completions and the origin position in the result data.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>docs</code>, <code>urls</code>, <code>origins</code> (optional, default <code>false</code>)
 </dt>
 <dd>
@@ -193,7 +223,7 @@ include documentation strings, urls, and origin files (if found) in
 the result data.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>filter</code> (optional, default <code>true</code>)
 </dt>
 <dd>
@@ -203,7 +233,7 @@ match the current word at the given point will be returned. Turn this
 off to get all results, so that you can filter on the client side.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>guess</code> (optional, default <code>true</code>)
 </dt>
 <dd>
@@ -213,7 +243,7 @@ completions are found, Tern will use some heuristics to try and return
 some properties anyway. Set this to <code>false</code> to turn that off.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>sort</code> (optional, default <code>true</code>)
 </dt>
 <dd>
@@ -222,7 +252,7 @@ Determines whether the result set
 will be sorted.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>expandWordForward</code> (optional, default <code>true</code>)
 </dt>
 <dd>
@@ -233,7 +263,7 @@ When enabled (the default), the whole variable name that the cursor is
 on will be included.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>omitObjectPrototype</code> (optional, default <code>true</code>)
 </dt>
 <dd>
@@ -243,7 +273,7 @@ the properties of <code>Object.prototype</code> unless they have been spelled ou
 by at least to characters.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >The result returned will be an object with <code>start</code> and <code>end</code>
 properties, which give the start and end <a href="#offsets">offsets</a> of the word that was
 completed, and a <code>completions</code> property holding an array of
@@ -253,15 +283,15 @@ completions. When one of the <code>types</code>, <code>depths</code>, <code>docs
 <code>type</code>, <code>depth</code>, <code>doc</code>, <code>url</code>, and <code>origin</code> properties. When none of
 these options are enabled, the result array will hold plain strings.</p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_type"></a><code>type</code>
 </dt>
 <dd>
 <p>
 Query the type of something.
 </p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>file</code>, <code>end</code> (required), <code>start</code> (optional)
 </dt>
 <dd>
@@ -270,7 +300,7 @@ Specify the expression
 we want the type of. <a href="#loc_spec">See below</a>.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>preferFunction</code> (optional, default <code>false</code>)
 </dt>
 <dd>
@@ -280,7 +310,7 @@ are interested in a function type. This will cause function types to
 win when something has multiple types.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>depth</code> (optional, default <code>0</code>)
 </dt>
 <dd>
@@ -291,10 +321,10 @@ to this depth, and be represented by their type name or a
 representation showing only property names below it.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >The returned object will have the following properties:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>type</code> (string)
 </dt>
 <dd>
@@ -303,7 +333,7 @@ A description of the type of the value. May be <code>"?"</code>
 when no type was found.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>guess</code> (bool)
 </dt>
 <dd>
@@ -312,7 +342,7 @@ Whether the given type was guessed, or should be
 considered reliable.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>name</code> (string, optional)
 </dt>
 <dd>
@@ -320,7 +350,7 @@ considered reliable.
 The name associated with the type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>exprName</code> (string, optional)
 </dt>
 <dd>
@@ -330,7 +360,7 @@ identifier or a property access, this will hold the name of the
 variable or property.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>doc</code>, <code>url</code>, <code>origin</code> (strings, optional)
 </dt>
 <dd>
@@ -340,9 +370,9 @@ documentation and origin information associated with it, these will
 also be returned.
 </p>
 </dd>
-</dl></div>
+</dl>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_definition"></a><code>definition</code>
 </dt>
 <dd>
@@ -358,8 +388,8 @@ their definition site), it will fail to return useful information.
 <p >Only takes <code>file</code>, <code>end</code> (required), and <code>start</code> (optional) fields to
 specify the expression you want the definition of. <a href="#loc_spec">See below</a>.</p>
 <p >The returned object will have the following properties:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>start</code>, <code>end</code> (<a href="#offsets">offsets</a>, optional)
 </dt>
 <dd>
@@ -368,7 +398,7 @@ The start and end positions of
 the definition.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>file</code> (string, optional)
 </dt>
 <dd>
@@ -377,7 +407,7 @@ The file in which the definition was
 defined.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>guess</code> (bool)
 </dt>
 <dd>
@@ -386,7 +416,7 @@ Indicates whether finding the definition required any
 heuristic guesses.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>context</code> (string, optional), <code>contextOffset</code> (number, optional)
 </dt>
 <dd>
@@ -397,7 +427,7 @@ start of the context to the actual definition. Can be used to find a
 definition&#8217;s location in a modified file.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>doc</code>, <code>url</code>, <code>origin</code> (strings, optional)
 </dt>
 <dd>
@@ -406,9 +436,9 @@ If the definition had
 documentation or an origin associated with it, it will be returned.
 </p>
 </dd>
-</dl></div>
+</dl>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_documentation"></a><code>documentation</code>
 </dt>
 <dd>
@@ -419,8 +449,8 @@ and URL for a given expression, if any.
 <p >Takes <code>file</code>, <code>end</code> (required), and <code>start</code> (optional) fields to
 specify the expression we are interested in. <a href="#loc_spec">See below</a>.</p>
 <p >Returns an object with the following properties:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>doc</code>, <code>url</code>, <code>origin</code> (strings, optional)
 </dt>
 <dd>
@@ -429,9 +459,9 @@ The documentation string,
 url, and the origin of the definition or value, if any.
 </p>
 </dd>
-</dl></div>
+</dl>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_refs"></a><code>refs</code>
 </dt>
 <dd>
@@ -446,7 +476,7 @@ variable or property, a <code>refs</code> property holding an array of <code>{fi
 start, end}</code> objects, and, for variables, a <code>type</code> property holding
 either <code>"global"</code> or <code>"local"</code>.</p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_rename"></a><code>rename</code>
 </dt>
 <dd>
@@ -461,7 +491,7 @@ start, end, text}</code> objects, which give the changes that must be
 performed to apply the rename. The client is responsible for doing the
 actual modification.</p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_properties"></a><code>properties</code>
 </dt>
 <dd>
@@ -469,8 +499,8 @@ actual modification.</p>
 Get a list of all known object
 property names (for <em>any</em> object).
 </p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>prefix</code> (string, optional)
 </dt>
 <dd>
@@ -479,7 +509,7 @@ Causes the server to only return
 properties that start with the given string.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>sort</code> (optional, default <code>true</code>)
 </dt>
 <dd>
@@ -487,11 +517,11 @@ properties that start with the given string.
 Whether the result should be sorted.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >The returned object will have a <code>completions</code> property holding an
 array of strings, which are the property names.</p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="req_files"></a><code>files</code>
 </dt>
 <dd>
@@ -502,7 +532,7 @@ in its set of analyzed files.
 <p >Does not take any parameters. Returns an object with a <code>files</code>
 property holding an array of strings (the file names).</p>
 </dd>
-</dl></div>
+</dl>
 <p ><a id="loc_spec"></a> When specifying a location, which is needed for most of
 the query types, the required <code>file</code> field may hold either a filename,
 or a string in the form <code>"#N"</code>, where <code>N</code> should be an integer
@@ -545,8 +575,8 @@ reading) is implemented in <code>lib/tern.js</code>. That package exposes a
 <code>Server</code> constructor that can be used to create a server. It takes an
 object holding configuration options options as argument. These are
 recognized (all have a default):</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="option_defs"></a> <code>defs</code> (array of strings)
 </dt>
 <dd>
@@ -555,7 +585,7 @@ The <a href="#typedef">definition</a>
 objects to load into the server&#8217;s environment.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="option_plugins"></a> <code>plugins</code> (object)
 </dt>
 <dd>
@@ -566,7 +596,7 @@ the object name the plugins, and their values hold options that will
 be passed to them.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="option_getFile"></a> <code>getFile</code> (function)
 </dt>
 <dd>
@@ -579,7 +609,7 @@ callback, and calls the callback with an optional error as the first
 argument, and the content string (if no error) as the second.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="option_async"></a> <code>async</code> (bool)
 </dt>
 <dd>
@@ -588,7 +618,7 @@ Indicates whether <code>getFile</code> is
 asynchronous. Default is <code>false</code>.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="option_fetchTimeout"></a> <code>fetchTimeout</code> (number)
 </dt>
 <dd>
@@ -598,10 +628,10 @@ maximum amount of milliseconds to wait for an asynchronous <code>getFile</code>
 before giving up on it. Defaults to <code>1000</code>.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >A server object has the following methods:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="tern.Server.addFile"></a> <code>addFile(name: string, text?: string)</code>
 </dt>
 <dd>
@@ -610,7 +640,7 @@ Register a file with the server. Note that files can also be
 <a href="#protocol_files">included</a> in requests.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.Server.delFile"></a> <code>delFile(name: string)</code>
 </dt>
 <dd>
@@ -618,7 +648,7 @@ Register a file with the server. Note that files can also be
 Unregister a file.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.Server.request"></a> <code>request(doc: object, callback: fn(error, response))</code>
 </dt>
 <dd>
@@ -633,7 +663,7 @@ object will be passed as second argument.
 <a href="#option_async">asynchronous</a>, the callback will be called before
 <code>request</code> returns.</p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.Server.flush"></a> <code>flush(callback: fn())</code>
 </dt>
 <dd>
@@ -642,7 +672,7 @@ Forces all files to be
 fetched an analyzed, and then calls the callback function.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.Server.on"></a> <code>on(eventType: string, handler: fn())</code>
 </dt>
 <dd>
@@ -651,7 +681,7 @@ Register
 an event handler for the named type of event.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.Server.off"></a> <code>off(eventType: string, handler: fn())</code>
 </dt>
 <dd>
@@ -659,11 +689,11 @@ an event handler for the named type of event.
 Unregister an event handler.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >The server fires the following type of events (mostly useful for
 plugins):</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="event_reset"></a> <code>reset ()</code>
 </dt>
 <dd>
@@ -672,7 +702,7 @@ When the server throws away its current
 analysis data and starts a fresh run.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="event_beforeLoad"></a> <code>beforeLoad (file)</code>
 </dt>
 <dd>
@@ -681,7 +711,7 @@ Before analyzing a file.
 <code>file</code> is an object holding <code>{name, text, scope}</code> properties.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="event_afterLoad"></a> <code>afterLoad (file)</code>
 </dt>
 <dd>
@@ -689,7 +719,7 @@ Before analyzing a file.
 After analyzing a file.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="typedef"></a>JSON type definitions</h3>
 <p >To be able to specify the types of things without actually analyzing
 source code, either because there is no JavaScript source code (as for
@@ -761,8 +791,8 @@ Tern server about the dependency management mechanisms defined by
 those systems (as well as, for node.js, including types for the
 built-in libraries).</p>
 <p >A plugin can use several hooks to add custom behavior.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.registerFunction"></a><code>infer.registerFunction(name: string, f: fn(self, args, argnodes))</code>
 </dt>
 <dd>
@@ -777,7 +807,7 @@ make calls to <code>require</code> trigger the necessary machinations to fetch a
 dependency and return its type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.registerPlugin"></a><code>tern.registerPlugin(name: string, fn(Server, options))</code>
 </dt>
 <dd>
@@ -790,7 +820,7 @@ any). This is usually the place where you register event handlers on
 the server and/or initialize the plugin&#8217;s state.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="tern.defineQueryType"></a><code>tern.defineQueryType(name: string, desc: object)</code>
 </dt>
 <dd>
@@ -807,7 +837,7 @@ will probably need to use the <a href="#infer">inference module&#8217;s API</a> 
 do someting useful in this function.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="configuration"></a>Project configuration</h3>
 <p >A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
 like this:</p>
@@ -841,8 +871,8 @@ directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
 <h3> <a id="utils"></a>Utilities</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <code>bin/test</code>
 </dt>
 <dd>
@@ -852,7 +882,7 @@ directory, as code interspersed with comments that indicate the
 types and conditions to check for.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>bin/condense</code>
 </dt>
 <dd>
@@ -864,7 +894,7 @@ interleaved with filenames prefixed with a <code>+</code>, which will be loaded
 <p >Pass <code>--plugin name</code> or <code>--plugin name={jsonconfig}</code> to load
 plugins. Use <code>--def file</code> to load <a href="#typedef">JSON definitions</a>.</p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <code>bin/from_ts</code>
 </dt>
 <dd>
@@ -873,7 +903,7 @@ Given a typescript <code>.def.ts</code> file, will attempt to convert it to a
 Tern-style <a href="#typedef">JSON definition</a> file.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h2> <a id="infer"></a>Inference engine</h2>
 <p >The inference engine module (<code>lib/infer.js</code>) implements a system that,
 given a context and an abstract syntax tree (parsed representation of
@@ -899,8 +929,8 @@ Almost all operations in the inference module require a context.</p>
 <p >To prevent having to pass the context around through every function, a
 form of dynamic binding is used—the <code>withContext</code> function executes a
 function body with a given object used as the current context.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.Context"></a><code>infer.Context(defs: [object])</code>
 </dt>
 <dd>
@@ -910,7 +940,7 @@ function for contexts. <code>defs</code> should be an array of <a href="#typedef
 global scope.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.withContext"></a><code>infer.withContext(context: Context, f: fn())</code>
 </dt>
 <dd>
@@ -920,7 +950,7 @@ code that does something with the inference engine should be wrapped
 in such a call.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.cx"></a><code>infer.cx() → Context</code>
 </dt>
 <dd>
@@ -929,7 +959,7 @@ Returns the current context
 object.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Context.topScope"></a><code>context.topScope</code>
 </dt>
 <dd>
@@ -938,12 +968,12 @@ The top-level
 <a href="#infer_scopes">scope</a> of the context.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="infer_analysis"></a>Analysis</h3>
 <p >To push code into a context, you first parse it, yielding a syntax
 tree, and then tell Tern to analyze that.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.parse"></a><code>infer.parse(text: string) → AST</code>
 </dt>
 <dd>
@@ -953,7 +983,7 @@ code for use by Tern. Will automatically fall back to the
 error-tolerant parser if the regular parser can&#8217;t parse the code.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.analyze"></a><code>infer.analyze(ast: AST, name: string, scope?: Scope)</code>
 </dt>
 <dd>
@@ -964,7 +994,7 @@ argument can be used to specify a <a href="#infer_scopes">scope</a> in which the
 code should be analyzed. It will default to the top-level scope.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >The same code, or slightly modified variants of the same code, can be
 analyzed in a context multiple times. The variables and properties
 that the context knows, as well as the types it assigns to them, will
@@ -973,8 +1003,8 @@ forms of the code. When incrementally re-analyzing code as it is being
 edited, this leads to an degradation in the preciseness of the
 results. To prevent that, it is possible to <em>purge</em> all elements that
 come from a specific origin from a context.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.purgeTypes"></a><code>infer.purgeTypes(origins: [string], start?: number, end?: number)</code>
 </dt>
 <dd>
@@ -987,7 +1017,7 @@ file was analyzed—but it prevents most of the noticeable inaccuracies
 that re-analysis tends to produce.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.markVariablesDefinedBy"></a><code>infer.markVariablesDefinedBy(scope: Scope, origins: [string], start?: number, end?: number)</code>
 </dt>
 <dd>
@@ -999,7 +1029,7 @@ call to <a href="#infer.analyze"><code>analyze</code></a> and then a call to
 <a href="#infer.purgeMarkedVariables"><code>purgeMarkedVariables</code></a>.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.purgeMarkedVariables"></a><code>infer.purgeMarkedVariables</code>
 </dt>
 <dd>
@@ -1010,12 +1040,12 @@ variables that were marked by a call to
 re-defined in the meantime.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="infer_types"></a>Types</h3>
 <p >Tern has a more or less complete implementation of the JavaScript type
 system.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.Obj"></a><code>infer.Obj(proto, name?: string)</code>
 </dt>
 <dd>
@@ -1026,7 +1056,7 @@ object, or <code>true</code> as a short-hand for <code>Object.prototype</code>, 
 for prototype-less objects.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Fn"></a><code>infer.Fn(name: string?, self: AVal, args: [AVal], argNames: [string], retval: AVal)</code>
 </dt>
 <dd>
@@ -1036,7 +1066,7 @@ Constructor for the type that implements functions. Inherits from
 the input and output types of the function.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Arr"></a><code>infer.Arr(contentType: AVal)</code>
 </dt>
 <dd>
@@ -1045,7 +1075,7 @@ Constructor that creates
 an array type with the given content type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Context.num"></a><code>context.num</code>
 </dt>
 <dd>
@@ -1053,7 +1083,7 @@ an array type with the given content type.
 The primitive number type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Context.str"></a><code>context.str</code>
 </dt>
 <dd>
@@ -1061,7 +1091,7 @@ The primitive number type.
 The primitive string type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Context.bool"></a><code>context.bool</code>
 </dt>
 <dd>
@@ -1069,11 +1099,11 @@ The primitive string type.
 The primitive boolean type.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >Types expose the following interface (plus some <code>AVal</code>-compatibility
 methods, see <a href="#type_is_aval">below</a>).</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.Type.name"></a><code>type.name: string</code>
 </dt>
 <dd>
@@ -1081,7 +1111,7 @@ methods, see <a href="#type_is_aval">below</a>).</p>
 The name of the type, if any.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Type.origin"></a><code>type.origin: string</code>
 </dt>
 <dd>
@@ -1089,7 +1119,7 @@ The name of the type, if any.
 The origin file of the type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Type.originNode"></a><code>type.originNode: AST</code>
 </dt>
 <dd>
@@ -1100,7 +1130,7 @@ for those it may be missing (if the type was created by a type
 definition file, or synthesized in some other way).
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Type.toString"></a><code>type.toString(maxDepth: number) → string</code>
 </dt>
 <dd>
@@ -1110,7 +1140,7 @@ a string that describes the type. <code>maxDepth</code> indicates the depth to
 which inner types should be shown.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Type.getProp"></a><code>type.getProp(prop: string) → AVal</code>
 </dt>
 <dd>
@@ -1119,7 +1149,7 @@ Get an
 <a href="#infer_aval"><code>AVal</code></a> that represents the named property of this type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Type.forAllProps"></a><code>type.forAllProps(f: fn(prop: string, val: AVal, local: bool))</code>
 </dt>
 <dd>
@@ -1128,10 +1158,10 @@ Call the given function for all properties of the object, including
 properties that are added in the future.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >Object types have a few extra methods and properties.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.Obj.proto"></a><code>obj.proto</code>
 </dt>
 <dd>
@@ -1139,7 +1169,7 @@ properties that are added in the future.
 The prototype of the object, or <code>null</code>.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Obj.props"></a><code>obj.props</code>
 </dt>
 <dd>
@@ -1149,7 +1179,7 @@ properties to AVals. Don&#8217;t manipulate this directly (ever), only use
 it if you have to iterate over the properties.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Obj.hasProp"></a><code>obj.hasProp(prop: string) → AVal?</code>
 </dt>
 <dd>
@@ -1159,7 +1189,7 @@ the AVal associated with the given property, or returns <code>null</code> if it
 doesn&#8217;t exist.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Obj.defProp"></a><code>obj.defProp(prop: string) → AVal</code>
 </dt>
 <dd>
@@ -1168,7 +1198,7 @@ Looks up the
 given property, or defines it if it did not yet exist.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="infer_aval"></a>Abstract values</h3>
 <p >Abstract values are objects used to represent sets of types. Each
 variable and property has an abstract value associated with it, but
@@ -1182,8 +1212,8 @@ associated abstract value will hold both these types. In some cases,
 no type can be assigned to something at all, in which case the
 abstract value remains empty.</p>
 <p >Abstract values expose the following interface:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.AVal"></a><code>infer.AVal()</code>
 </dt>
 <dd>
@@ -1191,7 +1221,7 @@ abstract value remains empty.</p>
 Constructor. Creates an empty AVal.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.AVal.addType"></a><code>aval.addType(type: Type, weight?: number)</code>
 </dt>
 <dd>
@@ -1204,7 +1234,7 @@ is <code>100</code>, and passing a weight lower than that will make the type
 assignment &#8220;weak&#8221;.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.AVal.propagate"></a><code>aval.propagate(target: Constraint)</code>
 </dt>
 <dd>
@@ -1215,7 +1245,7 @@ this AVal to propagate all types it receives to the given
 are propagated through the type graph.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.AVal.hasType"></a><code>aval.hasType(type: Type) → bool</code>
 </dt>
 <dd>
@@ -1224,7 +1254,7 @@ Queries whether the
 AVal <em>currently</em> holds the given type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.AVal.isEmpty"></a><code>aval.isEmpty() → bool</code>
 </dt>
 <dd>
@@ -1233,7 +1263,7 @@ Queries whether the
 AVal is empty.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.AVal.getType"></a><code>aval.getType(guess?: bool) → Type?</code>
 </dt>
 <dd>
@@ -1245,7 +1275,7 @@ not given, an empty AVal will try to use heuristics based on its
 propagation edges to guess a type.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.AVal.getFunctionType"></a><code>aval.getFunctionType() → Type?</code>
 </dt>
 <dd>
@@ -1255,7 +1285,7 @@ the AVal if it contains a function type. Useful when you aren&#8217;t
 interested in other kinds of types.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >Abstract values that are used to represent variables or properties
 will have, when possible, an <code>originNode</code> property pointing to an AST
 node.</p>
@@ -1274,8 +1304,8 @@ useable as constraints. The inference engine defines a number of
 additional constraints to propagate values in more indirect ways. See
 the <a href="http://marijnhaverbeke.nl/blog/tern.html">blog post</a> on the
 inference algorithm for some examples.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.constraint"></a><code>infer.constraint(props: string, methods: object) → constructor</code>
 </dt>
 <dd>
@@ -1287,12 +1317,12 @@ them in <code>this</code>, with a prototype that derives from a generic
 constraint type, extended with the properties specified in <code>methods</code>.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >Beyond <a href="#infer.AVal.addType"><code>addType</code></a>, there are a few optional
 methods that constraints can expose to tell the system something about
 itself.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.Constraint.typeHint"></a><code>constraint.typeHint() → Type?</code>
 </dt>
 <dd>
@@ -1302,7 +1332,7 @@ that <a href="#infer.AVal.getType"><code>getType</code></a> can use to &#8220;gu
 based on the fact that it propagates to this constraint.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Constraint.propHint"></a><code>constraint.propHint() → string?</code>
 </dt>
 <dd>
@@ -1312,12 +1342,12 @@ string when this constraint is indicative of the presence of a
 specific property in the source AVal.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h3> <a id="infer_scopes"></a>Scopes</h3>
 <p >Scopes are derived from the <a href="#infer.Obj"><code>Obj</code></a> type, and variables
 are represented the same way as properties.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.Scope"></a><code>infer.Scope(parent?: Scope)</code>
 </dt>
 <dd>
@@ -1326,7 +1356,7 @@ Constructor for scope
 objects. The top scope won&#8217;t have a parent.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.Scope.defVar"></a><code>scope.defVar(name: string, originNode: AST) → AVal</code>
 </dt>
 <dd>
@@ -1337,12 +1367,12 @@ the property doesn&#8217;t already have an
 <a href="#infer.Type.originNode"><code>originNode</code></a>, assigns the given node to it.
 </p>
 </dd>
-</dl></div>
-<h3> <a id="_utilities"></a>Utilities</h3>
+</dl>
+<h3> <a id="infer_util"></a>Utilities</h3>
 <p >These are miscellaneous utilities that come in helpful when doing code
 analysis.</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.findExpressionAt"></a><code>infer.findExpressionAt(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}</code>
 </dt>
 <dd>
@@ -1355,7 +1385,7 @@ object if successful, where <code>node</code> is AST node, and <code>state</code
 scope at that point. Returns <code>null</code> if unsuccessful.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.findExpressionAround"></a><code>infer.findExpressionAround(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}</code>
 </dt>
 <dd>
@@ -1365,7 +1395,7 @@ except that it will return the innermost expression node that spans
 the given range, rather than only exact matches.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.expressionType"></a><code>infer.expressionType(expr: {node, state}) → AVal</code>
 </dt>
 <dd>
@@ -1375,7 +1405,7 @@ the functions above). Will return an <a href="#infer_aval"><code>AVal</code></a>
 <a href="#infer_types"><code>Type</code></a>.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.scopeAt"></a><code>infer.scopeAt(ast: AST, pos: number, scope?: Scope) → Scope</code>
 </dt>
 <dd>
@@ -1385,7 +1415,7 @@ parameter can be used to override the scope used for code that isn&#8217;t
 wrapped in any function.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.findRefs"></a><code>infer.findRefs(ast: AST, scope: Scope, name: string, refScope: Scope, f: fn(AST, Scope))</code>
 </dt>
 <dd>
@@ -1396,7 +1426,7 @@ scope, looking for references to variable <code>name</code> that resolve to scop
 scope for each of them.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.findPropRefs"></a><code>infer.findPropRefs(ast: AST, scope: Scope, objType: Obj, propName: string, f: fn(AST))</code>
 </dt>
 <dd>
@@ -1407,13 +1437,13 @@ precise, this is dependent on type inference, and thus can not be
 relied on to be precise.
 </p>
 </dd>
-</dl></div>
+</dl>
 <p >Whenever the code in <code>lib/infer.js</code> guesses a type through fuzzy
 heuristics (through <a href="#infer.AVal.getType"><code>getType</code></a> or
 <a href="#infer.expressionType"><code>expressionType</code></a>), it sets a flag. The
 following two function allow access to this flag:</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
+<dl>
+<dt>
 <a id="infer.didGuess"></a><code>infer.didGuess() → bool</code>
 </dt>
 <dd>
@@ -1422,7 +1452,7 @@ Test whether the
 guessing flag is set.
 </p>
 </dd>
-<dt class="hdlist1">
+<dt>
 <a id="infer.resetGuessing"></a><code>infer.resetGuessing(val?: bool)</code>
 </dt>
 <dd>
@@ -1431,7 +1461,7 @@ Reset the
 guessing flag.
 </p>
 </dd>
-</dl></div>
+</dl>
 <h2> <a id="editor"></a>Editor plugins</h2>
 <p >FIXME</p>
 </div>
