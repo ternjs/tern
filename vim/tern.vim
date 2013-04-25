@@ -70,6 +70,12 @@ def tern_startServer():
     else:
       output += line
 
+def tern_killServer(ternPID):
+  if platform.system() == "Windows":
+    subprocess.call("taskkill /t /f /pid " + ternPID,shell=True)
+  else:
+    os.kill(int(ternPID),3)
+
 def tern_relativeFile():
   filename = vim.eval("expand('%:p')")
   return filename[len(tern_projectDir()) + 1:]
@@ -422,7 +428,7 @@ endfunction
 
 function! tern#Shutdown()
   if exists('g:ternPID')
-    python os.kill(int(vim.eval("g:ternPID")),3)
+    python tern_killServer(vim.eval("g:ternPID"))
   endif
 endfunction
 
