@@ -937,7 +937,7 @@
       }
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/Element",
-    "!doc": "This chapter provides a brief reference for the general methods, properties, and events available to most HTML and XML elements."
+    "!doc": "Represents an element in an HTML or XML document."
   },
   "Text": {
     "!type": "fn()",
