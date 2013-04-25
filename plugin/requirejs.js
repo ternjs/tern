@@ -124,7 +124,7 @@
   var defs = {
     "!name": "requirejs.js",
     requirejs: {
-      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> $custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
       onError: "fn(err: +Error)",
       load: "fn(context: ?, moduleName: string, url: string)",
       config: "fn(config: ?)",
@@ -133,7 +133,7 @@
     },
     require: "requirejs",
     define: {
-      "!type": "fn(deps: [string], callback: fn()) -> $custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn()) -> !custom:requireJS",
       amd: {
         jQuery: "bool"
       }

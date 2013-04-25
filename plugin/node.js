@@ -509,7 +509,7 @@
     },
     node: {
       require: {
-        "!type": "fn(id: string) -> $custom:nodeRequire",
+        "!type": "fn(id: string) -> !custom:nodeRequire",
         resolve: {
           "!type": "fn() -> string",
           "!url": "http://nodejs.org/api/globals.html#globals_require_resolve",
@@ -2764,12 +2764,12 @@
               "!doc": "The opposite of domain.add(emitter). Removes domain handling from the specified emitter."
             },
             bind: {
-              "!type": "fn(callback: fn(err: +Error, data: ?)) -> $0",
+              "!type": "fn(callback: fn(err: +Error, data: ?)) -> !0",
               "!url": "http://nodejs.org/api/domain.html#domain_domain_bind_callback",
               "!doc": "The returned function will be a wrapper around the supplied callback function. When the returned function is called, any errors that are thrown will be routed to the domain's error event."
             },
             intercept: {
-              "!type": "fn(cb: fn(data: ?)) -> $0",
+              "!type": "fn(cb: fn(data: ?)) -> !0",
               "!url": "http://nodejs.org/api/domain.html#domain_domain_intercept_callback",
               "!doc": "This method is almost identical to domain.bind(callback). However, in addition to catching thrown errors, it will also intercept Error objects sent as the first argument to the function."
             },

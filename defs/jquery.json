@@ -146,7 +146,7 @@
         "!doc": "Get the value of a style property for the first element in the set of matched elements or set one or more CSS properties for every matched element."
       },
       "data": {
-        "!type": "fn(key: string, value?: ?) -> $1",
+        "!type": "fn(key: string, value?: ?) -> !1",
         "!url": "http://api.jquery.com/data/",
         "!doc": "Store arbitrary data associated with the matched elements or return the value at the named data store for the first element in the set of matched elements."
       },
@@ -778,7 +778,7 @@
       "!doc": "Hook directly into jQuery to override how particular CSS properties are retrieved or set, normalize CSS property naming, or create custom properties."
     },
     "data": {
-      "!type": "fn(element: +Element, key: string, value: ?) -> $2",
+      "!type": "fn(element: +Element, key: string, value: ?) -> !2",
       "!url": "http://api.jquery.com/jquery.data/",
       "!doc": "Store arbitrary data associated with the specified element and/or return the value that was set."
     },
@@ -972,15 +972,15 @@
         "!doc": "Execute the next function on the queue for the matched elements."
     },
     "each": {
-      "!type": "fn(collection: ?, callback: fn(i: number, elt: ?)) -> $0",
-      "!effects": ["call $1 number $0.<i>"],
+      "!type": "fn(collection: ?, callback: fn(i: number, elt: ?)) -> !0",
+      "!effects": ["call !1 number !0.<i>"],
       "!url": "http://api.jquery.com/jQuery.each/",
       "!doc": "A generic iterator function, which can be used to seamlessly iterate over both objects and arrays. Arrays and array-like objects with a length property (such as a function's arguments object) are iterated by numeric index, from 0 to length-1. Other objects are iterated via their named properties."
     },
     "error": "fn(message: string)",
     "extend": {
-      "!type": "fn(target: ?, source: ?) -> $0",
-      "!effects": ["copy $1 $0"]
+      "!type": "fn(target: ?, source: ?) -> !0",
+      "!effects": ["copy !1 !0"]
     },
     "fx": {
       "!type": "fn(elem: +Element, options: ?, prop: string, end?: number, easing?: bool)",
@@ -1024,8 +1024,8 @@
       "!doc": "Execute some JavaScript code globally."
     },
     "grep": {
-      "!type": "fn(array: [?], filter: fn(elt: ?, i: number), invert?: bool) -> $0",
-      "!effects": ["call $1 $0.<i> number"],
+      "!type": "fn(array: [?], filter: fn(elt: ?, i: number), invert?: bool) -> !0",
+      "!effects": ["call !1 !0.<i> number"],
       "!url":"http://api.jquery.com/jquery.grep/",
       "!doc":"Finds the elements of an array which satisfy a filter function. The original array is not affected."
     },
@@ -1085,18 +1085,18 @@
       "!doc": ""
     },
     "makeArray": {
-      "!type": "fn(obj: ?) -> [$0.<i>]",
+      "!type": "fn(obj: ?) -> [!0.<i>]",
       "!url": "http://api.jquery.com/jquery.makeArray/",
       "!doc": "Convert an array-like object into a true JavaScript array."
     },
     "map": {
-      "!type": "fn(array: [?], callback: fn(element: ?, i: number) -> ?) -> [$1.$ret]",
-      "!effects": ["call $1 $0.<i> number"],
+      "!type": "fn(array: [?], callback: fn(element: ?, i: number) -> ?) -> [!1.!ret]",
+      "!effects": ["call !1 !0.<i> number"],
       "!url": "http://api.jquery.com/jquery.map/",
       "!doc": "Translate all items in an array or object to new array of items."
     },
     "merge": {
-      "!type": "fn(first: [?], second: [?]) -> $0",
+      "!type": "fn(first: [?], second: [?]) -> !0",
       "!url": "http://api.jquery.com/jquery.merge/",
       "!doc": "Merge the contents of two arrays together into the first array."
     },
@@ -1207,7 +1207,7 @@
       "!doc": "Determine the internal JavaScript [[Class]] of an object."
     },
     "unique": {
-      "!type": "fn(array: [?]) -> $0",
+      "!type": "fn(array: [?]) -> !0",
       "!url": "http://api.jquery.com/jquery.unique/",
       "!doc": "Sorts an array of DOM elements, in place, with the duplicates removed. Note that this only works on arrays of DOM elements, not strings or numbers."
     },
