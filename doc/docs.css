@@ -82,9 +82,9 @@ h1, h2, h3 {
   font-weight: 700;
   color: #124f55;
 }
-h1 { font-size: 18pt; }
-h2 { font-size: 16pt; }
-h3, h2[id=contents] { font-size: 13pt; }
+h1 { font-size: 20pt; }
+h2 { font-size: 17pt; }
+h3 { font-size: 13pt; }
 
 a, a:visited, a code { color: #df4c11; text-decoration: none; }
 a:hover { text-decoration: underline; }
