@@ -83,7 +83,7 @@ A `.tern-project` file is a JSON file in a format like this:
         "importantfile.js"
       ],
       "plugins": {
-        "requirejs: {
+        "requirejs": {
           "baseURL": "./",
           "paths": {}
         }

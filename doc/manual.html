@@ -1,0 +1,904 @@
+<!doctype html>
+<!-- This file is generated from src/*.txt. Do not edit by hand. -->
+<head>
+  <meta charset="utf-8">
+  <title>Tern Reference Manual</title>
+  <link rel="stylesheet" href="./docs.css" type="text/css">
+</head>
+<div id=top>
+  <div id=head>
+    <div class=logo></div>
+    <a href="http://ternjs.net" id=title>Tern: <span class=subtitle>Intelligent JavaScript tooling</span></a>
+    <a href="demo.html">Demo</a>
+    <a href="manual.html">Docs</a>
+    <a href="https://github.com/marijnh/tern">Code</a>
+  </div>
+</div>
+<h1>Tern Reference Manual</h1>
+<div class="sect1">
+<h2 id="_contents">Contents</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="#server">The Tern server</a>
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="#protocol">JSON protocol</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#server_api">Programming interface</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#typedef">JSON type definitions</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugins">Server plugins</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#configuration">Project configuration</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#utils">Utilities</a>
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<a href="#infer">Inference engine</a>
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="#infer_api">Programming interface</a>
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<a href="#editor">Editor plugins</a>
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="server">The Tern server</h2>
+<div class="sectionbody">
+<p >The <code>bin/tern</code> <em>binary</em> (<a href="http://nodejs.org">node.js</a> script, really),
+is used to start a Tern server. You will usually want to let an
+<a href="#plugins">editor plugin</a> start it for you, but it can be started
+manually, which can be useful for debugging.</p>
+<p >(Note that the basic structure of the server is also available through
+a <a href="#server_api">programming interface</a>, and that some project,
+especially those running client-side in a browser, will want to use
+that instead of the HTTP server described here.)</p>
+<p >When started, the server will look for a <code>.tern-project</code> file in the
+current directory or one of the directories above that, and use it for
+its <a href="#configuration">[configuration]</a>. If no project file is found, it&#8217;ll fall back to
+an empty default configuration.</p>
+<p >A server write the port it is listening on (which is random) to
+standard output on startup. It will serve a <a href="#protocol">simple JSON protocol</a> via HTTP on that port. Clients can upload code and ask
+questions about the code through this protocol.</p>
+<p >The following command-line flags are supported:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>--port &lt;number&gt;</code>
+</dt>
+<dd>
+<p>
+Specify a port to listen on, instead of the default behavior of
+letting the OS pick a random unused port.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>--persistent</code>
+</dt>
+<dd>
+<p>
+By default, the server will shut itself down after five minutes of
+inactivity. Pass it a this option to disable auto-shutdown.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>--verbose</code>
+</dt>
+<dd>
+<p>
+Will cause the server to spit out information about the requests and
+responses that it handles, and any errors that are raised. Useful for
+debugging.
+</p>
+</dd>
+</dl></div>
+<div class="sect2">
+<h3 id="protocol">JSON protocol</h3>
+<p >Sending queries to a Tern server is done by making <code>POST</code> requests to
+the server&#8217;s port (using <code>/</code> as the requests&#8217;s path) with a
+<a href="http://json.org">JSON</a> document in the body of the request.</p>
+<p >This document should be an object, with two optional fields, <code>query</code>
+and <code>files</code>. The first describes the kind of information you want to
+ask for. It may be omitted if the request is only used to push new
+code to the server (in which case you&#8217;ll get an empty object, <code>{}</code> as
+response). The <code>files</code> property, if given, contains an array of file
+specifications, as described below. It may be omitted when the query
+should operate on the code that the server already has, without adding
+anything new.</p>
+<p >A query is an object with at least a <code>type</code> property, which determines
+what kind of query it is. Depending on the type, other properties must
+or may be present in order to provide further details.</p>
+<p >These are the queries that a Tern server understands by default.
+(Plug-ins may add custom query types.)</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="req_completions"></a><code>completions</code>
+</dt>
+<dd>
+<p>
+Asks the server for a set of completions at the given point.
+</p>
+<p >Accepted fields are:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>file</code>, <code>end</code> (required)
+</dt>
+<dd>
+<p>
+Specify the location to complete at.
+<a href="#loc_spec">See below</a>.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>types</code> (optional, default <code>false</code>)
+</dt>
+<dd>
+<p>
+Whether to include the types of
+the completions in the result data.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>depths</code> (optional, default <code>false</code>)
+</dt>
+<dd>
+<p>
+Whether to include the distance
+(in scopes for variables, in prototypes for properties) between the
+completions and the origin position in the result data.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>docs</code>, <code>urls</code>, <code>origins</code> (optional, default <code>false</code>)
+</dt>
+<dd>
+<p>
+Whether to
+include documentation strings, urls, and origin files (if found) in
+the result data.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>filter</code> (optional, default <code>true</code>)
+</dt>
+<dd>
+<p>
+When on, only completions that
+match the current word at the given point will be returned. Turn this
+off to get all results, so that you can filter on the client side.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>guess</code> (optional, default <code>true</code>)
+</dt>
+<dd>
+<p>
+When completing a property and no
+completions are found, Tern will use some heuristics to try and return
+some properties anyway. Set this to <code>false</code> to turn that off.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>sort</code> (optional, default <code>true</code>)
+</dt>
+<dd>
+<p>
+Determines whether the result set
+will be sorted.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>expandWordForward</code> (optional, default <code>true</code>)
+</dt>
+<dd>
+<p>
+When disabled, only
+the text <em>before</em> the given position is considered part of the word.
+When enabled (the default), the whole variable name that the cursor is
+on will be included.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>omitObjectPrototype</code> (optional, default <code>true</code>)
+</dt>
+<dd>
+<p>
+Whether to ignore
+the properties of <code>Object.prototype</code> unless they have been spelled out
+by at least to characters.
+</p>
+</dd>
+</dl></div>
+<p >The result returned will be an object with <code>start</code> and <code>end</code>
+properties, which give the start and end <a href="#offsets">offsets</a> of the word that was
+completed, and a <code>completions</code> property holding an array of
+completions. When one of the <code>types</code>, <code>depths</code>, <code>docs</code>, <code>urls</code>, or
+<code>origins</code> options was passed, the array will hold objects with a
+<code>name</code> property (the completion text), and, depending on the options,
+<code>type</code>, <code>depth</code>, <code>doc</code>, <code>url</code>, and <code>origin</code> properties. When none of
+these options are enabled, the result array will hold plain strings.</p>
+</dd>
+<dt class="hdlist1">
+<a id="req_type"></a><code>type</code>
+</dt>
+<dd>
+<p>
+Query the type of something.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>file</code>, <code>end</code> (required), <code>start</code> (optional)
+</dt>
+<dd>
+<p>
+Specify the expression
+we want the type of. <a href="#loc_spec">See below</a>.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>preferFunction</code> (optional, default <code>false</code>)
+</dt>
+<dd>
+<p>
+Set to <code>true</code> when you
+are interested in a function type. This will cause function types to
+win when something has multiple types.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>depth</code> (optional, default <code>0</code>)
+</dt>
+<dd>
+<p>
+Determines how deep the type string
+must be expanded. Nested objects will only display property types up
+to this depth, and be represented by their type name or a
+representation showing only property names below it.
+</p>
+</dd>
+</dl></div>
+<p >The returned object will have the following properties:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>type</code> (string)
+</dt>
+<dd>
+<p>
+A description of the type of the value. May be <code>"?"</code>
+when no type was found.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>guess</code> (bool)
+</dt>
+<dd>
+<p>
+Whether the given type was guessed, or should be
+considered reliable.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>name</code> (string, optional)
+</dt>
+<dd>
+<p>
+The name associated with the type.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>exprName</code> (string, optional)
+</dt>
+<dd>
+<p>
+When the inspected expression was an
+identifier or a property access, this will hold the name of the
+variable or property.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>doc</code>, <code>url</code>, <code>origin</code> (strings, optional)
+</dt>
+<dd>
+<p>
+If the type had
+documentation and origin information associated with it, these will
+also be returned.
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+<a id="req_definition"></a><code>definition</code>
+</dt>
+<dd>
+<p>
+Asks for the definition of something.
+This will try, for a variable or property, to return the point at
+which it was defined. If that fails, or the chosen expression is not
+an identifier or property reference, it will try to return the
+definition site of the type the expression has. If no type is found,
+or the type is not an object or function (other types don&#8217;t store
+their definition site), it will fail to return useful information.
+</p>
+<p >Only takes <code>file</code>, <code>end</code> (required), and <code>start</code> (optional) fields to
+specify the expression you want the definition of. <a href="#loc_spec">See below</a>.</p>
+<p >The returned object will have the following properties:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>start</code>, <code>end</code> (<a href="#offsets">offsets</a>, optional)
+</dt>
+<dd>
+<p>
+The start and end positions of
+the definition.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>file</code> (string, optional)
+</dt>
+<dd>
+<p>
+The file in which the definition was
+defined.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>guess</code> (bool)
+</dt>
+<dd>
+<p>
+Indicates whether finding the definition required any
+heuristic guesses.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>context</code> (string, optional), <code>contextOffset</code> (number, optional)
+</dt>
+<dd>
+<p>
+A
+slice of the code in front of the definition, and the offset from the
+start of the context to the actual definition. Can be used to find a
+definition&#8217;s location in a modified file.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>doc</code>, <code>url</code>, <code>origin</code> (strings, optional)
+</dt>
+<dd>
+<p>
+If the definition had
+documentation or an origin associated with it, it will be returned.
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+<a id="req_documentation"></a><code>documentation</code>
+</dt>
+<dd>
+<p>
+Get the documentation string
+and URL for a given expression, if any.
+</p>
+<p >Takes <code>file</code>, <code>end</code> (required), and <code>start</code> (optional) fields to
+specify the expression we are interested in. <a href="#loc_spec">See below</a>.</p>
+<p >Returns an object with the following properties:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>doc</code>, <code>url</code>, <code>origin</code> (strings, optional)
+</dt>
+<dd>
+<p>
+The documentation string,
+url, and the origin of the definition or value, if any.
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+<a id="req_refs"></a><code>refs</code>
+</dt>
+<dd>
+<p>
+Used to find all references to a given variable
+or property.
+</p>
+<p >Takes <code>file</code>, <code>end</code> (required), and <code>start</code> (optional) fields to
+specify the expression we are interested in. <a href="#loc_spec">See below</a>.</p>
+<p >Returns an object with a <code>name</code> property holding the name of the
+variable or property, a <code>refs</code> property holding an array of <code>{file,
+start, end}</code> objects, and, for variables, a <code>type</code> property holding
+either <code>"global"</code> or <code>"local"</code>.</p>
+</dd>
+<dt class="hdlist1">
+<a id="req_rename"></a><code>rename</code>
+</dt>
+<dd>
+<p>
+Rename a variable in a scope-aware way.
+</p>
+<p >Takes <code>file</code>, <code>end</code> (required), and <code>start</code> (optional) fields to
+specify the variable we want to rename (<a href="#loc_spec">see below</a>), and a
+<code>newName</code> property that gives the new name of the variable.</p>
+<p >Returns an object whose <code>changes</code> property holds an array of <code>{file,
+start, end, text}</code> objects, which give the changes that must be
+performed to apply the rename. The client is responsible for doing the
+actual modification.</p>
+</dd>
+<dt class="hdlist1">
+<a id="req_properties"></a><code>properties</code>
+</dt>
+<dd>
+<p>
+Get a list of all known object
+property names (for <em>any</em> object).
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>prefix</code> (string, optional)
+</dt>
+<dd>
+<p>
+Causes the server to only return
+properties that start with the given string.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>sort</code> (optional, default <code>true</code>)
+</dt>
+<dd>
+<p>
+Whether the result should be sorted.
+</p>
+</dd>
+</dl></div>
+<p >The returned object will have a <code>completions</code> property holding an
+array of strings, which are the property names.</p>
+</dd>
+<dt class="hdlist1">
+<a id="req_files"></a><code>files</code>
+</dt>
+<dd>
+<p>
+Get the files that the server currently holds
+in its set of analyzed files.
+</p>
+<p >Does not take any parameters. Returns an object with a <code>files</code>
+property holding an array of strings (the file names).</p>
+</dd>
+</dl></div>
+<p ><a id="loc_spec"></a> When specifying a location, which is needed for most of
+the query types, the required <code>file</code> field may hold either a filename,
+or a string in the form <code>"#N"</code>, where <code>N</code> should be an integer
+referring to one of the files included in the request (more on that
+<a href="#protocol_files">later</a>). The required <code>end</code> field is an offset into
+this file, either a number or a <code>{line, ch}</code> object. It should point
+at the end of the expression the request is interested in, or
+somewhere inside of it if that doesn&#8217;t end up pointing inside a
+sub-expression (in which case the inner expression would be used). An
+optional <code>start</code> field can be used to disambiguate between
+expressions—if given, the innermost expression that spans the range
+between start and end will be used.</p>
+<p ><a id="offsets"></a> Offsets into a file can be either (zero-based) integers, or <code>{line,
+ch}</code> objects, where both <code>line</code> and <code>ch</code> are zero-based integers.
+Offsets returned by the server will be integers, unless the
+<code>lineCharPositions</code> field in the request was set to <code>true</code>, in which
+case they will be <code>{line, ch}</code> objects.</p>
+<p ><a id="variable"></a> Requests that take an input expression also accept a
+<code>variable</code> field which, when given, will cause the server to not look
+for an expression in the code, but to make up a variable expression
+with the given name. This does not remove the need to pass in an
+<code>end</code>, since that will be used to determine the scope in which the
+variable is interpreted.</p>
+<p ><a id="protocol_files"></a> The <code>files</code> property of a request must, if present,
+hold an array of file descriptions. These can be complete files, which
+have a <code>type</code> property holding <code>"full"</code> and <code>name</code> and <code>text</code>
+properties holding strings. Complete files will be stored by the
+server and can be reused in later requests.</p>
+<p >Alternatively, you can pass in partial files. This is useful when
+needing to perform a query on a large file without re-uploading and
+re-analyzing the whole file. A partial file has a <code>type</code> property
+holding the string <code>"part"</code>, a <code>text</code> property holding some slice of
+the file (starting at a line boundary), a <code>name</code> property referring to
+an existing file, and either an <code>offset</code> (character offset) or
+<code>offsetLines</code> (line offset) property indicating the approximate
+position of the fragment in the file.</p>
+</div>
+<div class="sect2">
+<h3 id="server_api">Programming interface</h3>
+<p ><a id="tern.Server"></a> The base server (without HTTP or configuration-file
+reading) is implemented in <code>lib/tern.js</code>. That package exposes a
+<code>Server</code> constructor that can be used to create a server. It takes an
+object holding configuration options options as argument. These are
+recognized (all have a default):</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="option_defs"></a> <code>defs</code> (array of strings)
+</dt>
+<dd>
+<p>
+The <a href="#typedef">definition</a>
+objects to load into the server&#8217;s environment.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="option_plugins"></a> <code>plugins</code> (object)
+</dt>
+<dd>
+<p>
+Specifies the set of
+<a href="#plugins">plugins</a> that the server should load. The property names of
+the object name the plugins, and their values hold options that will
+be passed to them.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="option_getFile"></a> <code>getFile</code> (function)
+</dt>
+<dd>
+<p>
+Provides a way for the
+server to try and fetch the content of files. Depending on the <code>async</code>
+option, this is either a function that takes a filename and returns a
+string (when not <code>async</code>), or a function that takes a filename and a
+callback, and calls the callback with an optional error as the first
+argument, and the content string (if no error) as the second.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="option_async"></a> <code>async</code> (bool)
+</dt>
+<dd>
+<p>
+Indicates whether <code>getFile</code> is
+asynchronous. Default is <code>false</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="option_fetchTimeout"></a> <code>fetchTimeout</code> (number)
+</dt>
+<dd>
+<p>
+Indicates the
+maximum amount of milliseconds to wait for an asynchronous <code>getFile</code>
+before giving up on it. Defaults to <code>1000</code>.
+</p>
+</dd>
+</dl></div>
+<p >A server object has the following methods:</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="tern.Server.addFile"></a> <code>addFile(name: string, text?: string)</code>
+</dt>
+<dd>
+<p>
+Register a file with the server. Note that files can also be
+<a href="#protocol_files">included</a> in requests.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.Server.delFile"></a> <code>delFile(name: string)</code>
+</dt>
+<dd>
+<p>
+Unregister a file.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.Server.request"></a> <code>request(doc: object, callback: fn(error, response))</code>
+</dt>
+<dd>
+<p>
+Perform a request. <code>doc</code> is a (parsed) JSON document as described in
+the <a href="#protocol">protocol documentation</a>. The <code>callback</code> function will
+be called when the request completes. If an error occurred, it will be
+passed as a first argument. Otherwise, the resonse (parsed) JSON
+object will be passed as second argument.
+</p>
+<p >When the server hasn&#8217;t been configured to be
+<a href="#option_async">asynchronous</a>, the callback will be called before
+<code>request</code> returns.</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.Server.flush"></a> <code>flush(callback: fn())</code>
+</dt>
+<dd>
+<p>
+Forces all files to be
+fetched an analyzed, and then calls the callback function.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.Server.on"></a> <code>on(eventType: string, handler: fn())</code>
+</dt>
+<dd>
+<p>
+Register
+an event handler for the named type of event.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.Server.off"></a> <code>off(eventType: string, handler: fn())</code>
+</dt>
+<dd>
+<p>
+Unregister an event handler.
+</p>
+</dd>
+</dl></div>
+<p >The server fires the following type of events (mostly useful for
+plugins):</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="event_reset"></a> <code>reset ()</code>
+</dt>
+<dd>
+<p>
+When the server throws away its current
+analysis data and starts a fresh run.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="event_beforeLoad"></a> <code>beforeLoad (file)</code>
+</dt>
+<dd>
+<p>
+Before analyzing a file.
+<code>file</code> is an object holding <code>{name, text, scope}</code> properties.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="event_afterLoad"></a> <code>afterLoad (file)</code>
+</dt>
+<dd>
+<p>
+After analyzing a file.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="typedef">JSON type definitions</h3>
+<p >To be able to specify the types of things without actually analyzing
+source code, either because there is no JavaScript source code (as for
+the built-in types) or because the source code is too big, or because
+Tern is unable to construct the correct types from the source code,
+Tern defines a JSON data format for specifying types. A few examples
+of files in this format can be found in the <code>defs/</code> directory in the
+distribution.</p>
+<p >A type definition data structure is basically a tree of objects, where
+the top-level object specifies variables in the global scope, and the
+nested objects specify properties of object types. Properties prefixed
+with an exclamation point (<code>!</code>) hold special directives, all other
+properties refer to variable or property names.</p>
+<p >Here is an example:</p>
+<pre data-language="application/x-json" class="cm-s-default">{
+  <span class="cm-string cm-property">"!name"</span>: <span class="cm-string">"mylibrary"</span>,
+  <span class="cm-string cm-property">"!def"</span>: {
+    <span class="cm-string cm-property">"point"</span>: {
+      <span class="cm-string cm-property">"x"</span>: <span class="cm-string">"number"</span>,
+      <span class="cm-string cm-property">"y"</span>: <span class="cm-string">"number"</span>
+    }
+  },
+  <span class="cm-string cm-property">"MyConstructor"</span>: {
+    <span class="cm-string cm-property">"!type"</span>: <span class="cm-string">"fn(arg: string)"</span>,
+    <span class="cm-string cm-property">"staticFunction"</span>: <span class="cm-string">"fn() -> bool"</span>,
+    <span class="cm-string cm-property">"prototype"</span>: {
+      <span class="cm-string cm-property">"property"</span>: <span class="cm-string">"[number]"</span>,
+      <span class="cm-string cm-property">"clone"</span>: <span class="cm-string">"fn() -> +MyConstructor"</span>,
+      <span class="cm-string cm-property">"getPoint"</span>: <span class="cm-string">"fn(i: number) -> point"</span>
+    }
+  },
+  <span class="cm-string cm-property">"someOtherGlobal"</span>: <span class="cm-string">"string"</span>
+}</pre>
+<p >This defines a library that sets two globals, <code>MyConstructor</code> holding
+a constructor function, and <code>someOtherGlobal</code> holding a string. The
+origin of the types, variables, and properties defined by this
+document will be <code>"mylibrary"</code>, as set by the <code>!name</code> property.</p>
+<p >The value of a variable or property can be either a string or an
+object. Strings can be one of the built-in types (<code>"number"</code>,
+<code>"string"</code>, <code>"bool"</code>), a function type (<code>"fn(arg1: type1, arg2: type2)
+-&gt; rettype"</code>, where <code>-&gt; rettype</code> is optional), or an array type
+(<code>"[type]"</code>). Strings can also name types, either by describing the
+path to the type in the global scope (<code>"Date.prototype"</code>) or by
+referring to one of the local definitions in the <code>!def</code> property of
+the document. Finally, a type can be prefixed with a <code>+</code> to indicate
+an instance of a constructor (<code>+Date</code>).</p>
+<p >Objects describe types by enumerating their properties. By default,
+their type will simply be an instance of <code>Object</code>, but a <code>!type</code>
+property can be used to make the type a function or array type, as the
+example does for <code>MyConstructor</code>. Alternatively, a <code>!proto</code> property
+can be used to give the object a custom prototype, for example
+<code>"!proto": Element.prototype</code>.</p>
+<p >Documentation can be attached to a type using <code>!doc</code>, which should
+hold a (short) documentation string and <code>!url</code>, which should hold a
+URL that has the full documentation of the type or function being
+defined.</p>
+<p >Finally, a function can be annotated with effects that it has. These
+aren&#8217;t currently documented, but you can search for <code>!effects</code> in
+<code>defs/ecma5.json</code> to see some examples. Similarly, a function type
+string&#8217;s return type may contain the variables <code>!0</code> (the first
+argument&#8217;s type, <code>!N</code> for the N-1th), <code>!this</code> (the self type of the
+call), and a special property <code>!ret</code> (the return type of a function).</p>
+</div>
+<div class="sect2">
+<h3 id="plugins">Server plugins</h3>
+<p >Plugins are JavaScript programs that add extra functionality to a
+server. The distribution currently comes with
+<a href="http://nodejs.org">node.js</a> plugin (<code>plugin/node.js</code>) and
+<a href="http://requirejs.org">RequireJS</a> (<code>plugin/requirejs.js</code>) that teach the
+Tern server about the dependency management mechanisms defined by
+those systems (as well as, for node.js, including types for the
+built-in libraries).</p>
+<p >A plugin can use several hooks to add custom behavior.</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="infer.registerFunction"></a><code>infer.registerFunction(name: string, f: fn(self, args, argnodes))</code>
+</dt>
+<dd>
+<p>
+This is a function in the <a href="#infer">inference engine module</a> that
+allows custom ways to compute function return types or effects. When a
+function is specified to return <code>!custom:myname</code> or has an effect
+<code>"custom myname"</code>, a call to the function will cause the function
+registered under <code>"myname"</code> to be called with the argument types and
+argument AST nodes given to the call. This is used, for example, to
+make calls to <code>require</code> trigger the necessary machinations to fetch a
+dependency and return its type.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.registerPlugin"></a><code>tern.registerPlugin(name: string, fn(Server, options))</code>
+</dt>
+<dd>
+<p>
+This can be used to register an initialization function for the plugin
+with the given name. A Tern server, when <a href="#option_plugins">configured</a>
+to load this plugin, will call this initialization function, passing
+in the server instance and the options specified for the plugin (if
+any). This is usually the place where you register event handlers on
+the server and/or initialize the plugin&#8217;s state.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="tern.defineQueryType"></a><code>tern.defineQueryType(name: string, desc: object)</code>
+</dt>
+<dd>
+<p>
+Defines a new type of query with the server. The <code>desc</code> object is a
+property describing the request. It should at least have a <code>run</code>
+property, which holds a function <code>fn(Server, query)</code> that will be
+called to handle queries with a <code>type</code> property that matches the given
+name. It may also have a <code>takesFile</code> property which, if true, will
+cause the server to try and resolve the file on which the query
+operates (from its <code>file</code> property) and pass that (a <code>{name, text,
+scope, ast}</code> object) as a third argument to the <code>run</code> function. You
+will probably need to use the <a href="#infer_api">inference module&#8217;s API</a> to
+do someting useful in this function.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="configuration">Project configuration</h3>
+<p >A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
+like this:</p>
+<pre data-language="application/x-json" class="cm-s-default">{
+  <span class="cm-string cm-property">"libs"</span>: [
+    <span class="cm-string">"browser"</span>,
+    <span class="cm-string">"jquery"</span>
+  ],
+  <span class="cm-string cm-property">"loadEagerly"</span>: [
+    <span class="cm-string">"importantfile.js"</span>
+  ],
+  <span class="cm-string cm-property">"plugins"</span>: {
+    <span class="cm-string cm-property">"requirejs"</span>: {
+      <span class="cm-string cm-property">"baseURL"</span>: <span class="cm-string">"./"</span>,
+      <span class="cm-string cm-property">"paths"</span>: {}
+    }
+  }
+}</pre>
+<p >The <code>libs</code> property refers to the <a href="#typedef">JSON type descriptions</a>
+that should be loaded into the environment for this project. See the
+<code>defs/</code> directory for examples. The strings given here will be
+suffixed with <code>.json</code>, and searched for first in the project&#8217;s own
+dir, and then in the <code>defs/</code> directory of the Tern distribution.</p>
+<p >By default, local files are loaded into the Tern server when they are
+opened by the editor. <code>loadEagerly</code> allows you to force some files to
+always be loaded.</p>
+<p >Finally, <code>plugins</code> is an object used to load and configure Tern
+plugins. The names of the properties refer to files that implement
+plugins, either in the project dir or under <code>plugin/</code> in the Tern
+directory. Their values are configuration objects that will be passed
+to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
+any options.</p>
+</div>
+<div class="sect2">
+<h3 id="utils">Utilities</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>bin/test</code>
+</dt>
+<dd>
+<p>
+Runs Tern&#8217;s own testsuite. Tests are defined in the <code>test/</code>
+directory, as code interspersed with comments that indicate the
+types and conditions to check for.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>bin/condense</code>
+</dt>
+<dd>
+<p>
+Utility for condensing source code down to a <a href="#typedef">JSON type definition</a> file. Takes a list of files to condense, optionally
+interleaved with filenames prefixed with a <code>+</code>, which will be loaded
+(to provide type information) but not included in the output.
+</p>
+<p >Pass <code>--plugin name</code> or <code>--plugin name={jsonconfig}</code> to load
+plugins. Use <code>--def file</code> to load <a href="#typedef">JSON definitions</a>.</p>
+</dd>
+<dt class="hdlist1">
+<code>bin/from_ts</code>
+</dt>
+<dd>
+<p>
+Given a typescript <code>.def.ts</code> file, will attempt to convert it to a
+Tern-style <a href="#typedef">JSON definition</a> file.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="infer">Inference engine</h2>
+<div class="sectionbody">
+<p >FIXME</p>
+<div class="sect2">
+<h3 id="infer_api">Programming interface</h3>
+<p >FIXME</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="editor">Editor plugins</h2>
+<div class="sectionbody">
+<p >FIXME</p>
+</div>
+</div>
+</div>

@@ -1,208 +1,81 @@
 <!doctype html>
 <head>
   <meta charset="utf-8">
-
-  <script src="node_modules/codemirror/lib/codemirror.js"></script>
-  <script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
-  <link rel=stylesheet href="node_modules/codemirror/lib/codemirror.css">
-  <script src="node_modules/codemirror/addon/hint/show-hint.js"></script>
-  <link rel="stylesheet" href="node_modules/codemirror/addon/hint/show-hint.css">
-  <script src="node_modules/codemirror/addon/dialog/dialog.js"></script>
-  <link rel="stylesheet" href="node_modules/codemirror/addon/dialog/dialog.css">
-  <script src="node_modules/codemirror/addon/search/searchcursor.js"></script>
-  <script src="node_modules/codemirror/addon/search/search.js"></script>
-  <script src="node_modules/codemirror/addon/edit/matchbrackets.js"></script>
-  <script src="node_modules/acorn/acorn.js"></script>
-  <script src="node_modules/acorn/acorn_loose.js"></script>
-  <script src="node_modules/acorn/util/walk.js"></script>
-  <script src="lib/tern.js"></script>
-  <script src="lib/def.js"></script>
-  <script src="lib/jsdoc.js"></script>
-  <script src="lib/infer.js"></script>
-  <script src="demo/demo.js"></script>
-  <script src="plugin/requirejs.js"></script>
-
   <link rel=stylesheet href="doc/docs.css">
   <title>Tern</title>
 </head>
 
-<div id=head>
-  <h1>Tern. <span>Intelligent JavaScript editing</span></h1>
-  <img id=head-image src="doc/header.png">
+<div id=top>
+  <div id=head>
+    <div class=logo></div>
+    <a href="http://ternjs.net" id=title>Tern: <span class=subtitle>Intelligent JavaScript tooling</span></a>
+    <a href="doc/demo.html">Demo</a>
+    <a href="doc/manual.html">Docs</a>
+    <a href="https://github.com/marijnh/tern">Code</a>
+  </div>
 </div>
 
-<div id=main>
-
-<p>A tern is a small sea bird. It darts over the waves, looking for
-fish below the surface. When it spots one, it dives into the water,
-vanishes for an instant, and bursts out again with its prey in its
-beak.</p>
-
-<p>Tern is a piece of software. It dives into the muddy depths of a
-JavaScript system to locate the information that it was asked for.
-Combined with an editor plug-in, it can make the life of a JavaScript
-programmer a lot more pleasant.</p>
-
-<p>Find the code on <a href="http://github.com/marijnh/tern">Github</a>.</p>
-
-<h2>Demo</h2>
-
-<p>This editor is hooked up to Tern. The drop-down in the top right
-corner lists the commands and keyboard shortcuts available. Output and
-function argument hints will appear in the bar below the editor.</p>
-
-<div style="position: relative" id="demospace">
-  <select id="commands">
-    <option>commands...</option>
-    <option value=complete>Autocomplete (ctrl-space)</option>
-    <option value=jumptodef>Jump to definition (alt-.)</option>
-    <option value=findtype>Find type of (ctrl-i)</option>
-    <option value=rename>Rename variable (ctrl-q)</option>
-    <option value=addfile>Add a new file</option>
-    <option value=delfile>Remove this file</option>
-  </select>
-  <form>
-    <ul class="tabs" id="docs"></ul>
-    <textarea id=code name=code>
-// Use ctrl-space to complete something
-co
-document.body.a
-
-// Put the cursor in or after an expression, press ctrl-i to
-// find its type
-
-var foo = ["array", "of", "strings"];
-var bar = foo.slice(0, 2).join("").split("a")[0];
-
-// Works for locally defined types too.
-
-function CTor() { this.size = 10; }
-CTor.prototype.hallo = "hallo";
-
-var baz = new CTor;
-baz.
-
-// You can press ctrl-q when the cursor is on a variable name to
-// rename it. Try it with CTor...
-
-// When the cursor is in an argument list, the arguments are
-// shown below the editor.
-
-[1].reduce(  );
-
-// And a little more advanced code...
-
-(function(exports) {
-  exports.randomElt = function(arr) {
-    return arr[Math.floor(arr.length * Math.random())];
-  };
-  exports.strList = "foo".split("");
-  exports.intList = exports.strList.map(function(s) { return s.charCodeAt(0); });
-})(window.myMod = {});
-
-var randomStr = myMod.randomElt(myMod.strList);
-var randomInt = myMod.randomElt(myMod.intList);
-
-// A test of the requirejs plug-in. Check the 'test_dep.js' tab,
-// notice that the test variable.
-
-requirejs(["test_dep.js"], function(test) {
-  var word = test.capitalize(test.garble("coconut"));
-  console.log(word);
-});
-</textarea></form>
-  <pre class=output id=out></pre>
-</div>
-
-<pre style="display: none" id="requirejs_test_dep">define(function() {
-  return {
-    capitalize: function(word) {
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    },
-    garble: function(word) {
-      return word.replace(/[auiyoe]/g, function() {
-        return "auiyoe".charAt(Math.floor(Math.random() * 6));
-      });
-    }
-  };
-});</pre>
-
-<h2>What is the status of the project?</h2>
-
-<p>Tern is not yet finished. The core works well enough to be useful,
-but a lot of work is still to be done: testing, documenting, fixing
-bugs, and writing editor plug-ins.</p>
-
-<p>Tern is open source software, under an MIT license. You can find
-the code on <a href="https://github.com/marijnh/tern">Github</a>.
-Documentation does not exist yet, but is being worked on.</p>
-
-<h2>How does it work?</h2>
-
-<p>Tern parses and analyzes a program on the fly, using a simple form
-of type inference along with a lot of heuristics and dirty tricks to
-approximate the types of the variables and expressions in the
-program.</p>
-
-<p>The type inference algorithm is roughly based on
-the <a href="http://rfrn.org/~shu/drafts/ti.pdf">algorithm</a> used in
-Mozilla's SpiderMonkey engine. It deviates from their approach in
-several ways, because, on the one hand, it does not have access to
-run-time information, and, on the other hand, it does not have to be
-entirely precise, and can use approximations in some cases.</p>
-
-<p>Once you know the type of a thing, it is easy to provide a
-meaningful list of property completions, or display a function type as
-a set of parameter hints.</p>
-
-<p>Tern can be run in two ways — as a JavaScript library, for
-integration in JavaScript-based systems like the demo above, or as an
-HTTP server, for use with desktop editor plug-ins.</p>
-
-<h2>Is this new?</h2>
-
-<p>I am under the impression that the approach I'm taking here has
-never before been applied to JavaScript editing assistance.</p>
-
-<p>Microsoft's Visual Studio's JavaScript Intellisense comes the
-closest, in terms of power. It uses a completely different approach
-(actually running the code, instead of doing type inference), and has
-some different strengths and weaknesses.</p>
-
-<p>But that is a proprietary system tied to a single IDE. Tern is an
-open system that can (and will) be plugged into a variety of editors
-and IDEs.</p>
-
-<h2>Does it scale?</h2>
-
-<p>So is this a clever toy that works in a little text input like the
-one above, or something that can be applied when working on real, big,
-multi-file, multi-dependency projects?</p>
-
-<p>I've tried to keep big codebases in mind as I built this. These are
-the strategies Tern uses to stay responsive in the face of huge bulks
-of code:</p>
+<p>Tern is a stand-alone <strong>code-analysis engine</strong> for
+JavaScript. It is intended to be used with a <a href="#plugins">code
+editor plugin</a> to enhance the editor's support for intelligent
+JavaScript editing. Features provided are:</p>
 
 <ul>
-  <li>The parser it uses
-  (<a href="http://marijnhaverbeke.nl/acorn/">Acorn</a>) is heavily
-  optimized.</li>
-  <li>The type inference algorithm is designed to be lightweight (its
-  other use, in the SpiderMonkey compiler, is similarly
-  performance-critical).</li>
-  <li>Tern runs as a server (or instance) which reuses as much
-  information as possible between queries, and tries to time
-  recomputation work so that it doesn't hold up the interface.</li>
-  <li>When editing large files, there is a mechanism for re-evaluating
-  only a small slice of the file, using information from a previous
-  evaluation run as context.</li>
-  <li>It is possible to automatically 'condense' a JavaScript library
-  to a simple JSON document that holds its type information, and then
-  load only that information when analysing code that uses the
-  library. (You can hand-edit such documents to fix inference mistakes
-  or add information.)</li>
+  <li>Autocompletion on variables and properties
+  <li>Function argument hints
+  <li>Querying the type of an expression
+  <li>Finding the definition of something
+  <li>Automatic refactoring
 </ul>
 
-<p style="margin-top: 4em; text-align: right">- <a href="http://marijnhaverbeke.nl">Marijn Haverbeke</a></p>
+<p>Tern is open-source (<a href="LICENSE">MIT license</a>), written in
+JavaScript, and capable of running both
+on <a href="http://nodejs.org">node.js</a> and in
+the <a href="doc/demo.html">browser</a>.</p>
 
-</div>
+<h2 id="plugins">Editor plugins</h2>
+
+<p>There is currently Tern support for the following editors:</p>
+
+<ul>
+  <li>Emacs
+  <li>Vim
+  <li>Sublime Text
+</ul>
+
+<p>None of these are currently properly packaged, easy to install, or
+well documented. Expect that to change in the coming weeks.</p>
+
+<h2 id="support">Community and support</h2>
+
+<p>There are two mailing lists for the project, a low-volume one for
+announcements
+at <a href="https://groups.google.com/forum/?fromgroups#!forum/tern-announce">tern-announce</a>,
+and an open one where everyone can post
+at <a href="https://groups.google.com/forum/?fromgroups#!forum/tern-dev">tern-dev</a>.
+For reporting bugs, I prefer that you use
+the <a href="https://github.com/marijnh/tern/issues?state=open">github
+issue tracker</a>.</p>
+
+<p>Code contributions are welcome, preferably
+through <a href="https://github.com/marijnh/tern/pulls">pull
+requests</a>.</p>
+
+<p>The maintainer of the project
+(<a href="mailto:marijnh@gmail.com">Marijn Haverbeke</a>) is, in
+principle, available for consulting work around Tern. Commercial
+support contracts are also possible. Contact me for details.</p>
+
+<h2 id="docs">Documentation</h2>
+
+<p>The <a href="doc/manual.html">reference manual</a> should be your
+first stop for figuring out how to use Tern.</p>
+
+<p>If you are interested in the way the system works internally, take
+a look at this <a href="http://marijnhaverbeke.nl/blog/tern.html">blog
+post</a>.</p>
+
+<h2 id="releases">Release history</h2>
+
+<p>No official release of Tern has been brought out yet. This will
+change soon.</p>
