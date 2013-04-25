@@ -43,7 +43,7 @@ body {
 
 #head > a {
   border-right: 1px solid #276c81;
-  display: table-cell;
+  display: inline-block;
   padding: 5px 20px;
   color: white;
   text-align: middle;
