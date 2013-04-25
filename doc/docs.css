@@ -18,7 +18,7 @@ body {
   font-size: 11pt;
   max-width: 700px;
   margin: 0 0 0 60px;
-  padding: 4em 0 4em;
+  padding: 60px 0 4em;
 }
 
 #top {
@@ -51,7 +51,7 @@ body {
   text-decoration: none;
 }
 
-#head > a#title {
+#head > a.title {
   font-size: 15pt;
   padding-left: 80px;
   background: url(logo.png);
@@ -64,7 +64,7 @@ body {
   background-color: #276c81 !important;
 }
 
-#title span {
+.title span {
   font-size: 10pt;
 }
 
@@ -81,7 +81,7 @@ h1, h2, h3 {
   color: #124f55;
 }
 h1 { font-size: 18pt; }
-h2 { font-size: 16pt; margin-top: 1.5em; }
+h2 { font-size: 16pt; }
 h3, h2[id=contents] { font-size: 13pt; }
 
 a, a:visited, a code { color: #df4c11; text-decoration: none; }
@@ -101,6 +101,12 @@ dd p:first-child { margin-top: 1px; }
 dd { margin-left: 20px; }
 dt { text-indent: -1em; padding-left: 1em; }
 
+a[id] {
+  position: relative;
+  display: block;
+  top: -60px;
+}
+ 
 /* CodeMirror default theme for highlighting */
 
 .cm-s-default .cm-keyword {color: #708;}

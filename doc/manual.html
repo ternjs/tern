@@ -8,7 +8,7 @@
 <div id=top>
   <div id=head>
     <div class=logo></div>
-    <a href="http://ternjs.net" id=title>Tern: <span class=subtitle>Intelligent JavaScript tooling</span></a>
+    <a href="http://ternjs.net" class=title>Tern: <span class=subtitle>Intelligent JavaScript tooling</span></a>
     <a href="demo.html">Demo</a>
     <a href="manual.html">Docs</a>
     <a href="https://github.com/marijnh/tern">Code</a>
@@ -24,9 +24,7 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 <a href="#server_api">server module</a>, which uses the <a href="#infer">inference engine</a> to do the actual type inference.</p>
 </div>
 </div>
-<div class="sect1">
-<h2 id="contents">Contents</h2>
-<div class="sectionbody">
+<h2> <a id="contents"></a>Contents</h2>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -83,11 +81,7 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 </p>
 </li>
 </ul></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="server">The Tern server</h2>
-<div class="sectionbody">
+<h2> <a id="server"></a>The Tern server</h2>
 <p >The <code>bin/tern</code> <em>binary</em> (<a href="http://nodejs.org">node.js</a> script, really),
 is used to start a Tern server. You will usually want to let an
 <a href="#plugins">editor plugin</a> start it for you, but it can be started
@@ -134,8 +128,7 @@ debugging.
 </p>
 </dd>
 </dl></div>
-<div class="sect2">
-<h3 id="protocol">JSON protocol</h3>
+<h3> <a id="protocol"></a>JSON protocol</h3>
 <p >Sending queries to a Tern server is done by making <code>POST</code> requests to
 the server&#8217;s port (using <code>/</code> as the requests&#8217;s path) with a
 <a href="http://json.org">JSON</a> document in the body of the request.</p>
@@ -546,9 +539,7 @@ the file (starting at a line boundary), a <code>name</code> property referring t
 an existing file, and either an <code>offset</code> (character offset) or
 <code>offsetLines</code> (line offset) property indicating the approximate
 position of the fragment in the file.</p>
-</div>
-<div class="sect2">
-<h3 id="server_api">Programming interface</h3>
+<h3> <a id="server_api"></a>Programming interface</h3>
 <p ><a id="tern.Server"></a> The base server (without HTTP or configuration-file
 reading) is implemented in <code>lib/tern.js</code>. That package exposes a
 <code>Server</code> constructor that can be used to create a server. It takes an
@@ -699,9 +690,7 @@ After analyzing a file.
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="typedef">JSON type definitions</h3>
+<h3> <a id="typedef"></a>JSON type definitions</h3>
 <p >To be able to specify the types of things without actually analyzing
 source code, either because there is no JavaScript source code (as for
 the built-in types) or because the source code is too big, or because
@@ -763,9 +752,7 @@ aren&#8217;t currently documented, but you can search for <code>!effects</code> 
 string&#8217;s return type may contain the variables <code>!0</code> (the first
 argument&#8217;s type, <code>!N</code> for the N-1th), <code>!this</code> (the self type of the
 call), and a special property <code>!ret</code> (the return type of a function).</p>
-</div>
-<div class="sect2">
-<h3 id="plugins">Server plugins</h3>
+<h3> <a id="plugins"></a>Server plugins</h3>
 <p >Plugins are JavaScript programs that add extra functionality to a
 server. The distribution currently comes with
 <a href="http://nodejs.org">node.js</a> plugin (<code>plugin/node.js</code>) and
@@ -821,9 +808,7 @@ do someting useful in this function.
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="configuration">Project configuration</h3>
+<h3> <a id="configuration"></a>Project configuration</h3>
 <p >A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
 like this:</p>
 <pre data-language="application/x-json" class="cm-s-default">{
@@ -855,9 +840,7 @@ plugins, either in the project dir or under <code>plugin/</code> in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
-</div>
-<div class="sect2">
-<h3 id="utils">Utilities</h3>
+<h3> <a id="utils"></a>Utilities</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <code>bin/test</code>
@@ -891,12 +874,7 @@ Tern-style <a href="#typedef">JSON definition</a> file.
 </p>
 </dd>
 </dl></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="infer">Inference engine</h2>
-<div class="sectionbody">
+<h2> <a id="infer"></a>Inference engine</h2>
 <p >The inference engine module (<code>lib/infer.js</code>) implements a system that,
 given a context and an abstract syntax tree (parsed representation of
 the code), tries to infer the types of the variables and properties in
@@ -914,8 +892,7 @@ works can be found in a <a href="http://marijnhaverbeke.nl/blog/tern.html">blog
 post</a> I wrote on the subject.</p>
 <p >This module also exposes some utility functions that are useful to
 implement the <a href="#protocol">services</a> the server exposes.</p>
-<div class="sect2">
-<h3 id="infer_context">Context</h3>
+<h3> <a id="infer_context"></a>Context</h3>
 <p >A context is an object that holds a global JavaScript scope, as well
 as some meta-information and state used by the type inference process.
 Almost all operations in the inference module require a context.</p>
@@ -962,9 +939,7 @@ The top-level
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="infer_analysis">Analysis</h3>
+<h3> <a id="infer_analysis"></a>Analysis</h3>
 <p >To push code into a context, you first parse it, yielding a syntax
 tree, and then tell Tern to analyze that.</p>
 <div class="dlist"><dl>
@@ -1036,9 +1011,7 @@ re-defined in the meantime.
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="infer_types">Types</h3>
+<h3> <a id="infer_types"></a>Types</h3>
 <p >Tern has a more or less complete implementation of the JavaScript type
 system.</p>
 <div class="dlist"><dl>
@@ -1196,9 +1169,7 @@ given property, or defines it if it did not yet exist.
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="infer_aval">Abstract values</h3>
+<h3> <a id="infer_aval"></a>Abstract values</h3>
 <p >Abstract values are objects used to represent sets of types. Each
 variable and property has an abstract value associated with it, but
 they are also used for other purposes, such as tracking the return
@@ -1296,9 +1267,7 @@ simply be used.</p>
 that never holds any types, and discards types added to it. It can be
 used as a placeholder in situations where we either aren&#8217;t interested
 in the types, or there simply are no types.</p>
-</div>
-<div class="sect2">
-<h3 id="infer_constraint">Constraints</h3>
+<h3> <a id="infer_constraint"></a>Constraints</h3>
 <p >Constraints are things that can receive values. They use the same
 <code>addType</code> method to receive them, which causes all AVals to also be
 useable as constraints. The inference engine defines a number of
@@ -1344,9 +1313,7 @@ specific property in the source AVal.
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="infer_scopes">Scopes</h3>
+<h3> <a id="infer_scopes"></a>Scopes</h3>
 <p >Scopes are derived from the <a href="#infer.Obj"><code>Obj</code></a> type, and variables
 are represented the same way as properties.</p>
 <div class="dlist"><dl>
@@ -1371,9 +1338,7 @@ the property doesn&#8217;t already have an
 </p>
 </dd>
 </dl></div>
-</div>
-<div class="sect2">
-<h3 id="_utilities">Utilities</h3>
+<h3> <a id="_utilities"></a>Utilities</h3>
 <p >These are miscellaneous utilities that come in helpful when doing code
 analysis.</p>
 <div class="dlist"><dl>
@@ -1467,13 +1432,6 @@ guessing flag.
 </p>
 </dd>
 </dl></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="editor">Editor plugins</h2>
-<div class="sectionbody">
+<h2> <a id="editor"></a>Editor plugins</h2>
 <p >FIXME</p>
-</div>
-</div>
 </div>
