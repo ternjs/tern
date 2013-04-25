@@ -65,6 +65,7 @@ def tern_startServer():
     if match:
       port = int(match.group(1))
       vim.command("let b:ternPort = " + str(port))
+      vim.command("let g:ternPID = "+str(proc.pid))
       return port
     else:
       output += line
@@ -371,12 +372,19 @@ function! tern#Enable()
     autocmd InsertEnter <buffer> let b:ternInsertActive = 1
     autocmd InsertLeave <buffer> let b:ternInsertActive = 0
   augroup END
+  autocmd VimLeavePre * call tern#Shutdown()
 endfunction
 
 function! tern#Disable()
   augroup TernAutoCmd
     autocmd!
   augroup END
+endfunction
+
+function! tern#Shutdown()
+  if exists('g:ternPID')
+    python os.kill(int(vim.eval("g:ternPID")),3)
+  endif
 endfunction
 
 autocmd FileType javascript :call tern#Enable()
