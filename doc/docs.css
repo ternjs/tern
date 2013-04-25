@@ -52,9 +52,10 @@ body {
 
 #head > a.title {
   font-size: 20px;
+  line-height: 24px;
   padding-left: 80px;
   background: url(logo.png);
-  background-position: 45px center;
+  background-position: 40px center;
   background-size: auto 80%;
   background-repeat: no-repeat;
   border-bottom-left-radius: 5px;
