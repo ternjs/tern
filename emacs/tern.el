@@ -1,3 +1,9 @@
+;;; tern.el --- Tern-powered JavaScript integration
+
+;; Author: Marijn Haverbeke
+;; URL: http://ternjs.net/
+;; Version: 0.0.1
+
 ;;; -*- lexical-binding: t -*-
 
 (eval-when-compile (require 'cl))
@@ -497,3 +503,5 @@ list of strings, giving the binary name and arguments.")
   (remove-hook 'buffer-list-update-hook 'tern-left-buffer t))
 
 (provide 'tern)
+
+;;; tern.el ends here
