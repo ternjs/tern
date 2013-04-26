@@ -27,3 +27,7 @@ var num = new Number(1);
 num; //: Number
 
 "foo".toString(); //: string
+
+Array.prototype.slice.call([1, 2, 3], 1); //: [number]
+
+Array.prototype.slice.apply([1, 2, 3], [1]); //: [number]

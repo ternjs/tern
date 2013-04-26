@@ -108,14 +108,17 @@
     "prototype": {
       "!stdProto": "Function",
       "apply": {
-        "!type": "fn(this: ?, args: [?]) -> !this.!ret",
+        "!type": "fn(this: ?, args: [?])",
+        "!effects": [
+          "call and return !this this=!0 !1.<i> !1.<i> !1.<i>"
+        ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/apply",
         "!doc": "Calls a function with a given this value and arguments provided as an array (or an array like object)."
       },
       "call": {
         "!type": "fn(this: ?, args?: ?) -> !this.!ret",
         "!effects": [
-          "call !this this=!0 !1 !2 !3 !4"
+          "call and return !this this=!0 !1 !2 !3 !4"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/call",
         "!doc": "Calls a function with a given this value and arguments provided individually."
