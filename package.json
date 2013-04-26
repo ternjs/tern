@@ -14,8 +14,10 @@
     "test": "./bin/test"
   },
   "dependencies": {
+    "acorn": "git://github.com/marijnh/acorn.git"
+  },
+  "devDependencies": {
     "codemirror": "git://github.com/marijnh/CodeMirror.git",
-    "acorn": "git://github.com/marijnh/acorn.git",
     "typescript": "0.8.3"
   }
 }
