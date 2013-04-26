@@ -26,6 +26,9 @@ engine>> to do the actual type inference.
 ** <<infer_scopes,Scopes>>
 ** <<infer_util,Utilities>>
 * <<editor,Editor plugins>>
+** <<emacs,Emacs>>
+** <<vim,Vim>>
+** <<sublime_text,Sublime Text>>
 
 [[server]]
 == The Tern server ==
@@ -871,4 +874,108 @@ guessing flag.
 [[editor]]
 == Editor plugins ==
 
-FIXME
+If your editor of choice is not yet supported, you are encouraged to
+try and port one of the existing plugins to it. When figuring out how
+things work, the code powering the demo, in `doc/demo/demo.js`, might
+also come in useful.
+
+All these plugins use the http://nodejs.org[node.js]-based server, and
+thus require that (as well as http://npmjs.org[npm]) to be installed.
+
+[[emacs]]
+=== Emacs ===
+
+The Emacs mode is part of the main tern
+https://github.com/marijnh/tern[repository]. It can be installed as
+follows:
+
+. Make sure you are using Emacs 24 or later. The Tern mode requires
+  lexical scoping.
+
+. Clone this repository somewhere. Do `npm install` to get the
+  dependencies.
+
+. Make Emacs aware of `emacs/tern.el`. For example by adding this to
+  your `.emacs` file:
++
+[source,commonlisp]
+----
+(add-to-list 'load-path "/path/to/tern/emacs/")
+(autoload 'tern-mode "tern.el" nil t)
+----
+
+. Optionally set `tern-mode` to be automatically enabled for your
+  JavaScript mode of choice. Here's the snippet for `js-mode`:
++
+[source,commonlisp]
+----
+(add-hook 'js-mode-hook (lambda () (tern-mode t)))
+----
+
+Buffers in `tern-mode` add a `completion-at-point` function that
+activates Tern's completion. So, unless you rebound the key, `M-tab`
+(or `C-M-i`) will trigger completion.
+
+When the point is in an argument list, Tern will show argument names
+and types at the bottom of the screen.
+
+The following additional keys are bound:
+
+`M-.`:: Jump to the definition of the thing under the cursor.
+
+`M-,`:: Brings you back to last place you were when you pressed `M-.`.
+
+`C-c C-r`:: Rename the variable under the cursor.
+
+`C-c C-c`:: Find the type of the thing under the cursor.
+
+`C-c C-d`:: Find docs of the thing under the cursor. Press again to
+open the associated URL (if any).
+
+[[vim]]
+=== Vim ===
+
+The Vim plugin will probably move to a separate repository soon, but
+for now it is included with Tern. To install:
+
+. Clone this repository somewhere. Do `npm install` to get the
+  dependencies.
+
+. Make sure your Vim has Python support.
+
+. Source the `vim/tern.vim` script in your `.vimrc`. Don't copy it
+  anywhere, leave it in the Tern checkout so that it can find the
+  Tern server code.
++
+[source,text/plain]
+----
+so /path/to/tern/vim/tern.vim
+----
+
+When editing a JavaScript (`.js`) file, your omni-complete will be
+hooked into Tern. Use `C-x C-o` in insert mode to activate it.
+
+There are also a number of Tern-based commands available:
+
+`TernDef`:: Jump to the definition of the thing under the cursor.
+
+`TernDoc`:: Look up the documentation of something.
+
+`TernType`:: Find the type of the thing under the cursor.
+
+`TernRefs`:: Show all references to the variable or property under the
+cursor.
+
+`TernRename`:: Rename the variable under the cursor.
+
+[[sublime_text]]
+=== Sublime Text ===
+
+There are two implementations of Sublime Text modules for Tern. One
+written by me, at <https://github.com/marijnh/tern_for_sublime>. This
+one uses the node.js-based server. The other is written by Sergey
+Chikuyonok, and can be found at
+<https://github.com/emmetio/sublime-tern>. It uses a Python V8 bridge
+to run the server.
+
+See the readme files in those repositories for details.

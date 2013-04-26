@@ -108,6 +108,23 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 <p>
 <a href="#editor">Editor plugins</a>
 </p>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="#emacs">Emacs</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#vim">Vim</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#sublime_text">Sublime Text</a>
+</p>
+</li>
+</ul></div>
 </li>
 </ul></div>
 <h2> <a id="server"></a>The Tern server</h2>
@@ -1462,5 +1479,170 @@ guessing flag.
 </dd>
 </dl>
 <h2> <a id="editor"></a>Editor plugins</h2>
-<p >FIXME</p>
+<p >If your editor of choice is not yet supported, you are encouraged to
+try and port one of the existing plugins to it. When figuring out how
+things work, the code powering the demo, in <code>doc/demo/demo.js</code>, might
+also come in useful.</p>
+<p >All these plugins use the <a href="http://nodejs.org">node.js</a>-based server, and
+thus require that (as well as <a href="http://npmjs.org">npm</a>) to be installed.</p>
+<h3> <a id="emacs"></a>Emacs</h3>
+<p >The Emacs mode is part of the main tern
+<a href="https://github.com/marijnh/tern">repository</a>. It can be installed as
+follows:</p>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Make sure you are using Emacs 24 or later. The Tern mode requires
+  lexical scoping.
+</p>
+</li>
+<li>
+<p>
+Clone this repository somewhere. Do <code>npm install</code> to get the
+  dependencies.
+</p>
+</li>
+<li>
+<p>
+Make Emacs aware of <code>emacs/tern.el</code>. For example by adding this to
+  your <code>.emacs</code> file:
+</p>
+<pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">add-to-list</span> '<span class="cm-variable">load-path</span> <span class="cm-string">"/path/to/tern/emacs/"</span><span class="cm-bracket">)</span>
+<span class="cm-bracket">(</span><span class="cm-variable">autoload</span> '<span class="cm-variable">tern-mode</span> <span class="cm-string">"tern.el"</span> <span class="cm-atom">nil</span> <span class="cm-atom">t</span><span class="cm-bracket">)</span></pre>
+</li>
+<li>
+<p>
+Optionally set <code>tern-mode</code> to be automatically enabled for your
+  JavaScript mode of choice. Here&#8217;s the snippet for <code>js-mode</code>:
+</p>
+<pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">add-hook</span> '<span class="cm-variable">js-mode-hook</span> <span class="cm-bracket">(</span><span class="cm-variable">lambda</span> <span class="cm-bracket">()</span> <span class="cm-bracket">(</span><span class="cm-variable">tern-mode</span> <span class="cm-atom">t</span><span class="cm-bracket">)))</span></pre>
+</li>
+</ol></div>
+<p >Buffers in <code>tern-mode</code> add a <code>completion-at-point</code> function that
+activates Tern&#8217;s completion. So, unless you rebound the key, <code>M-tab</code>
+(or <code>C-M-i</code>) will trigger completion.</p>
+<p >When the point is in an argument list, Tern will show argument names
+and types at the bottom of the screen.</p>
+<p >The following additional keys are bound:</p>
+<dl>
+<dt>
+<code>M-.</code>
+</dt>
+<dd>
+<p>
+Jump to the definition of the thing under the cursor.
+</p>
+</dd>
+<dt>
+<code>M-,</code>
+</dt>
+<dd>
+<p>
+Brings you back to last place you were when you pressed <code>M-.</code>.
+</p>
+</dd>
+<dt>
+<code>C-c C-r</code>
+</dt>
+<dd>
+<p>
+Rename the variable under the cursor.
+</p>
+</dd>
+<dt>
+<code>C-c C-c</code>
+</dt>
+<dd>
+<p>
+Find the type of the thing under the cursor.
+</p>
+</dd>
+<dt>
+<code>C-c C-d</code>
+</dt>
+<dd>
+<p>
+Find docs of the thing under the cursor. Press again to
+open the associated URL (if any).
+</p>
+</dd>
+</dl>
+<h3> <a id="vim"></a>Vim</h3>
+<p >The Vim plugin will probably move to a separate repository soon, but
+for now it is included with Tern. To install:</p>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Clone this repository somewhere. Do <code>npm install</code> to get the
+  dependencies.
+</p>
+</li>
+<li>
+<p>
+Make sure your Vim has Python support.
+</p>
+</li>
+<li>
+<p>
+Source the <code>vim/tern.vim</code> script in your <code>.vimrc</code>. Don&#8217;t copy it
+  anywhere, leave it in the Tern checkout so that it can find the
+  Tern server code.
+</p>
+<pre data-language="text/plain" class="cm-s-default">so /path/to/tern/vim/tern.vim</pre>
+</li>
+</ol></div>
+<p >When editing a JavaScript (<code>.js</code>) file, your omni-complete will be
+hooked into Tern. Use <code>C-x C-o</code> in insert mode to activate it.</p>
+<p >There are also a number of Tern-based commands available:</p>
+<dl>
+<dt>
+<code>TernDef</code>
+</dt>
+<dd>
+<p>
+Jump to the definition of the thing under the cursor.
+</p>
+</dd>
+<dt>
+<code>TernDoc</code>
+</dt>
+<dd>
+<p>
+Look up the documentation of something.
+</p>
+</dd>
+<dt>
+<code>TernType</code>
+</dt>
+<dd>
+<p>
+Find the type of the thing under the cursor.
+</p>
+</dd>
+<dt>
+<code>TernRefs</code>
+</dt>
+<dd>
+<p>
+Show all references to the variable or property under the
+cursor.
+</p>
+</dd>
+<dt>
+<code>TernRename</code>
+</dt>
+<dd>
+<p>
+Rename the variable under the cursor.
+</p>
+</dd>
+</dl>
+<h3> <a id="sublime_text"></a>Sublime Text</h3>
+<p >There are two implementations of Sublime Text modules for Tern. One
+written by me, at <a href="https://github.com/marijnh/tern_for_sublime">https://github.com/marijnh/tern_for_sublime</a>. This
+one uses the node.js-based server. The other is written by Sergey
+Chikuyonok, and can be found at
+<a href="https://github.com/emmetio/sublime-tern">https://github.com/emmetio/sublime-tern</a>. It uses a Python V8 bridge
+to run the server.</p>
+<p >See the readme files in those repositories for details.</p>
 </div>
