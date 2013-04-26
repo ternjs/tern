@@ -9,7 +9,6 @@
   (declare (special url-mime-charset-string url-request-method url-request-data url-show-status))
   (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
          (url-request-method "POST")
-         (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
          (url-request-data (json-encode doc))
          (url-show-status nil)
          (url (url-parse-make-urlobj "http" nil nil "127.0.0.1" port "/" nil nil nil)))
@@ -449,10 +448,11 @@ list of strings, giving the binary name and arguments.")
     (setf tern-last-argument-hints nil)))
 
 (defun tern-post-command ()
-  (unless (eq (point) tern-last-point-pos)
-    (setf tern-last-point-pos (point))
-    (setf tern-activity-since-command tern-command-generation)
-    (tern-update-argument-hints)))
+  (let (deactivate-mark) ; Prevents actions in temporary buffers from interfering with active mark
+    (unless (eq (point) tern-last-point-pos)
+      (setf tern-last-point-pos (point))
+      (setf tern-activity-since-command tern-command-generation)
+      (tern-update-argument-hints))))
 
 (defun tern-left-buffer ()
   (declare (special buffer-list-update-hook))
