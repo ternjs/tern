@@ -18,7 +18,8 @@
 (defun tern-req-finished (c)
   (declare (special url-http-process))
   (let ((is-error (and (consp c) (eq (car c) :error)))
-        (found-body (search-forward "\n\n" nil t)))
+        (found-body (search-forward "\n\n" nil t))
+        (deactivate-mark nil))
     (if (or is-error (not found-body))
         (let ((message (and found-body
                             (buffer-substring-no-properties (point) (point-max)))))
@@ -257,7 +258,8 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-parse-function-type (data)
   (let ((type (cdr (assq 'type data)))
-        (name (or (cdr (assq 'exprName data)) (cdr (assq 'name data)) "fn")))
+        (name (or (cdr (assq 'exprName data)) (cdr (assq 'name data)) "fn"))
+        (deactivate-mark nil))
     (when (string-match-p "^fn(" type)
       (with-temp-buffer
         (insert type)
