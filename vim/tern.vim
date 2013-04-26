@@ -411,7 +411,7 @@ function! tern#Enable()
   let b:ternInsertActive = 0
   setlocal omnifunc=tern#Complete
   augroup TernAutoCmd
-    autocmd!
+    autocmd! * <buffer>
     autocmd BufLeave <buffer> :py tern_sendBufferIfDirty()
     autocmd CursorMoved,CursorMovedI <buffer> call tern#LookupArgumentHints()
     autocmd InsertEnter <buffer> let b:ternInsertActive = 1
@@ -422,7 +422,7 @@ endfunction
 
 function! tern#Disable()
   augroup TernAutoCmd
-    autocmd!
+    autocmd! * <buffer>
   augroup END
 endfunction
 
