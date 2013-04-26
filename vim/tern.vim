@@ -1,6 +1,6 @@
 py << endpy
 
-import vim, os, platform, subprocess, urllib2, webbrowser, json, re
+import vim, os, platform, subprocess, urllib2, webbrowser, json, re, string
 from functools import cmp_to_key
 from itertools import groupby
 
@@ -157,11 +157,11 @@ def tern_runCommand(query, pos=None, fragments=True):
     vim.command("let b:ternBufferSentAt = " + str(curSeq))
   return data
 
-def tern_sendBuffer():
+def tern_sendBuffer(files=None):
   port, _portIsOld = tern_findServer()
   if port is None: return False
   try:
-    tern_makeRequest(port, {"files": [tern_fullBuffer()]})
+    tern_makeRequest(port, {"files": files or [tern_fullBuffer()]})
     return True
   except:
     return False
@@ -302,9 +302,8 @@ def tern_rename(newName):
                           ,key=lambda c: tern_projectFilePath(c["file"]))
 
   name = data["name"]
-  changes = []
+  changes, external = ([], [])
   for file, filechanges in changes_byfile:
-    print file
     bufnr = int(vim.eval("bufloaded('" + file + "') ? bufnr('" + file + "') : -1"))
     if bufnr != -1:
       lines = vim.buffers[bufnr - 1]
@@ -333,6 +332,9 @@ def tern_rename(newName):
     if bufnr == -1:
       with open(file, "w") as f:
         f.writelines(lines)
+      external.append({"name": file, "text": string.join(lines, ""), "type": "full"})
+  if len(external):
+    tern_sendBuffer(external)
   vim.command("call setloclist(0," + json.dumps(changes) + ") | lopen")
 
 endpy
