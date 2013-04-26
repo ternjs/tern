@@ -422,7 +422,7 @@ endfunction
 
 function! tern#Disable()
   augroup TernAutoCmd
-    autocmd!
+    autocmd! * <buffer>
   augroup END
 endfunction
 
