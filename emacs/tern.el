@@ -7,11 +7,12 @@
 
 (defun tern-req (port doc c)
   (declare (special url-mime-charset-string url-request-method url-request-data url-show-status))
-  (let ((url-mime-charset-string nil) ; Suppress huge, useless header
-        (url-request-method "POST")
-        (url-request-data (json-encode doc))
-        (url-show-status nil)
-        (url (url-parse-make-urlobj "http" nil nil "127.0.0.1" port "/" nil nil nil)))
+  (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
+         (url-request-method "POST")
+         (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
+         (url-request-data (json-encode doc))
+         (url-show-status nil)
+         (url (url-parse-make-urlobj "http" nil nil "127.0.0.1" port "/" nil nil nil)))
     (url-http url #'tern-req-finished (list c))))
 
 (defun tern-req-finished (c)
