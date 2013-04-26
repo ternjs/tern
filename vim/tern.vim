@@ -232,13 +232,13 @@ def tern_lookupDocumentation(browse=False):
     vim.command("echo 'no documentation found'")
 
 def tern_echoWrap(data, name=""):
-  text = json.dumps(data)
+  text = data
   if len(name) > 0:
-    text = "'"+name+": ' " + text
+    text = name+": " + text
   col = int(vim.eval("&columns"))-23
   if len(text) > col:
-    text = text[0:col]+"...\""
-  vim.command("echo " + text)
+    text = text[0:col]+"..."
+  vim.command("echo '{0}'".format(text))
 
 def tern_lookupType():
   data = tern_runCommand("type")
