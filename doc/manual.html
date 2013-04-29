@@ -1568,75 +1568,9 @@ open the associated URL (if any).
 </dd>
 </dl>
 <h3> <a id="vim"></a>Vim</h3>
-<p >The Vim plugin will probably move to a separate repository soon, but
-for now it is included with Tern. To install:</p>
-<div class="olist arabic"><ol class="arabic">
-<li>
-<p>
-Clone this repository somewhere. Do <code>npm install</code> to get the
-  dependencies.
-</p>
-</li>
-<li>
-<p>
-Make sure your Vim has Python support.
-</p>
-</li>
-<li>
-<p>
-Source the <code>vim/tern.vim</code> script in your <code>.vimrc</code>. Don&#8217;t copy it
-  anywhere, leave it in the Tern checkout so that it can find the
-  Tern server code.
-</p>
-<pre data-language="text/plain" class="cm-s-default">so /path/to/tern/vim/tern.vim</pre>
-</li>
-</ol></div>
-<p >When editing a JavaScript (<code>.js</code>) file, your omni-complete will be
-hooked into Tern. Use <code>C-x C-o</code> in insert mode to activate it.</p>
-<p >There are also a number of Tern-based commands available:</p>
-<dl>
-<dt>
-<code>TernDef</code>
-</dt>
-<dd>
-<p>
-Jump to the definition of the thing under the cursor.
-</p>
-</dd>
-<dt>
-<code>TernDoc</code>
-</dt>
-<dd>
-<p>
-Look up the documentation of something.
-</p>
-</dd>
-<dt>
-<code>TernType</code>
-</dt>
-<dd>
-<p>
-Find the type of the thing under the cursor.
-</p>
-</dd>
-<dt>
-<code>TernRefs</code>
-</dt>
-<dd>
-<p>
-Show all references to the variable or property under the
-cursor.
-</p>
-</dd>
-<dt>
-<code>TernRename</code>
-</dt>
-<dd>
-<p>
-Rename the variable under the cursor.
-</p>
-</dd>
-</dl>
+<p >The Vim plugin is maintained in a
+<a href="https://github.com/marijnh/tern_for_vim">separate repository</a>. Please
+see its README for details.</p>
 <h3> <a id="sublime_text"></a>Sublime Text</h3>
 <p >There are two implementations of Sublime Text modules for Tern. One
 written by me, at <a href="https://github.com/marijnh/tern_for_sublime">https://github.com/marijnh/tern_for_sublime</a>. This

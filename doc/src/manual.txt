@@ -935,38 +935,9 @@ open the associated URL (if any).
 [[vim]]
 === Vim ===
 
-The Vim plugin will probably move to a separate repository soon, but
-for now it is included with Tern. To install:
-
-. Clone this repository somewhere. Do `npm install` to get the
-  dependencies.
-
-. Make sure your Vim has Python support.
-
-. Source the `vim/tern.vim` script in your `.vimrc`. Don't copy it
-  anywhere, leave it in the Tern checkout so that it can find the
-  Tern server code.
-+
-[source,text/plain]
-----
-so /path/to/tern/vim/tern.vim
-----
-
-When editing a JavaScript (`.js`) file, your omni-complete will be
-hooked into Tern. Use `C-x C-o` in insert mode to activate it.
-
-There are also a number of Tern-based commands available:
-
-`TernDef`:: Jump to the definition of the thing under the cursor.
-
-`TernDoc`:: Look up the documentation of something.
-
-`TernType`:: Find the type of the thing under the cursor.
-
-`TernRefs`:: Show all references to the variable or property under the
-cursor.
-
-`TernRename`:: Rename the variable under the cursor.
+The Vim plugin is maintained in a
+https://github.com/marijnh/tern_for_vim[separate repository]. Please
+see its README for details.
 
 [[sublime_text]]
 === Sublime Text ===
