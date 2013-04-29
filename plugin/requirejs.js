@@ -9,7 +9,8 @@
 
   function resolveName(name, data) {
     var opts = data.options;
-    var base = opts.baseURL ? opts.baseURL + "/" : "";
+    var base = opts.baseURL || "";
+    if (base && base.charAt(base.length - 1) != "/") base += "/";
     if (!opts.paths) return base + name + ".js";
     var known = opts.paths[name];
     if (known) return base + known + ".js";
