@@ -53,7 +53,11 @@ def tern_findServer(ignorePort=False):
 
 def tern_startServer():
   win = platform.system() == "Windows"
-  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=tern_projectDir(),
+  env = None
+  if platform.system() == "Darwin":
+    env = os.environ.copy()
+    env["PATH"] += ":/usr/local/bin"
+  proc = subprocess.Popen(vim.eval("g:tern#command"), cwd=tern_projectDir(), env=env,
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=win)
   output = ""
   while True:
