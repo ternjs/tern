@@ -438,12 +438,14 @@ function showArgumentHints(cache, out, pos) {
 var jumpStack = [];
 
 function moveTo(name, start, end) {
-  if (name != curDoc.name) {
-    for (var i = 0; i < docs.length; ++i)
-      if (docs[i].name == name) { selectDoc(i); break; }
-    if (i == docs.length) return displayError("Definition is not in a local buffer");
+  if (name == curDoc.name) return curDoc.doc.setSelection(end, start);
+
+  for (var i = 0; i < docs.length; ++i) if (docs[i].name == name) {
+    selectDoc(i);
+    setTimeout(function() { curDoc.doc.setSelection(end, start); }, 50);
+    return;
   }
-  curDoc.doc.setSelection(end, start);
+  displayError("Definition is not in a local buffer");
 }
 
 // The {line,ch} representation of positions makes this rather awkward.
