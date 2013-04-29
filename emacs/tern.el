@@ -1,10 +1,9 @@
+;;; -*- lexical-binding: t -*-
 ;;; tern.el --- Tern-powered JavaScript integration
 
 ;; Author: Marijn Haverbeke
 ;; URL: http://ternjs.net/
 ;; Version: 0.0.1
-
-;;; -*- lexical-binding: t -*-
 
 (eval-when-compile (require 'cl))
 (require 'json)
@@ -56,7 +55,8 @@
                 (funcall c tern-known-port nil))))
     (unless (buffer-file-name)
       (return (funcall c nil "Buffer is not associated with a file")))
-    (let ((port-file (expand-file-name ".tern-port" (tern-project-dir))))
+    (let ((deactivate-mark nil)
+          (port-file (expand-file-name ".tern-port" (tern-project-dir))))
       (when (file-exists-p port-file)
         (let ((port (string-to-number (with-temp-buffer
                                         (insert-file-contents port-file)
