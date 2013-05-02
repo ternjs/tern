@@ -529,6 +529,48 @@ directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at `{}` when you don't need to pass
 any options.
 
+[[plugin_node]]
+==== Node.js plugin ====
+
+The http://nodejs.org[node.js] plugin, called `"node"`, provides
+variables that are part of the node environment, such as `process` and
+`require`, and hooks up `require` to try and find the dependencies
+that are being loaded, and assign them the correct types. It also
+includes types for the built-in modules that node.js provides (`"fs"`,
+`"http"`, etc).
+
+The plugin understands the following configuration parameters:
+
+`dontLoad`:: Can be set to `true` to disable dynamic loading of
+required modules entirely, or to a regular expression to disable
+loading of files that match the expression.
+
+`load`:: If `dontLoad` isn't given, this setting is checked. If it is
+a regular expression, the plugin will only load files that match the
+expression.
+
+`modules`:: Can be used to assign <<typedef,JSON type definitions>> to
+certain modules, so that those are loaded instead of the source code
+itself. If given, should be an object mapping module names to either
+JSON objects defining the types in the module, or a string referring
+to a file name (relative to the project directory) that contains the
+JSON data.
+
+[[plugin_requirejs]]
+==== RequireJS plugin ====
+
+This plugin teaches the server to understand
+http://requirejs.org[RequireJS]-style dependency management. It
+defines the global functions `define` and `requirejs`, and will do its
+best to resolve dependencies and give them their proper types.
+
+These options are understood:
+
+`baseURL`:: The base path to prefix to dependency filenames.
+
+`path`:: An object mapping filename prefixes to specific paths. For
+example `{"acorn": "lib/acorn/"}`.
+
 [[utils]]
 === Utilities ===
 

@@ -886,6 +886,78 @@ plugins, either in the project dir or under <code>plugin/</code> in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
+<div class="sect3">
+<h4 id="plugin_node">Node.js plugin</h4>
+<p >The <a href="http://nodejs.org">node.js</a> plugin, called <code>"node"</code>, provides
+variables that are part of the node environment, such as <code>process</code> and
+<code>require</code>, and hooks up <code>require</code> to try and find the dependencies
+that are being loaded, and assign them the correct types. It also
+includes types for the built-in modules that node.js provides (<code>"fs"</code>,
+<code>"http"</code>, etc).</p>
+<p >The plugin understands the following configuration parameters:</p>
+<dl>
+<dt>
+<code>dontLoad</code>
+</dt>
+<dd>
+<p>
+Can be set to <code>true</code> to disable dynamic loading of
+required modules entirely, or to a regular expression to disable
+loading of files that match the expression.
+</p>
+</dd>
+<dt>
+<code>load</code>
+</dt>
+<dd>
+<p>
+If <code>dontLoad</code> isn&#8217;t given, this setting is checked. If it is
+a regular expression, the plugin will only load files that match the
+expression.
+</p>
+</dd>
+<dt>
+<code>modules</code>
+</dt>
+<dd>
+<p>
+Can be used to assign <a href="#typedef">JSON type definitions</a> to
+certain modules, so that those are loaded instead of the source code
+itself. If given, should be an object mapping module names to either
+JSON objects defining the types in the module, or a string referring
+to a file name (relative to the project directory) that contains the
+JSON data.
+</p>
+</dd>
+</dl>
+</div>
+<div class="sect3">
+<h4 id="plugin_requirejs">RequireJS plugin</h4>
+<p >This plugin teaches the server to understand
+<a href="http://requirejs.org">RequireJS</a>-style dependency management. It
+defines the global functions <code>define</code> and <code>requirejs</code>, and will do its
+best to resolve dependencies and give them their proper types.</p>
+<p >These options are understood:</p>
+<dl>
+<dt>
+<code>baseURL</code>
+</dt>
+<dd>
+<p>
+The base path to prefix to dependency filenames.
+</p>
+</dd>
+<dt>
+<code>path</code>
+</dt>
+<dd>
+<p>
+An object mapping filename prefixes to specific paths. For
+example <code>{"acorn": "lib/acorn/"}</code>.
+</p>
+</dd>
+</dl>
+</div>
 <h3> <a id="utils"></a>Utilities</h3>
 <dl>
 <dt>
