@@ -70,7 +70,7 @@
   (let* ((script-file (or load-file-name
                           (and (boundp 'bytecomp-filename) bytecomp-filename)
                           buffer-file-name))
-         (bin-file (expand-file-name "../bin/tern" (file-name-directory script-file))))
+         (bin-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file)))))
     (list (if (file-exists-p bin-file) bin-file "tern")))
   "The command to be run to start the Tern server. Should be a
 list of strings, giving the binary name and arguments.")
