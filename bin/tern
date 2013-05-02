@@ -13,6 +13,7 @@ var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
 
 var persistent = process.argv.indexOf("--persistent") > -1;
 var verbose = process.argv.indexOf("--verbose") > -1;
+var noPortFile = process.argv.indexOf("--no-port-file") > -1;
 var port = 0;
 var portArg = process.argv.indexOf("--port");
 if (portArg > -1) {
@@ -137,14 +138,17 @@ var httpServer = require("http").createServer(function(req, resp) {
   }
 });
 httpServer.listen(port, "127.0.0.1", function() {
-  var portFile = path.resolve(projectDir, portFileName), port = httpServer.address().port;
-  fs.writeFileSync(portFile, String(port), "utf8");
-  process.on("exit", function() {
-    try {
-      var cur = Number(fs.readFileSync(portFile, "utf8"));
-      if (cur == port) fs.unlinkSync(portFile);
-    } catch(e) {}
-  });
+  var port = httpServer.address().port;
+  if (!noPortFile) {
+    var portFile = path.resolve(projectDir, portFileName);
+    fs.writeFileSync(portFile, String(port), "utf8");
+    process.on("exit", function() {
+      try {
+        var cur = Number(fs.readFileSync(portFile, "utf8"));
+        if (cur == port) fs.unlinkSync(portFile);
+      } catch(e) {}
+    });
+  }
   process.on("SIGINT", function() { process.exit(); });
   console.log("Listening on port " + port);
 });

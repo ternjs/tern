@@ -150,8 +150,8 @@ questions about the code through this protocol.</p>
 </dt>
 <dd>
 <p>
-Specify a port to listen on, instead of the default behavior of
-letting the OS pick a random unused port.
+Specify a port to listen on, instead of the
+default behavior of letting the OS pick a random unused port.
 </p>
 </dd>
 <dt>
@@ -159,8 +159,9 @@ letting the OS pick a random unused port.
 </dt>
 <dd>
 <p>
-By default, the server will shut itself down after five minutes of
-inactivity. Pass it a this option to disable auto-shutdown.
+By default, the server will shut itself down after
+five minutes of inactivity. Pass it a this option to disable
+auto-shutdown.
 </p>
 </dd>
 <dt>
@@ -168,9 +169,20 @@ inactivity. Pass it a this option to disable auto-shutdown.
 </dt>
 <dd>
 <p>
-Will cause the server to spit out information about the requests and
-responses that it handles, and any errors that are raised. Useful for
-debugging.
+Will cause the server to spit out information about the
+requests and responses that it handles, and any errors that are
+raised. Useful for debugging.
+</p>
+</dd>
+<dt>
+<code>--no-port-file</code>
+</dt>
+<dd>
+<p>
+The server won&#8217;t write a <code>.tern-port</code> file. Can be
+used if the port files are a problem for you. Will prevent other
+clients from finding the server (and may thus result in multiple
+servers for the same project).
 </p>
 </dd>
 </dl>

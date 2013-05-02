@@ -55,21 +55,21 @@ questions about the code through this protocol.
 
 The following command-line flags are supported:
 
-`--port <number>`::
+`--port <number>`:: Specify a port to listen on, instead of the
+default behavior of letting the OS pick a random unused port.
 
-Specify a port to listen on, instead of the default behavior of
-letting the OS pick a random unused port.
+`--persistent`:: By default, the server will shut itself down after
+five minutes of inactivity. Pass it a this option to disable
+auto-shutdown.
 
-`--persistent`::
+`--verbose`:: Will cause the server to spit out information about the
+requests and responses that it handles, and any errors that are
+raised. Useful for debugging.
 
-By default, the server will shut itself down after five minutes of
-inactivity. Pass it a this option to disable auto-shutdown.
-
-`--verbose`::
-
-Will cause the server to spit out information about the requests and
-responses that it handles, and any errors that are raised. Useful for
-debugging.
+`--no-port-file`:: The server won't write a `.tern-port` file. Can be
+used if the port files are a problem for you. Will prevent other
+clients from finding the server (and may thus result in multiple
+servers for the same project).
 
 [[protocol]]
 === JSON protocol ===
