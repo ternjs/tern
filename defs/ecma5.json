@@ -133,7 +133,7 @@
     "!doc": "Every function in JavaScript is actually a Function object."
   },
   "Array": {
-    "!type": "fn(size: number) -> [?]",
+    "!type": "fn(size: number)",
     "isArray": {
       "!type": "fn(value: ?) -> bool",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/isArray",
