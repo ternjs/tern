@@ -10,6 +10,9 @@
 (require 'url)
 (require 'url-http)
 
+(defun tern-message (fmt &rest objects)
+  (apply 'message fmt objects))
+
 (defun tern-req (port doc c)
   (declare (special url-mime-charset-string url-request-method url-request-data url-show-status))
   (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
@@ -195,7 +198,7 @@ list of strings, giving the binary name and arguments.")
                     (with-current-buffer (find-file-noselect (expand-file-name (cdr (assq 'name file)) tern-project-dir))
                       (setf tern-buffer-is-dirty nil))))
                 (funcall f data))
-               ((not (eq mode :silent)) (message "Request failed: %s" (cdr err))))))
+               ((not (eq mode :silent)) (tern-message "Request failed: %s" (cdr err))))))
      doc)))
 
 (defun tern-send-buffer-to-server ()
@@ -314,7 +317,7 @@ list of strings, giving the binary name and arguments.")
           (push " -> " parts)
           (push (propertize ret 'face 'font-lock-type-face) parts)))
       (let (message-log-max)
-        (message (apply #'concat (nreverse parts)))))))
+        (tern-message (apply #'concat (nreverse parts)))))))
 
 ;; Refactoring ops
 
@@ -358,7 +361,7 @@ list of strings, giving the binary name and arguments.")
       (let ((url (cdr (assq 'url data))))
         (if url
             (browse-url url)
-          (message "No definition found."))))))
+          (tern-message "No definition found."))))))
 
 (defun tern-at-interesting-expression ()
   (if (member (get-text-property (point) 'face)
@@ -411,7 +414,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-get-type ()
   (interactive)
-  (tern-run-query (lambda (data) (message (or (cdr (assq 'type data)) "Not found")))
+  (tern-run-query (lambda (data) (tern-message (or (cdr (assq 'type data)) "Not found")))
                   "type"
                   (point)))
 
@@ -428,10 +431,10 @@ list of strings, giving the binary name and arguments.")
                       (let ((url (cdr (assq 'url data))) (doc (cdr (assq 'doc data))))
                         (cond (doc
                                (setf tern-last-docs-url url)
-                               (message doc))
+                               (tern-message doc))
                               (url
                                (browse-url url))
-                              (t (message "Not found")))))
+                              (t (tern-message "Not found")))))
                     "documentation"
                     (point))))
 
