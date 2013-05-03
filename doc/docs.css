@@ -109,6 +109,10 @@ a[id] {
   vertical-align: top;
   top: -60px;
 }
+
+.release-note {
+  margin-left: 1em;
+}
  
 /* CodeMirror default theme for highlighting */
 
