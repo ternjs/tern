@@ -18,5 +18,5 @@ For further documentation, see the [project page][1] and the
 [3]: http://ternjs.net/doc/manual.html
 
 [emacs]: http://ternjs.net/doc/manual.html#emacs
-[vim]: http://ternjs.net/doc/manual.html#vim
+[vim]: https://github.com/marijnh/tern_for_vim
 [st]: https://github.com/marijnh/tern_for_sublime
