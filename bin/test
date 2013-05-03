@@ -72,7 +72,7 @@ function runTests(filter) {
       ++failed;
     }
 
-    while (m = typedef.exec(text)) {
+    while (m = typedef.exec(text)) (function(m) {
       var args = m[3], kind = m[2], directlyHere = m[1];
       ++tests;
       if (kind == "+") { // Completion test
@@ -107,7 +107,7 @@ function runTests(filter) {
           if (!expr) {
             fail(m, "No expresion found");
             ++failed;
-            continue;
+            return;
           }
           start = expr.node.start; end = expr.node.end;
         }
@@ -149,10 +149,12 @@ function runTests(filter) {
           }
         });
       }
-    }
+    })(m);
   });
-  console.log("Ran " + tests + " tests from " + files + " files.");
-  console.log(failed ? failed + " failures!" : "All passed.");
+  process.on("exit", function() {
+    console.log("Ran " + tests + " tests from " + files + " files.");
+    console.log(failed ? failed + " failures!" : "All passed.");
+  });
 }
 
 runTests(process.argv[2]);
