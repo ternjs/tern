@@ -67,7 +67,7 @@ function runTests(filter) {
     var ast = server.files[0].ast;
 
     var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\n]*)/g, m;
-    function fail(str) {
+    function fail(m, str) {
       console.log(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
       ++failed;
     }
@@ -94,7 +94,7 @@ function runTests(filter) {
           for (var i = 0; i < parts.length && match; ++i)
             if (resp.completions.indexOf(parts[i]) < 0) match = false;
           if (!match)
-            fail("Completion set failed at hint: " + parts[i - 1] +
+            fail(m, "Completion set failed at hint: " + parts[i - 1] +
                  "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
         });
       } else {
@@ -105,7 +105,7 @@ function runTests(filter) {
         } else {
           var expr = walk.findNodeBefore(ast, m.index, "Expression");
           if (!expr) {
-            fail("No expresion found");
+            fail(m, "No expresion found");
             ++failed;
             continue;
           }
@@ -121,16 +121,16 @@ function runTests(filter) {
 
           if (kind == "doc:") { // Docstring test
             if (resp.doc != args) {
-              fail("Found " + (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
+              fail(m, "Found " + (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
                    "instead of expected docstring\n  " + args);
               ++failed;
             }
           } else if (kind == "loc:") { // Definition finding test
             var pos = args.match(/^\s*(\d+),\s*(\d+)/), line = Number(pos[1]), col = Number(pos[2]), bad;
             if (!resp.start)
-              fail("Did not find a definition.");
+              fail(m, "Did not find a definition.");
             else if (resp.start.line + 1 != line || resp.start.ch != col)
-              fail("Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
+              fail(m, "Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
                    " instead of expected " + line + ":" + col);
           } else if (kind == "refs:") { // Reference finding test
             var pos = /\s*(\d+),\s*(\d+)/g, m, refs = [];
@@ -140,12 +140,12 @@ function runTests(filter) {
                 var ref = resp.refs[i];
                 if (ref.start.line + 1 == line && ref.start.ch == col) { found = true; break; }
               }
-              if (!found) fail("Did not find reference at line " + line + ", column " + col + ".");
+              if (!found) fail(m, "Did not find reference at line " + line + ", column " + col + ".");
             }
           } else { // Type test
             var type = resp.guess && kind != ":?" ? "?" : resp.type || "?";
             if (type != args)
-              fail("Expression has type\n  " + type + "\ninstead of expected type\n  " + args);
+              fail(m, "Expression has type\n  " + type + "\ninstead of expected type\n  " + args);
           }
         });
       }
