@@ -269,17 +269,19 @@ list of strings, giving the binary name and arguments.")
 (defun tern-ac-complete ()
   "Complete code at point by tern."
   (interactive)
-  (tern-ac-complete-request
-   (lambda ()
-     (auto-complete '(ac-source-tern-completion)))))
+  (let ((cur-ac-sources ac-sources))
+    (tern-ac-complete-request
+     (lambda ()
+       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
 
 (defun tern-ac-dot-complete ()
   "Insert dot and complete code at point by tern."
   (interactive)
   (insert ".")
-  (tern-ac-complete-request
-   (lambda ()
-     (auto-complete '(ac-source-tern-completion)))))
+  (let ((cur-ac-sources ac-sources))
+    (tern-ac-complete-request
+     (lambda ()
+       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
 
 (defvar tern-ac-completion-truncate-length 22
   "[AC] truncation length for type summary.")
