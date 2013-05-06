@@ -438,6 +438,12 @@ list of strings, giving the binary name and arguments.")
                     "documentation"
                     (point))))
 
+;; Connection management
+
+(defun tern-use-server (port)
+  (interactive "nPort to connect to: ")
+  (setf 'tern-known-port port))
+
 ;; Mode plumbing
 
 (defun tern-before-change (start end)
