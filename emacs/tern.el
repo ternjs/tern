@@ -442,7 +442,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-use-server (port)
   (interactive "nPort to connect to: ")
-  (setf 'tern-known-port port))
+  (setf tern-known-port port))
 
 ;; Mode plumbing
 
