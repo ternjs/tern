@@ -317,10 +317,26 @@ list of strings, giving the binary name and arguments.")
 
 ;; Argument hints
 
+(defvar tern-show-argument-hints-popup t "If non-nil, popup arguments hint.")
+
 (defvar tern-update-argument-hints-timer 700 "millisecond.")
 
 (defvar tern-update-argument-hints-async nil
   "[internal] If non-nil, `tern-update-argument-hints' will be called later.")
+
+(defun tern-argument-hints-new (paren type doc)
+  "Make an argument-hints object."
+  (list paren type doc))
+
+(defun tern-argument-hints-paren (hints)
+  (car hints))
+
+(defun tern-argument-hints-type (hints)
+  (cadr hints))
+
+(defun tern-argument-hints-doc (hints)
+  (nth 2 hints))
+
 
 (defun tern-update-argument-hints-async ()
   (when tern-update-argument-hints-async
@@ -340,11 +356,13 @@ list of strings, giving the binary name and arguments.")
       (if (and tern-last-argument-hints (eq (car tern-last-argument-hints) opening-paren))
           (tern-show-argument-hints)
         (tern-run-query (lambda (data)
-                          (let ((type (tern-parse-function-type data)))
+                          (let ((type (tern-parse-function-type data))
+                                (doc (cdr (assq 'doc data))))
                             (when type
-                              (setf tern-last-argument-hints (cons opening-paren type))
+                              (setf tern-last-argument-hints 
+                                    (tern-argument-hints-new opening-paren type doc))
                               (tern-show-argument-hints))))
-                        `((type . "type")
+                        `((type . "type") (docs . t) (types . t)
                           (preferFunction . t))
                         opening-paren
                         :silent)))))
@@ -393,26 +411,65 @@ list of strings, giving the binary name and arguments.")
                 (forward-char 1)))))))
 
 (defun tern-show-argument-hints ()
+  "Display argument hints with `tern-last-argument-hints'."
   (declare (special message-log-max))
-  (destructuring-bind (paren . type) tern-last-argument-hints
-    (let ((parts ())
-          (current-arg (tern-find-current-arg paren)))
-      (destructuring-bind (name args ret) type
-        (push (propertize name 'face 'font-lock-function-name-face) parts)
-        (push "(" parts)
-        (loop for arg in args for i from 0 do
-              (unless (zerop i) (push ", " parts))
-              (let ((name (or (car arg) "?")))
-                (push (if (eq i current-arg) (propertize name 'face 'highlight) name) parts))
-              (unless (equal (cdr arg) "?")
-                (push ": " parts)
-                (push (propertize (cdr arg) 'face 'font-lock-type-face) parts)))
+  (let* ((hints tern-last-argument-hints)
+         (parts ())
+         (current-arg (tern-find-current-arg 
+                       (tern-argument-hints-paren hints))))
+    (destructuring-bind (name args ret) (tern-argument-hints-type hints)
+      (push (propertize name 'face 'font-lock-function-name-face) parts)
+      (push "(" parts)
+      (loop for arg in args for i from 0 do
+            (unless (zerop i) (push ", " parts))
+            (let ((name (or (car arg) "?")))
+              (push (if (eq i current-arg) (propertize name 'face 'highlight) name) parts))
+            (unless (equal (cdr arg) "?")
+              (push ": " parts)
+              (push (propertize (cdr arg) 'face 'font-lock-type-face) parts)))
         (push ")" parts)
         (when ret
           (push " -> " parts)
           (push (propertize ret 'face 'font-lock-type-face) parts)))
-      (let (message-log-max)
-        (tern-message (apply #'concat (nreverse parts)))))))
+    (let (message-log-max
+          (str (concat (apply #'concat (nreverse parts)) " : " 
+                       (tern-argument-hints-doc hints))))
+      (message str)
+      (when (and tern-show-argument-hints-popup (featurep 'popup)
+                 (not (ac-menu-live-p)))
+        (tern-show-argument-hints-popup)))))
+
+(defun tern-show-argument-hints-popup ()
+  (let* ((hints tern-last-argument-hints)
+         (paren (tern-argument-hints-paren hints))
+         (type (tern-argument-hints-type hints))
+         (doc (tern-argument-hints-doc hints)))
+    (let ((parts ()) (poss ())
+          (current-arg (tern-find-current-arg paren)))
+      (destructuring-bind (name args ret) type
+        (push "(" parts) (push " " poss)
+        (loop for arg in args for i from 0 do
+              (unless (zerop i) 
+                (push ", " parts) (push "  " poss))
+              (let ((posc (if (eq i current-arg) ?^ ? ))
+                    (argname (car arg)) (argtype (cdr arg)))
+                (when argname
+                  (push (make-string (string-width argname) posc) poss)
+                  (push argname parts)
+                  (push ": " parts)
+                  (push (make-string (string-width ": ") posc) poss))
+                (push argtype parts)
+                (push (make-string (string-width argtype) posc) poss)))
+        (push ")" parts) (push " " poss)
+        (when ret
+          (push " -> " parts)
+          (push ret parts))
+        (popup-tip (concat 
+                    (apply #'concat (nreverse parts)) "\n"
+                    (apply #'concat (nreverse poss)) "\n"
+                    doc)
+                   :truncate t
+                   :point paren)))))
 
 ;; Refactoring ops
 
@@ -507,11 +564,20 @@ list of strings, giving the binary name and arguments.")
 
 ;; Query type
 
+(defvar tern-show-get-type-popup t "If non-nil, popup expression type.")
+
 (defun tern-get-type ()
   (interactive)
-  (tern-run-query (lambda (data) (tern-message (or (cdr (assq 'type data)) "Not found")))
-                  "type"
-                  (point)))
+  (tern-run-query #'tern-get-type-display "type" (point)))
+
+(defun tern-get-type-display (data)
+  (let* ((type-str (cdr (assq 'type data)))
+         (expr-str (cdr (assq 'exprName data)))
+         (str (if type-str (format "%s : %s" expr-str type-str) "Not found")))
+    (cond 
+     ((and tern-show-get-type-popup (featurep 'popup))
+      (popup-tip str :truncate t))
+     (t (tern-message str)))))
 
 ;; Display docs
 
