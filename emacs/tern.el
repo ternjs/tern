@@ -304,10 +304,12 @@ list of strings, giving the binary name and arguments.")
         tern-ac-complete-request-point)))
 
 ;; (makunbound 'ac-source-tern-completion)
-(ac-define-source tern-completion
-  '((candidates . tern-ac-completion-matches)
-    (prefix . tern-ac-completion-prefix)
-    (requires . -1)))
+(eval-after-load 'auto-complete
+  '(progn
+     (ac-define-source tern-completion
+       '((candidates . tern-ac-completion-matches)
+         (prefix . tern-ac-completion-prefix)
+         (requires . -1)))))
 
 (defun tern-ac-setup ()
   (interactive)
@@ -658,7 +660,7 @@ list of strings, giving the binary name and arguments.")
   (add-hook 'before-change-functions 'tern-before-change nil t)
   (add-hook 'post-command-hook 'tern-post-command nil t)
   (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t)
-  (when auto-complete-mode
+  (when (and (featurep 'auto-complete) auto-complete-mode)
     (tern-ac-setup)))
 
 (defun tern-mode-disable ()
