@@ -239,6 +239,23 @@ list of strings, giving the binary name and arguments.")
 
 ;; Argument hints
 
+(defvar tern-update-argument-hints-timer 700 "millisecond.")
+
+(defvar tern-update-argument-hints-async nil
+  "[internal] If non-nil, `tern-update-argument-hints' will be called later.")
+
+(defun tern-update-argument-hints-async ()
+  (when tern-update-argument-hints-async
+    (cancel-timer tern-update-argument-hints-async))
+  (setq tern-update-argument-hints-async
+          (run-at-time 
+           (* 0.001 tern-update-argument-hints-timer) nil
+           (lambda ()
+             (condition-case err
+                 (tern-update-argument-hints)
+               (t (message "tern-update-argument-hints : %S" err)))
+             (setq tern-update-argument-hints-async nil)))))
+
 (defun tern-update-argument-hints ()
   (let ((opening-paren (cadr (syntax-ppss))))
     (when (and opening-paren (equal (char-after opening-paren) ?\())
@@ -469,7 +486,7 @@ list of strings, giving the binary name and arguments.")
   (unless (eq (point) tern-last-point-pos)
     (setf tern-last-point-pos (point))
     (setf tern-activity-since-command tern-command-generation)
-    (tern-update-argument-hints)))
+    (tern-update-argument-hints-async)))
 
 (defun tern-left-buffer ()
   (declare (special buffer-list-update-hook))
