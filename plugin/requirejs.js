@@ -7,21 +7,6 @@
 })(function(infer, tern) {
   "use strict";
 
-  function resolveName(name, data) {
-    var opts = data.options;
-    var base = opts.baseURL || "";
-    if (base && base.charAt(base.length - 1) != "/") base += "/";
-    if (!opts.paths) return base + name + ".js";
-    var known = opts.paths[name];
-    if (known) return base + known + ".js";
-    var dir = name.match(/^([^\/]+)(\/.*)$/);
-    if (dir) {
-      var known = opts.paths[dir[0]];
-      if (known) return base + known + dir[1] + ".js";
-    }
-    return base + name + ".js";
-  }
-
   function flattenPath(path) {
     if (!/(^|\/)(\.\/|[^\/]+\/\.\.\/)/.test(path)) return path;
     var parts = path.split("/");
@@ -30,6 +15,26 @@
       else if (i && parts[i] == "..") parts.splice(i-- - 1, 2);
     }
     return parts.join("/");
+  }
+
+  function resolveName(name, data) {
+    var opts = data.options;
+    var hasExt = /\.js$/.test(name);
+    if (hasExt || /^(?:\w+:|\/)/.test(name))
+      return name + (hasExt ? "" : ".js");
+
+    var base = opts.baseURL || "";
+    if (base && base.charAt(base.length - 1) != "/") base += "/";
+    if (opts.paths) {
+      var known = opts.paths[name];
+      if (known) return flattenPath(base + known + ".js");
+      var dir = name.match(/^([^\/]+)(\/.*)$/);
+      if (dir) {
+        var known = opts.paths[dir[0]];
+        if (known) return flattenPath(base + known + dir[1] + ".js");
+      }
+    }
+    return flattenPath(base + name + ".js");
   }
 
   function getRequire(data) {
