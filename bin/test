@@ -133,9 +133,9 @@ function runTests(filter) {
               fail(m, "Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
                    " instead of expected " + line + ":" + col);
           } else if (kind == "refs:") { // Reference finding test
-            var pos = /\s*(\d+),\s*(\d+)/g, m, refs = [];
-            while (m = pos.exec(args)) {
-              var line = Number(m[1]), col = Number(m[2]), found = false;
+            var pos = /\s*(\d+),\s*(\d+)/g, mm, refs = [];
+            while (mm = pos.exec(args)) {
+              var line = Number(mm[1]), col = Number(mm[2]), found = false;
               for (var i = 0; i < resp.refs.length; ++i) {
                 var ref = resp.refs[i];
                 if (ref.start.line + 1 == line && ref.start.ch == col) { found = true; break; }

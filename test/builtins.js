@@ -31,3 +31,5 @@ num; //: Number
 Array.prototype.slice.call([1, 2, 3], 1); //: [number]
 
 Array.prototype.slice.apply([1, 2, 3], [1]); //: [number]
+
+String.prototype.indexOf.bind("abcde", "a"); //: fn(from?: number) -> number
