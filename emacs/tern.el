@@ -239,7 +239,7 @@ list of strings, giving the binary name and arguments.")
 
 ;; Argument hints
 
-(defvar tern-update-argument-hints-timer 700 "millisecond.")
+(defvar tern-update-argument-hints-timer 500 "millisecond.")
 
 (defvar tern-update-argument-hints-async nil
   "[internal] If non-nil, `tern-update-argument-hints' will be called later.")
