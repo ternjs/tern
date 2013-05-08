@@ -237,7 +237,120 @@ list of strings, giving the binary name and arguments.")
                                 when (eq (compare-strings word 0 (length word) new-word 0 (length word)) t)
                                 collect elt)))))))))
 
+;; Completion by auto-complete
+
+(defvar tern-ac-on-dot nil "[AC] If t, tern enable completion by auto-completion.")
+
+(defvar tern-ac-complete-reply nil  "[internal] tern-ac-complete-reply.")
+
+(defvar tern-ac-complete-request-point 0
+  "[internal] The point where `tern-ac-complete-request' is called.")
+
+(defun tern-ac-complete-request (cc)
+  (setq tern-last-point-pos (point))
+  (setq tern-ac-complete-reply nil)
+  (setq tern-ac-complete-request-point (point))
+  (tern-run-query 
+   (lambda (data) 
+     (tern-ac-complete-response data)
+     (funcall cc))
+   `((type . "completions") (types . t) (docs . t))
+   (point)))
+
+(defun tern-ac-complete-response (data)
+  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
+        (start (+ 1 (cdr (assq 'start data))))
+        (end (+ 1 (cdr (assq 'end data)))))
+    (setq tern-last-completions (list (buffer-substring-no-properties start end) start end cs))
+    (setq tern-ac-complete-reply cs)))
+
+(defun tern-ac-complete ()
+  "Complete code at point by tern."
+  (interactive)
+  (let ((cur-ac-sources ac-sources))
+    (tern-ac-complete-request
+     (lambda ()
+       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
+
+(defun tern-ac-dot-complete ()
+  "Insert dot and complete code at point by tern."
+  (interactive)
+  (insert ".")
+  (let ((cur-ac-sources ac-sources))
+    (tern-ac-complete-request
+     (lambda ()
+       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
+
+(defvar tern-ac-completion-truncate-length 22
+  "[AC] truncation length for type summary.")
+
+(defun tern-ac-completion-matches ()
+  (mapcar
+   (lambda (item)
+     (let ((doc (cdr (assq 'doc item)))
+           (type (cdr (assq 'type item)))
+           (name (cdr (assq 'name item))))
+       (popup-make-item 
+        name
+        :symbol (if (string-match "fn" type) "f" "v")
+        :summary (truncate-string-to-width 
+                  type tern-ac-completion-truncate-length 0 nil "...")
+        :document (concat type "\n\n" doc))))
+   tern-ac-complete-reply))
+
+(defun tern-ac-completion-prefix ()
+  (or (ac-prefix-default)
+      (when (= tern-ac-complete-request-point (point))
+        tern-ac-complete-request-point)))
+
+;; (makunbound 'ac-source-tern-completion)
+(eval-after-load 'auto-complete
+  '(progn
+     (ac-define-source tern-completion
+       '((candidates . tern-ac-completion-matches)
+         (prefix . tern-ac-completion-prefix)
+         (requires . -1)))))
+
+(defun tern-ac-setup ()
+  (interactive)
+  (if tern-ac-on-dot
+      (define-key tern-mode-keymap "." 'tern-ac-dot-complete)
+    (define-key tern-mode-keymap "." nil)))
+
 ;; Argument hints
+
+(defvar tern-show-argument-hints-popup t "If non-nil, popup arguments hint.")
+
+(defvar tern-update-argument-hints-timer 700 "millisecond.")
+
+(defvar tern-update-argument-hints-async nil
+  "[internal] If non-nil, `tern-update-argument-hints' will be called later.")
+
+(defun tern-argument-hints-new (paren type doc)
+  "Make an argument-hints object."
+  (list paren type doc))
+
+(defun tern-argument-hints-paren (hints)
+  (car hints))
+
+(defun tern-argument-hints-type (hints)
+  (cadr hints))
+
+(defun tern-argument-hints-doc (hints)
+  (nth 2 hints))
+
+
+(defun tern-update-argument-hints-async ()
+  (when tern-update-argument-hints-async
+    (cancel-timer tern-update-argument-hints-async))
+  (setq tern-update-argument-hints-async
+          (run-at-time 
+           (* 0.001 tern-update-argument-hints-timer) nil
+           (lambda ()
+             (condition-case err
+                 (tern-update-argument-hints)
+               (t (message "tern-update-argument-hints : %S" err)))
+             (setq tern-update-argument-hints-async nil)))))
 
 (defun tern-update-argument-hints ()
   (let ((opening-paren (cadr (syntax-ppss))))
@@ -245,11 +358,13 @@ list of strings, giving the binary name and arguments.")
       (if (and tern-last-argument-hints (eq (car tern-last-argument-hints) opening-paren))
           (tern-show-argument-hints)
         (tern-run-query (lambda (data)
-                          (let ((type (tern-parse-function-type data)))
+                          (let ((type (tern-parse-function-type data))
+                                (doc (cdr (assq 'doc data))))
                             (when type
-                              (setf tern-last-argument-hints (cons opening-paren type))
+                              (setf tern-last-argument-hints 
+                                    (tern-argument-hints-new opening-paren type doc))
                               (tern-show-argument-hints))))
-                        `((type . "type")
+                        `((type . "type") (docs . t) (types . t)
                           (preferFunction . t))
                         opening-paren
                         :silent)))))
@@ -298,26 +413,65 @@ list of strings, giving the binary name and arguments.")
                 (forward-char 1)))))))
 
 (defun tern-show-argument-hints ()
+  "Display argument hints with `tern-last-argument-hints'."
   (declare (special message-log-max))
-  (destructuring-bind (paren . type) tern-last-argument-hints
-    (let ((parts ())
-          (current-arg (tern-find-current-arg paren)))
-      (destructuring-bind (name args ret) type
-        (push (propertize name 'face 'font-lock-function-name-face) parts)
-        (push "(" parts)
-        (loop for arg in args for i from 0 do
-              (unless (zerop i) (push ", " parts))
-              (let ((name (or (car arg) "?")))
-                (push (if (eq i current-arg) (propertize name 'face 'highlight) name) parts))
-              (unless (equal (cdr arg) "?")
-                (push ": " parts)
-                (push (propertize (cdr arg) 'face 'font-lock-type-face) parts)))
+  (let* ((hints tern-last-argument-hints)
+         (parts ())
+         (current-arg (tern-find-current-arg 
+                       (tern-argument-hints-paren hints))))
+    (destructuring-bind (name args ret) (tern-argument-hints-type hints)
+      (push (propertize name 'face 'font-lock-function-name-face) parts)
+      (push "(" parts)
+      (loop for arg in args for i from 0 do
+            (unless (zerop i) (push ", " parts))
+            (let ((name (or (car arg) "?")))
+              (push (if (eq i current-arg) (propertize name 'face 'highlight) name) parts))
+            (unless (equal (cdr arg) "?")
+              (push ": " parts)
+              (push (propertize (cdr arg) 'face 'font-lock-type-face) parts)))
         (push ")" parts)
         (when ret
           (push " -> " parts)
           (push (propertize ret 'face 'font-lock-type-face) parts)))
-      (let (message-log-max)
-        (tern-message (apply #'concat (nreverse parts)))))))
+    (let (message-log-max
+          (str (concat (apply #'concat (nreverse parts)) " : " 
+                       (tern-argument-hints-doc hints))))
+      (message str)
+      (when (and tern-show-argument-hints-popup (featurep 'popup)
+                 (not (ac-menu-live-p)))
+        (tern-show-argument-hints-popup)))))
+
+(defun tern-show-argument-hints-popup ()
+  (let* ((hints tern-last-argument-hints)
+         (paren (tern-argument-hints-paren hints))
+         (type (tern-argument-hints-type hints))
+         (doc (tern-argument-hints-doc hints)))
+    (let ((parts ()) (poss ())
+          (current-arg (tern-find-current-arg paren)))
+      (destructuring-bind (name args ret) type
+        (push "(" parts) (push " " poss)
+        (loop for arg in args for i from 0 do
+              (unless (zerop i) 
+                (push ", " parts) (push "  " poss))
+              (let ((posc (if (eq i current-arg) ?^ ? ))
+                    (argname (car arg)) (argtype (cdr arg)))
+                (when argname
+                  (push (make-string (string-width argname) posc) poss)
+                  (push argname parts)
+                  (push ": " parts)
+                  (push (make-string (string-width ": ") posc) poss))
+                (push argtype parts)
+                (push (make-string (string-width argtype) posc) poss)))
+        (push ")" parts) (push " " poss)
+        (when ret
+          (push " -> " parts)
+          (push ret parts))
+        (popup-tip (concat 
+                    (apply #'concat (nreverse parts)) "\n"
+                    (apply #'concat (nreverse poss)) "\n"
+                    doc)
+                   :truncate t
+                   :point paren)))))
 
 ;; Refactoring ops
 
@@ -412,11 +566,20 @@ list of strings, giving the binary name and arguments.")
 
 ;; Query type
 
+(defvar tern-show-get-type-popup t "If non-nil, popup expression type.")
+
 (defun tern-get-type ()
   (interactive)
-  (tern-run-query (lambda (data) (tern-message (or (cdr (assq 'type data)) "Not found")))
-                  "type"
-                  (point)))
+  (tern-run-query #'tern-get-type-display "type" (point)))
+
+(defun tern-get-type-display (data)
+  (let* ((type-str (cdr (assq 'type data)))
+         (expr-str (cdr (assq 'exprName data)))
+         (str (if type-str (format "%s : %s" expr-str type-str) "Not found")))
+    (cond 
+     ((and tern-show-get-type-popup (featurep 'popup))
+      (popup-tip str :truncate t))
+     (t (tern-message str)))))
 
 ;; Display docs
 
@@ -469,7 +632,7 @@ list of strings, giving the binary name and arguments.")
   (unless (eq (point) tern-last-point-pos)
     (setf tern-last-point-pos (point))
     (setf tern-activity-since-command tern-command-generation)
-    (tern-update-argument-hints)))
+    (tern-update-argument-hints-async)))
 
 (defun tern-left-buffer ()
   (declare (special buffer-list-update-hook))
@@ -504,7 +667,9 @@ list of strings, giving the binary name and arguments.")
   (push 'tern-completion-at-point completion-at-point-functions)
   (add-hook 'before-change-functions 'tern-before-change nil t)
   (add-hook 'post-command-hook 'tern-post-command nil t)
-  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t))
+  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t)
+  (when (and (featurep 'auto-complete) auto-complete-mode)
+    (tern-ac-setup)))
 
 (defun tern-mode-disable ()
   (setf completion-at-point-functions
