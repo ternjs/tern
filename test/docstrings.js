@@ -49,4 +49,4 @@ var o = {
 };
 
 o.getName; //doc: Get the name.
-o.name; // The name
+o.name; //doc: The name
