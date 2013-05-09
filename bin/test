@@ -88,14 +88,26 @@ function runTests(filter) {
         var andOthers = /,\s*\.\.\.$/.test(args);
         if (andOthers) args = args.slice(0, args.lastIndexOf(","));
         var parts = args ? args.split(/\s*,\s*/) : [];
+        var wantedParts = [], unwantedParts = [];
+        for (var i = 0; i < parts.length; ++i) {
+          if (parts[i][0] == "!") {
+            unwantedParts.push(parts[i].slice(1));
+          } else {
+            wantedParts.push(parts[i]);
+          }
+        }
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
           var match = andOthers || parts.length == resp.completions.length;
-          for (var i = 0; i < parts.length && match; ++i)
-            if (resp.completions.indexOf(parts[i]) < 0) match = false;
+          for (var i = 0; i < wantedParts.length && match; ++i) {
+            if (resp.completions.indexOf(wantedParts[i]) < 0) match = false;
+          }
+          for (var i = 0; i < unwantedParts.length && match; ++i) {
+            if (resp.completions.indexOf(unwantedParts[i]) != -1) match = false;
+          }
           if (!match)
             fail(m, "Completion set failed at hint: " + parts[i - 1] +
-                 "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
+                 "\n   got: " + resp.completions.join(", ") + "\n  args: " + args);
         });
       } else {
         var start, end;
