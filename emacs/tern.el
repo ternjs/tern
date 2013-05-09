@@ -237,6 +237,86 @@ list of strings, giving the binary name and arguments.")
                                 when (eq (compare-strings word 0 (length word) new-word 0 (length word)) t)
                                 collect elt)))))))))
 
+;; Completion by auto-complete
+
+(defvar tern-ac-on-dot nil "[AC] If t, tern enable completion by auto-completion.")
+
+(defvar tern-ac-complete-reply nil  "[internal] tern-ac-complete-reply.")
+
+(defvar tern-ac-complete-request-point 0
+  "[internal] The point where `tern-ac-complete-request' is called.")
+
+(defun tern-ac-complete-request (cc)
+  (setq tern-last-point-pos (point))
+  (setq tern-ac-complete-reply nil)
+  (setq tern-ac-complete-request-point (point))
+  (tern-run-query 
+   (lambda (data) 
+     (tern-ac-complete-response data)
+     (funcall cc))
+   `((type . "completions") (types . t) (docs . t))
+   (point)))
+
+(defun tern-ac-complete-response (data)
+  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
+        (start (+ 1 (cdr (assq 'start data))))
+        (end (+ 1 (cdr (assq 'end data)))))
+    (setq tern-last-completions (list (buffer-substring-no-properties start end) start end cs))
+    (setq tern-ac-complete-reply cs)))
+
+(defun tern-ac-complete ()
+  "Complete code at point by tern."
+  (interactive)
+  (let ((cur-ac-sources ac-sources))
+    (tern-ac-complete-request
+     (lambda ()
+       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
+
+(defun tern-ac-dot-complete ()
+  "Insert dot and complete code at point by tern."
+  (interactive)
+  (insert ".")
+  (let ((cur-ac-sources ac-sources))
+    (tern-ac-complete-request
+     (lambda ()
+       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
+
+(defvar tern-ac-completion-truncate-length 22
+  "[AC] truncation length for type summary.")
+
+(defun tern-ac-completion-matches ()
+  (mapcar
+   (lambda (item)
+     (let ((doc (cdr (assq 'doc item)))
+           (type (cdr (assq 'type item)))
+           (name (cdr (assq 'name item))))
+       (popup-make-item 
+        name
+        :symbol (if (string-match "fn" type) "f" "v")
+        :summary (truncate-string-to-width 
+                  type tern-ac-completion-truncate-length 0 nil "...")
+        :document (concat type "\n\n" doc))))
+   tern-ac-complete-reply))
+
+(defun tern-ac-completion-prefix ()
+  (or (ac-prefix-default)
+      (when (= tern-ac-complete-request-point (point))
+        tern-ac-complete-request-point)))
+
+;; (makunbound 'ac-source-tern-completion)
+(eval-after-load 'auto-complete
+  '(progn
+     (ac-define-source tern-completion
+       '((candidates . tern-ac-completion-matches)
+         (prefix . tern-ac-completion-prefix)
+         (requires . -1)))))
+
+(defun tern-ac-setup ()
+  (interactive)
+  (if tern-ac-on-dot
+      (define-key tern-mode-keymap "." 'tern-ac-dot-complete)
+    (define-key tern-mode-keymap "." nil)))
+
 ;; Argument hints
 
 (defvar tern-update-argument-hints-timer 500 "millisecond.")
@@ -521,7 +601,9 @@ list of strings, giving the binary name and arguments.")
   (push 'tern-completion-at-point completion-at-point-functions)
   (add-hook 'before-change-functions 'tern-before-change nil t)
   (add-hook 'post-command-hook 'tern-post-command nil t)
-  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t))
+  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t)
+  (when (and (featurep 'auto-complete) auto-complete-mode)
+    (tern-ac-setup)))
 
 (defun tern-mode-disable ()
   (setf completion-at-point-functions
