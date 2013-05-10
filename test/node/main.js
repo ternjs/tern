@@ -35,3 +35,6 @@ require("./foo/../exportfunc.js"); //: fn(a: number, b: number) -> number
 require("mod1").mainExport.x; //: number
 require("mod1/secondfile").secondExport.u; //: number
 require("mod1/dir1").foo.a; //: number
+
+module.exports. //+ !mainExport, ...
+exports. //+ !goodbye
