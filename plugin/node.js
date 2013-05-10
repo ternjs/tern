@@ -23,7 +23,7 @@
     var scope = new infer.Scope(parent);
     scope.node = node;
     infer.def.parsePath("node.require").propagate(scope.defProp("require"));
-    var module = infer.getInstance(infer.def.parsePath("node.Module.prototype").getType());
+    var module = new infer.Obj(infer.def.parsePath("node.Module.prototype").getType());
     module.propagate(scope.defProp("module"));
     var exports = new infer.Obj(true, "exports", origin);
     exports.propagate(scope.defProp("exports"));
