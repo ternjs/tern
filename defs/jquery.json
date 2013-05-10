@@ -762,9 +762,9 @@
       "!url": "http://api.jquery.com/jquery.ajaxTransport/",
       "!doc": "Creates an object that handles the actual transmission of Ajax data."
     },
-    "callbacks": {
+    "Callbacks": {
       "!type": "fn(flags: string) -> ?",
-      "!url": "http://api.jquery.com/jquery.callbacks/",
+      "!url": "http://api.jquery.com/jquery.Callbacks/",
       "!doc": "A multi-purpose callbacks list object that provides a powerful way to manage callback lists."
     },
     "contains": {
