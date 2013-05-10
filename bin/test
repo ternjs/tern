@@ -98,7 +98,7 @@ function runTests(filter) {
         }
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
-          var match = andOthers || parts.length == resp.completions.length;
+          var match = andOthers || wantedParts.length == resp.completions.length;
           for (var i = 0; i < wantedParts.length && match; ++i) {
             if (resp.completions.indexOf(wantedParts[i]) < 0) match = false;
           }
