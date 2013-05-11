@@ -1,6 +1,6 @@
 // plugin=requirejs
 
-requirejs(["foo", "bar", "useexports", "simplifiedcommon"], function(foo, bar, useexports, simplified) {
+requirejs(["foo", "abc!bar", "useexports", "simplifiedcommon"], function(foo, bar, useexports, simplified) {
   foo.aString; //: string
   bar.aNumber; //: number
   bar.baz.bazProp; //: Date
