@@ -718,7 +718,7 @@
       "wrapInner": {
         "!type": "fn(wrappingElement: ?) -> jQuery.fn",
         "!url": "http://api.jquery.com/wrapInner/",
-        "doc": "Wrap an HTML structure around the content of each element in the set of matched elements."
+        "!doc": "Wrap an HTML structure around the content of each element in the set of matched elements."
       },
 
       "slice": {
@@ -773,7 +773,7 @@
       "!doc": "Check to see if a DOM element is a descendant of another DOM element."
     },
     "cssHooks": {
-      "!type": "{}",
+      "!type": "?",
       "!url": "http://api.jquery.com/cssHooks/",
       "!doc": "Hook directly into jQuery to override how particular CSS properties are retrieved or set, normalize CSS property naming, or create custom properties."
     },

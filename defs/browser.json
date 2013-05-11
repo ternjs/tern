@@ -130,7 +130,7 @@
     "!type": "fn()",
     "prototype": {
       "parentElement": {
-        "!type": "++Element",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.parentElement",
         "!doc": "Returns the DOM node's parent Element, or null if the node either has no parent, or its parent isn't a DOM Element."
       },
