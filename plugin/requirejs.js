@@ -54,6 +54,7 @@
 
   function getInterface(name, data) {
     if (name == "require") return getRequire(data);
+    if (name == "module") return infer.cx().definitions.requirejs.module;
 
     if (!/^(https?:|\/)|\.js$/.test(name))
       name = resolveName(name, data);
@@ -131,7 +132,15 @@
   });
 
   var defs = {
-    "!name": "requirejs.js",
+    "!name": "requirejs",
+    "!define": {
+      module: {
+        id: "string",
+        uri: "string",
+        config: "fn() -> ?",
+        exports: "?"
+      }
+    },
     requirejs: {
       "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
       onError: "fn(err: +Error)",
