@@ -1131,7 +1131,7 @@
       "!doc": "Takes a well-formed JSON string and returns the resulting JavaScript object."
     },
     "parseXML": {
-      "!type": "fn(xml: string) -> XMLDocument",
+      "!type": "fn(xml: string) -> +XMLDocument",
       "!url": "http://api.jquery.com/jquery.parseXML/",
       "!doc": "Parses a string into an XML document."
     },
