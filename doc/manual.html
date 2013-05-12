@@ -594,9 +594,9 @@ needing to perform a query on a large file without re-uploading and
 re-analyzing the whole file. A partial file has a <code>type</code> property
 holding the string <code>"part"</code>, a <code>text</code> property holding some slice of
 the file (starting at a line boundary), a <code>name</code> property referring to
-an existing file, and either an <code>offset</code> (character offset) or
-<code>offsetLines</code> (line offset) property indicating the approximate
-position of the fragment in the file.</p>
+an existing file, and an <code>offset</code> property, either an integer or a
+<code>{line, ch}</code> object, indicating the approximate position of the
+fragment in the file.</p>
 <h3> <a id="server_api"></a>Programming interface</h3>
 <p ><a id="tern.Server"></a> The base server (without HTTP or configuration-file
 reading) is implemented in <code>lib/tern.js</code>. That package exposes a

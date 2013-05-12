@@ -294,9 +294,9 @@ needing to perform a query on a large file without re-uploading and
 re-analyzing the whole file. A partial file has a `type` property
 holding the string `"part"`, a `text` property holding some slice of
 the file (starting at a line boundary), a `name` property referring to
-an existing file, and either an `offset` (character offset) or
-`offsetLines` (line offset) property indicating the approximate
-position of the fragment in the file.
+an existing file, and an `offset` property, either an integer or a
+`{line, ch}` object, indicating the approximate position of the
+fragment in the file.
 
 [[server_api]]
 === Programming interface ===
