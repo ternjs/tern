@@ -1,6 +1,7 @@
-function Bar() {}
+function Bar() { this.prop = 10; }
 Bar.prototype.hallo = function() {
   this; //: Bar
+  this.prop; //: number
 };
 
 Bar.prototype.fn2 = function() {
