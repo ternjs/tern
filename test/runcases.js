@@ -2,20 +2,18 @@ var fs = require("fs"), path = require("path");
 var infer = require("../lib/infer");
 var tern = require("../lib/tern");
 var acorn = require("acorn");
-var walk = require("acorn/util/walk.js");
+var walk = require("acorn/util/walk");
 require("../plugin/requirejs.js");
 require("../plugin/node.js");
+var util = require("./util");
 
-var pDir = path.resolve(__dirname, "..");
-
-var ecma5 = JSON.parse(fs.readFileSync(path.resolve(pDir, "defs/ecma5.json")), "utf8");
 var defData = {
-  browser: JSON.parse(fs.readFileSync(path.resolve(pDir, "defs/browser.json")), "utf8"),
-  jquery: JSON.parse(fs.readFileSync(path.resolve(pDir, "defs/jquery.json")), "utf8")
+  browser: util.browser,
+  jquery: util.jquery
 };
 
 function getDefs(text) {
-  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [ecma5];
+  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [util.ecma5];
   while (m = spec.exec(text)) {
     var data = defData[m[1]];
     if (!data) throw new Error("Unknown environment: " + m[1]);
@@ -32,10 +30,10 @@ function getPlugins(text) {
 }
 
 var nodeModules = {};
-fs.readdirSync(path.resolve(pDir, "test/cases/node_modules")).forEach(function(name) {
+fs.readdirSync(util.resolve("test/cases/node_modules")).forEach(function(name) {
   if (/\.json$/.test(name))
     nodeModules[path.basename(name, ".json")] =
-      JSON.parse(fs.readFileSync(path.resolve(pDir, "test/cases/node_modules/" + name), "utf8"));
+      JSON.parse(fs.readFileSync(util.resolve("test/cases/node_modules/" + name), "utf8"));
 });
 
 function serverOptions(context, text) {
@@ -49,12 +47,11 @@ function serverOptions(context, text) {
 }
 
 exports.runTests = function(filter) {
-  var files = 0, tests = 0, failed = 0;
-  var caseDir = path.resolve(pDir, "test/cases") + "/";
+  var caseDir = util.resolve("test/cases") + "/";
   fs.readdirSync(caseDir).forEach(function(name) {
     if (filter && name.indexOf(filter) == -1) return;
 
-    ++files;
+    util.addFile();
     var fname = name, context = caseDir;
     if (fs.statSync(path.resolve(context, name)).isDirectory()) {
       if (name == "node_modules") return;
@@ -68,13 +65,12 @@ exports.runTests = function(filter) {
 
     var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\n]*)/g, m;
     function fail(m, str) {
-      console.log(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
-      ++failed;
+      util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
 
     while (m = typedef.exec(text)) (function(m) {
       var args = m[3], kind = m[2], directlyHere = m[1];
-      ++tests;
+      util.addTest();
       if (kind == "+") { // Completion test
         var columnInfo = /\s*@(\d+)$/.exec(args), pos = m.index;
         if (columnInfo) {
@@ -106,7 +102,6 @@ exports.runTests = function(filter) {
           var expr = walk.findNodeBefore(ast, m.index, "Expression");
           if (!expr) {
             fail(m, "No expresion found");
-            ++failed;
             return;
           }
           start = expr.node.start; end = expr.node.end;
@@ -123,7 +118,6 @@ exports.runTests = function(filter) {
             if (resp.doc != args) {
               fail(m, "Found " + (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
                    "instead of expected docstring\n  " + args);
-              ++failed;
             }
           } else if (kind == "loc:") { // Definition finding test
             var pos = args.match(/^\s*(\d+),\s*(\d+)/), line = Number(pos[1]), col = Number(pos[2]), bad;
@@ -150,9 +144,5 @@ exports.runTests = function(filter) {
         });
       }
     })(m);
-  });
-  process.on("exit", function() {
-    console.log("Ran " + tests + " tests from " + files + " files.");
-    console.log(failed ? failed + " failures!" : "All passed.");
   });
 };
