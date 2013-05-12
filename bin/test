@@ -34,9 +34,9 @@ function getPlugins(text) {
 }
 
 var nodeModules = {};
-fs.readdirSync("test/node_modules").forEach(function(name) {
+fs.readdirSync("test/cases/node_modules").forEach(function(name) {
   if (/\.json$/.test(name))
-    nodeModules[path.basename(name, ".json")] = JSON.parse(fs.readFileSync("test/node_modules/" + name, "utf8"));
+    nodeModules[path.basename(name, ".json")] = JSON.parse(fs.readFileSync("test/cases/node_modules/" + name, "utf8"));
 });
 
 function serverOptions(context, text) {
@@ -51,11 +51,11 @@ function serverOptions(context, text) {
 
 function runTests(filter) {
   var files = 0, tests = 0, failed = 0;
-  fs.readdirSync("test/").forEach(function(name) {
+  fs.readdirSync("test/cases/").forEach(function(name) {
     if (filter && name.indexOf(filter) == -1) return;
 
     ++files;
-    var fname = name, context = "test/";
+    var fname = name, context = "test/cases/";
     if (fs.statSync(context + name).isDirectory()) {
       if (name == "node_modules") return;
       context += name + "/";
