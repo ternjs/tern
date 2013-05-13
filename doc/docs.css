@@ -77,7 +77,7 @@ pre {
   padding: 2px 0 2px 10px;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: "Signika", sans-serif;
   font-weight: 700;
   color: #124f55;
@@ -85,6 +85,7 @@ h1, h2, h3 {
 h1 { font-size: 20pt; }
 h2 { font-size: 17pt; }
 h3 { font-size: 13pt; }
+h4 { font-size: 11pt; }
 
 a, a:visited, a code { color: #df4c11; text-decoration: none; }
 a:hover { text-decoration: underline; }
