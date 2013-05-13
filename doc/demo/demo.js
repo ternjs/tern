@@ -64,7 +64,7 @@ function initEditor() {
       async: true,
       defs: defs,
       debug: true,
-      plugins: {requirejs: {}}
+      plugins: {requirejs: {}, doc_comments: true}
     });
   }
   registerDoc("test.js", editor.getDoc());

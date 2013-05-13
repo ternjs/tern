@@ -69,17 +69,28 @@ function findDefs(projectDir, config) {
   return defs;
 }
 
+var defaultPlugins = ["doc_comment"];
+
 function loadPlugins(projectDir, plugins) {
   var options = {};
   for (var plugin in plugins) {
+    var val = plugins[plugin];
+    if (!val) continue;
     var found = findFile(plugin + ".js", projectDir, path.resolve(distDir, "plugin"));
     if (!found) {
       process.stderr.write("Failed to find plugin " + plugin + ".\n");
       continue;
     }
     require(found);
-    options[path.basename(plugin)] = plugins[plugin];
+    options[path.basename(plugin)] = val;
   }
+  
+  defaultPlugins.forEach(function(name) {
+    if (!plugins.hasOwnProperty(name)) {
+      options[name] = true;
+      require("../plugin/" + name);
+    }
+  });
   return options;
 }
 

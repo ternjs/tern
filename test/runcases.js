@@ -5,6 +5,7 @@ var acorn = require("acorn");
 var walk = require("acorn/util/walk");
 require("../plugin/requirejs.js");
 require("../plugin/node.js");
+require("../plugin/doc_comment.js");
 var util = require("./util");
 
 var defData = {
@@ -23,7 +24,7 @@ function getDefs(text) {
 }
 
 function getPlugins(text) {
-  var spec = /\/\/ plugin=(\w+)\n/g, m, plugins = {};
+  var spec = /\/\/ plugin=(\w+)\n/g, m, plugins = {doc_comment: true};
   while (m = spec.exec(text))
     plugins[m[1]] = m[1] == "node" ? {modules: nodeModules} : {};
   return plugins;
