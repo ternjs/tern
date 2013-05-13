@@ -1651,6 +1651,16 @@ open the associated URL (if any).
 </p>
 </dd>
 </dl>
+<div class="sect3">
+<h4 id="_auto_complete">Auto-Complete</h4>
+<p >If you want to use <code>auto-complete.el</code> for completion, append following codes:</p>
+<pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">eval-after-load</span> '<span class="cm-variable">tern</span>
+   '<span class="cm-bracket">(</span><span class="cm-variable">progn</span>
+      <span class="cm-bracket">(</span><span class="cm-variable">require</span> '<span class="cm-variable">tern-auto-complete</span><span class="cm-bracket">)</span>
+      <span class="cm-bracket">(</span><span class="cm-variable">tern-ac-setup</span><span class="cm-bracket">)))</span></pre>
+<p >If <code>tern-ac-on-dot</code> is non-nil (default), typing <code>.</code>(dot) invokes auto-complete to select completions.
+Calling the command <code>tern-ac-complete</code>, one can invoke auto-complete manually.</p>
+</div>
 <h3> <a id="vim"></a>Vim</h3>
 <p >The Vim plugin is maintained in a
 <a href="https://github.com/marijnh/tern_for_vim">separate repository</a>. Please
