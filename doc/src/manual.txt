@@ -974,6 +974,21 @@ The following additional keys are bound:
 `C-c C-d`:: Find docs of the thing under the cursor. Press again to
 open the associated URL (if any).
 
+==== Auto-Complete ====
+
+If you want to use `auto-complete.el` for completion, append following codes:
+
+[source,commonlisp]
+----
+(eval-after-load 'tern
+   '(progn
+      (require 'tern-auto-complete)
+      (tern-ac-setup)))
+----
+
+If `tern-ac-on-dot` is non-nil (default), typing `.`(dot) invokes auto-complete to select completions.
+Calling the command `tern-ac-complete`, one can invoke auto-complete manually.
+
 [[vim]]
 === Vim ===
 
