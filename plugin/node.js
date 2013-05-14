@@ -32,9 +32,9 @@
   }
 
   function exportsFromScope(scope) {
-    var exportsVal = scope.getProp("module").getType().getProp("exports");
-    if (!(exportsVal instanceof infer.AVal))
-      return file.scope.getProp("exports");
+    var mType = scope.getProp("module").getType(), exportsVal = mType && mType.getProp("exports");
+    if (!(exportsVal instanceof infer.AVal) || exportsVal.isEmpty())
+      return scope.getProp("exports");
     else
       return exportsVal.types[exportsVal.types.length - 1];
   }

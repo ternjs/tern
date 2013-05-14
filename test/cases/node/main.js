@@ -9,6 +9,8 @@ fs.stat("foobar", function(err, stats) {
   stats.isFile(); //: bool
 });
 
+var module = {};
+
 crypto.getCiphers()[3]; //: string
 crypto.createHash("sha1").digest().readUInt16BE(0); //: number
 
