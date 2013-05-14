@@ -448,12 +448,12 @@ call), and a special property `!ret` (the return type of a function).
 === Server plugins ===
 
 Plugins are JavaScript programs that add extra functionality to a
-server. The distribution currently comes with
-http://nodejs.org[node.js] plugin (`plugin/node.js`) and
-http://requirejs.org[RequireJS] (`plugin/requirejs.js`) that teach the
-Tern server about the dependency management mechanisms defined by
-those systems (as well as, for node.js, including types for the
-built-in libraries).
+server. The distribution currently comes plugins for parsing
+<<plugin_doc_comment,doc comments>>, and plugins for
+<<plugin_node,node.js>> and <<plugin_requirejs,RequireJS>>, which
+teach the Tern server about the dependency management mechanisms
+defined by those systems (as well as, for node.js, including types for
+the built-in libraries).
 
 A plugin can use several hooks to add custom behavior.
 
@@ -468,12 +468,27 @@ make calls to `require` trigger the necessary machinations to fetch a
 dependency and return its type.
 
 [[tern.registerPlugin]]`tern.registerPlugin(name: string, fn(Server, options))`::
-This can be used to register an initialization function for the plugin
-with the given name. A Tern server, when <<option_plugins,configured>>
-to load this plugin, will call this initialization function, passing
-in the server instance and the options specified for the plugin (if
-any). This is usually the place where you register event handlers on
-the server and/or initialize the plugin's state.
+This can be used to register an initialization function
+for the plugin with the given name. A Tern server, when
+<<option_plugins,configured>> to load this plugin, will call this
+initialization function, passing in the server instance and the
+options specified for the plugin (if any). This is the place where you
+register event handlers on the server and/or initialize the plugin's
+state.
++
+An object returned from this function can be used to further
+configure the server. Its `defs` property may contain a <<typedef,JSON
+type definition>> data structure that the server should load, and its
+`passes` property may hold an object mapping pass names to functions.
+Currently the following passes are supported:
+
+`"postParse" (ast, text)`;; Will be run right after a file is parsed,
+and passed the parse tree and the parsed file as arguments.
+
+`"preInfer" (ast, scope)`;; Run right before the type inference pass,
+passing the syntax tree and a <<infer_scope,scope>> object.
+
+`"postInfer" (ast, scope)`;; Run after the type inference pass.
 
 [[tern.defineQueryType]]`tern.defineQueryType(name: string, desc: object)`::
 Defines a new type of query with the server. The `desc` object is a
@@ -528,6 +543,20 @@ plugins, either in the project dir or under `plugin/` in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at `{}` when you don't need to pass
 any options.
+
+[[plugin_doc_comment]]
+==== Doc comments plugin ====
+
+This plugin, which is enabled by default in the `bin/tern` server,
+parses comments before function declarations, variable declarations,
+and object properties. It will look for
+http://usejsdoc.org/[JSDoc]-style type declarations, and try to parse
+them and add them to the inferred types, and it will treat the first
+sentence of comment text as the docstring for the defined variable or
+property.
+
+To turn this plugin off, set `doc_comment: null` in your
+<<option_plugins,plugin option>>.
 
 [[plugin_node]]
 ==== Node.js plugin ====

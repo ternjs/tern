@@ -812,12 +812,12 @@ argument&#8217;s type, <code>!N</code> for the N-1th), <code>!this</code> (the s
 call), and a special property <code>!ret</code> (the return type of a function).</p>
 <h3> <a id="plugins"></a>Server plugins</h3>
 <p >Plugins are JavaScript programs that add extra functionality to a
-server. The distribution currently comes with
-<a href="http://nodejs.org">node.js</a> plugin (<code>plugin/node.js</code>) and
-<a href="http://requirejs.org">RequireJS</a> (<code>plugin/requirejs.js</code>) that teach the
-Tern server about the dependency management mechanisms defined by
-those systems (as well as, for node.js, including types for the
-built-in libraries).</p>
+server. The distribution currently comes plugins for parsing
+<a href="#plugin_doc_comment">doc comments</a>, and plugins for
+<a href="#plugin_node">node.js</a> and <a href="#plugin_requirejs">RequireJS</a>, which
+teach the Tern server about the dependency management mechanisms
+defined by those systems (as well as, for node.js, including types for
+the built-in libraries).</p>
 <p >A plugin can use several hooks to add custom behavior.</p>
 <dl>
 <dt>
@@ -840,13 +840,46 @@ dependency and return its type.
 </dt>
 <dd>
 <p>
-This can be used to register an initialization function for the plugin
-with the given name. A Tern server, when <a href="#option_plugins">configured</a>
-to load this plugin, will call this initialization function, passing
-in the server instance and the options specified for the plugin (if
-any). This is usually the place where you register event handlers on
-the server and/or initialize the plugin&#8217;s state.
+This can be used to register an initialization function
+for the plugin with the given name. A Tern server, when
+<a href="#option_plugins">configured</a> to load this plugin, will call this
+initialization function, passing in the server instance and the
+options specified for the plugin (if any). This is the place where you
+register event handlers on the server and/or initialize the plugin&#8217;s
+state.
 </p>
+<p >An object returned from this function can be used to further
+configure the server. Its <code>defs</code> property may contain a <a href="#typedef">JSON type definition</a> data structure that the server should load, and its
+<code>passes</code> property may hold an object mapping pass names to functions.
+Currently the following passes are supported:</p>
+<dl>
+<dt>
+<code>"postParse" (ast, text)</code>
+</dt>
+<dd>
+<p>
+Will be run right after a file is parsed,
+and passed the parse tree and the parsed file as arguments.
+</p>
+</dd>
+<dt>
+<code>"preInfer" (ast, scope)</code>
+</dt>
+<dd>
+<p>
+Run right before the type inference pass,
+passing the syntax tree and a <a href="#infer_scope">scope</a> object.
+</p>
+</dd>
+<dt>
+<code>"postInfer" (ast, scope)</code>
+</dt>
+<dd>
+<p>
+Run after the type inference pass.
+</p>
+</dd>
+</dl>
 </dd>
 <dt>
 <a id="tern.defineQueryType"></a><code>tern.defineQueryType(name: string, desc: object)</code>
@@ -898,6 +931,18 @@ plugins, either in the project dir or under <code>plugin/</code> in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
+<div class="sect3">
+<h4 id="plugin_doc_comment">Doc comments plugin</h4>
+<p >This plugin, which is enabled by default in the <code>bin/tern</code> server,
+parses comments before function declarations, variable declarations,
+and object properties. It will look for
+<a href="http://usejsdoc.org/">JSDoc</a>-style type declarations, and try to parse
+them and add them to the inferred types, and it will treat the first
+sentence of comment text as the docstring for the defined variable or
+property.</p>
+<p >To turn this plugin off, set <code>doc_comment: null</code> in your
+<a href="#option_plugins">plugin option</a>.</p>
+</div>
 <div class="sect3">
 <h4 id="plugin_node">Node.js plugin</h4>
 <p >The <a href="http://nodejs.org">node.js</a> plugin, called <code>"node"</code>, provides
