@@ -39,7 +39,10 @@
       return exportsVal.types[exportsVal.types.length - 1];
   }
 
-  function resolveModule() { return infer.ANull; }
+  function resolveModule(server, name) {
+    server.addFile(name);
+    return getModule(server._node, name);
+  }
 
   // Assume node.js & access to local file system
   if (require) (function() {
@@ -59,31 +62,36 @@
       }
     }
 
-    resolveModule = function(server, name) {
-      var data = server._node;
+    resolveModule = function(server, name, relative) {
+      var data = server._node, dir = server.options.projectDir || "";
       if (data.options.dontLoad == true ||
           data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
           data.options.load && !new RegExp(data.options.load).test(name))
         return infer.ANull;
 
-      var modDir = findModuleDir(server);
-      if (!modDir) return infer.ANull;
-
       var file = name;
-      if (name.indexOf("/") < 0) {
-        try {
-          var pkg = JSON.parse(fs.readFileSync(path.resolve(modDir, name + "/package.json")));
-        } catch(e) { return infer.ANull; }
-        file = name + "/" + pkg.main;
+      if (!relative) {
+        var modDir = findModuleDir(server);
+        if (!modDir) return infer.ANull;
+        file = path.resolve(modDir, file);
       }
 
-      file = path.resolve(modDir, file);
-      try { if (fs.statSync(file).isDirectory()) file = path.resolve(file, "index.js"); }
-      catch(e) {}
+      try {
+        var pkg = JSON.parse(fs.readFileSync(path.resolve(modDir, file + "/package.json")));
+      } catch(e) {}
+      if (pkg && pkg.main) {
+        file += "/" + pkg.main;
+      } else {
+        try {
+          if (fs.statSync(path.resolve(dir, file)).isDirectory())
+            file += "/index.js";
+        } catch(e) {}
+      }
       if (!/\.js$/.test(file)) file += ".js";
 
-      try { if (!fs.statSync(file).isFile()) return infer.ANull; }
-      catch(e) { return infer.ANull; }
+      try {
+        if (!fs.statSync(path.resolve(dir, file)).isFile()) return infer.ANull;
+      } catch(e) { return infer.ANull; }
 
       server.addFile(file);
       return data.modules[file] = data.modules[name] = new infer.AVal;
@@ -97,23 +105,23 @@
     var locals = cx.definitions.node;
     if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name];
 
-    if (/^\.{0,2}\//.test(name)) { // Relative
+    var relative = /^\.{0,2}\//.test(name);
+    if (relative) {
       if (!data.currentFile) return argNodes[0].required || infer.ANull;
-      if (!/\.[^\/]*$/.test(name)) name = name + ".js";
       name = resolvePath(data.currentFile, name);
-      server.addFile(name);
-      return argNodes[0].required = getModule(data, name);
     }
 
     if (name in data.modules) return data.modules[name];
 
+    var result;
     if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
       var scope = buildWrappingScope(cx.topScope, name);
       infer.def.load(data.options.modules[name], scope);
-      return data.modules[name] = exportsFromScope(scope);
+      result = data.modules[name] = exportsFromScope(scope);
     } else {
-      return resolveModule(server, name);
+      result = resolveModule(server, name, relative);
     }
+    return argNodes[0].required = result;
   });
 
   tern.registerPlugin("node", function(server, options) {
