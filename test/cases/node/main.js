@@ -38,4 +38,6 @@ require("mod1").mainExport.x; //: number
 require("mod1/secondfile").secondExport.u; //: number
 require("mod1/dir1").foo.a; //: number
 
+require("mod1/reassign_exports").funcPropExport; //loc: 2, 15
+
 module.exports. //+
