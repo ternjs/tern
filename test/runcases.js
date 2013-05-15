@@ -81,7 +81,7 @@ exports.runTests = function(filter) {
         } else {
           while (/\s/.test(text.charAt(pos - 1))) --pos;
         }
-        var query = {type: "completions", end: pos, file: fname};
+        var query = {type: "completions", end: pos, file: fname, guess: false};
         var andOthers = /,\s*\.\.\.$/.test(args);
         if (andOthers) args = args.slice(0, args.lastIndexOf(","));
         var parts = args ? args.split(/\s*,\s*/) : [];
