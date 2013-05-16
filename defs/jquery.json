@@ -840,6 +840,9 @@
       "!doc": "Store arbitrary data associated with the specified element and/or return the value that was set."
     },
     "Event": {
+      "!type": "fn(type: ?, props?: ?) -> +jQuery.Event",
+      "!url": "http://api.jquery.com/category/events/event-object/",
+      "!doc": "The jQuery.Event constructor is exposed and can be used when calling trigger. The new operator is optional.",
       "prototype": {
         "currentTarget":{
           "!type": "+Element",
