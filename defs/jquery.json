@@ -763,9 +763,66 @@
       "!doc": "Creates an object that handles the actual transmission of Ajax data."
     },
     "Callbacks": {
-      "!type": "fn(flags: string) -> ?",
+      "!type": "fn(flags: string) -> +jQuery.Callbacks",
       "!url": "http://api.jquery.com/jquery.Callbacks/",
-      "!doc": "A multi-purpose callbacks list object that provides a powerful way to manage callback lists."
+      "!doc": "A multi-purpose callbacks list object that provides a powerful way to manage callback lists.",
+      "prototype": {
+        "add":{
+          "!type": "fn(callbacks: ?) -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.add/",
+          "!doc": "Add a callback or a collection of callbacks to a callback list."
+        },
+        "disable":{
+          "!type": "fn() -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.disable/",
+          "!doc": "Disable a callback list from doing anything more."
+        },
+        "disabled":{
+          "!type": "fn() -> bool",
+          "!url": "http://api.jquery.com/callbacks.disabled/",
+          "!doc": "Determine if the callbacks list has been disabled."
+        },
+        "empty":{
+          "!type": "fn() -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.empty/",
+          "!doc": "Remove all of the callbacks from a list."
+        },
+        "fire":{
+          "!type": "fn(arguments: ?) -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.fire/",
+          "!doc": "Call all of the callbacks with the given arguments"
+        },
+        "fired":{
+          "!type": "fn() -> bool",
+          "!url": "http://api.jquery.com/callbacks.fired/",
+          "!doc": "Determine if the callbacks have already been called at least once."
+        },
+        "fireWith":{
+          "!type": "fn(context?: ?, args?: ?) -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.fireWith/",
+          "!doc": "Call all callbacks in a list with the given context and arguments."
+        },
+        "has":{
+          "!type": "fn(callback: fn()) -> bool",
+          "!url": "http://api.jquery.com/callbacks.has/",
+          "!doc": "Determine whether a supplied callback is in a list."
+        },
+        "lock":{
+          "!type": "fn() -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.lock/",
+          "!doc": "Lock a callback list in its current state."
+        },
+        "locked":{
+          "!type": "fn() -> bool",
+          "!url": "http://api.jquery.com/callbacks.locked/",
+          "!doc": "Determine if the callbacks list has been locked."
+        },
+        "remove":{
+          "!type": "fn(callbacks: ?) -> +jQuery.Callbacks",
+          "!url": "http://api.jquery.com/callbacks.remove/",
+          "!doc": "Remove a callback or a collection of callbacks from a callback list."
+        }
+      }
     },
     "contains": {
       "!type": "fn(container: +Element, contained: +Element) -> bool",
