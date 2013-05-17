@@ -28,7 +28,7 @@
       VariableDeclaration: attachComments,
       FunctionDeclaration: attachComments,
       AssignmentExpression: function(node) {
-        if (node.operator == '=' && node.right.type == 'FunctionExpression') {
+        if (node.operator == '=') {
           attachComments(node.right, node.start);
         }
       },
@@ -55,8 +55,7 @@
       AssignmentExpression: function(node, scope) {
         if (node.right.commentsBefore)
           interpretComments(node, node.right.commentsBefore, scope,
-                            infer.expressionType({node: node.left, state: scope}),
-                            node.right.body.scope.fnType);
+                            infer.expressionType({node: node.left, state: scope}));
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {

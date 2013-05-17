@@ -48,9 +48,9 @@ var o = {
   name: "Harold"
 };
 
-// Returns foo.
-o.foo = function() { return "foo"; };
+// The string "foo".
+o.foo = "foo";
 
 o.getName; //doc: Get the name.
 o.name; //doc: The name
-o.foo; //doc: Returns foo.
+o.foo; //doc: The string "foo".
