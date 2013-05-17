@@ -215,7 +215,7 @@
 
     if (fn && (args || ret)) {
       if (args) for (var i = 0; i < fn.argNames.length; ++i) {
-        var name = fn.argNames[i], known = args[name];
+        var name = fn.argNames[i], known = args.hasOwnProperty(name) ? args[name] : null;
         if (known) known.propagate(fn.args[i]);
       }
       if (ret) ret.propagate(fn.retval);
