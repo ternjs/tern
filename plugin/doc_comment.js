@@ -73,7 +73,7 @@
   function interpretComments(node, comments, scope, aval, type) {
     jsdocInterpretComments(node, scope, aval, comments);
 
-    if (!type && aval.types.length) {
+    if (!type && aval.types && aval.types.length) {
       type = aval.types[aval.types.length - 1];
       if (!(type instanceof infer.Obj) || type.origin != infer.cx().curOrigin || type.doc)
         type = null;
