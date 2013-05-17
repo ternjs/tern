@@ -22,11 +22,16 @@
   });
 
   function postParse(ast, text) {
-    function attachComments(node) { comment.ensureCommentsBefore(text, node); }
+    function attachComments(node, start) { comment.ensureCommentsBefore(text, node, start || node.start); }
 
     walk.simple(ast, {
       VariableDeclaration: attachComments,
       FunctionDeclaration: attachComments,
+      AssignmentExpression: function(node) {
+        if (node.operator == '=' && node.right.type == 'FunctionExpression') {
+          attachComments(node.right, node.start);
+        }
+      },
       ObjectExpression: function(node) {
         for (var i = 0; i < node.properties.length; ++i)
           attachComments(node.properties[i].key);
@@ -46,6 +51,12 @@
           interpretComments(node, node.commentsBefore, scope,
                             scope.getProp(node.id.name),
                             node.body.scope.fnType);
+      },
+      AssignmentExpression: function(node, scope) {
+        if (node.right.commentsBefore)
+          interpretComments(node, node.right.commentsBefore, scope,
+                            infer.expressionType({node: node.left, state: scope}),
+                            node.right.body.scope.fnType);
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
@@ -209,6 +220,10 @@
       if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.body.scope.fnType;
     } else if (node.type == "FunctionDeclaration") {
       fn = node.body.scope.fnType;
+    } else if (node.type == "AssignmentExpression") {
+      if (node.right.type == "FunctionExpression") {
+        fn = node.right.body.scope.fnType;
+      }
     } else { // An object property
       if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
     }
