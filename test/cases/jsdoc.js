@@ -34,5 +34,9 @@ var o = {
   prop2: function() { return anything(); }
 };
 
+/** @returns {String} */
+o.prop3 = function() { return something(); };
+
 o.prop1; //: string
 o.prop2; //: fn() -> number
+o.prop3; //: fn() -> string

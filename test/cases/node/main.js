@@ -44,5 +44,6 @@ require("mod1/reassign_exports").funcPropExport; //loc: 2, 15
 
 var doc = require("mod1/doc");
 doc.f1; //doc: doc for f1
+doc.f2; //doc: doc for f2
 
 module.exports. //+

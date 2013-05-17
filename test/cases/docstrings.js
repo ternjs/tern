@@ -48,5 +48,9 @@ var o = {
   name: "Harold"
 };
 
+// The string "foo".
+o.foo = "foo";
+
 o.getName; //doc: Get the name.
 o.name; //doc: The name
+o.foo; //doc: The string "foo".
