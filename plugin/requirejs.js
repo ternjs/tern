@@ -33,8 +33,8 @@
       if (known) return flattenPath(base + known + ".js");
       var dir = name.match(/^([^\/]+)(\/.*)$/);
       if (dir) {
-        var known = opts.paths[dir[0]];
-        if (known) return flattenPath(base + known + dir[1] + ".js");
+        var known = opts.paths[dir[1]];
+        if (known) return flattenPath(base + known + dir[2] + ".js");
       }
     }
     return flattenPath(base + name + ".js");
