@@ -193,7 +193,7 @@
         case "param": case "arg": case "argument":
           var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/);
           if (!name) continue;
-          (args || (args = {}))[name[1]] = parsed.type;
+          (args || (args = Object.create(null)))[name[1]] = parsed.type;
           break;
         }
       }
