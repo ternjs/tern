@@ -195,9 +195,6 @@ the definition.
 `file` (string, optional);; The file in which the definition was
 defined.
 
-`guess` (bool);; Indicates whether finding the definition required any
-heuristic guesses.
-
 `context` (string, optional), `contextOffset` (number, optional);; A
 slice of the code in front of the definition, and the offset from the
 start of the context to the actual definition. Can be used to find a
