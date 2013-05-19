@@ -22,15 +22,13 @@
   });
 
   function postParse(ast, text) {
-    function attachComments(node, start) { comment.ensureCommentsBefore(text, node, start || node.start); }
+    function attachComments(node) { comment.ensureCommentsBefore(text, node); }
 
     walk.simple(ast, {
       VariableDeclaration: attachComments,
       FunctionDeclaration: attachComments,
       AssignmentExpression: function(node) {
-        if (node.operator == '=') {
-          attachComments(node.right, node.start);
-        }
+        if (node.operator == "=") attachComments(node);
       },
       ObjectExpression: function(node) {
         for (var i = 0; i < node.properties.length; ++i)
@@ -53,8 +51,8 @@
                             node.body.scope.fnType);
       },
       AssignmentExpression: function(node, scope) {
-        if (node.right.commentsBefore)
-          interpretComments(node, node.right.commentsBefore, scope,
+        if (node.commentsBefore)
+          interpretComments(node, node.commentsBefore, scope,
                             infer.expressionType({node: node.left, state: scope}));
       },
       ObjectExpression: function(node, scope) {
@@ -73,7 +71,7 @@
   function interpretComments(node, comments, scope, aval, type) {
     jsdocInterpretComments(node, scope, aval, comments);
 
-    if (!type && aval.types && aval.types.length) {
+    if (!type && aval instanceof infer.AVal && aval.types.length) {
       type = aval.types[aval.types.length - 1];
       if (!(type instanceof infer.Obj) || type.origin != infer.cx().curOrigin || type.doc)
         type = null;
@@ -82,7 +80,7 @@
     var first = comments[0], dot = first.search(/\.\s/);
     if (dot > 5) first = first.slice(0, dot + 1);
     first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
-    aval.doc = first;
+    if (aval instanceof infer.AVal) aval.doc = first;
     if (type) type.doc = first;
   }
 
@@ -220,9 +218,8 @@
     } else if (node.type == "FunctionDeclaration") {
       fn = node.body.scope.fnType;
     } else if (node.type == "AssignmentExpression") {
-      if (node.right.type == "FunctionExpression") {
+      if (node.right.type == "FunctionExpression")
         fn = node.right.body.scope.fnType;
-      }
     } else { // An object property
       if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
     }
