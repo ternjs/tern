@@ -131,7 +131,7 @@
         pos = retType.end;
         ret = retType.type;
       }
-      type = new infer.Fn(null, infer.ANull, args.labels, args.types, ret);
+      type = new infer.Fn(null, infer.ANull, args.types, args.labels, ret);
     } else if (str.charAt(pos) == "[") {
       var inner = parseType(scope, str, pos + 1);
       if (!inner) return null;
