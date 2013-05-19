@@ -1,5 +1,6 @@
 {
   "!name": "ecma5",
+  "!define": {"Error.prototype": "Error.prototype"},
   "Infinity": {
     "!type": "number",
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Infinity",
