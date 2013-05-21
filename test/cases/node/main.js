@@ -34,7 +34,7 @@ require("./localfile").hello; //: fn() -> number
 
 require("./foo/../exportfunc.js"); //: fn(a: number, b: number) -> number
 
-require("./dir"); //:: {foo: string}
+require("./dir"); //:: {foo: string, rel: {abc: number, def: {xyz: string}}}
 
 require("mod1").mainExport.x; //: number
 require("mod1/secondfile").secondExport.u; //: number

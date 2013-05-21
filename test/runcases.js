@@ -110,7 +110,7 @@ exports.runTests = function(filter) {
         var query = {type: kind == "doc:" ? "documentation" : kind == "loc:" ? "definition" : kind == "refs:" ? "refs" : "type",
                      start: start, end: end,
                      file: fname,
-                     depth: kind == "::" ? 2 : null,
+                     depth: kind == "::" ? 5 : null,
                      lineCharPositions: true};
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
