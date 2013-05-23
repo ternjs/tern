@@ -173,11 +173,11 @@ Foo.prototype = {
   bar: 13
 };
 
-var z = new Foo(true); 
+var foo = new Foo(true); 
 
-z. //+ bar, makeString, x, y, ...
-z.makeString(). //+ charAt, charCodeAt, concat, ...
-z.bar. //+ toExponential, toFixed, toString
+foo. //+ bar, makeString, x, y, ...
+foo.makeString(). //+ charAt, charCodeAt, concat, ...
+foo.bar. //+ toExponential, toFixed, toString
 
 config = {
   CSS: {

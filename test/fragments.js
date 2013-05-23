@@ -2,8 +2,6 @@ var util = require("./util");
 var tern = require("../lib/tern");
 var fs = require("fs");
 
-util.addFile();
-
 var file = fs.readFileSync(util.resolve("test/data/large.js"), "utf8");
 
 var server = new tern.Server({defs: [util.ecma5]});
@@ -15,9 +13,11 @@ function fail(msg) { throw curTest + ": " + msg; }
 function eq(a, b, msg) { if (a != b) fail(msg || a + " != " + b); }
 
 exports.runTests = function(filter) {
+  var added = false;
   function test(name, start, text, query, check) {
     name = "fragments/" + name;
     if (filter && name.indexOf(filter) == -1) return;
+    if (!added) { util.addFile(); added = true; }
     util.addTest();
     curTest = name;
     if (typeof text == "number") text = file.slice(start, text);
