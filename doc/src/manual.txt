@@ -116,6 +116,10 @@ the result data.
 match the current word at the given point will be returned. Turn this
 off to get all results, so that you can filter on the client side.
 
+`caseInsensitive` (optional, default `false`);; Whether to use a
+case-insensitive compare between the current word and potential
+completions.
+
 `guess` (optional, default `true`);; When completing a property and no
 completions are found, Tern will use some heuristics to try and return
 some properties anyway. Set this to `false` to turn that off.
