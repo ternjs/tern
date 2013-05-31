@@ -64,7 +64,7 @@ exports.runTests = function(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\n]*)/g, m;
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\r\n]*)/g, m;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
