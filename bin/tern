@@ -28,7 +28,7 @@ function findProjectDir() {
       if (fs.statSync(path.resolve(dir, projectFileName)).isFile()) return dir;
     } catch(e) {}
     var end = dir.lastIndexOf("/");
-    if (end <= 0) return null;
+    if (/win/.test(process.platform)) end = Math.max(end, dir.lastIndexOf("\\"));
     dir = dir.slice(0, end);
   }
 }
