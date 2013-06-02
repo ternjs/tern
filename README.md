@@ -8,8 +8,8 @@ Thanks to a group of generous [crowd funders][2], Tern is open-source
 software, under an MIT license.
 
 There are currently [Emacs][emacs], [Vim][vim], and [Sublime Text][st]
-plugins available with built-in support in [Brackets][brackets]
-/[Edge Code][edge_code].
+plugins available with built-in support in [Brackets][brackets] and 
+[Edge Code][edge_code]. 
 
 For further documentation, see the [project page][1] and the
 [manual][3].
