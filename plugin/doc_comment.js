@@ -227,7 +227,7 @@
     if (fn && (args || ret)) {
       if (args) for (var i = 0; i < fn.argNames.length; ++i) {
         var name = fn.argNames[i], known = args[name];
-        if (known) known.propagate(fn.args[i]);
+        if (known && fn.args[i]) known.propagate(fn.args[i]);
       }
       if (ret) ret.propagate(fn.retval);
     } else if (type) {
