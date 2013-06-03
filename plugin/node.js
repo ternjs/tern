@@ -47,12 +47,19 @@
   // Assume node.js & access to local file system
   if (require) (function() {
     var fs = require("fs"), path = require("path");
+    var win = /win/.test(process.platform);
+
+    var resolve = path.resolve;
+    if (win) resolve = function(base, file) { return path.resolve(base, file).replace(/\\/g, "/"); };
 
     function findModuleDir(server) {
       if (server._node.moduleDir !== undefined) return server._node.moduleDir;
+      var dir = server.options.projectDir;
+      if (win) dir = dir.replace(/\\/g, "/");
 
       for (var dir = server.options.projectDir || "";;) {
-        var modDir = path.resolve(dir, "node_modules");
+        var modDir = resolve(dir, "node_modules");
+        
         try {
           if (fs.statSync(modDir).isDirectory()) return server._node.moduleDir = modDir;
         } catch(e) {}
@@ -73,24 +80,24 @@
       if (!relative) {
         var modDir = findModuleDir(server);
         if (!modDir) return infer.ANull;
-        file = path.resolve(modDir, file);
+        file = resolve(modDir, file);
       }
 
       try {
-        var pkg = JSON.parse(fs.readFileSync(path.resolve(modDir, file + "/package.json")));
+        var pkg = JSON.parse(fs.readFileSync(resolve(modDir, file + "/package.json")));
       } catch(e) {}
       if (pkg && pkg.main) {
         file += "/" + pkg.main;
       } else {
         try {
-          if (fs.statSync(path.resolve(dir, file)).isDirectory())
+          if (fs.statSync(resolve(dir, file)).isDirectory())
             file += "/index.js";
         } catch(e) {}
       }
       if (!/\.js$/.test(file)) file += ".js";
 
       try {
-        if (!fs.statSync(path.resolve(dir, file)).isFile()) return infer.ANull;
+        if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
       } catch(e) { return infer.ANull; }
 
       server.addFile(file);
