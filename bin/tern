@@ -29,6 +29,7 @@ function findProjectDir() {
     } catch(e) {}
     var end = dir.lastIndexOf("/");
     if (/win/.test(process.platform)) end = Math.max(end, dir.lastIndexOf("\\"));
+    if (end == -1) break;
     dir = dir.slice(0, end);
   }
 }
