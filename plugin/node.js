@@ -54,10 +54,10 @@
 
     function findModuleDir(server) {
       if (server._node.moduleDir !== undefined) return server._node.moduleDir;
-      var dir = server.options.projectDir;
+      var dir = server.options.projectDir || "";
       if (win) dir = dir.replace(/\\/g, "/");
 
-      for (var dir = server.options.projectDir || "";;) {
+      for (;;) {
         var modDir = resolve(dir, "node_modules");
         
         try {
