@@ -598,7 +598,7 @@ These options are understood:
 
 `baseURL`:: The base path to prefix to dependency filenames.
 
-`path`:: An object mapping filename prefixes to specific paths. For
+`paths`:: An object mapping filename prefixes to specific paths. For
 example `{"acorn": "lib/acorn/"}`.
 
 [[utils]]
