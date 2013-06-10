@@ -121,14 +121,14 @@ exports.runTests = function(filter) {
                    "instead of expected docstring\n  " + args);
             }
           } else if (kind == "loc:") { // Definition finding test
-            var pos = args.match(/^\s*(\d+),\s*(\d+)/), line = Number(pos[1]), col = Number(pos[2]), bad;
+            var pos = args.match(/^\s*(\d+),\s*(\d+)/), line = Number(pos[1]), col = Number(pos[2]);
             if (!resp.start)
               fail(m, "Did not find a definition.");
             else if (resp.start.line + 1 != line || resp.start.ch != col)
               fail(m, "Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
                    " instead of expected " + line + ":" + col);
           } else if (kind == "refs:") { // Reference finding test
-            var pos = /\s*(\d+),\s*(\d+)/g, mm, refs = [];
+            var pos = /\s*(\d+),\s*(\d+)/g, mm;
             while (mm = pos.exec(args)) {
               var line = Number(mm[1]), col = Number(mm[2]), found = false;
               for (var i = 0; i < resp.refs.length; ++i) {

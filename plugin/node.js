@@ -59,7 +59,7 @@
 
       for (;;) {
         var modDir = resolve(dir, "node_modules");
-        
+
         try {
           if (fs.statSync(modDir).isDirectory()) return server._node.moduleDir = modDir;
         } catch(e) {}
@@ -149,7 +149,7 @@
       exportsFromScope(file.scope).propagate(getModule(this._node, file.name));
     });
 
-    server.on("reset", function(file) {
+    server.on("reset", function() {
       this._node.modules = Object.create(null);
     });
 
@@ -2090,7 +2090,7 @@
               "!url": "http://nodejs.org/api/crypto.html#crypto_cipher_update_data_input_encoding_output_encoding",
               "!doc": "Updates the cipher with data, the encoding of which is given in input_encoding and can be 'utf8', 'ascii' or 'binary'. If no encoding is provided, then a buffer is expected."
             },
-            final: {
+            "final": {
               "!type": "fn(output_encoding?: string) -> +Buffer",
               "!url": "http://nodejs.org/api/crypto.html#crypto_cipher_final_output_encoding",
               "!doc": "Returns any remaining enciphered contents, with output_encoding being one of: 'binary', 'base64' or 'hex'. If no encoding is provided, then a buffer is returned."
@@ -2123,7 +2123,7 @@
               "!url": "http://nodejs.org/api/crypto.html#crypto_decipher_update_data_input_encoding_output_encoding",
               "!doc": "Updates the decipher with data, which is encoded in 'binary', 'base64' or 'hex'. If no encoding is provided, then a buffer is expected."
             },
-            final: {
+            "final": {
               "!type": "fn(output_encoding?: string) -> +Buffer",
               "!url": "http://nodejs.org/api/crypto.html#crypto_decipher_final_output_encoding",
               "!doc": "Returns any remaining plaintext which is deciphered, with output_encoding being one of: 'binary', 'ascii' or 'utf8'. If no encoding is provided, then a buffer is returned."
@@ -2366,7 +2366,7 @@
           "!url": "http://nodejs.org/api/assert.html#assert_assert_notstrictequal_actual_expected_message",
           "!doc": "Tests strict non-equality, as determined by the strict not equal operator ( !== )"
         },
-        throws: {
+        "throws": {
           "!type": "fn(block: fn(), error?: ?, messsage?: string)",
           "!url": "http://nodejs.org/api/assert.html#assert_assert_throws_block_error_message",
           "!doc": "Expects block to throw an error. error can be constructor, regexp or validation function."

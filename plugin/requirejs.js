@@ -43,7 +43,7 @@
   function getRequire(data) {
     if (!data.require) {
       data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
-      data.require.computeRet = function(_self, args, argNodes) {
+      data.require.computeRet = function(_self, _args, argNodes) {
         if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string")
           return getInterface(argNodes[0].value, data);
         return infer.ANull;
@@ -136,7 +136,7 @@
     server.on("beforeLoad", function(file) {
       this._requireJS.currentFile = file.name;
     });
-    server.on("reset", function(file) {
+    server.on("reset", function() {
       this._requireJS.interfaces = Object.create(null);
       this._requireJS.require = null;
     });
