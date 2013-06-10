@@ -43,6 +43,7 @@ a <<server_api,programming interface>>, and that some project,
 especially those running client-side in a browser, will want to use
 that instead of the HTTP server described here.)
 
+[[project_file]]
 When started, the server will look for a `.tern-project` file in the
 current directory or one of the directories above that, and use it for
 its <<configuration,configuration>>. If no project file is found,
@@ -983,6 +984,9 @@ follows:
 ----
 (add-hook 'js-mode-hook (lambda () (tern-mode t)))
 ----
+
+The Emacs mode uses the `bin/tern` server, and project configuration
+is done with a <<project_file,`.tern-project`>> file.
 
 Buffers in `tern-mode` add a `completion-at-point` function that
 activates Tern's completion. So, unless you rebound the key, `M-tab`
