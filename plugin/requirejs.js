@@ -56,6 +56,18 @@
     if (name == "require") return getRequire(data);
     if (name == "module") return infer.cx().definitions.requirejs.module;
 
+    if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
+      var over = data.options.override[name];
+      if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
+      if (typeof over == "object") {
+        if (data.interfaces[name]) return data.interfaces[name];
+        var scope = data.interfaces[name] = new infer.Obj(null, name);
+        infer.def.load(over, scope);
+        return scope;
+      }
+      name = over;
+    }
+
     if (!/^(https?:|\/)|\.js$/.test(name))
       name = resolveName(name, data);
     name = flattenPath(name);

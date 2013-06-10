@@ -1,4 +1,5 @@
-// plugin=requirejs
+// environment=jquery
+// plugin=requirejs {"override": {"jquery": "=$"}}
 
 requirejs(["foo", "abc!bar", "useexports", "simplifiedcommon"], function(foo, bar, useexports, simplified) {
   foo.aString; //: string
@@ -8,4 +9,8 @@ requirejs(["foo", "abc!bar", "useexports", "simplifiedcommon"], function(foo, ba
   useexports.hello; //: bool
   simplified.hello; //: string
   simplified.func; //: fn() -> bool
+});
+
+requirejs(["jquery"], function($) {
+  $.fx.off; //: bool
 });
