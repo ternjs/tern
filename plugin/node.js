@@ -140,7 +140,7 @@
     };
 
     server.on("beforeLoad", function(file) {
-      this._node.currentFile = file.name;
+      this._node.currentFile = file.name.replace(/\\/g, "/");
       file.scope = buildWrappingScope(file.scope, file.name, file.ast);
     });
 
