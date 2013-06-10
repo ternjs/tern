@@ -19,7 +19,7 @@
 
   function resolveName(name, data) {
     var excl = name.indexOf("!");
-    if (excl > -1) name = name.slice(excl + 1);
+    if (excl > -1) name = name.slice(0, excl);
 
     var opts = data.options;
     var hasExt = /\.js$/.test(name);
