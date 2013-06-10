@@ -44,7 +44,8 @@
   (or tern-project-dir
       (and (not (buffer-file-name)) (setf tern-project-dir ""))
       (let ((project-dir (file-name-directory (buffer-file-name))))
-        (loop for cur = project-dir then (file-name-directory (substring cur 0 (1- (length cur))))
+        (loop for cur = project-dir then (let ((shorter (file-name-directory (substring cur 0 (1- (length cur))))))
+                                           (and (< (length shorter) (length cur)) shorter))
               while cur do
               (when (file-exists-p (expand-file-name ".tern-project" cur))
                 (return (setf project-dir cur))))
