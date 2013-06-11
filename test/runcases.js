@@ -30,6 +30,12 @@ function getPlugins(text) {
   return plugins;
 }
 
+fs.readdirSync(util.resolve("test/cases/defs")).forEach(function(name) {
+  if (/\.json$/.test(name))
+    defData[path.basename(name, ".json")] =
+      JSON.parse(fs.readFileSync(util.resolve("test/cases/defs/" + name), "utf8"));
+});
+
 var nodeModules = {};
 fs.readdirSync(util.resolve("test/cases/node_modules")).forEach(function(name) {
   if (/\.json$/.test(name))
@@ -55,7 +61,7 @@ exports.runTests = function(filter) {
     util.addFile();
     var fname = name, context = caseDir;
     if (fs.statSync(path.resolve(context, name)).isDirectory()) {
-      if (name == "node_modules") return;
+      if (name == "node_modules" || name == "defs") return;
       context += name + "/";
       fname = "main.js";
     }
