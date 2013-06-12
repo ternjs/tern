@@ -156,6 +156,37 @@
     return {defs: defs};
   });
 
+  tern.defineQueryType("node_exports", {
+    takesFile: true,
+    run: function(server, query, file) {
+      var resp = {exports: []};
+      var fileExports = file.scope.getProp("module").getProp("exports");
+
+      function makeExport(name, val) {
+        var type = val.getType();
+        if (type) type = type.name;
+        return {name: name, doc: val.doc, origin: val.origin, start: val.originNode.start, end: val.originNode.end, type: type};
+      }
+
+      // check for reassignment of module.exports to a func (it could be reassigned to any
+      // type, but the common case we want to handle is reassignment to a func)
+      var fileFunc = fileExports.getFunctionType();
+      if (fileFunc) {
+        resp.exports.push(makeExport(null, fileFunc));
+      }
+
+      // iterate over module.exports props
+      var seen = {};
+      fileExports.forAllProps(function(prop, val, local) {
+        if (local && !seen[prop]) {
+          resp.exports.push(makeExport(prop, val));
+          seen[prop] = true;
+        }
+      });
+      return resp;
+    }
+  });
+
   var defs = {
     "!name": "node",
     "!define": {

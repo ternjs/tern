@@ -253,6 +253,19 @@ properties that start with the given string.
 The returned object will have a `completions` property holding an
 array of strings, which are the property names.
 
+[[req_node_exports]]`node_exports` (node plugin only):: List the exports
+of a given node.js module.
++
+Takes a `file` field to specify the node.js module file whose exports we
+want to list.
++
+Returns an object whose `exports` property holds an array of `{name,
+doc, origin, start, end, type}` objects, which represent the exports of
+the module. If the module's `module.exports` was reassigned (e.g., to
+make the module itself directly callable as a function), then the object
+in the array corresponding to that reassigned value will have a null
+`name` property.
+
 [[req_files]]`files`:: Get the files that the server currently holds
 in its set of analyzed files.
 +
