@@ -164,8 +164,12 @@
 
       function makeExport(name, val) {
         var type = val.getType();
-        if (type) type = type.name;
-        return {name: name, doc: val.doc, origin: val.origin, start: val.originNode.start, end: val.originNode.end, type: type};
+        var x = {name: name, doc: val.doc, origin: val.origin, type: type && type.name};
+        if (val.originNode) {
+          x.start = val.originNode.start;
+          x.end = val.originNode.end;
+        }
+        return x;
       }
 
       // check for reassignment of module.exports to a func (it could be reassigned to any
