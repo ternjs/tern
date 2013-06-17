@@ -68,10 +68,11 @@
   "Insert dot and complete code at point by tern."
   (interactive)
   (insert ".")
-  (let ((cur-ac-sources ac-sources))
-    (tern-ac-complete-request
-     (lambda ()
-       (auto-complete (cons 'ac-source-tern-completion cur-ac-sources))))))
+  (if (or (integerp ac-auto-show-menu) (floatp ac-auto-show-menu))
+      (setq ac-show-menu-timer
+            (run-with-idle-timer
+             ac-auto-show-menu ac-auto-show-menu 'tern-ac-complete))
+    (tern-ac-complete)))
 
 (defvar tern-ac-completion-truncate-length 22
   "[AC] truncation length for type summary.")
