@@ -39,6 +39,7 @@ function setSelectedDoc(pos) {
 }
 
 function selectDoc(pos) {
+  server.hideDoc(curDoc.name);
   setSelectedDoc(pos);
   curDoc = docs[pos];
   editor.swapDoc(curDoc.doc);
