@@ -393,7 +393,7 @@ Here is an example:
 ----
 {
   "!name": "mylibrary",
-  "!def": {
+  "!define": {
     "point": {
       "x": "number",
       "y": "number"
@@ -423,7 +423,7 @@ object. Strings can be one of the built-in types (`"number"`,
 -> rettype"`, where `-> rettype` is optional), or an array type
 (`"[type]"`). Strings can also name types, either by describing the
 path to the type in the global scope (`"Date.prototype"`) or by
-referring to one of the local definitions in the `!def` property of
+referring to one of the local definitions in the `!define` property of
 the document. Finally, a type can be prefixed with a `+` to indicate
 an instance of a constructor (`+Date`).
 

@@ -765,7 +765,7 @@ properties refer to variable or property names.</p>
 <p> Here is an example:</p>
 <pre data-language="application/x-json" class="cm-s-default">{
   <span class="cm-string cm-property">"!name"</span>: <span class="cm-string">"mylibrary"</span>,
-  <span class="cm-string cm-property">"!def"</span>: {
+  <span class="cm-string cm-property">"!define"</span>: {
     <span class="cm-string cm-property">"point"</span>: {
       <span class="cm-string cm-property">"x"</span>: <span class="cm-string">"number"</span>,
       <span class="cm-string cm-property">"y"</span>: <span class="cm-string">"number"</span>
@@ -792,7 +792,7 @@ object. Strings can be one of the built-in types (<code>"number"</code>,
 -&gt; rettype"</code>, where <code>-&gt; rettype</code> is optional), or an array type
 (<code>"[type]"</code>). Strings can also name types, either by describing the
 path to the type in the global scope (<code>"Date.prototype"</code>) or by
-referring to one of the local definitions in the <code>!def</code> property of
+referring to one of the local definitions in the <code>!define</code> property of
 the document. Finally, a type can be prefixed with a <code>+</code> to indicate
 an instance of a constructor (<code>+Date</code>).</p>
 <p> Objects describe types by enumerating their properties. By default,
