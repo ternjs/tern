@@ -36,7 +36,10 @@ require("./foo/../exportfunc.js"); //: fn(a: number, b: number) -> number
 
 require("./dir"); //:: {foo: string, rel: {abc: number, def: {xyz: string}}}
 
-require("mod1").mainExport.x; //: number
+var mod1 = require("mod1");
+var mod2 = require("mod1/mainfile.js");
+mod1.mainExport.x; //: number
+mod2.mainExport.x; //: number
 require("mod1/secondfile").secondExport.u; //: number
 require("mod1/dir1").foo.a; //: number
 
