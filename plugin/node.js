@@ -156,6 +156,33 @@
     return {defs: defs};
   });
 
+  tern.defineQueryType("node_exports", {
+    takesFile: true,
+    run: function(server, query, file) {
+      function describe(aval) {
+        var target = {}, type = aval.getType(false);
+        target.type = infer.toString(type, 3);
+        var doc = aval.doc || (type && type.doc), url = aval.url || (type && type.url);
+        if (doc) target.doc = doc;
+        if (url) target.url = url;
+        var span = tern.getSpan(aval) || (type && tern.getSpan(type));
+        if (span) tern.storeSpan(server, query, span, target);
+        return target;
+      }
+
+      var known = server._node.modules[file.name];
+      if (!known) return {};
+      var type = known.getType(false);
+      var resp = describe(known);
+      if (type instanceof infer.Obj) {
+        var props = resp.props = {};
+        for (var prop in type.props)
+          props[prop] = describe(type.props[prop]);
+      }
+      return resp;
+    }
+  });
+
   var defs = {
     "!name": "node",
     "!define": {

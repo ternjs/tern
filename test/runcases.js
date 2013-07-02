@@ -70,7 +70,7 @@ exports.runTests = function(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\r\n]*)/g, m;
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:) *([^\r\n]*)/g, m;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -99,6 +99,11 @@ exports.runTests = function(filter) {
           if (!match)
             fail(m, "Completion set failed at hint: " + parts[i - 1] +
                  "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
+        });
+      } else if (kind == "exports:") {
+        server.request({query: {type: "node_exports", file: fname}}, function(err, resp) {
+          if (err) throw err;
+          if (resp.type != args) fail(m, "Export type failed. Got:\n    " + resp.type + "\nwanted:\n    " + args);
         });
       } else {
         var start, end;

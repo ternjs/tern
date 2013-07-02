@@ -561,6 +561,24 @@ in its set of analyzed files.
 <p> Does not take any parameters. Returns an object with a <code>files</code>
 property holding an array of strings (the file names).</p>
 </dd>
+<dt>
+<a id="req_node_exports"></a><code>node_exports</code>
+</dt>
+<dd>
+<p>
+Only available when the
+<a href="#plugin_node">node.js plugin</a> is loaded. Get the exported type of a
+node module file.
+</p>
+<p> Takes a <code>file</code> field to indicate the file to query for. Returns an
+object with <code>type</code>, and optional <code>url</code>, <code>doc</code>, <code>origin</code>, <code>start, and
+`end</code> properties indicating the type and metainformation for the
+exports, plus, if the exported value is an object type, a <code>props</code>
+property containing an object mapping property names of this object to
+objects holding information about the types of the properties, again
+containing <code>type</code> and optional <code>url</code>, <code>doc</code>, <code>origin</code>, <code>start</code>, and
+<code>end</code> fields.</p>
+</dd>
 </dl>
 <p> <a id="loc_spec"></a> When specifying a location, which is needed for most of
 the query types, the required <code>file</code> field may hold either a filename,
@@ -932,8 +950,7 @@ plugins, either in the project dir or under <code>plugin/</code> in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
-<div class="sect3">
-<h4 id="plugin_doc_comment">Doc comments plugin</h4>
+<h4> <a id="plugin_doc_comment"></a>Doc comments plugin</h4>
 <p> This plugin, which is enabled by default in the <code>bin/tern</code> server,
 parses comments before function declarations, variable declarations,
 and object properties. It will look for
@@ -943,9 +960,7 @@ sentence of comment text as the docstring for the defined variable or
 property.</p>
 <p> To turn this plugin off, set <code>doc_comment: null</code> in your
 <a href="#option_plugins">plugin option</a>.</p>
-</div>
-<div class="sect3">
-<h4 id="plugin_node">Node.js plugin</h4>
+<h4> <a id="plugin_node"></a>Node.js plugin</h4>
 <p> The <a href="http://nodejs.org">node.js</a> plugin, called <code>"node"</code>, provides
 variables that are part of the node environment, such as <code>process</code> and
 <code>require</code>, and hooks up <code>require</code> to try and find the dependencies
@@ -988,9 +1003,7 @@ JSON data.
 </p>
 </dd>
 </dl>
-</div>
-<div class="sect3">
-<h4 id="plugin_requirejs">RequireJS plugin</h4>
+<h4> <a id="plugin_requirejs"></a>RequireJS plugin</h4>
 <p> This plugin teaches the server to understand
 <a href="http://requirejs.org">RequireJS</a>-style dependency management. It
 defines the global functions <code>define</code> and <code>requirejs</code>, and will do its
@@ -1015,7 +1028,6 @@ example <code>{"acorn": "lib/acorn/"}</code>.
 </p>
 </dd>
 </dl>
-</div>
 <h3> <a id="utils"></a>Utilities</h3>
 <dl>
 <dt>
@@ -1699,8 +1711,7 @@ open the associated URL (if any).
 </p>
 </dd>
 </dl>
-<div class="sect3">
-<h4 id="_auto_complete">Auto-Complete</h4>
+<h4> <a id="_auto_complete"></a>Auto-Complete</h4>
 <p> If you want to use <code>auto-complete.el</code> for completion, append following codes:</p>
 <pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">eval-after-load</span> '<span class="cm-variable">tern</span>
    '<span class="cm-bracket">(</span><span class="cm-variable">progn</span>
@@ -1708,7 +1719,6 @@ open the associated URL (if any).
       <span class="cm-bracket">(</span><span class="cm-variable">tern-ac-setup</span><span class="cm-bracket">)))</span></pre>
 <p> If <code>tern-ac-on-dot</code> is non-nil (default), typing <code>.</code>(dot) invokes auto-complete to select completions.
 Calling the command <code>tern-ac-complete</code>, one can invoke auto-complete manually.</p>
-</div>
 <h3> <a id="vim"></a>Vim</h3>
 <p> The Vim plugin is maintained in a
 <a href="https://github.com/marijnh/tern_for_vim">separate repository</a>. Please

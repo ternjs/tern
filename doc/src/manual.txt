@@ -259,6 +259,19 @@ in its set of analyzed files.
 Does not take any parameters. Returns an object with a `files`
 property holding an array of strings (the file names).
 
+[[req_node_exports]]`node_exports`:: Only available when the
+<<plugin_node,node.js plugin>> is loaded. Get the exported type of a
+node module file.
++
+Takes a `file` field to indicate the file to query for. Returns an
+object with `type`, and optional `url`, `doc`, `origin`, `start, and
+`end` properties indicating the type and metainformation for the
+exports, plus, if the exported value is an object type, a `props`
+property containing an object mapping property names of this object to
+objects holding information about the types of the properties, again
+containing `type` and optional `url`, `doc`, `origin`, `start`, and
+`end` fields.
+
 [[loc_spec]] When specifying a location, which is needed for most of
 the query types, the required `file` field may hold either a filename,
 or a string in the form `"#N"`, where `N` should be an integer
