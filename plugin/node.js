@@ -100,8 +100,13 @@
         if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
       } catch(e) { return infer.ANull; }
 
-      server.addFile(file);
-      return data.modules[file] = data.modules[name] = new infer.AVal;
+      var known = data.modules[file];
+      if (known) {
+        return data.modules[name] = known;
+      } else {
+        server.addFile(file);
+        return data.modules[file] = data.modules[name] = new infer.AVal;
+      }
     };
   })();
 
