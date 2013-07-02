@@ -96,6 +96,8 @@
       }
       if (!/\.js$/.test(file)) file += ".js";
 
+      if (data.modules[file]) return data.modules[file];
+
       try {
         if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
       } catch(e) { return infer.ANull; }
