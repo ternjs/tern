@@ -7,6 +7,7 @@
 
 var tern = require("../lib/tern");
 var fs = require("fs"), path = require("path"), url = require("url");
+var glob = require("glob"), minimatch = require("minimatch");
 
 var projectFileName = ".tern-project", portFileName = ".tern-port";
 var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
@@ -108,7 +109,10 @@ function startServer(dir, config) {
   var plugins = loadPlugins(dir, config.plugins);
   var server = new tern.Server({
     getFile: function(name, c) {
-      fs.readFile(path.resolve(dir, name), "utf8", c);
+      if (config.dontLoad && config.dontLoad.some(function(pat) {return minimatch(name, pat)}))
+        c(null, "");
+      else
+        fs.readFile(path.resolve(dir, name), "utf8", c);
     },
     async: true,
     defs: defs,
@@ -116,9 +120,11 @@ function startServer(dir, config) {
     debug: verbose,
     projectDir: dir
   });
-  // FIXME maybe allow globs?
-  if (config.loadEagerly) config.loadEagerly.forEach(function(file) {
-    server.addFile(file);
+
+  if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
+    glob.sync(pat).forEach(function(file) {
+      server.addFile(file);
+    });
   });
   return server;
 }

@@ -943,7 +943,10 @@ suffixed with <code>.json</code>, and searched for first in the project&#8217;s 
 dir, and then in the <code>defs/</code> directory of the Tern distribution.</p>
 <p> By default, local files are loaded into the Tern server when they are
 opened by the editor. <code>loadEagerly</code> allows you to force some files to
-always be loaded.</p>
+always be loaded, it may be an array of filenames or glob patterns
+(i.e. <code>foo/bar/*.js</code>). The <code>dontLoad</code> option can be used to prevent
+Tern from loading certain files. It also takes an array of file names
+or glob patterns.</p>
 <p> Finally, <code>plugins</code> is an object used to load and configure Tern
 plugins. The names of the properties refer to files that implement
 plugins, either in the project dir or under <code>plugin/</code> in the Tern
