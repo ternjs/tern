@@ -70,7 +70,7 @@ exports.runTests = function(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:) *([^\r\n]*)/g, m;
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|node_exports:|refs:) *([^\r\n]*)/g, m;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -99,6 +99,19 @@ exports.runTests = function(filter) {
           if (!match)
             fail(m, "Completion set failed at hint: " + parts[i - 1] +
                  "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
+        });
+      } else if (kind == "node_exports:") { // Node.js module exports test
+        var parts = args.split(/\s*,\s*/);
+        var query = {type: "node_exports", file: fname};
+        server.request({query: query}, function(err, resp) {
+          if (err) throw err;
+          var match = parts.length == resp.exports.length;
+          var exportNames = resp.exports.map(function(x) { return x.name || '(reassigned to func)'; });
+          for (var i = 0; i < parts.length && match; ++i)
+            if (exportNames.indexOf(parts[i]) < 0) match = false;
+          if (!match)
+            fail(m, "Node.js exports set failed at name: " + parts[i - 1] +
+                 "\n     got: " + exportNames.join(", ") + "\n  wanted: " + args);
         });
       } else {
         var start, end;

@@ -551,6 +551,23 @@ Whether the result should be sorted.
 array of strings, which are the property names.</p>
 </dd>
 <dt>
+<a id="req_node_exports"></a><code>node_exports</code> (node plugin only)
+</dt>
+<dd>
+<p>
+List the exports
+of a given node.js module.
+</p>
+<p> Takes a <code>file</code> field to specify the node.js module file whose exports we
+want to list.</p>
+<p> Returns an object whose <code>exports</code> property holds an array of <code>{name,
+doc, origin, start, end, type}</code> objects, which represent the exports of
+the module. If the module&#8217;s <code>module.exports</code> was reassigned (e.g., to
+make the module itself directly callable as a function), then the object
+in the array corresponding to that reassigned value will have a null
+<code>name</code> property.</p>
+</dd>
+<dt>
 <a id="req_files"></a><code>files</code>
 </dt>
 <dd>
