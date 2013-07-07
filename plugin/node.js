@@ -8,6 +8,7 @@
   "use strict";
 
   function resolvePath(base, path) {
+    if (path[0] == "/") return path;
     var slash = base.lastIndexOf("/"), m;
     if (slash >= 0) path = base.slice(0, slash + 1) + path;
     while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
@@ -46,60 +47,20 @@
 
   // Assume node.js & access to local file system
   if (require) (function() {
-    var fs = require("fs"), path = require("path");
-    var win = /win/.test(process.platform);
+    var module_ = require("module"), path = require("path");
 
-    var resolve = path.resolve;
-    if (win) resolve = function(base, file) { return path.resolve(base, file).replace(/\\/g, "/"); };
-
-    function findModuleDir(server) {
-      if (server._node.moduleDir !== undefined) return server._node.moduleDir;
-      var dir = server.options.projectDir || "";
-      if (win) dir = dir.replace(/\\/g, "/");
-
-      for (;;) {
-        var modDir = resolve(dir, "node_modules");
-
-        try {
-          if (fs.statSync(modDir).isDirectory()) return server._node.moduleDir = modDir;
-        } catch(e) {}
-        var end = dir.lastIndexOf("/");
-        if (end <= 0) return server._node.moduleDir = null;
-        dir = dir.slice(0, end);
-      }
-    }
-
-    resolveModule = function(server, name, relative) {
-      var data = server._node, dir = server.options.projectDir || "";
+    resolveModule = function(server, name, parent) {
+      var data = server._node;
       if (data.options.dontLoad == true ||
           data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
           data.options.load && !new RegExp(data.options.load).test(name))
         return infer.ANull;
 
-      var file = name;
-      if (!relative) {
-        var modDir = findModuleDir(server);
-        if (!modDir) return infer.ANull;
-        file = resolve(modDir, file);
-      }
-
-      try {
-        var pkg = JSON.parse(fs.readFileSync(resolve(modDir, file + "/package.json")));
-      } catch(e) {}
-      if (pkg && pkg.main) {
-        file += "/" + pkg.main;
-      } else {
-        try {
-          if (fs.statSync(resolve(dir, file)).isDirectory())
-            file += "/index.js";
-        } catch(e) {}
-      }
-      if (!/\.js$/.test(file)) file += ".js";
-
-      try {
-        if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
-      } catch(e) { return infer.ANull; }
-
+      var currentModule = {
+        id: parent,
+        paths: module_._nodeModulePaths(path.dirname(parent))
+      };
+      var file = module_._resolveFilename(name, currentModule);
       var known = data.modules[file];
       if (known) {
         return data.modules[name] = known;
@@ -131,7 +92,7 @@
       infer.def.load(data.options.modules[name], scope);
       result = data.modules[name] = exportsFromScope(scope);
     } else {
-      result = resolveModule(server, name, relative);
+      result = resolveModule(server, name, data.currentFile);
     }
     return argNodes[0].required = result;
   });
@@ -145,7 +106,7 @@
     };
 
     server.on("beforeLoad", function(file) {
-      this._node.currentFile = file.name.replace(/\\/g, "/");
+      this._node.currentFile = resolvePath(server.options.projectDir + "/", file.name.replace(/\\/g, "/"));
       file.scope = buildWrappingScope(file.scope, file.name, file.ast);
     });
 
