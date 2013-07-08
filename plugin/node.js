@@ -60,7 +60,9 @@
         id: parent,
         paths: module_._nodeModulePaths(path.dirname(parent))
       };
-      var file = module_._resolveFilename(name, currentModule);
+      try {
+        var file = module_._resolveFilename(name, currentModule);
+      } catch(e) { return infer.ANull; }
       var known = data.modules[file];
       if (known) {
         return data.modules[name] = known;
