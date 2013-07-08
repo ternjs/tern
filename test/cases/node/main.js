@@ -40,6 +40,7 @@ var mod1 = require("mod1");
 var mod2 = require("mod1/mainfile.js");
 mod1.mainExport.x; //: number
 mod2.mainExport.x; //: number
+mod1.fromSubdep; //: fn()
 
 require("mod1/secondfile").secondExport.u; //: number
 require("mod1/dir1").foo.a; //: number
