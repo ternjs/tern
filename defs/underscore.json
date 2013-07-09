@@ -95,7 +95,6 @@
     "VERSION": {
       "!type": "string"
     },
-    "_": "exports",
     "after": {
       "!doc": "Returns a function that will only be executed after being called N times.",
       "!type": "fn(times: ?, func: ?) -> _.after.!ret"
@@ -190,7 +189,7 @@
     "foldl": "_.inject",
     "foldr": {
       "!doc": "The right-associative version of reduce, also known as `foldr`.",
-      "!type": "fn(obj: [?], iterator: fn() -> +exports, memo: +exports, context: ?) -> !0.<i>"
+      "!type": "fn(obj: [?], iterator: fn() -> +_, memo: +_, context: ?) -> !0.<i>"
     },
     "forEach": {
       "!doc": "The cornerstone, an `each` implementation, aka `forEach`. Handles objects with the built-in `forEach`, arrays, and raw objects. Delegates to **ECMAScript 5**'s native `forEach` if available.",
@@ -224,7 +223,7 @@
     },
     "inject": {
       "!doc": "**Reduce** builds up a single result from a list of values, aka `inject`, or `foldl`.",
-      "!type": "fn(obj: ?, iterator: ?, memo: ?, context: ?) -> +exports"
+      "!type": "fn(obj: ?, iterator: ?, memo: ?, context: ?) -> +_"
     },
     "intersection": {
       "!doc": "Produce an array that contains every item shared between all the passed-in arrays.",
@@ -306,7 +305,7 @@
     },
     "methods": {
       "!doc": "Return a sorted list of the function names available on the object.",
-      "!type": "fn(obj: exports)"
+      "!type": "fn(obj: _)"
     },
     "min": {
       "!doc": "Return the minimum element (or element-based computation).",
@@ -314,7 +313,7 @@
     },
     "mixin": {
       "!doc": "Add your own custom functions to the Underscore object.",
-      "!type": "fn(obj: exports)"
+      "!type": "fn(obj: _)"
     },
     "noConflict": {
       "!doc": "Run Underscore.js in *noConflict* mode, returning the `_` variable to its previous owner. Returns a reference to the Underscore object.",
