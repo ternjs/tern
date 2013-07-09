@@ -6,6 +6,7 @@ exports.resolve = function(pth) { return path.resolve(projectDir, pth); };
 exports.ecma5 = JSON.parse(fs.readFileSync(exports.resolve("defs/ecma5.json")), "utf8");
 exports.browser = JSON.parse(fs.readFileSync(exports.resolve("defs/browser.json")), "utf8");
 exports.jquery = JSON.parse(fs.readFileSync(exports.resolve("defs/jquery.json")), "utf8");
+exports.underscore = JSON.parse(fs.readFileSync(exports.resolve("defs/underscore.json")), "utf8");
 
 var files = 0, tests = 0, failed = 0;
 

@@ -1,0 +1,473 @@
+{
+  "!name": "underscore",
+  "!define": {
+    "_.after.!ret": {
+      "!type": "fn()"
+    },
+    "_.any.!1": {
+      "!type": "fn(value: ?, index: number, list: ?) -> bool"
+    },
+    "_.bind.!ret": {
+      "!type": "fn()"
+    },
+    "_.compose.!ret": {
+      "!type": "fn()"
+    },
+    "_.countBy.!ret": {
+      "<i>": {
+        "!type": "number"
+      }
+    },
+    "_.debounce.!ret": {
+      "!type": "fn()"
+    },
+    "_.defaults.!0": {
+      "escape": "+RegExp",
+      "evaluate": "+RegExp",
+      "interpolate": "+RegExp"
+    },
+    "_.forEach.!1": {
+      "!type": "fn(value: ?, index: number, list: !0)"
+    },
+    "_.groupBy.!ret": {
+      "<i>": {
+        "!type": "[?]"
+      }
+    },
+    "_.invert.!0": {
+      "\"": {
+        "!type": "string"
+      },
+      "&": {
+        "!type": "string"
+      },
+      "'": {
+        "!type": "string"
+      },
+      "/": {
+        "!type": "string"
+      },
+      "<": {
+        "!type": "string"
+      },
+      ">": {
+        "!type": "string"
+      }
+    },
+    "_.invert.!ret": {
+      "<i>": "?"
+    },
+    "_.memoize.!ret": {
+      "!type": "fn()"
+    },
+    "_.object.!ret": {
+      "<i>": "?"
+    },
+    "_.omit.!ret": {},
+    "_.once.!0": {
+      "!type": "fn() -> ?"
+    },
+    "_.once.!ret": {
+      "!type": "fn() -> _.once.!0.!ret"
+    },
+    "_.partial.!ret": {
+      "!type": "fn()"
+    },
+    "_.pick.!ret": {
+      "<i>": "?"
+    },
+    "_.select.!1": {
+      "!type": "fn(value: ?, index: number, list: ?) -> bool"
+    },
+    "_.template.!ret": {
+      "!type": "fn(data: ?)",
+      "source": {
+        "!type": "string"
+      }
+    }
+  },
+  "_": {
+    "!doc": "Save the previous value of the `_` variable.",
+    "!type": "fn(obj: ?) -> !0",
+    "<i>": {
+      "!type": "fn(string: ?) -> string"
+    },
+    "VERSION": {
+      "!type": "string"
+    },
+    "_": "exports",
+    "after": {
+      "!doc": "Returns a function that will only be executed after being called N times.",
+      "!type": "fn(times: ?, func: ?) -> _.after.!ret"
+    },
+    "all": {
+      "!doc": "Determine whether all of the elements match a truth test.",
+      "!type": "fn(obj: [?], iterator: _.isArray, context: ?) -> bool"
+    },
+    "any": {
+      "!doc": "Determine if at least one element in the object matches a truth test.",
+      "!type": "fn(obj: [?], iterator: _.any.!1, context: ?) -> bool"
+    },
+    "bind": {
+      "!doc": "Create a function bound to a given object (assigning `this`, and arguments, optionally).",
+      "!type": "fn(func: ?, context: ?) -> _.bind.!ret"
+    },
+    "bindAll": {
+      "!doc": "Bind all of an object's methods to that object.",
+      "!type": "fn(obj: ?)"
+    },
+    "chain": {
+      "!doc": "Add a \"chain\" function, which will delegate to the wrapper.",
+      "!type": "fn(obj: ?)"
+    },
+    "clone": {
+      "!doc": "Create a (shallow-cloned) duplicate of an object.",
+      "!type": "fn(obj: ?) -> ?"
+    },
+    "collect": {
+      "!doc": "Return the results of applying the iterator to each element.",
+      "!type": "fn(obj: [?], iterator: ?, context: bool) -> [?]"
+    },
+    "compact": {
+      "!doc": "Trim out all falsy values from an array.",
+      "!type": "fn(array: [?]) -> [?]"
+    },
+    "compose": {
+      "!doc": "Returns a function that is the composition of a list of functions, each consuming the return value of the function that follows.",
+      "!type": "fn() -> _.compose.!ret"
+    },
+    "contains": "_.include",
+    "countBy": {
+      "!doc": "Counts instances of an object that group by a certain criterion.",
+      "!type": "fn(obj: ?, value: ?, context: ?) -> _.countBy.!ret"
+    },
+    "debounce": {
+      "!doc": "Returns a function, that, as long as it continues to be invoked, will not be triggered.",
+      "!type": "fn(func: ?, wait: ?, immediate: ?) -> _.debounce.!ret"
+    },
+    "defaults": {
+      "!doc": "Fill in a given object with default properties.",
+      "!type": "fn(obj: _.defaults.!0)"
+    },
+    "defer": {
+      "!doc": "Defers a function, scheduling it to run after the current call stack has cleared.",
+      "!type": "fn(func: ?) -> number"
+    },
+    "delay": {
+      "!doc": "Delays a function for the given number of milliseconds, and then calls it with the arguments supplied.",
+      "!type": "fn(func: fn(), wait: number) -> number"
+    },
+    "detect": {
+      "!doc": "Return the first value which passes a truth test.",
+      "!type": "fn(obj: ?, iterator: ?, context: ?)"
+    },
+    "difference": {
+      "!doc": "Take the difference between one array and a number of other arrays.",
+      "!type": "fn(array: [?]) -> [?]"
+    },
+    "drop": {
+      "!doc": "Returns everything but the first entry of the array.",
+      "!type": "fn(array: [?], n: number, guard: ?) -> !0"
+    },
+    "each": "_.forEach",
+    "every": "_.all",
+    "extend": {
+      "!doc": "Extend a given object with all the properties in passed-in object(s).",
+      "!type": "fn(destination: ?, source1: ?, source2?: ?) -> !0",
+      "!effects": ["copy !1 !0", "copy !2 !0"]
+    },
+    "filter": "_.select",
+    "find": "_.detect",
+    "findWhere": {
+      "!doc": "Convenience version of a common use case of `find`: getting the first object containing specific `key:value` pairs.",
+      "!type": "fn(obj: ?, attrs: ?)"
+    },
+    "first": "_.take",
+    "flatten": {
+      "!doc": "Return a completely flattened version of an array.",
+      "!type": "fn(array: [?], shallow: bool) -> [?]"
+    },
+    "foldl": "_.inject",
+    "foldr": {
+      "!doc": "The right-associative version of reduce, also known as `foldr`.",
+      "!type": "fn(obj: [?], iterator: fn() -> +exports, memo: +exports, context: ?) -> !0.<i>"
+    },
+    "forEach": {
+      "!doc": "The cornerstone, an `each` implementation, aka `forEach`. Handles objects with the built-in `forEach`, arrays, and raw objects. Delegates to **ECMAScript 5**'s native `forEach` if available.",
+      "!type": "fn(obj: _.forEach.!0, iterator: _.forEach.!1, context: ?)"
+    },
+    "functions": "_.methods",
+    "groupBy": {
+      "!doc": "Groups the object's values by a criterion.",
+      "!type": "fn(obj: ?, value: ?, context: ?) -> _.groupBy.!ret"
+    },
+    "has": {
+      "!doc": "Shortcut function for checking if an object has a given property directly on itself (in other words, not on a prototype).",
+      "!type": "fn(obj: ?, key: string) -> bool"
+    },
+    "head": "_.take",
+    "identity": {
+      "!doc": "Keep the identity function around for default iterators.",
+      "!type": "fn(value: ?) -> !0"
+    },
+    "include": {
+      "!doc": "Determine if the array or object contains a given value (using `===`).",
+      "!type": "fn(obj: ?, target: ?) -> bool"
+    },
+    "indexOf": {
+      "!doc": "If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**), we need this function.",
+      "!type": "fn(array: [?], item: ?, isSorted: ?) -> !2"
+    },
+    "initial": {
+      "!doc": "Returns everything but the last entry of the array.",
+      "!type": "fn(array: [?], n: number, guard: ?) -> !0"
+    },
+    "inject": {
+      "!doc": "**Reduce** builds up a single result from a list of values, aka `inject`, or `foldl`.",
+      "!type": "fn(obj: ?, iterator: ?, memo: ?, context: ?) -> +exports"
+    },
+    "intersection": {
+      "!doc": "Produce an array that contains every item shared between all the passed-in arrays.",
+      "!type": "fn(array: [?]) -> [!0.<i>]"
+    },
+    "invert": {
+      "!doc": "Invert the keys and values of an object.",
+      "!type": "fn(obj: _.invert.!0) -> _.invert.!ret"
+    },
+    "invoke": {
+      "!doc": "Invoke a method (with arguments) on every item in a collection.",
+      "!type": "fn(obj: ?, method: ?) -> [?]"
+    },
+    "isArguments": {
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isArray": {
+      "!doc": "Is a given value an array? Delegates to ECMA5's native Array.isArray",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isBoolean": {
+      "!doc": "Is a given value a boolean?",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isElement": {
+      "!doc": "Is a given value a DOM element?",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isEmpty": {
+      "!doc": "Is a given array, string, or object empty? An \"empty\" object has no enumerable own-properties.",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isEqual": {
+      "!doc": "Perform a deep comparison to check if two objects are equal.",
+      "!type": "fn(a: ?, b: ?) -> bool"
+    },
+    "isFinite": {
+      "!doc": "Is a given object a finite number?",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isFunction": {
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isNaN": {
+      "!doc": "Is the given value `NaN`? (NaN is the only number which does not equal itself).",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isNull": {
+      "!doc": "Is a given value equal to null?",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isObject": {
+      "!doc": "Is a given variable an object?",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "isUndefined": {
+      "!doc": "Is a given variable undefined?",
+      "!type": "fn(obj: ?) -> bool"
+    },
+    "keys": {
+      "!doc": "Retrieve the names of an object's properties. Delegates to **ECMAScript 5**'s native `Object.keys`",
+      "!type": "fn(obj: ?) -> [?]"
+    },
+    "last": {
+      "!doc": "Get the last element of an array.",
+      "!type": "fn(array: [?], n: number, guard: ?) -> !0"
+    },
+    "lastIndexOf": {
+      "!doc": "Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.",
+      "!type": "fn(array: [?], item: ?, from: ?) -> !0.length"
+    },
+    "map": "_.collect",
+    "max": {
+      "!type": "fn(obj: [?], iterator: ?, context: ?) -> number"
+    },
+    "memoize": {
+      "!doc": "Memoize an expensive function by storing its results.",
+      "!type": "fn(func: ?, hasher: _.identity) -> _.memoize.!ret"
+    },
+    "methods": {
+      "!doc": "Return a sorted list of the function names available on the object.",
+      "!type": "fn(obj: exports)"
+    },
+    "min": {
+      "!doc": "Return the minimum element (or element-based computation).",
+      "!type": "fn(obj: ?, iterator: ?, context: ?) -> number"
+    },
+    "mixin": {
+      "!doc": "Add your own custom functions to the Underscore object.",
+      "!type": "fn(obj: exports)"
+    },
+    "noConflict": {
+      "!doc": "Run Underscore.js in *noConflict* mode, returning the `_` variable to its previous owner. Returns a reference to the Underscore object.",
+      "!type": "fn() -> _"
+    },
+    "object": {
+      "!doc": "Converts lists into objects.",
+      "!type": "fn(list: [?], values?: [?]) -> _.object.!ret"
+    },
+    "omit": {
+      "!doc": "Return a copy of the object without the blacklisted properties.",
+      "!type": "fn(obj: ?, keys: ?) -> _.omit.!ret"
+    },
+    "once": {
+      "!doc": "Returns a function that will be executed at most one time, no matter how often you call it.",
+      "!type": "fn(func: _.once.!0) -> _.once.!ret"
+    },
+    "pairs": {
+      "!doc": "Convert an object into a list of `[key, value]` pairs.",
+      "!type": "fn(obj: ?) -> [[?]]"
+    },
+    "partial": {
+      "!doc": "Partially apply a function by creating a version that has had some of its arguments pre-filled, without changing its dynamic `this` context.",
+      "!type": "fn(func: ?) -> _.partial.!ret"
+    },
+    "pick": {
+      "!doc": "Return a copy of the object only containing the whitelisted properties.",
+      "!type": "fn(obj: ?) -> _.pick.!ret"
+    },
+    "pluck": {
+      "!doc": "Convenience version of a common use case of `map`: fetching a property.",
+      "!type": "fn(obj: [?], key: string) -> [?]"
+    },
+    "prototype": {
+      "<i>": {
+        "!type": "fn() -> !this._wrapped"
+      },
+      "_chain": {
+        "!type": "bool"
+      },
+      "chain": {
+        "!doc": "Start chaining a wrapped Underscore object.",
+        "!type": "fn() -> !this"
+      },
+      "value": {
+        "!doc": "Extracts the result from a wrapped and chained object.",
+        "!type": "fn() -> !this._wrapped"
+      }
+    },
+    "random": {
+      "!doc": "Return a random integer between min and max (inclusive).",
+      "!type": "fn(min: number, max: number) -> number"
+    },
+    "range": {
+      "!type": "fn(start?: number, stop: number, step: number) -> [number]"
+    },
+    "reduce": "_.inject",
+    "reduceRight": "_.foldr",
+    "reject": {
+      "!doc": "Return all the elements for which a truth test fails.",
+      "!type": "fn(obj: ?, iterator: ?, context: ?) -> [?]"
+    },
+    "rest": "_.drop",
+    "result": {
+      "!doc": "If the value of the named `property` is a function then invoke it with the `object` as context; otherwise, return it.",
+      "!type": "fn(object: ?, property: ?) -> !0.<i>"
+    },
+    "select": {
+      "!doc": "Return all the elements that pass a truth test.",
+      "!type": "fn(obj: [?], iterator: _.select.!1, context: ?) -> [?]"
+    },
+    "shuffle": {
+      "!doc": "Shuffle an array.",
+      "!type": "fn(obj: ?) -> !0"
+    },
+    "size": {
+      "!doc": "Return the number of elements in an object.",
+      "!type": "fn(obj: ?) -> number"
+    },
+    "some": "_.any",
+    "sortBy": {
+      "!doc": "Sort the object's values by a criterion produced by an iterator.",
+      "!type": "fn(obj: ?, value: ?, context: ?) -> !0"
+    },
+    "sortedIndex": {
+      "!doc": "Use a comparator function to figure out the smallest index at which an object should be inserted so as to maintain order.",
+      "!type": "fn(array: [?], obj: ?, iterator: ?, context: ?) -> number"
+    },
+    "tail": "_.drop",
+    "take": {
+      "!doc": "Get the first element of an array. Passing **n** will return the first N values in the array. Aliased as `head` and `take`. The **guard** check allows it to work with `_.map`.",
+      "!type": "fn(array: [?], n: number, guard: ?) -> !0.<i>"
+    },
+    "tap": {
+      "!doc": "Invokes interceptor with the obj, and then returns obj.",
+      "!type": "fn(obj: ?, interceptor: ?) -> !0",
+      "!effects": ["call !1 !0"]
+    },
+    "template": {
+      "!doc": "JavaScript micro-templating, similar to John Resig's implementation.",
+      "!type": "fn(text: ?, data: ?, settings: _.defaults.!0) -> _.template.!ret"
+    },
+    "templateSettings": {
+      "!doc": "By default, Underscore uses ERB-style template delimiters, change the following template settings to use alternative delimiters.",
+      "escape": "+RegExp",
+      "evaluate": "+RegExp",
+      "interpolate": "+RegExp"
+    },
+    "throttle": {
+      "!doc": "Returns a function, that, when invoked, will only be triggered at most once during a given window of time.",
+      "!type": "fn(func: fn(), wait: number, options: _.throttle.!2) -> !0"
+    },
+    "times": {
+      "!doc": "Run a function **n** times.",
+      "!type": "fn(n: number, iterator: ?, context: ?) -> [?]"
+    },
+    "toArray": {
+      "!doc": "Safely create a real, live array from anything iterable.",
+      "!type": "fn(obj: ?) -> [?]"
+    },
+    "union": {
+      "!doc": "Produce an array that contains the union: each distinct element from all of the passed-in arrays.",
+      "!type": "fn(array: [?], array2: [?]) -> [?]"
+    },
+    "uniq": "_.unique",
+    "unique": {
+      "!doc": "Produce a duplicate-free version of the array.",
+      "!type": "fn(array: [?], isSorted: ?, iterator: ?, context: ?) -> [?]"
+    },
+    "uniqueId": {
+      "!doc": "Generate a unique integer id (unique within the entire client session). Useful for temporary DOM ids.",
+      "!type": "fn(prefix: string) -> string"
+    },
+    "values": {
+      "!doc": "Retrieve the values of an object's properties.",
+      "!type": "fn(obj: ?) -> [?]"
+    },
+    "where": {
+      "!doc": "Convenience version of a common use case of `filter`: selecting only objects containing specific `key:value` pairs.",
+      "!type": "fn(obj: [?], attrs: ?, first?: bool) -> !0"
+    },
+    "without": {
+      "!doc": "Return a version of the array that does not contain the specified value(s).",
+      "!type": "fn(array: [?]) -> !0"
+    },
+    "wrap": {
+      "!doc": "Returns the first function passed as an argument to the second, allowing you to adjust arguments, run code before and after, and conditionally execute the original function.",
+      "!type": "fn(func: fn(), wrapper: fn()) -> ?",
+      "!effects": ["call !1 !0"]
+    },
+    "zip": {
+      "!doc": "Zip together multiple lists into a single array -- elements that share an index go together.",
+      "!type": "fn(array1: [?], array2: [?]) -> [?]"
+    }
+  }
+}

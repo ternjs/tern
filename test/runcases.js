@@ -10,7 +10,8 @@ var util = require("./util");
 
 var defData = {
   browser: util.browser,
-  jquery: util.jquery
+  jquery: util.jquery,
+  underscore: util.underscore
 };
 
 function getDefs(text) {
