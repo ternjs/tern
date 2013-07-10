@@ -220,7 +220,8 @@ list of strings, giving the binary name and arguments.")
         (start (+ 1 (cdr (assq 'start data))))
         (end (+ 1 (cdr (assq 'end data)))))
     (setf tern-last-completions (list (buffer-substring-no-properties start end) start end cs))
-    (completion-in-region start end cs)))
+    (let ((completion-in-region-mode-predicate nil))
+      (completion-in-region start end cs))))
 
 (defun tern-completion-matches-last ()
   (when tern-last-completions
