@@ -1,16 +1,17 @@
 ;;; -*- lexical-binding: t -*-
-;;; tern-id-complete.el --- Tern Completion by ido.el
+;;; tern-ido-complete.el --- Tern Completion by ido.el
 
 ;; Author:  <https://github.com/katspaugh>
 ;; Version: 0.0.1
 
 ;;; Commentary:
 
-;; Display completions in minibuffer using `ido-completing-read'.
+;; Display and refine completions in minibuffer using
+;; `ido-completing-read'.
 
 ;;; Installation:
 
-;; Add following lines below the tern setup code.
+;; Add the following lines below the Tern setup code.
 
 ;; (eval-after-load 'tern
 ;;   '(progn
@@ -29,7 +30,7 @@
         (start (+ 1 (cdr (assq 'start data))))
         (end (+ 1 (cdr (assq 'end data)))))
     (let ((refined (if (eq 1 (length cs)) cs
-                    (list (ido-completing-read "" cs)))))
+                     (list (ido-completing-read "" cs)))))
       (completion-in-region start end refined))))
 
 (defun tern-ido-complete ()
