@@ -28,10 +28,15 @@
 (defun tern-ido-display (data)
   (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
         (start (+ 1 (cdr (assq 'start data))))
-        (end (+ 1 (cdr (assq 'end data)))))
-    (let ((refined (if (eq 1 (length cs)) cs
-                     (list (ido-completing-read "" cs)))))
-      (completion-in-region start end refined))))
+        (end (+ 1 (cdr (assq 'end data))))
+        refined)
+    (if (eq 1 (length cs))
+        (setq refined cs)
+      (let* ((sym (symbol-at-point))
+             (input (when sym (symbol-name sym))))
+        (setq refined (list (ido-completing-read "" cs nil nil input)))))
+    (completion-in-region start end refined)))
+
 
 (defun tern-ido-complete ()
   (interactive)
