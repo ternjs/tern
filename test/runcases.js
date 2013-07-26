@@ -71,7 +71,7 @@ exports.runTests = function(filter) {
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:) *([^\r\n]*)/g, m;
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|forAllProps:|loc:|refs:|exports:) *([^\r\n]*)/g, m;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -118,6 +118,19 @@ exports.runTests = function(filter) {
             return;
           }
           start = expr.node.start; end = expr.node.end;
+        }
+        if (kind == "forAllProps:") {
+          infer.withContext(server.cx, function() {
+            var expr = tern.findQueryExpr(server.files[0], {start: start, end: end});
+            var type = infer.expressionType(expr);
+            try {
+              type.forAllProps(function() {});
+            }/* catch (e) {
+              fail(m, "forAllProps failed");
+            }*/finally {}
+
+          });
+          return;
         }
         var query = {type: kind == "doc:" ? "documentation" : kind == "loc:" ? "definition" : kind == "refs:" ? "refs" : "type",
                      start: start, end: end,
