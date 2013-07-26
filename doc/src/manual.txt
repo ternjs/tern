@@ -29,6 +29,7 @@ engine>> to do the actual type inference.
 ** <<emacs,Emacs>>
 ** <<vim,Vim>>
 ** <<sublime_text,Sublime Text>>
+* <<software,Related Software>>
 
 [[server]]
 == The Tern server ==
@@ -1057,3 +1058,20 @@ Chikuyonok, and can be found at
 to run the server.
 
 See the readme files in those repositories for details.
+
+[[software]]
+== Related Software ==
+
+This is a place to gather links to software that is built on Tern.
+Drop me an mailto:marijnh@gmail.com[email] if you want to suggest a
+link.
+
+=== jsctags ===
+
+https://github.com/ramitos/jsctags[jsctags] is a tool that generates
+ctags files from JavaScript code by using Tern's inference engine.
+
+=== CodeMirror Tern addon ===
+
+The http://codemirror.net[CodeMirror] browser-based editor has an
+http://codemirror.net/demo/tern.html[addon] for integrating with Tern.
