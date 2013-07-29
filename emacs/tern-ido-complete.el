@@ -32,11 +32,10 @@
         refined)
     (if (eq 1 (length cs))
         (setq refined cs)
-      (let* ((sym (symbol-at-point))
-             (input (when sym (symbol-name sym))))
-        (setq refined (list (ido-completing-read "" cs nil nil input)))))
+      (let ((choice (ido-completing-read
+                     "" cs nil nil (thing-at-point 'symbol))))
+        (setq refined (list choice))))
     (completion-in-region start end refined)))
-
 
 (defun tern-ido-complete ()
   (interactive)
