@@ -25,21 +25,28 @@
 (require 'ido)
 
 
+(defun tern-ido-insert (start end choice)
+  (let ((completion-in-region-mode-predicate nil))
+    (completion-in-region start end (list choice))))
+
 (defun tern-ido-display (data)
-  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
-        (start (+ 1 (cdr (assq 'start data))))
-        (end (+ 1 (cdr (assq 'end data))))
-        refined)
-    (if (eq 1 (length cs))
-        (setq refined cs)
-      (let ((choice (ido-completing-read
-                     "" cs nil nil (thing-at-point 'symbol))))
-        (setq refined (list choice))))
-    (completion-in-region start end refined)))
+  (when (eq (point) tern-last-point-pos)
+    (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
+          (start (+ 1 (cdr (assq 'start data))))
+          (end (+ 1 (cdr (assq 'end data)))))
+      (if (eq 1 (length cs))
+          (tern-ido-insert start end cs)
+        (run-with-idle-timer 0 nil 'tern-ido-read start end cs)))))
+
+(defun tern-ido-read (start end cs)
+  (when (eq (point) tern-last-point-pos)
+    (tern-ido-insert
+     start end (ido-completing-read "" cs nil nil (thing-at-point 'symbol)))))
 
 (defun tern-ido-complete ()
   (interactive)
-  (tern-run-query #'tern-ido-display "completions" (point)))
+  (setq tern-last-point-pos (point))
+  (tern-run-query 'tern-ido-display "completions" (point)))
 
 
 (provide 'tern-ido-complete)
