@@ -4,6 +4,7 @@
 ;; Author: Marijn Haverbeke
 ;; URL: http://ternjs.net/
 ;; Version: 0.0.1
+;; Package-Requires: ((json "1.2") (emacs "24"))
 
 (eval-when-compile (require 'cl))
 (require 'json)
@@ -459,6 +460,7 @@ list of strings, giving the binary name and arguments.")
 
 ;; Connection management
 
+;;;###autoload
 (defun tern-use-server (port)
   (interactive "nPort to connect to: ")
   (setf tern-known-port port))
@@ -505,6 +507,7 @@ list of strings, giving the binary name and arguments.")
 (define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
 (define-key tern-mode-keymap [(control ?c) (control ?d)] 'tern-get-docs)
 
+;;;###autoload
 (define-minor-mode tern-mode
   "Minor mode binding to the Tern JavaScript analyzer"
   nil
