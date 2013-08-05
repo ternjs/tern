@@ -3,6 +3,7 @@
 
 ;; Author:  <m.sakurai at kiwanami.net>
 ;; Version: 0.0.1
+;; Package-Requires: ((tern "0.0.1") (auto-complete "1.4") (emacs "24"))
 
 ;;; Commentary:
 
@@ -103,6 +104,7 @@
          (prefix . tern-ac-completion-prefix)
          (requires . -1)))))
 
+;;;###autoload
 (defun tern-ac-setup ()
   "Setup auto-complete for tern-mode."
   (interactive)
