@@ -2488,6 +2488,11 @@
         ca: "string",
         crl: "string",
         ciphers: "string"
+      },
+      buffer: {
+        Buffer: "Buffer",
+        INSPECT_MAX_BYTES: "number",
+        SlowBuffer: "Buffer"
       }
     },
     process: {
@@ -2788,8 +2793,7 @@
         writeFloatBE: "fn(value: number, offset: number, noAssert?: bool)",
         writeDoubleLE: "fn(value: number, offset: number, noAssert?: bool)",
         writeDoubleBE: "fn(value: number, offset: number, noAssert?: bool)",
-        fill: "fn(value: ?, offset?: number, end?: number)",
-        INSPECT_MAX_BYTES: "number"
+        fill: "fn(value: ?, offset?: number, end?: number)"
       },
       isBuffer: "fn(obj: ?) -> bool",
       byteLength: "fn(string: string, encoding?: string) -> number",
