@@ -2493,6 +2493,50 @@
         Buffer: "Buffer",
         INSPECT_MAX_BYTES: "number",
         SlowBuffer: "Buffer"
+      },
+      timers: {
+        setTimeout: {
+          "!type": "fn(callback: fn(), ms: number) -> timers.Timer",
+          "!url": "http://nodejs.org/api/globals.html#globals_settimeout_cb_ms",
+          "!doc": "Run callback cb after at least ms milliseconds. The actual delay depends on external factors like OS timer granularity and system load."
+        },
+        clearTimeout: {
+          "!type": "fn(id: timers.Timer)",
+          "!url": "http://nodejs.org/api/globals.html#globals_cleartimeout_t",
+          "!doc": "Stop a timer that was previously created with setTimeout(). The callback will not execute."
+        },
+        setInterval: {
+          "!type": "fn(callback: fn(), ms: number) -> timers.Timer",
+          "!url": "http://nodejs.org/api/globals.html#globals_setinterval_cb_ms",
+          "!doc": "Run callback cb repeatedly every ms milliseconds. Note that the actual interval may vary, depending on external factors like OS timer granularity and system load. It's never less than ms but it may be longer."
+        },
+        clearInterval: {
+          "!type": "fn(id: timers.Timer)",
+          "!url": "http://nodejs.org/api/globals.html#globals_clearinterval_t",
+          "!doc": "Stop a timer that was previously created with setInterval(). The callback will not execute."
+        },
+        setImmediate: {
+          "!type": "fn(callback: fn(), ms: number) -> timers.Timer",
+          "!url": "http://nodejs.org/api/timers.html#timers_setimmediate_callback_arg",
+          "!doc": "Schedule the 'immediate' execution of callback after I/O events callbacks."
+        },
+        clearImmediate: {
+          "!type": "fn(id: timers.Timer)",
+          "!url": "http://nodejs.org/api/timers.html#timers_clearimmediate_immediateid",
+          "!doc": "Stops an immediate from triggering."
+        },
+        Timer: {
+          unref: {
+            "!type": "fn()",
+            "!url": "http://nodejs.org/api/timers.html#timers_unref",
+            "!doc": "Create a timer that is active but if it is the only item left in the event loop won't keep the program running."
+          },
+          ref: {
+            "!type": "fn()",
+            "!url": "http://nodejs.org/api/timers.html#timers_unref",
+            "!doc": "Explicitly request the timer hold the program open (cancel the effect of 'unref')."
+          }
+        }
       }
     },
     process: {
@@ -2731,26 +2775,10 @@
       "!url": "http://nodejs.org/api/globals.html#globals_dirname",
       "!doc": "The name of the directory that the currently executing script resides in."
     },
-    setTimeout: {
-      "!type": "fn(callback: fn(), ms: number) -> ?",
-      "!url": "http://nodejs.org/api/globals.html#globals_settimeout_cb_ms",
-      "!doc": "Run callback cb after at least ms milliseconds. The actual delay depends on external factors like OS timer granularity and system load."
-    },
-    clearTimeout: {
-      "!type": "fn(timeoutId: ?)",
-      "!url": "http://nodejs.org/api/globals.html#globals_cleartimeout_t",
-      "!doc": "Stop a timer that was previously created with setTimeout(). The callback will not execute."
-    },
-    setInterval: {
-      "!type": "fn(callback: fn(), ms: number) -> ?",
-      "!url": "http://nodejs.org/api/globals.html#globals_setinterval_cb_ms",
-      "!doc": "Run callback cb repeatedly every ms milliseconds. Note that the actual interval may vary, depending on external factors like OS timer granularity and system load. It's never less than ms but it may be longer."
-    },
-    clearInterval: {
-      "!type": "fn(intervalId: ?)",
-      "!url": "http://nodejs.org/api/globals.html#globals_clearinterval_t",
-      "!doc": "Stop a timer that was previously created with setInterval(). The callback will not execute."
-    },
+    setTimeout: "timers.setTimeout",
+    clearTimeout: "timers.clearTimeout",
+    setInterval: "timers.setInterval",
+    clearInterval: "timers.clearInterval",
     module: {
       "!type": "+Module",
       "!url": "http://nodejs.org/api/globals.html#globals_module",

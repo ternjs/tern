@@ -25,6 +25,10 @@ tls.createServer({}, function(stream) {
   stream.authorized; //: bool
 });
 
+require("timers").setInterval; //: fn(callback: fn(), ms: number) -> timers.Timer
+setInterval; //: fn(callback: fn(), ms: number) -> timers.Timer
+setTimeout(function(){}, 10).ref; //: fn()
+
 var mymod = require("mymod");
 
 mymod.foo; //: number
