@@ -29,6 +29,9 @@ require("timers").setInterval; //: fn(callback: fn(), ms: number) -> timers.Time
 setInterval; //: fn(callback: fn(), ms: number) -> timers.Timer
 setTimeout(function(){}, 10).ref; //: fn()
 
+// don't attempt to handle .node binary modules
+require("./binary.node").binary; //: ?
+
 var mymod = require("mymod");
 
 mymod.foo; //: number
