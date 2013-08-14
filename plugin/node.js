@@ -67,7 +67,7 @@
       if (known) {
         return data.modules[name] = known;
       } else {
-        server.addFile(file);
+        if (path.extname(file) != '.node') server.addFile(file);
         return data.modules[file] = data.modules[name] = new infer.AVal;
       }
     };
