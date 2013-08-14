@@ -29,6 +29,8 @@ require("timers").setInterval; //: fn(callback: fn(), ms: number) -> timers.Time
 setInterval; //: fn(callback: fn(), ms: number) -> timers.Timer
 setTimeout(function(){}, 10).ref; //: fn()
 
+require("module");
+
 var mymod = require("mymod");
 
 mymod.foo; //: number
