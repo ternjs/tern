@@ -31,6 +31,8 @@ setTimeout(function(){}, 10).ref; //: fn()
 
 var mymod = require("mymod");
 
+require("_stream_readable");
+
 mymod.foo; //: number
 mymod.bar; //: string
 
