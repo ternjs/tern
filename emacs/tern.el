@@ -364,6 +364,28 @@ list of strings, giving the binary name and arguments.")
   (interactive "MNew variable name: ")
   (tern-run-query #'tern-do-refactor `((type . "rename") (newName . ,new-name)) (point) :full-file))
 
+;; Highlight references in scope
+
+(defvar tern-flash-timeout 0.5 "Delay before highlight overlay dissappears.")
+
+(defun tern-flash-region (start end)
+  "Temporarily highlight region from START to END."
+  (let ((overlay (make-overlay start end)))
+    (overlay-put overlay 'face 'highlight)
+    (run-with-timer tern-flash-timeout nil 'delete-overlay overlay)))
+
+(defun tern-do-highlight (data)
+  (loop for ref across (cdr (assq 'refs data)) do
+        (let ((file (cdr (assq 'file ref))))
+          (when (string= buffer-file-name (expand-file-name file (tern-project-dir)))
+            (let ((start (1+ (cdr (assq 'start ref))))
+                  (end (1+ (cdr (assq 'end ref)))))
+              (tern-flash-region start end))))))
+
+(defun tern-highlight-refs ()
+  (interactive)
+  (tern-run-query #'tern-do-highlight "refs" (point) :silent)))
+
 ;; Jump-to-definition
 
 (defvar tern-find-definition-stack ())
