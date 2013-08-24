@@ -59,6 +59,8 @@ require("mod1/dir1").foo.a; //: number
 
 require("mod1/reassign_exports").funcPropExport; //loc: 2, 15
 
+require("mod1/reassign_exports_to_required"); //:: {A: number}
+
 // inference should continue even if a module is not found
 require("mod_not_found"); //: ?
 
