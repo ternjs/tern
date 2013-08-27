@@ -20,6 +20,8 @@
     return data.modules[name] || (data.modules[name] = new infer.AVal);
   }
 
+  var WG_DEFAULT_EXPORT = 95;
+
   function buildWrappingScope(parent, origin, node) {
     var scope = new infer.Scope(parent);
     scope.node = node;
@@ -28,16 +30,9 @@
     module.propagate(scope.defProp("module"));
     var exports = new infer.Obj(true, "exports", origin);
     exports.propagate(scope.defProp("exports"));
-    exports.propagate(module.defProp("exports"));
+    var moduleExports = scope.exports = module.defProp("exports");
+    exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
     return scope;
-  }
-
-  function exportsFromScope(scope) {
-    var mType = scope.getProp("module").getType(), exportsVal = mType && mType.getProp("exports");
-    if (!(exportsVal instanceof infer.AVal) || exportsVal.isEmpty())
-      return scope.getProp("exports");
-    else
-      return exportsVal.types[exportsVal.types.length - 1];
   }
 
   function resolveModule(server, name) {
@@ -94,7 +89,7 @@
     if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
       var scope = buildWrappingScope(cx.topScope, name);
       infer.def.load(data.options.modules[name], scope);
-      result = data.modules[name] = exportsFromScope(scope);
+      result = data.modules[name] = scope.exports;
     } else {
       result = resolveModule(server, name, data.currentFile);
     }
@@ -116,7 +111,7 @@
 
     server.on("afterLoad", function(file) {
       this._node.currentFile = null;
-      exportsFromScope(file.scope).propagate(getModule(this._node, file.name));
+      file.scope.exports.propagate(getModule(this._node, file.name));
     });
 
     server.on("reset", function() {
