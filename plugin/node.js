@@ -64,7 +64,7 @@
       } else {
         // If the module resolves to a file that doesn't exist, then it is likely a node.js stdlib
         // module that is not predefined below.
-        if (fs.existsSync(file) && path.extname(file) != ".node") server.addFile(file);
+        if (fs.existsSync(file) && /^(\.js)?$/.test(path.extname(file))) server.addFile(file);
         return data.modules[file] = data.modules[name] = new infer.AVal;
       }
     };
