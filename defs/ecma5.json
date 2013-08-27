@@ -128,7 +128,8 @@
         "!type": "fn(this: ?, args?: ?) -> !custom:Function_bind",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind",
         "!doc": "Creates a new function that, when called, has its this keyword set to the provided value, with a given sequence of arguments preceding any provided when the new function was called."
-      }
+      },
+      "prototype": "?"
     },
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function",
     "!doc": "Every function in JavaScript is actually a Function object."
