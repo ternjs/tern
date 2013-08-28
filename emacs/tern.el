@@ -211,10 +211,15 @@ list of strings, giving the binary name and arguments.")
 
 ;; Completion
 
+(defun tern-completion-at-point-fn ()
+  (tern-run-query #'tern-do-complete "completions" (point)))
+
 (defun tern-completion-at-point ()
   (or (tern-completion-matches-last)
-      (lambda ()
-        (tern-run-query #'tern-do-complete "completions" (point)))))
+      ;; Do not return a closure, as calling car-safe (e.g. in
+      ;; completion-at-point) on such an object returns 'closure
+      ;; instead of nil.
+      'tern-completion-at-point-fn))
 
 (defun tern-do-complete (data)
   (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
