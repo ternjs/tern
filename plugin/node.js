@@ -28,7 +28,8 @@
     infer.cx().definitions.node.require.propagate(scope.defProp("require"));
     var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
     module.propagate(scope.defProp("module"));
-    var exports = new infer.Obj(true, "exports", origin);
+    var exports = new infer.Obj(true, "exports");
+    module.origin = exports.origin = origin;
     exports.propagate(scope.defProp("exports"));
     var moduleExports = scope.exports = module.defProp("exports");
     exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
