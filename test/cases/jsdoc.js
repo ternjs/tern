@@ -40,3 +40,11 @@ o.prop3 = function() { return something(); };
 o.prop1; //: string
 o.prop2; //: fn() -> number
 o.prop3; //: fn() -> string
+
+/** @type {Array.<string>} */
+var closureArray = anotherThing();
+closureArray[1]; //: string
+
+/** @type {Object.<number,boolean>} */
+var closureMap = yetAnotherThing();
+closureMap[1]; //: bool

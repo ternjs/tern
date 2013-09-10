@@ -157,7 +157,30 @@
       if (/^(number|integer)$/i.test(word)) type = infer.cx().num;
       else if (/^bool(ean)?$/i.test(word)) type = infer.cx().bool;
       else if (/^string$/i.test(word)) type = infer.cx().str;
-      else {
+      else if (/^array$/i.test(word)) {
+        var inner = null;
+        if (str.charAt(pos) == "." && str.charAt(pos + 1) == "<") {
+          var inAngles = parseType(scope, str, pos + 2);
+          if (!inAngles) return null;
+          pos = skipSpace(str, inAngles.end);
+          if (str.charAt(pos++) != ">") return null;
+          inner = inAngles.type;
+        }
+        type = new infer.Arr(inner);
+      } else if (/^object$/i.test(word)) {
+        type = new infer.Obj(true);
+        if (str.charAt(pos) == "." && str.charAt(pos + 1) == "<") {
+          var key = parseType(scope, str, pos + 2);
+          if (!key) return null;
+          pos = skipSpace(str, key.end);
+          if (str.charAt(pos++) != ",") return null;
+          var val = parseType(scope, str, pos);
+          if (!val) return null;
+          pos = skipSpace(str, val.end);
+          if (str.charAt(pos++) != ">") return null;
+          val.type.propagate(type.defProp("<i>"));
+        }
+      } else {
         var found = scope.hasProp(word);
         if (found) found = found.getType();
         if (!found) {
