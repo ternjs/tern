@@ -142,7 +142,7 @@
     }
   }
 
-  infer.registerFunction("requireJSConfig", function(_self, args, argNodes) {
+  infer.registerFunction("requireJSConfig", function(_self, _args, argNodes) {
     var server = infer.cx().parent, data = server && server._requireJS;
     if (data && argNodes && argNodes.length && argNodes[0].type == "ObjectExpression") {
       var config = parseExprNode(argNodes[0]);
