@@ -6,6 +6,7 @@ var walk = require("acorn/util/walk");
 require("../plugin/requirejs.js");
 require("../plugin/node.js");
 require("../plugin/doc_comment.js");
+require("../plugin/component.js");
 var util = require("./util");
 
 var defData = {
@@ -66,6 +67,7 @@ exports.runTests = function(filter) {
       context += name + "/";
       fname = "main.js";
     }
+
     var text = fs.readFileSync(context + fname, "utf8");
     var server = new tern.Server(serverOptions(context, text));
     server.addFile(fname);
