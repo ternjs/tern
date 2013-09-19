@@ -166,6 +166,8 @@ httpServer.listen(port, "127.0.0.1", function() {
       } catch(e) {}
     });
   }
+  process.stdin.on("data", function() { });
+  process.stdin.on("end", function() { process.exit(); });
   process.on("SIGINT", function() { process.exit(); });
   process.on("SIGTERM", function() { process.exit(); });
   console.log("Listening on port " + port);
