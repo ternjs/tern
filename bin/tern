@@ -118,7 +118,8 @@ function startServer(dir, config) {
     defs: defs,
     plugins: plugins,
     debug: verbose,
-    projectDir: dir
+    projectDir: dir,
+    restrictedGlobals: config.restrictedGlobals || {}
   });
 
   if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
