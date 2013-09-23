@@ -68,12 +68,15 @@ exports.runTests = function(filter) {
       fname = "main.js";
     }
 
-    var text = fs.readFileSync(context + fname, "utf8");
+    var text = fs.readFileSync(context + fname, "utf8"), m;
     var server = new tern.Server(serverOptions(context, text));
     server.addFile(fname);
     var ast = server.files[0].ast;
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:) *([^\r\n]*)/g, m;
+    if (m = text.match(/\/\/ loadfiles=\s*(.*)\s*\n/))
+      m[1].split(/,\s*/g).forEach(function(f) {server.addFile(f);});
+
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:) *([^\r\n]*)/g;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
