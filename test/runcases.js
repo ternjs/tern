@@ -7,6 +7,7 @@ require("../plugin/requirejs.js");
 require("../plugin/node.js");
 require("../plugin/doc_comment.js");
 require("../plugin/component.js");
+require("../plugin/angular.js");
 var util = require("./util");
 
 var defData = {
