@@ -1,4 +1,6 @@
 // plugin=angular
+// environment=browser
+// environment=jquery
 // loadfiles=config.js, filters.js
 
 angular.module('sample', ['ngResource', 'sample.config', 'sample.filters'])
@@ -8,7 +10,7 @@ angular.module('sample', ['ngResource', 'sample.config', 'sample.filters'])
   $scope.myName; //: string
   $scope.myConfig; //: {myColor}
   $scope.version; //: string
-  $scope.user.finally; //: fn(callback: fn()) -> {}
+  $scope.user.finally; //: fn(callback: fn()) -> Promise
 })
 
 .controller('GreetingCtrl', ['$scope', 'User', 'myConfig', 'version', function($scope, User, myConfig, version) {

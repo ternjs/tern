@@ -192,11 +192,11 @@
           "!doc": "Resolve path"
         },
         normalize: {
-          "!type": "fn(curr: string, path: string) > string",
+          "!type": "fn(curr: string, path: string) -> string",
           "!doc": "Normalize `path` relative to the current path"
         },
         register: {
-          "!type": "fn(path: string, definition: fn)",
+          "!type": "fn(path: string, definition: fn())",
           "!doc": "Register module at `path` with callback `definition`"
         },
         alias: {
@@ -204,7 +204,7 @@
           "!doc": "Alias a module definition"
         },
         relative: {
-          "!type": "fn(parent: string) -> fn",
+          "!type": "fn(parent: string) -> fn()",
           "!doc": "Return a require function relative to the `parent` path"
         }
       },

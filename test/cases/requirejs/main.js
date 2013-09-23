@@ -1,3 +1,4 @@
+// environment=browser
 // environment=jquery
 // plugin=requirejs {"override": {"jquery": "=$"}}
 

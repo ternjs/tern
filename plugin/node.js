@@ -2492,7 +2492,7 @@
         INSPECT_MAX_BYTES: "number",
         SlowBuffer: "Buffer"
       },
-      module: "?",
+      module: {},
       timers: {
         setTimeout: {
           "!type": "fn(callback: fn(), ms: number) -> timers.Timer",

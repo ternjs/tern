@@ -154,7 +154,7 @@
     "!name": "angular",
     "!define": {
       cacheObj: {
-        info: "fn() -> cacheInfo",
+        info: "fn() -> ?",
         put: "fn(key: string, value: ?) -> !1",
         get: "fn(key: string) -> ?",
         remove: "fn(key: string)",
@@ -220,9 +220,11 @@
       Promise: {
         "!url": "http://docs.angularjs.org/api/ng.$q",
         "!doc": "Allow for interested parties to get access to the result of the deferred task when it completes.",
-        then: "fn(successCallback: fn(value: ?), errorCallback: fn(reason: ?), notifyCallback: fn(value: ?)) -> +Promise",
-        "catch": "fn(errorCallback: fn(reason: ?))",
-        "finally": "fn(callback: fn()) -> +Promise"
+        prototype: {
+          then: "fn(successCallback: fn(value: ?), errorCallback: fn(reason: ?), notifyCallback: fn(value: ?)) -> +Promise",
+          "catch": "fn(errorCallback: fn(reason: ?))",
+          "finally": "fn(callback: fn()) -> +Promise"
+        }
       },
       Deferred: {
         "!url": "http://docs.angularjs.org/api/ng.$q",
@@ -284,7 +286,7 @@
           "!doc": "Factory that constructs cache objects and gives access to them."
         },
         $compile: {
-          "!type": "fn(element: +Element, transclude: fn(scope), maxPriority: number)",
+          "!type": "fn(element: +Element, transclude: fn(scope: ?), maxPriority: number)",
           "!url": "http://docs.angularjs.org/api/ng.$compile",
           "!doc": "Compiles a piece of HTML string or DOM into a template and produces a template function."
         },
