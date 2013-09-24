@@ -13,9 +13,9 @@
   }
 
   Injector.prototype.get = function(name) {
+    if (name == "$scope") return new infer.Obj(globalInclude("$rootScope").getType(), "$scope");
     if (name in this.fields) return this.fields[name];
     var field = this.fields[name] = new infer.AVal;
-    if (name == "$scope") field.addType(new infer.Obj(true, "$scope"));
     return field;
   };
   Injector.prototype.set = function(name, val, depth) {
@@ -31,12 +31,15 @@
       injector.set(field, this.fields[field]);
   };
 
+  function globalInclude(name) {
+    var service = infer.cx().definitions.angular.service;
+    if (service.hasProp(name)) return service.getProp(name);
+  }
+
   function getInclude(mod, name) {
-    var cx = infer.cx(), service = cx.definitions.angular.service;
-    if (service.hasProp(name))
-      return service.getProp(name);
-    if (!mod.injector)
-      return infer.ANull;
+    var glob = globalInclude(name);
+    if (glob) return glob;
+    if (!mod.injector) return infer.ANull;
     return mod.injector ? mod.injector.get(name) : infer.ANull;
   }
 
@@ -161,6 +164,14 @@
         removeAll: "fn()",
         destroy: "fn()"
       },
+      eventObj: {
+        targetScope: "service.$rootScope",
+        currentScope: "service.$rootScope",
+        name: "string",
+        stopPropagation: "fn()",
+        preventDefault: "fn()",
+        defaultPrevented: "bool"
+      },
       Module: {
         "!url": "http://docs.angularjs.org/api/angular.Module",
         "!doc": "Interface for configuring angular modules.",
@@ -235,14 +246,21 @@
           promise: "+Promise"
         }
       },
+      ResourceClass: {
+        "!url": "http://docs.angularjs.org/api/ngResource.$resource",
+        prototype: {
+          $promise: "+Promise",
+          $save: "fn()"
+        }
+      },
       Resource: {
         "!url": "http://docs.angularjs.org/api/ngResource.$resource",
         prototype: {
-          get: "fn(params: ?, callback: fn()) -> +Promise",
-          save: "fn(params: ?, callback: fn()) -> +Promise",
-          query: "fn(params: ?, callback: fn()) -> +Promise",
-          remove: "fn(params: ?, callback: fn()) -> +Promise",
-          "delete": "fn(params: ?, callback: fn()) -> +Promise"
+          get: "fn(params: ?, callback: fn()) -> +ResourceClass",
+          save: "fn(params: ?, callback: fn()) -> +ResourceClass",
+          query: "fn(params: ?, callback: fn()) -> +ResourceClass",
+          remove: "fn(params: ?, callback: fn()) -> +ResourceClass",
+          "delete": "fn(params: ?, callback: fn()) -> +ResourceClass"
         }
       },
       service: {
@@ -437,7 +455,67 @@
           "!doc": "The root element of Angular application."
         },
         $rootScope: {
-          "!url": "http://docs.angularjs.org/api/ng.$rootScope"
+          "!url": "http://docs.angularjs.org/api/ng.$rootScope",
+          $apply: {
+            "!type": "fn(expression: string)",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$apply",
+            "!doc": "Execute an expression in angular from outside of the angular framework."
+          },
+          $broadcast: {
+            "!type": "fn(name: string, args?: ?) -> eventObject",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$broadcast",
+            "!doc": "Dispatches an event name downwards to all child scopes."
+          },
+          $destroy: {
+            "!type": "fn()",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$destroy",
+            "!doc": "Removes the current scope (and all of its children) from the parent scope."
+          },
+          $digest: {
+            "!type": "fn()",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$digest",
+            "!doc": "Processes all of the watchers of the current scope and its children."
+          },
+          $emit: {
+            "!type": "fn(name: string, args?: ?) -> eventObject",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$emit",
+            "!doc": "Dispatches an event name upwards through the scope hierarchy."
+          },
+          $eval: {
+            "!type": "fn(expression: string) -> ?",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$eval",
+            "!doc": "Executes the expression on the current scope and returns the result."
+          },
+          $evalAsync: {
+            "!type": "fn(expression: string)",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$evalAsync",
+            "!doc": "Executes the expression on the current scope at a later point in time."
+          },
+          $new: {
+            "!type": "fn(isolate: bool) -> service.$rootScope",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$new",
+            "!doc": "Creates a new child scope."
+          },
+          $on: {
+            "!type": "fn(name: string, listener: fn(event: ?)) -> fn()",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$on",
+            "!doc": "Listens on events of a given type."
+          },
+          $watch: {
+            "!type": "fn(watchExpression: string, listener?: fn(), objectEquality?: boolean) -> fn()",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$watch",
+            "!doc": "Registers a listener callback to be executed whenever the watchExpression changes."
+          },
+          $watchCollection: {
+            "!type": "fn(obj: string, listener: fn()) -> fn()",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$watchCollection",
+            "!doc": "Shallow watches the properties of an object and fires whenever any of the properties."
+          },
+          $id: {
+            "!type": "number",
+            "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$id",
+            "!doc": "Unique scope ID."
+          }
         },
         $sce: {
           HTML: "string",

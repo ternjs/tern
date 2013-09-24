@@ -5,20 +5,28 @@
 
 angular.module('sample', ['ngResource', 'sample.config', 'sample.filters'])
 
-.run(function($scope, someNumber) {
+.run(function($rootScope, someNumber) {
   someNumber; //: number
-  $scope.myName; //: string
-  $scope.myConfig; //: {myColor}
-  $scope.version; //: string
-  $scope.user.finally; //: fn(callback: fn()) -> Promise
+  $rootScope.rootName; //: string
 })
 
-.controller('GreetingCtrl', ['$scope', 'User', 'myConfig', 'version', function($scope, User, myConfig, version) {
-  $scope.myName = 'John';
-  $scope.myConfig = myConfig;
-  $scope.version = version;
+.controller('GreetingCtrl', ['$rootScope', '$scope', 'User', 'myConfig', 'version', function($rootScope, $scope, User, myConfig, version) {
+  $rootScope.rootName = $scope.myName = 'John';
+  $scope.myName; //: string
+
+  $scope.myConfig = myConfig; //: {myColor}
+  $scope.myConfig; //: {myColor}
+
+  $scope.version = version; //: string
+  $scope.version; //: string
 
   $scope.user = User.get({login: 'sqs'});
+  $scope.user.$promise.finally; //: fn(callback: fn()) -> Promise
+}])
+
+.controller('OtherCtrl', ['$scope', function($scope) {
+  // Test that controllers' $scope objects are distinct.
+  $scope.myName; //: ?
 }])
 
 .constant('version', 'v1.2.3')
