@@ -1,11 +1,18 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"));
+    return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
+               require("acorn/util/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern"], mod);
-  mod(tern, tern);
-})(function(infer, tern) {
+    return define(["../lib/infer", "../lib/tern", "../lib/comment", "acorn/util/walk"], mod);
+  mod(tern, tern, tern.comment, acorn.walk);
+})(function(infer, tern, comment, walk) {
   "use strict";
+
+  var SetDoc = infer.constraint("doc", {
+    addType: function(type) {
+      if (!type.doc) type.doc = this.doc;
+    }
+  });
 
   function Injector() {
     this.fields = Object.create(null);
@@ -18,17 +25,20 @@
     var field = this.fields[name] = new infer.AVal;
     return field;
   };
-  Injector.prototype.set = function(name, val, depth) {
+  Injector.prototype.set = function(name, val, doc, depth) {
     if (name == "$scope" || depth && depth > 10) return;
     var field = this.fields[name] || (this.fields[name] = new infer.AVal);
+    if (doc) field.propagate(new SetDoc(doc));
     val.propagate(field);
     for (var i = 0; i < this.forward.length; ++i)
-      this.forward[i].set(name, val, (depth || 0) + 1);
+      this.forward[i].set(name, val, doc, (depth || 0) + 1);
   };
   Injector.prototype.forwardTo = function(injector) {
     this.forward.push(injector);
-    for (var field in this.fields)
-      injector.set(field, this.fields[field]);
+    for (var field in this.fields) {
+      var val = this.fields[field];
+      injector.set(field, val, val.doc);
+    }
   };
 
   function globalInclude(name) {
@@ -78,14 +88,14 @@
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1]);
       if (mod.injector && argNodes[0].type == "Literal")
-        mod.injector.set(argNodes[0].value, result);
+        mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc);
     }
   });
 
   infer.registerFunction("angular_regField", function(self, args, argNodes) {
     var mod = self.getType();
     if (mod && mod.injector && argNodes && argNodes[0] && argNodes[0].type == "Literal" && args[1])
-      mod.injector.set(argNodes[0].value, args[1]);
+      mod.injector.set(argNodes[0].value, args[1], argNodes[0].angularDoc);
   });
 
   infer.registerFunction("angular_module", function(_self, _args, argNodes) {
@@ -141,6 +151,24 @@
     return result;
   });
 
+  function postParse(ast, text) {
+    walk.simple(ast, {
+      CallExpression: function(node) {
+        if (node.callee.type == "MemberExpression" &&
+            !node.callee.computed && node.arguments.length &&
+            /^(value|constant|controller|factory|provider)$/.test(node.callee.property.name)) {
+          var before = comment.commentsBefore(text, node.callee.property.start - 1);
+          if (before) {
+            var first = before[0], dot = first.search(/\.\s/);
+            if (dot > 5) first = first.slice(0, dot + 1);
+            first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
+            node.arguments[0].angularDoc = first;
+          }
+        }
+      }
+    });
+  }
+
   tern.registerPlugin("angular", function(server) {
     server._angular = {
       modules: Object.create(null),
@@ -150,7 +178,8 @@
       this._angular.modules = Object.create(null);
       this._angular.pendingImports = Object.create(null);
     });
-    return {defs: defs};
+    return {defs: defs,
+            passes: { postParse: postParse }};
   });
 
   var defs = {

@@ -20,6 +20,8 @@ angular.module('sample', ['ngResource', 'sample.config', 'sample.filters'])
   $scope.version = version; //: string
   $scope.version; //: string
 
+  User; //doc: doc for User
+
   $scope.user = User.get({login: 'sqs'});
   $scope.user.$promise.finally; //: fn(callback: fn()) -> Promise
 }])
@@ -31,6 +33,7 @@ angular.module('sample', ['ngResource', 'sample.config', 'sample.filters'])
 
 .constant('version', 'v1.2.3')
 
+// doc for User
 .factory('User', ['$resource', function($resource) {
   return $resource('https://api.github.com/users/:login');
 }])
