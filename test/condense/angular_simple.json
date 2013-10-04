@@ -4,7 +4,7 @@
     "!ng": {
       "foo": {
         "!data": {
-          "includes": {}
+          "includes": []
         },
         "!proto": "angular.Module.prototype",
         "_inject_fooVal": {
@@ -13,9 +13,9 @@
       },
       "test": {
         "!data": {
-          "includes": {
-            "0": "foo"
-          }
+          "includes": [
+            "foo"
+          ]
         },
         "!proto": "angular.Module.prototype",
         "_inject_testVal": {
