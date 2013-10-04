@@ -1,0 +1,17 @@
+{
+  "!name": "node_simple",
+  "!define": {
+    "!node": {
+      "node_simple": {
+        "a": {
+          "!span": "8[0:8]-9[0:9]",
+          "!type": "number"
+        },
+        "b": {
+          "!span": "24[1:8]-25[1:9]",
+          "!type": "fn() -> number"
+        }
+      }
+    }
+  }
+}

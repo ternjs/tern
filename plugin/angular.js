@@ -570,7 +570,7 @@
             "!doc": "Execute an expression in angular from outside of the angular framework."
           },
           $broadcast: {
-            "!type": "fn(name: string, args?: ?) -> eventObject",
+            "!type": "fn(name: string, args?: ?) -> eventObj",
             "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$broadcast",
             "!doc": "Dispatches an event name downwards to all child scopes."
           },
@@ -585,7 +585,7 @@
             "!doc": "Processes all of the watchers of the current scope and its children."
           },
           $emit: {
-            "!type": "fn(name: string, args?: ?) -> eventObject",
+            "!type": "fn(name: string, args?: ?) -> eventObj",
             "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$emit",
             "!doc": "Dispatches an event name upwards through the scope hierarchy."
           },
@@ -610,7 +610,7 @@
             "!doc": "Listens on events of a given type."
           },
           $watch: {
-            "!type": "fn(watchExpression: string, listener?: fn(), objectEquality?: boolean) -> fn()",
+            "!type": "fn(watchExpression: string, listener?: fn(), objectEquality?: bool) -> fn()",
             "!url": "http://docs.angularjs.org/api/ng.$rootScope.Scope#$watch",
             "!doc": "Registers a listener callback to be executed whenever the watchExpression changes."
           },
@@ -879,6 +879,7 @@
         "!url": "http://docs.angularjs.org/api/angular.module",
         "!doc": "A global place for creating, registering and retrieving Angular modules."
       },
+      Module: "Module",
       noop: {
         "!type": "fn()",
         "!url": "http://docs.angularjs.org/api/angular.noop",

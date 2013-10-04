@@ -1,11 +1,16 @@
 var util = require("./util");
 var tern = require("../lib/tern"), condense = require("../lib/condense");
 var fs = require("fs");
+require("../plugin/angular");
+require("../plugin/node");
 
 function caseFile(name, ext) { return "test/condense/" + name + "." + (ext || "js"); }
 
 function runTest(options) {
-  var server = new tern.Server({defs: [util.ecma5, util.browser]});
+  var server = new tern.Server({
+    defs: [util.ecma5, util.browser],
+    plugins: options.plugins
+  });
   options.load.forEach(function(file) {
     server.addFile(file, fs.readFileSync(caseFile(file), "utf8"));
   });    
@@ -37,4 +42,9 @@ exports.runTests = function(filter) {
   test("double_ref");
   test("proto");
   test("generic");
+
+  test({load: ["node_simple"], plugins: {node: true}});
+  test({load: ["node_fn_export"], plugins: {node: true}});
+
+  test({load: ["angular_simple"], plugins: {angular: true}});
 };

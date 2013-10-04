@@ -1,0 +1,29 @@
+{
+  "!name": "angular_simple",
+  "!define": {
+    "!ng": {
+      "foo": {
+        "!data": {
+          "includes": {}
+        },
+        "!proto": "angular.Module.prototype",
+        "_inject_fooVal": {
+          "!span": "32[0:32]-40[0:40]"
+        }
+      },
+      "test": {
+        "!data": {
+          "includes": {
+            "0": "foo"
+          }
+        },
+        "!proto": "angular.Module.prototype",
+        "_inject_testVal": {
+          "!doc": "Doc for testVal",
+          "!span": "121[4:9]-130[4:18]",
+          "!type": "string"
+        }
+      }
+    }
+  }
+}
