@@ -25,19 +25,23 @@
     var field = this.fields[name] = new infer.AVal;
     return field;
   };
-  Injector.prototype.set = function(name, val, doc, depth) {
+  Injector.prototype.set = function(name, val, doc, node, depth) {
     if (name == "$scope" || depth && depth > 10) return;
     var field = this.fields[name] || (this.fields[name] = new infer.AVal);
-    if (doc) field.propagate(new SetDoc(doc));
+    if (!depth) field.local = true;
+    if (!field.origin) field.origin = infer.cx().curOrigin;
+    if (typeof node == "string" && !field.span) field.span = node;
+    else if (node && typeof node == "object" && !field.originNode) field.originNode = node;
+    if (doc) { field.doc = doc; field.propagate(new SetDoc(doc)); }
     val.propagate(field);
     for (var i = 0; i < this.forward.length; ++i)
-      this.forward[i].set(name, val, doc, (depth || 0) + 1);
+      this.forward[i].set(name, val, doc, node, (depth || 0) + 1);
   };
   Injector.prototype.forwardTo = function(injector) {
     this.forward.push(injector);
     for (var field in this.fields) {
       var val = this.fields[field];
-      injector.set(field, val, val.doc);
+      injector.set(field, val, val.doc, val.span || val.originNode, 1);
     }
   };
 
@@ -88,48 +92,65 @@
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1]);
       if (mod.injector && argNodes[0].type == "Literal")
-        mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc);
+        mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
     }
   });
 
   infer.registerFunction("angular_regField", function(self, args, argNodes) {
     var mod = self.getType();
     if (mod && mod.injector && argNodes && argNodes[0] && argNodes[0].type == "Literal" && args[1])
-      mod.injector.set(argNodes[0].value, args[1], argNodes[0].angularDoc);
+      mod.injector.set(argNodes[0].value, args[1], argNodes[0].angularDoc, argNodes[0]);
   });
 
-  infer.registerFunction("angular_module", function(_self, _args, argNodes) {
-    var cx = infer.cx(), data = cx.parent._angular, mod;
-    var name = argNodes && argNodes[0] && argNodes[0].type == "Literal" && argNodes[0].value;
-    if (typeof name == "string")
-      mod = data.modules[name];
-    if (!mod) {
-      var proto = cx.definitions.angular.Module.getProp("prototype").getType();
-      mod = new infer.Obj(proto || true);
-      mod.injector = new Injector();
-      var include = argNodes && argNodes[1];
-      if (include && include.type == "ArrayExpression") {
-        for (var i = 0; i < include.elements.length; ++i) {
-          var elt = include.elements[i];
-          if (elt.type != "Literal" || typeof elt.value != "string")
-            continue;
-          var depMod = data.modules[elt.value];
-          if (!depMod)
-            (data.pendingImports[elt.value] || (data.pendingImports[elt.value] = [])).push(mod.injector);
-          else if (depMod.injector)
-            depMod.injector.forwardTo(mod.injector);
-        }
+  function arrayNodeToStrings(node) {
+    var strings = [];
+    if (node && node.type == "ArrayExpression")
+      for (var i = 0; i < node.elements.length; ++i) {
+        var elt = node.elements[i];
+        if (elt.type == "Literal" && typeof elt.value == "string")
+          strings.push(elt.value);
       }
-      if (typeof name == "string") {
-        data.modules[name] = mod;
-        var pending = data.pendingImports[name];
-        if (pending) {
-          delete data.pendingImports[name];
-          for (var i = 0; i < pending.length; ++i)
-            mod.injector.forwardTo(pending[i]);
-        }
+    return strings;
+  }
+
+  function moduleProto(cx) {
+    var ngDefs = cx.definitions.angular;
+    return ngDefs && ngDefs.Module.getProp("prototype").getType();
+  }
+
+  function declareMod(name, includes) {
+    var cx = infer.cx(), data = cx.parent._angular;
+    var proto = moduleProto(cx);
+    var mod = new infer.Obj(proto || true);
+    if (!proto) data.nakedModules.push(mod);
+    mod.origin = cx.curOrigin;
+    mod.injector = new Injector();
+    mod.metaData = {includes: includes};
+    for (var i = 0; i < includes.length; ++i) {
+      var depMod = data.modules[includes[i]];
+      if (!depMod)
+        (data.pendingImports[includes[i]] || (data.pendingImports[includes[i]] = [])).push(mod.injector);
+      else if (depMod.injector)
+        depMod.injector.forwardTo(mod.injector);
+    }
+    if (typeof name == "string") {
+      data.modules[name] = mod;
+      var pending = data.pendingImports[name];
+      if (pending) {
+        delete data.pendingImports[name];
+        for (var i = 0; i < pending.length; ++i)
+          mod.injector.forwardTo(pending[i]);
       }
     }
+    return mod;
+  }
+
+  infer.registerFunction("angular_module", function(_self, _args, argNodes) {
+    var mod, name = argNodes && argNodes[0] && argNodes[0].type == "Literal" && argNodes[0].value;
+    if (typeof name == "string")
+      mod = infer.cx().parent._angular.modules[name];
+    if (!mod)
+      mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]));
     return mod;
   });
 
@@ -169,17 +190,75 @@
     });
   }
 
-  tern.registerPlugin("angular", function(server) {
+  function postLoadDef(data) {
+    var cx = infer.cx(), defs = cx.definitions[data["!name"]];
+    if (data["!name"] == "angular") {
+      var proto = moduleProto(cx), naked = cx.parent._angular.nakedModules;
+      if (proto) for (var i = 0; i < naked.length; ++i) naked[i].proto = proto;
+      return;
+    }
+    var data = cx.parent._angular, mods = defs && defs["!ng"];
+    if (mods) for (var name in mods.props) {
+      var obj = mods.props[name].getType();
+      var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || []);
+      for (var prop in obj.props) {
+        var val = obj.props[prop], tp = val.getType();
+        if (!tp) continue;
+        if (/^_inject_/.test(prop)) {
+          tp.name = prop.slice(8);
+          mod.injector.set(prop.slice(8), tp, val.doc, val.span);
+        } else {
+          obj.props[prop].propagate(mod.defProp(prop));
+        }
+      }
+    }
+  }
+
+  function preCondenseReach(state) {
+    var mods = infer.cx().parent._angular.modules;
+    var modObj = new infer.Obj(null), found = 0;
+    for (var name in mods) {
+      var mod = mods[name];
+      if (state.origins.indexOf(mod.origin) > -1) {
+        modObj.defProp(name.replace(/\./g, "`")).addType(mod);
+        mod.condenseForceInclude = true;
+        ++found;
+      }
+    }
+    if (found) state.roots["!ng"] = modObj;
+  }
+
+  function postCondenseReach(state) {
+    for (var path in state.types) {
+      var info = state.types[path], injector = info.type.injector;
+      if (!injector) continue;
+      for (var name in injector.fields) {
+        var field = injector.fields[name], type = field.getType();
+        if (field.local && type) state.types[path + "._inject_" + name] = {
+          type: type,
+          span: state.getSpan(field) || state.getSpan(type),
+          doc: field.doc
+        };
+      }
+    }
+  }
+
+  function initServer(server) {
     server._angular = {
       modules: Object.create(null),
-      pendingImports: Object.create(null)
+      pendingImports: Object.create(null),
+      nakedModules: []
     };
-    server.on("reset", function() {
-      this._angular.modules = Object.create(null);
-      this._angular.pendingImports = Object.create(null);
-    });
+  }
+
+  tern.registerPlugin("angular", function(server) {
+    initServer(server);
+    server.on("reset", function() { initServer(server); });
     return {defs: defs,
-            passes: { postParse: postParse }};
+            passes: {postParse: postParse,
+                     postLoadDef: postLoadDef,
+                     preCondenseReach: preCondenseReach,
+                     postCondenseReach: postCondenseReach}};
   });
 
   var defs = {

@@ -97,6 +97,23 @@
     return argNodes[0].required = result;
   });
 
+  function preCondenseReach(state) {
+    var mods = infer.cx().parent._node.modules;
+    var node = state.roots["!node"] = new infer.Obj(null);
+    for (var name in mods) {
+      var prop = node.defProp(name.replace(/\./g, "`"));
+      mods[name].propagate(prop);
+      prop.origin = mods[name].origin;
+    }
+  }
+
+  function postLoadDef(data) {
+    var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!node"];
+    var data = cx.parent._node;
+    if (mods) for (var name in mods.props)
+      mods.props[name].propagate(getModule(data, name.replace(/`/g, ".")))
+  }
+
   tern.registerPlugin("node", function(server, options) {
     server._node = {
       modules: Object.create(null),
@@ -119,7 +136,9 @@
       this._node.modules = Object.create(null);
     });
 
-    return {defs: defs};
+    return {defs: defs,
+            passes: {preCondenseReach: preCondenseReach,
+                     postLoadDef: postLoadDef}};
   });
 
   tern.defineQueryType("node_exports", {
