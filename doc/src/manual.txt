@@ -15,6 +15,10 @@ engine>> to do the actual type inference.
 ** <<server_api,Programming interface>>
 ** <<typedef,JSON type definitions>>
 ** <<plugins,Server plugins>>
+*** <<plugin_doc_comment,Doc comments>>
+*** <<plugin_node,node>>
+*** <<plugin_requirejs,RequireJS>>
+*** <<plugin_angular,Angular.js>>
 ** <<configuration,Project configuration>>
 ** <<utils,Utilities>>
 * <<infer,Inference engine>>
@@ -619,6 +623,13 @@ These options are understood:
 `paths`:: An object mapping filename prefixes to specific paths. For
 example `{"acorn": "lib/acorn/"}`.
 
+[[plugin_angular]]
+==== Angular.js plugin ====
+
+Adds the `angular` object to the top-level environment, and tries to
+wire up some of the bizarre dependency management scheme from this
+library, so that dependency injections get the right types.
+
 [[utils]]
 === Utilities ===
 
@@ -628,7 +639,7 @@ Runs Tern's own testsuite. Tests are defined in the `test/`
 directory, as code interspersed with comments that indicate the
 types and conditions to check for.
 
-`bin/condense`::
+[[condense]]`bin/condense`::
 
 Utility for condensing source code down to a <<typedef,JSON type
 definition>> file. Takes a list of files to condense, optionally

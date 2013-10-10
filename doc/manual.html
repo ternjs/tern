@@ -49,6 +49,28 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 <p>
 <a href="#plugins">Server plugins</a>
 </p>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="#plugin_doc_comment">Doc comments</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugin_node">node</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugin_requirejs">RequireJS</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugin_angular">Angular.js</a>
+</p>
+</li>
+</ul></div>
 </li>
 <li>
 <p>
@@ -1036,6 +1058,10 @@ example <code>{"acorn": "lib/acorn/"}</code>.
 </p>
 </dd>
 </dl>
+<h4> <a id="plugin_angular"></a>Angular.js plugin</h4>
+<p> Adds the <code>angular</code> object to the top-level environment, and tries to
+wire up some of the bizarre dependency management scheme from this
+library, so that dependency injections get the right types.</p>
 <h3> <a id="utils"></a>Utilities</h3>
 <dl>
 <dt>
@@ -1049,7 +1075,7 @@ types and conditions to check for.
 </p>
 </dd>
 <dt>
-<code>bin/condense</code>
+<a id="condense"></a><code>bin/condense</code>
 </dt>
 <dd>
 <p>
