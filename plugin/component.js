@@ -88,9 +88,20 @@
           var dep = Object.keys(cmp.dependencies).filter(function(dependency) {
             return dpx.test(dependency);
           }).pop();
-          var author = dep.match(/(.*?)\/.*?/i).shift();
-          author =  author.substring(0, author.length - 1);
-          file = resolve(dir, "components/" + author + "-" + name);
+          if (cmp.local.indexOf(name) !== -1) {
+            if (cmp.paths) {
+              cmp.paths.some(function (path) {
+                file = resolve(dir, [path, name].join('/'));
+                if (file) return true;
+              });
+            } else {
+              file = resolve(dir, name);
+            }
+          } else if (dep) {
+            var author = dep.match(/(.*?)\/.*?/i).shift();
+            author = author.substring(0, author.length - 1);
+            file = resolve(dir, "components/" + author + "-" + name);
+          }
         } catch(e) {}
       }
 

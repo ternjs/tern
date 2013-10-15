@@ -1,5 +1,7 @@
 {
   "dependencies": {
     "marijnh/tern": "*"
-  }
+  },
+  "paths": ["lib"],
+  "local": ["local-component"]
 }
