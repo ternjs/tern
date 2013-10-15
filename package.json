@@ -14,7 +14,7 @@
     "test": "./bin/test"
   },
   "dependencies": {
-    "acorn": "0.4",
+    "acorn": ">=0.4.2",
     "glob": "3",
     "minimatch": "0.2"
   },
