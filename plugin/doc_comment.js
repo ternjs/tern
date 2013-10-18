@@ -188,6 +188,7 @@
         } else if (found instanceof infer.Fn && /^[A-Z]/.test(word)) {
           var proto = found.getProp("prototype").getType();
           if (proto instanceof infer.Obj) type = infer.getInstance(proto);
+          else type = found;
         } else {
           type = found;
         }
