@@ -82,7 +82,7 @@ function initEditor() {
     "Ctrl-Space": function(cm) { server.complete(cm); },
     "Alt-.": function(cm) { server.jumpToDef(cm); },
     "Alt-,": function(cm) { server.jumpBack(cm); },
-    "Ctrl-Q": function(cm) { server.renamce(cm); }
+    "Ctrl-Q": function(cm) { server.rename(cm); }
   };
 
   editor = CodeMirror.fromTextArea(document.getElementById("code"), {
