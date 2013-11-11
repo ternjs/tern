@@ -33,6 +33,7 @@ engine>> to do the actual type inference.
 ** <<emacs,Emacs>>
 ** <<vim,Vim>>
 ** <<sublime_text,Sublime Text>>
+** <<tern_java,Eclipse>>
 * <<software,Related Software>>
 
 [[server]]
@@ -1070,6 +1071,12 @@ Chikuyonok, and can be found at
 to run the server.
 
 See the readme files in those repositories for details.
+
+[[tern_java]]
+=== Eclipse / Java ===
+
+https://github.com/angelozerr/tern.java[tern.java] is a Tern client
+written in Java. It includes Eclipse integration.
 
 [[software]]
 == Related Software ==
