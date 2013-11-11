@@ -611,7 +611,7 @@ JSON data.
 [[plugin_requirejs]]
 ==== RequireJS plugin ====
 
-This plugin teaches the server to understand
+This plugin (`"requirejs"`) teaches the server to understand
 http://requirejs.org[RequireJS]-style dependency management. It
 defines the global functions `define` and `requirejs`, and will do its
 best to resolve dependencies and give them their proper types.
@@ -628,7 +628,8 @@ example `{"acorn": "lib/acorn/"}`.
 
 Adds the `angular` object to the top-level environment, and tries to
 wire up some of the bizarre dependency management scheme from this
-library, so that dependency injections get the right types.
+library, so that dependency injections get the right types. Enabled
+with the name `"angular"`.
 
 [[utils]]
 === Utilities ===
