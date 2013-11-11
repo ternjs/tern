@@ -48,3 +48,8 @@ closureArray[1]; //: string
 /** @type {Object.<number,boolean>} */
 var closureMap = yetAnotherThing();
 closureMap[1]; //: bool
+
+/** @param {Number=} a */
+function takesOpt(a) { console.log(a || 20); }
+
+takesOpt; //: fn(a?: number)

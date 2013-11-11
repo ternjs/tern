@@ -197,8 +197,8 @@
 
     var isOptional = false;
     if (str.charAt(pos) == "=") {
-        ++pos;
-        isOptional = true;
+      ++pos;
+      isOptional = true;
     }
     return {type: type, end: pos, isOptional: isOptional};
   }
@@ -229,10 +229,10 @@
         case "type":
           type = parsed.type; break;
         case "param": case "arg": case "argument":
-          var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/);
+          var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/), arg;
           if (!name) continue;
-          (args || (args = Object.create(null)))[name[1]] = parsed.type;
-          if (args) args[name[1]].isOptional = parsed.isOptional;
+          var argname = name[1] + (parsed.isOptional ? "?" : "");
+          (args || (args = Object.create(null)))[argname] = parsed.type;
           break;
         }
       }
@@ -258,10 +258,9 @@
     if (fn && (args || ret)) {
       if (args) for (var i = 0; i < fn.argNames.length; ++i) {
         var name = fn.argNames[i], known = args[name];
-        if (known) {
-            known.propagate(fn.args[i]);
-            if (args[name].isOptional) fn.argNames[i] += "?";
-        }
+        if (!known && (known = args[name + "?"]))
+          fn.argNames[i] += "?";
+        if (known) known.propagate(fn.args[i]);
       }
       if (ret) ret.propagate(fn.retval);
     } else if (type) {
