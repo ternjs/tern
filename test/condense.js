@@ -21,6 +21,9 @@ function runTest(options) {
     if (out != expect)
       util.failure("condense/" + options.load[0] + ": Mismatch in condense output. Got " +
                    out + "\nExpected " + expect);
+
+    // Test loading the condensed defs.
+    new tern.Server({defs: [condensed]});
   });
 }
 
@@ -42,6 +45,7 @@ exports.runTests = function(filter) {
   test("double_ref");
   test("proto");
   test("generic");
+  test("type_spec");
 
   test({load: ["node_simple"], plugins: {node: true}});
   test({load: ["node_fn_export"], plugins: {node: true}});
