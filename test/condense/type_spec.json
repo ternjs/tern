@@ -1,0 +1,13 @@
+{
+  "!name": "type_spec",
+  "!define": {
+    "a.!0": {
+      "!span": "11[0:11]-12[0:12]",
+      "!type": "string"
+    }
+  },
+  "a": {
+    "!span": "9[0:9]-10[0:10]",
+    "!type": "fn(x: string)"
+  }
+}
