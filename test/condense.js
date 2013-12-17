@@ -13,7 +13,7 @@ function runTest(options) {
   });
   options.load.forEach(function(file) {
     server.addFile(file, fs.readFileSync(caseFile(file), "utf8"));
-  });    
+  });
   server.flush(function() {
     var condensed = condense.condense(options.include || options.load, null, {sortOutput: true});
     var out = JSON.stringify(condensed, null, 2).trim();
@@ -21,6 +21,18 @@ function runTest(options) {
     if (out != expect)
       util.failure("condense/" + options.load[0] + ": Mismatch in condense output. Got " +
                    out + "\nExpected " + expect);
+
+    // Test loading the condensed defs.
+    var server2 = new tern.Server({
+      defs: [util.ecma5, util.browser, condensed],
+      plugins: options.plugins
+    });
+    server2.flush(function() {
+      var condensed2 = condense.condense(options.include || options.load, null, {sortOutput: true});
+      if (!util.deepEqual(condensed, condensed2))
+        util.failure("condense/" + options.load[0] + ": Mismatch in condense output after loading defs. Got " +
+                     JSON.stringify(condensed2, null, 2).trim() + "\nExpected " + out);
+    });
   });
 }
 
