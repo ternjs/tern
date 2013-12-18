@@ -1,4 +1,4 @@
-var assert = require("assert"), fs = require("fs"), path = require("path");
+var fs = require("fs"), path = require("path");
 
 var projectDir = path.resolve(__dirname, "..");
 exports.resolve = function(pth) { return path.resolve(projectDir, pth); };
@@ -7,17 +7,6 @@ exports.ecma5 = JSON.parse(fs.readFileSync(exports.resolve("defs/ecma5.json")), 
 exports.browser = JSON.parse(fs.readFileSync(exports.resolve("defs/browser.json")), "utf8");
 exports.jquery = JSON.parse(fs.readFileSync(exports.resolve("defs/jquery.json")), "utf8");
 exports.underscore = JSON.parse(fs.readFileSync(exports.resolve("defs/underscore.json")), "utf8");
-
-exports.deepEqual = function(a, b) {
-  var eq;
-  try {
-    assert.deepEqual(a, b);
-    eq = true;
-  } catch (_) {
-    eq = false;
-  }
-  return eq;
-};
 
 var files = 0, tests = 0, failed = 0;
 

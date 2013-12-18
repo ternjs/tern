@@ -1,5 +1,4 @@
 {
-  "!name": "node_simple",
   "!define": {
     "!node": {
       "node_simple": {
@@ -13,5 +12,6 @@
         }
       }
     }
-  }
+  },
+  "!name": "node_simple"
 }

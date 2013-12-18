@@ -1,5 +1,4 @@
 {
-  "!name": "node_fn_export",
   "!define": {
     "!node": {
       "node_fn_export": {
@@ -7,5 +6,6 @@
         "!type": "fn(a: ?) -> !0"
       }
     }
-  }
+  },
+  "!name": "node_fn_export"
 }

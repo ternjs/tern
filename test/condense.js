@@ -16,11 +16,11 @@ function runTest(options) {
   });
   server.flush(function() {
     var condensed = condense.condense(options.include || options.load, null, {sortOutput: true});
-    var out = JSON.stringify(condensed, null, 2).trim();
+    var out = JSON.stringify(condensed, null, 2);
     var expect = fs.readFileSync(caseFile(options.load[0], "json"), "utf8").trim();
     if (out != expect)
-      util.failure("condense/" + options.load[0] + ": Mismatch in condense output. Got " +
-                   out + "\nExpected " + expect);
+      return util.failure("condense/" + options.load[0] + ": Mismatch in condense output. Got " +
+                          out + "\nExpected " + expect);
 
     // Test loading the condensed defs.
     var server2 = new tern.Server({
@@ -28,10 +28,11 @@ function runTest(options) {
       plugins: options.plugins
     });
     server2.flush(function() {
-      var condensed2 = condense.condense(options.include || options.load, null, {sortOutput: true});
-      if (!util.deepEqual(condensed, condensed2))
+      var condensed = condense.condense(options.include || options.load, null, {sortOutput: true});
+      var out = JSON.stringify(condensed, null, 2);
+      if (out != expect)
         util.failure("condense/" + options.load[0] + ": Mismatch in condense output after loading defs. Got " +
-                     JSON.stringify(condensed2, null, 2).trim() + "\nExpected " + out);
+                     out + "\nExpected " + expect);
     });
   });
 }

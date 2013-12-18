@@ -1,5 +1,4 @@
 {
-  "!name": "angular_simple",
   "!define": {
     "!ng": {
       "foo": {
@@ -29,5 +28,6 @@
         }
       }
     }
-  }
+  },
+  "!name": "angular_simple"
 }
