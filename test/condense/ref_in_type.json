@@ -11,6 +11,6 @@
   },
   "out": {
     "!span": "9[0:9]-12[0:12]",
-    "!type": "fn(a: ?) -> number"
+    "!type": "fn(a: out.!0) -> number"
   }
 }
