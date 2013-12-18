@@ -8,7 +8,11 @@
         },
         "!proto": "angular.Module.prototype",
         "_inject_fooVal": {
-          "!span": "32[0:32]-40[0:40]"
+          "!span": "32[0:32]-40[0:40]",
+          "info": {
+            "!span": "43[0:43]-47[0:47]",
+            "!type": "string"
+          }
         }
       },
       "test": {

@@ -190,9 +190,9 @@
     });
   }
 
-  function postLoadDef(data) {
-    var cx = infer.cx(), defs = cx.definitions[data["!name"]];
-    if (data["!name"] == "angular") {
+  function postLoadDef(json) {
+    var cx = infer.cx(), defName = json["!name"], defs = cx.definitions[defName];
+    if (defName == "angular") {
       var proto = moduleProto(cx), naked = cx.parent._angular.nakedModules;
       if (proto) for (var i = 0; i < naked.length; ++i) naked[i].proto = proto;
       return;
@@ -201,11 +201,12 @@
     if (mods) for (var name in mods.props) {
       var obj = mods.props[name].getType();
       var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || []);
+      mod.origin = defName;
       for (var prop in obj.props) {
         var val = obj.props[prop], tp = val.getType();
         if (!tp) continue;
         if (/^_inject_/.test(prop)) {
-          tp.name = prop.slice(8);
+          if (!tp.name) tp.name = prop.slice(8);
           mod.injector.set(prop.slice(8), tp, val.doc, val.span);
         } else {
           obj.props[prop].propagate(mod.defProp(prop));
@@ -220,25 +221,30 @@
     for (var name in mods) {
       var mod = mods[name];
       if (state.origins.indexOf(mod.origin) > -1) {
-        modObj.defProp(name.replace(/\./g, "`")).addType(mod);
+        var propName = name.replace(/\./g, "`");
+        modObj.defProp(propName).addType(mod);
         mod.condenseForceInclude = true;
         ++found;
+        if (mod.injector) for (var inj in mod.injector.fields) {
+          var field = mod.injector.fields[inj];
+          if (field.local) state.roots["!ng." + propName + "._inject_" + inj] = field;
+        }
       }
     }
     if (found) state.roots["!ng"] = modObj;
   }
 
   function postCondenseReach(state) {
+    var mods = infer.cx().parent._angular.modules;
     for (var path in state.types) {
-      var info = state.types[path], injector = info.type.injector;
-      if (!injector) continue;
-      for (var name in injector.fields) {
-        var field = injector.fields[name], type = field.getType();
-        if (field.local && type) state.types[path + "._inject_" + name] = {
-          type: type,
-          span: state.getSpan(field) || state.getSpan(type),
-          doc: field.doc
-        };
+      var m;
+      if (m = path.match(/^!ng\.([^\.]+)\._inject_([^\.]+)^/)) {
+        var mod = mods[m[1].replace(/`/g, ".")];
+        console.log(mod.injector.fields, m[2]);
+        var field = mod.injector.fields[m[2]];
+        var data = state.types[path];
+        if (field.span) data.span = field.span;
+        if (field.doc) data.doc = field.doc;
       }
     }
   }
@@ -258,7 +264,8 @@
             passes: {postParse: postParse,
                      postLoadDef: postLoadDef,
                      preCondenseReach: preCondenseReach,
-                     postCondenseReach: postCondenseReach}};
+                     postCondenseReach: postCondenseReach},
+            loadFirst: true};
   });
 
   var defs = {
