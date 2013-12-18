@@ -229,7 +229,7 @@
         case "type":
           type = parsed.type; break;
         case "param": case "arg": case "argument":
-          var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/), arg;
+          var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/);
           if (!name) continue;
           var argname = name[1] + (parsed.isOptional ? "?" : "");
           (args || (args = Object.create(null)))[argname] = parsed.type;

@@ -197,7 +197,7 @@
       if (proto) for (var i = 0; i < naked.length; ++i) naked[i].proto = proto;
       return;
     }
-    var data = cx.parent._angular, mods = defs && defs["!ng"];
+    var mods = defs && defs["!ng"];
     if (mods) for (var name in mods.props) {
       var obj = mods.props[name].getType();
       var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || []);

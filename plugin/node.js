@@ -111,7 +111,7 @@
     var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!node"];
     var data = cx.parent._node;
     if (mods) for (var name in mods.props)
-      mods.props[name].propagate(getModule(data, name.replace(/`/g, ".")))
+      mods.props[name].propagate(getModule(data, name.replace(/`/g, ".")));
   }
 
   tern.registerPlugin("node", function(server, options) {
