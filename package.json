@@ -20,6 +20,6 @@
   },
   "devDependencies": {
     "codemirror": "git://github.com/marijnh/CodeMirror.git",
-    "typescript": "0.8.3"
+    "typescript": "0.9.5"
   }
 }
