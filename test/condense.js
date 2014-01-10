@@ -63,4 +63,5 @@ exports.runTests = function(filter) {
 
   test({load: ["require_const"], plugins: {requirejs: true}});
   test({load: ["require_setup"], plugins: {requirejs: true}});
+  test({load: ["require_empty_deps"], plugins: {requirejs: true}});
 };
