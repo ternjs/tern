@@ -15,11 +15,12 @@ function runTest(options) {
     server.addFile(file, fs.readFileSync(caseFile(file), "utf8"));
   });
   server.flush(function() {
-    var condensed = condense.condense(options.include || options.load, null, {sortOutput: true});
+    var origins = options.include || options.load;
+    var condensed = condense.condense(origins, null, {sortOutput: true});
     var out = JSON.stringify(condensed, null, 2);
-    var expect = fs.readFileSync(caseFile(options.load[0], "json"), "utf8").trim();
+    var expect = fs.readFileSync(caseFile(origins[0], "json"), "utf8").trim();
     if (out != expect)
-      return util.failure("condense/" + options.load[0] + ": Mismatch in condense output. Got " +
+      return util.failure("condense/" + origins[0] + ": Mismatch in condense output. Got " +
                           out + "\nExpected " + expect);
 
     // Test loading the condensed defs.
@@ -28,10 +29,10 @@ function runTest(options) {
       plugins: options.plugins
     });
     server2.flush(function() {
-      var condensed = condense.condense(options.include || options.load, null, {sortOutput: true});
+      var condensed = condense.condense(origins, null, {sortOutput: true});
       var out = JSON.stringify(condensed, null, 2);
       if (out != expect)
-        util.failure("condense/" + options.load[0] + ": Mismatch in condense output after loading defs. Got " +
+        util.failure("condense/" + origins[0] + ": Mismatch in condense output after loading defs. Got " +
                      out + "\nExpected " + expect);
     });
   });
@@ -64,4 +65,5 @@ exports.runTests = function(filter) {
   test({load: ["require_const"], plugins: {requirejs: true}});
   test({load: ["require_setup"], plugins: {requirejs: true}});
   test({load: ["require_empty_deps"], plugins: {requirejs: true}});
+  test({load: ["require_const", "require_dep"], include: ["require_dep"], plugins: {requirejs: true}});
 };

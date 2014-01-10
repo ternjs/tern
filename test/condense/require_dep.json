@@ -1,0 +1,11 @@
+{
+  "!define": {
+    "!requirejs": {
+      "require_dep": {
+        "!span": "63[1:9]-81[1:27]",
+        "a": "!requirejs.require_const"
+      }
+    }
+  },
+  "!name": "require_dep"
+}

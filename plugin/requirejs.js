@@ -60,8 +60,8 @@
       var over = data.options.override[name];
       if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
       if (typeof over == "object") {
-        if (data.interfaces[name]) return data.interfaces[name];
-        var scope = data.interfaces[name] = new infer.Obj(null, name);
+        if (data.interfaces[stripJSExt(name)]) return data.interfaces[stripJSExt(name)];
+        var scope = data.interfaces[stripJSExt(name)] = new infer.Obj(null, name);
         infer.def.load(over, scope);
         return scope;
       }
@@ -71,9 +71,9 @@
     if (!/^(https?:|\/)|\.js$/.test(name))
       name = resolveName(name, data);
     name = flattenPath(name);
-    var known = data.interfaces[name];
+    var known = data.interfaces[stripJSExt(name)];
     if (!known) {
-      known = data.interfaces[name.replace(/\.js$/, '')] = new infer.AVal;
+      known = data.interfaces[stripJSExt(name)] = new infer.AVal;
       data.server.addFile(name);
     }
     return known;
@@ -96,11 +96,15 @@
     },
   };
 
+  function stripJSExt(f) {
+    return f.replace(/\.js$/, '');
+  }
+
   infer.registerFunction("requireJS", function(_self, args, argNodes) {
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
 
-    var name = data.currentFile;
+    var name = stripJSExt(data.currentFile);
     var out = data.interfaces[name];
     if (!out) out = data.interfaces[name] = new infer.AVal;
 
@@ -180,8 +184,8 @@
     var rjs = state.roots["!requirejs"] = new infer.Obj(null);
     for (var name in interfaces) {
       var prop = rjs.defProp(name.replace(/\./g, "`"));
-      interfaces[name].propagate(prop);
-      prop.origin = interfaces[name].origin;
+      interfaces[stripJSExt(name)].propagate(prop);
+      prop.origin = interfaces[stripJSExt(name)].origin;
     }
   }
 
