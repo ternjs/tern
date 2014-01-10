@@ -60,4 +60,6 @@ exports.runTests = function(filter) {
   test({load: ["node_fn_export"], plugins: {node: true}});
 
   test({load: ["angular_simple"], plugins: {angular: true}});
+
+  test({load: ["require_const"], plugins: {requirejs: true}});
 };

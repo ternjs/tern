@@ -73,7 +73,7 @@
     name = flattenPath(name);
     var known = data.interfaces[name];
     if (!known) {
-      known = data.interfaces[name] = new infer.AVal;
+      known = data.interfaces[name.replace(/\.js$/, '')] = new infer.AVal;
       data.server.addFile(name);
     }
     return known;
@@ -175,6 +175,23 @@
     return infer.ANull;
   });
 
+  function preCondenseReach(state) {
+    var interfaces = infer.cx().parent._requireJS.interfaces;
+    var rjs = state.roots["!requirejs"] = new infer.Obj(null);
+    for (var name in interfaces) {
+      var prop = rjs.defProp(name.replace(/\./g, "`"));
+      interfaces[name].propagate(prop);
+      prop.origin = interfaces[name].origin;
+    }
+  }
+
+  function postLoadDef(data) {
+    var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
+    var data = cx.parent._requireJS;
+    if (interfaces) for (var name in interfaces.props)
+      interfaces.props[name].propagate(getInterface(name.replace(/`/g, "."), data));
+  }
+
   tern.registerPlugin("requirejs", function(server, options) {
     server._requireJS = {
       interfaces: Object.create(null),
@@ -190,7 +207,13 @@
       this._requireJS.interfaces = Object.create(null);
       this._requireJS.require = null;
     });
-    return {defs: defs};
+    return {
+      defs: defs,
+      passes: {
+        preCondenseReach: preCondenseReach,
+        postLoadDef: postLoadDef
+      },
+    };
   });
 
   var defs = {
