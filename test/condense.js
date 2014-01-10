@@ -58,6 +58,7 @@ exports.runTests = function(filter) {
 
   test({load: ["node_simple"], plugins: {node: true}});
   test({load: ["node_fn_export"], plugins: {node: true}});
+  test({load: ["stack_overflow"], plugins: {node: true}});
 
   test({load: ["angular_simple"], plugins: {angular: true}});
 };
