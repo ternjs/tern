@@ -1,5 +1,5 @@
 {
-  "!name": "ignore_newer",
+  "!name": "ignore_newer.js",
   "foo": {
     "!span": "4[0:4]-7[0:7]",
     "x": {

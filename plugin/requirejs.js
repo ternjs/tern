@@ -60,8 +60,9 @@
       var over = data.options.override[name];
       if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
       if (typeof over == "object") {
-        if (data.interfaces[name]) return data.interfaces[name];
-        var scope = data.interfaces[name] = new infer.Obj(null, name);
+        var known = getKnownModule(name, data);
+        if (known) return known;
+        var scope = data.interfaces[stripJSExt(name)] = new infer.Obj(null, stripJSExt(name));
         infer.def.load(over, scope);
         return scope;
       }
@@ -71,15 +72,31 @@
     if (!/^(https?:|\/)|\.js$/.test(name))
       name = resolveName(name, data);
     name = flattenPath(name);
-    var known = data.interfaces[name];
+
+    var known = getKnownModule(name, data);
+
     if (!known) {
-      known = data.interfaces[name] = new infer.AVal;
+      known = getModule(name, data);
       data.server.addFile(name);
     }
     return known;
   }
 
+  function getKnownModule(name, data) {
+    return data.interfaces[stripJSExt(name)];
+  }
+
+  function getModule(name, data) {
+    var known = getKnownModule(name, data);
+    if (!known) known = data.interfaces[stripJSExt(name)] = new infer.AVal;
+    return known;
+  }
+
   var EXPORT_OBJ_WEIGHT = 50;
+
+  function stripJSExt(f) {
+    return f.replace(/\.js$/, '');
+  }
 
   var path = {
     dirname: function(path) {
@@ -101,8 +118,7 @@
     if (!data || !args.length) return infer.ANull;
 
     var name = data.currentFile;
-    var out = data.interfaces[name];
-    if (!out) out = data.interfaces[name] = new infer.AVal;
+    var out = getModule(name, data);
 
     var deps = [], fn;
     if (argNodes && args.length > 1) {
@@ -175,6 +191,24 @@
     return infer.ANull;
   });
 
+  function preCondenseReach(state) {
+    var interfaces = infer.cx().parent._requireJS.interfaces;
+    var rjs = state.roots["!requirejs"] = new infer.Obj(null);
+    for (var name in interfaces) {
+      var prop = rjs.defProp(name.replace(/\./g, "`"));
+      interfaces[name].propagate(prop);
+      prop.origin = interfaces[name].origin;
+    }
+  }
+
+  function postLoadDef(data) {
+    var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
+    var data = cx.parent._requireJS;
+    if (interfaces) for (var name in interfaces.props) {
+      interfaces.props[name].propagate(getInterface(name, data));
+    }
+  }
+
   tern.registerPlugin("requirejs", function(server, options) {
     server._requireJS = {
       interfaces: Object.create(null),
@@ -190,7 +224,13 @@
       this._requireJS.interfaces = Object.create(null);
       this._requireJS.require = null;
     });
-    return {defs: defs};
+    return {
+      defs: defs,
+      passes: {
+        preCondenseReach: preCondenseReach,
+        postLoadDef: postLoadDef
+      },
+    };
   });
 
   var defs = {
