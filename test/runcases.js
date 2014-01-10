@@ -77,7 +77,7 @@ exports.runTests = function(filter) {
     if (m = text.match(/\/\/ loadfiles=\s*(.*)\s*\n/))
       m[1].split(/,\s*/g).forEach(function(f) {server.addFile(f);});
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:) *([^\r\n]*)/g;
+    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -145,6 +145,9 @@ exports.runTests = function(filter) {
             else if (resp.start.line + 1 != line || resp.start.ch != col)
               fail(m, "Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
                    " instead of expected " + line + ":" + col);
+          } else if (kind == "origin:") { // Origin finding test
+            if (resp.origin != args)
+              fail(m, "Found origin\n  " + resp.origin + "\ninstead of expected origin\n  " + args);
           } else if (kind == "refs:") { // Reference finding test
             var pos = /\s*(\d+),\s*(\d+)/g, mm;
             while (mm = pos.exec(args)) {

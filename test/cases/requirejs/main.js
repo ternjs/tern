@@ -11,6 +11,10 @@ requirejs(["foo", "bar!abc", "useexports", "simplifiedcommon", "subdir/zap"], fu
   simplified.hello; //: string
   simplified.func; //: fn() -> bool
   zap; //: string
+
+  foo; //origin: foo.js
+  bar; //origin: bar.js
+  bar.baz; //origin: baz.js
 });
 
 requirejs(["jquery"], function($) {
