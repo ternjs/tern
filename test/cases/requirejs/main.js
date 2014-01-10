@@ -2,7 +2,7 @@
 // environment=jquery
 // plugin=requirejs {"override": {"jquery": "=$"}}
 
-requirejs(["foo", "bar!abc", "useexports", "simplifiedcommon"], function(foo, bar, useexports, simplified) {
+requirejs(["foo", "bar!abc", "useexports", "simplifiedcommon", "subdir/zap"], function(foo, bar, useexports, simplified, zap) {
   foo.aString; //: string
   bar.aNumber; //: number
   bar.baz.bazProp; //: Date
@@ -10,6 +10,7 @@ requirejs(["foo", "bar!abc", "useexports", "simplifiedcommon"], function(foo, ba
   useexports.hello; //: bool
   simplified.hello; //: string
   simplified.func; //: fn() -> bool
+  zap; //: string
 });
 
 requirejs(["jquery"], function($) {
