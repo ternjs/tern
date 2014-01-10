@@ -1,7 +1,7 @@
 {
   "!define": {
     "!node": {
-      "node_simple": {
+      "node_simple`js": {
         "a": {
           "!span": "8[0:8]-9[0:9]",
           "!type": "number"
@@ -13,5 +13,5 @@
       }
     }
   },
-  "!name": "node_simple"
+  "!name": "node_simple.js"
 }

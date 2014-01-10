@@ -1,5 +1,5 @@
 {
-  "!name": "add_to_old",
+  "!name": "add_to_old.js",
   "Element": {
     "prototype": {
       "foo": {

@@ -1,7 +1,7 @@
 {
   "!define": {
     "!requirejs": {
-      "require_empty_deps": {
+      "requirejs_empty_deps": {
         "!span": "33[1:9]-41[1:17]",
         "c": {
           "!span": "34[1:10]-35[1:11]",
@@ -10,5 +10,5 @@
       }
     }
   },
-  "!name": "require_empty_deps"
+  "!name": "requirejs_empty_deps.js"
 }

@@ -1,5 +1,5 @@
 {
-  "!name": "proto",
+  "!name": "proto.js",
   "x": {
     "!span": "4[0:4]-5[0:5]",
     "my": {

@@ -1,5 +1,5 @@
 {
-  "!name": "double_ref",
+  "!name": "double_ref.js",
   "a": {
     "!span": "4[0:4]-5[0:5]",
     "an": {
