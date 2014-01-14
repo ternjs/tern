@@ -288,8 +288,8 @@
       "!stdProto": "String",
       "length": {
         "!type": "number",
-        "!url": "https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String",
-        "!doc": "The String global object is a constructor for strings, or a sequence of characters."
+        "!url": "https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/length",
+        "!doc": "Represents the length of a string."
       },
       "<i>": "string",
       "charAt": {
