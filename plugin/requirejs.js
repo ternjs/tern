@@ -88,7 +88,10 @@
 
   function getModule(name, data) {
     var known = getKnownModule(name, data);
-    if (!known) known = data.interfaces[stripJSExt(name)] = new infer.AVal;
+    if (!known) {
+      known = data.interfaces[stripJSExt(name)] = new infer.AVal;
+      known.origin = name;
+    }
     return known;
   }
 
