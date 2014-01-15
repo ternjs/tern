@@ -48,6 +48,7 @@ exports.runTests = function(filter) {
   }
 
   test("basic.js");
+  test("fn.js");
   test("add_to_old.js");
   test({load: ["ignore_newer.js", "extend_foo.js"],
         include: ["ignore_newer.js"]});
