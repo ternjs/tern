@@ -16,6 +16,12 @@
     return path.replace(/(^|[^\.])\.\//g, "$1");
   }
 
+  function relativePath(from, to) {
+    if (from[from.length - 1] != "/") from += "/";
+    if (to.indexOf(from) == 0) return to.slice(from.length);
+    else return to;
+  }
+
   function getModule(data, name) {
     return data.modules[name] || (data.modules[name] = new infer.AVal);
   }
@@ -45,12 +51,16 @@
   if (require) (function() {
     var fs = require("fs"), module_ = require("module"), path = require("path");
 
+    relativePath = path.relative;
+
     resolveModule = function(server, name, parent) {
       var data = server._node;
       if (data.options.dontLoad == true ||
           data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
           data.options.load && !new RegExp(data.options.load).test(name))
         return infer.ANull;
+
+      if (data.modules[name]) return data.modules[name];
 
       var currentModule = {
         id: parent,
@@ -59,17 +69,22 @@
       try {
         var file = module_._resolveFilename(name, currentModule);
       } catch(e) { return infer.ANull; }
-      var known = data.modules[file];
-      if (known) {
-        return data.modules[name] = known;
-      } else {
+
+      if (data.modules[file]) return data.modules[file];
+      else {
         // If the module resolves to a file that doesn't exist, then it is likely a node.js stdlib
         // module that is not predefined below.
-        if (fs.existsSync(file) && /^(\.js)?$/.test(path.extname(file))) server.addFile(file);
-        return data.modules[file] = data.modules[name] = new infer.AVal;
+        if (fs.existsSync(file) && /^(\.js)?$/.test(path.extname(file))) {
+          server.addFile(relativePath(server.options.projectDir, file));
+        }
+        return data.modules[file] = new infer.AVal;
       }
     };
   })();
+
+  function resolveProjectPath(server, pth) {
+    return resolvePath(server.options.projectDir + "/", pth.replace(/\\/g, "/"));
+  }
 
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
     if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
@@ -77,12 +92,6 @@
     var cx = infer.cx(), server = cx.parent, data = server._node, name = argNodes[0].value;
     var locals = cx.definitions.node;
     if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name];
-
-    var relative = /^\.{0,2}\//.test(name);
-    if (relative) {
-      if (!data.currentFile) return argNodes[0].required || infer.ANull;
-      name = resolvePath(data.currentFile, name);
-    }
 
     if (name in data.modules) return data.modules[name];
 
@@ -92,7 +101,16 @@
       infer.def.load(data.options.modules[name], scope);
       result = data.modules[name] = scope.exports;
     } else {
-      result = resolveModule(server, name, data.currentFile);
+      // data.currentFile is only available while analyzing a file; at query
+      // time, determine the calling file from the caller's AST.
+      var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
+
+      var relative = /^\.{0,2}\//.test(name);
+      if (relative) {
+        if (!currentFile) return argNodes[0].required || infer.ANull;
+        name = resolvePath(currentFile, name);
+      }
+      result = resolveModule(server, name, currentFile);
     }
     return argNodes[0].required = result;
   });
@@ -101,17 +119,22 @@
     var mods = infer.cx().parent._node.modules;
     var node = state.roots["!node"] = new infer.Obj(null);
     for (var name in mods) {
-      var prop = node.defProp(name.replace(/\./g, "`"));
-      mods[name].propagate(prop);
-      prop.origin = mods[name].origin;
+      var mod = mods[name];
+      var prop = node.defProp(mod.origin.replace(/\./g, "`"));
+      mod.propagate(prop);
+      prop.origin = mod.origin;
     }
   }
 
   function postLoadDef(data) {
     var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!node"];
     var data = cx.parent._node;
-    if (mods) for (var name in mods.props)
-      mods.props[name].propagate(getModule(data, name.replace(/`/g, ".")));
+    if (mods) for (var name in mods.props) {
+      var origin = name.replace(/`/g, ".");
+      var mod = getModule(data, origin);
+      mod.origin = origin;
+      mods.props[name].propagate(mod);
+    }
   }
 
   tern.registerPlugin("node", function(server, options) {
@@ -119,17 +142,22 @@
       modules: Object.create(null),
       options: options || {},
       currentFile: null,
+      currentOrigin: null,
       server: server
     };
 
     server.on("beforeLoad", function(file) {
-      this._node.currentFile = resolvePath(server.options.projectDir + "/", file.name.replace(/\\/g, "/"));
-      file.scope = buildWrappingScope(file.scope, file.name, file.ast);
+      this._node.currentFile = resolveProjectPath(server, file.name);
+      this._node.currentOrigin = file.name;
+      file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
     });
 
     server.on("afterLoad", function(file) {
+      var mod = getModule(this._node, this._node.currentFile);
+      mod.origin = this._node.currentOrigin;
+      file.scope.exports.propagate(mod);
       this._node.currentFile = null;
-      file.scope.exports.propagate(getModule(this._node, file.name));
+      this._node.currentOrigin = null;
     });
 
     server.on("reset", function() {
@@ -155,7 +183,7 @@
         return target;
       }
 
-      var known = server._node.modules[file.name];
+      var known = server._node.modules[resolveProjectPath(server, file.name)];
       if (!known) return {};
       var type = known.getType(false);
       var resp = describe(known);

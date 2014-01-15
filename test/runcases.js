@@ -57,7 +57,7 @@ function serverOptions(context, text) {
 }
 
 exports.runTests = function(filter) {
-  var caseDir = util.resolve("test/cases") + "/";
+  var caseDir = util.resolve("test/cases");
   fs.readdirSync(caseDir).forEach(function(name) {
     if (filter && name.indexOf(filter) == -1) return;
 
@@ -65,11 +65,11 @@ exports.runTests = function(filter) {
     var fname = name, context = caseDir;
     if (fs.statSync(path.resolve(context, name)).isDirectory()) {
       if (name == "node_modules" || name == "defs") return;
-      context += name + "/";
+      context = path.join(context, name);
       fname = "main.js";
     }
 
-    var text = fs.readFileSync(context + fname, "utf8"), m;
+    var text = fs.readFileSync(path.join(context, fname), "utf8"), m;
     var server = new tern.Server(serverOptions(context, text));
     server.addFile(fname);
     var ast = server.files[0].ast;
