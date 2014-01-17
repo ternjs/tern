@@ -57,7 +57,7 @@
     return mod.injector ? mod.injector.get(name) : infer.ANull;
   }
 
-  function applyWithInjection(mod, fnType, node) {
+  function applyWithInjection(mod, fnType, node, asNew) {
     var deps = [];
     if (node.type == "FunctionExpression") {
       for (var i = 0; i < node.params.length; ++i)
@@ -75,7 +75,14 @@
         fnType = last.body.scope.fnType;
     }
     var result = new infer.AVal;
-    fnType.propagate(new infer.IsCallee(infer.cx().topScope, deps, null, result));
+    if (asNew) {
+      var self = new infer.AVal;
+      fnType.propagate(new infer.IsCtor(self));
+      self.propagate(result, 90);
+      fnType.propagate(new infer.IsCallee(self, deps, null, new infer.IfObj(result)));
+    } else {
+      fnType.propagate(new infer.IsCallee(infer.cx().topScope, deps, null, result));
+    }
     return result;
   }
 
@@ -91,6 +98,15 @@
     var mod = self.getType();
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1]);
+      if (mod.injector && argNodes[0].type == "Literal")
+        mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
+    }
+  });
+
+  infer.registerFunction("angular_regFieldNew", function(self, args, argNodes) {
+    var mod = self.getType();
+    if (mod && argNodes && argNodes.length > 1) {
+      var result = applyWithInjection(mod, args[1], argNodes[1], true);
       if (mod.injector && argNodes[0].type == "Literal")
         mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
     }
@@ -734,7 +750,7 @@
           },
           service: {
             "!type": "fn(name: string, constructor: fn()) -> !this",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldNew"],
             "!url": "http://docs.angularjs.org/api/AUTO.$provide#provider",
             "!doc": "Register a provider for a service."
           },
