@@ -25,10 +25,11 @@
     var field = this.fields[name] = new infer.AVal;
     return field;
   };
-  Injector.prototype.set = function(name, val, doc, node, depth) {
+  Injector.prototype.set = function(name, val, doc, node, depth, fieldType) {
     if (name == "$scope" || depth && depth > 10) return;
     var field = this.fields[name] || (this.fields[name] = new infer.AVal);
     if (!depth) field.local = true;
+    field.type = fieldType;
     if (!field.origin) field.origin = infer.cx().curOrigin;
     if (typeof node == "string" && !field.span) field.span = node;
     else if (node && typeof node == "object" && !field.originNode) field.originNode = node;
@@ -87,14 +88,38 @@
     };
   });
 
-  infer.registerFunction("angular_regFieldCall", function(self, args, argNodes) {
+  infer.registerFunction("angular_regFieldCallController", function(self, args, argNodes) {
+    angular_regFieldCall(self, args, argNodes, 'controller')
+  });
+
+  infer.registerFunction("angular_regFieldCallDirective", function(self, args, argNodes) {
+    angular_regFieldCall(self, args, argNodes, 'directive')
+  });
+
+  infer.registerFunction("angular_regFieldCallDecorator", function(self, args, argNodes) {
+    angular_regFieldCall(self, args, argNodes, 'decorator')
+  });
+
+  infer.registerFunction("angular_regFieldCallFactory", function(self, args, argNodes) {
+    angular_regFieldCall(self, args, argNodes, 'factory')
+  });
+  
+  infer.registerFunction("angular_regFieldCallProvider", function(self, args, argNodes) {
+    angular_regFieldCall(self, args, argNodes, 'provider')
+  });
+  
+  infer.registerFunction("angular_regFieldCallService", function(self, args, argNodes) {
+    angular_regFieldCall(self, args, argNodes, 'service')
+  });
+  
+  function angular_regFieldCall(self, args, argNodes, callType) {
     var mod = self.getType();
     if (mod && argNodes && argNodes.length > 1) {
       var result = applyWithInjection(mod, args[1], argNodes[1]);
       if (mod.injector && argNodes[0].type == "Literal")
-        mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0]);
+        mod.injector.set(argNodes[0].value, result, argNodes[0].angularDoc, argNodes[0], null, callType);
     }
-  });
+  };
 
   infer.registerFunction("angular_regField", function(self, args, argNodes) {
     var mod = self.getType();
@@ -305,13 +330,13 @@
           constant: "service.$provide.constant",
           controller: {
             "!type": "fn(name: string, constructor: fn()) -> !this",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldCallController"],
             "!url": "http://docs.angularjs.org/api/ng.$controllerProvider",
             "!doc": "Register a controller."
           },
           directive: {
             "!type": "fn(name: string, directiveFactory: fn()) -> !this",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldCallDirective"],
             "!url": "http://docs.angularjs.org/api/ng.$compileProvider#directive",
             "!doc": "Register a new directive with the compiler."
           },
@@ -716,25 +741,25 @@
           },
           decorator: {
             "!type": "fn(name: string, decorator: fn())",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldCallDecorator"],
             "!url": "http://docs.angularjs.org/api/AUTO.$provide#decorator",
             "!doc": "Decoration of service, allows the decorator to intercept the service instance creation."
           },
           factory: {
             "!type": "fn(name: string, providerFunction: fn()) -> !this",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldCallFactory"],
             "!url": "http://docs.angularjs.org/api/AUTO.$provide#factory",
             "!doc": "A short hand for configuring services if only $get method is required."
           },
           provider: {
             "!type": "fn(name: string, providerType: fn()) -> !this",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldCallProvider"],
             "!url": "http://docs.angularjs.org/api/AUTO.$provide#provider",
             "!doc": "Register a provider for a service."
           },
           service: {
             "!type": "fn(name: string, constructor: fn()) -> !this",
-            "!effects": ["custom angular_regFieldCall"],
+            "!effects": ["custom angular_regFieldCallService"],
             "!url": "http://docs.angularjs.org/api/AUTO.$provide#provider",
             "!doc": "Register a provider for a service."
           },
