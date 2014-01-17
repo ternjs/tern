@@ -349,7 +349,9 @@
         prototype: {
           then: "fn(successCallback: fn(value: ?), errorCallback: fn(reason: ?), notifyCallback: fn(value: ?)) -> +Promise",
           "catch": "fn(errorCallback: fn(reason: ?))",
-          "finally": "fn(callback: fn()) -> +Promise"
+          "finally": "fn(callback: fn()) -> +Promise",
+          success: "fn(callback: fn(data: ?, status: number, headers: ?, config: ?)) -> +Promise",
+          error: "fn(callback: fn(data: ?, status: number, headers: ?, config: ?)) -> +Promise"
         }
       },
       Deferred: {
@@ -446,7 +448,13 @@
         $http: {
           "!type": "fn(config: ?) -> service.$q",
           "!url": "http://docs.angularjs.org/api/ng.$http",
-          "!doc": "Facilitates communication with remote HTTP servers."
+          "!doc": "Facilitates communication with remote HTTP servers.",
+          "delete": "fn(url: string, config?: ?) -> +Promise",
+          get: "fn(url: string, config?: ?) -> +Promise",
+          head: "fn(url: string, config?: ?) -> +Promise",
+          jsonp: "fn(url: string, config?: ?) -> +Promise",
+          post: "fn(url: string, data: ?, config?: ?) -> +Promise",
+          put: "fn(url: string, data: ?, config?: ?) -> +Promise"
         },
         $interpolate: {
           "!type": "fn(text: string, mustHaveExpression?: bool, trustedContext?: string) -> fn(context: ?) -> string",
@@ -733,7 +741,7 @@
           value: {
             "!type": "fn(name: string, object: ?) -> !this",
             "!effects": ["custom angular_regField"],
-            "!url": "http://docs.angularjs.org/api/AUTO.$provide#value",
+            "!url": "http://docs.angularjs.org/api/AUTO.$providevalue",
             "!doc": "A short hand for configuring services if the $get method is a constant."
           }
         },
