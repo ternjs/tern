@@ -69,6 +69,7 @@ exports.runTests = function(filter) {
   test("generic");
 
   test({load: ["node_simple"], plugins: {node: true}});
+  test({load: ["node_require_private"], plugins: {node: true}});
   test({load: ["node_fn_export"], plugins: {node: true}});
   test({load: ["node_other_module_type_ref"], include: ["node_other_module_type_ref", "node_export_function_a"], plugins: {node: true}});
 
