@@ -68,4 +68,6 @@ var doc = require("mod1/doc");
 doc.f1; //doc: doc for f1
 doc.f2; //doc: doc for f2
 
+require('constants').MY_CONST; //: number
+
 module.exports. //+

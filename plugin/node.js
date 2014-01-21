@@ -71,12 +71,26 @@
     };
   })();
 
+  function makeConstants() {
+    // Transparently add all seen properties on the "constants" module as numbers.
+    var underlying = new infer.Obj(null), proxy = new infer.Obj(underlying, "constants");
+    proxy.hasProp = function(prop) {
+      if (!underlying.hasProp(prop)) {
+        underlying.defProp(prop).addType(infer.cx().num);
+      }
+      return underlying.hasProp(prop);
+    }
+    return proxy;
+  }
+
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
     if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
       return infer.ANull;
     var cx = infer.cx(), server = cx.parent, data = server._node, name = argNodes[0].value;
     var locals = cx.definitions.node;
     if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name];
+
+    if (name == "constants") return data.modules[name] || (data.modules[name] = makeConstants());
 
     var relative = /^\.{0,2}\//.test(name);
     if (relative) {
