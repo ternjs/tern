@@ -120,7 +120,8 @@
     var node = state.roots["!node"] = new infer.Obj(null);
     for (var name in mods) {
       var mod = mods[name];
-      var prop = node.defProp(mod.origin.replace(/\./g, "`"));
+      var id = mod.origin || name;
+      var prop = node.defProp(id.replace(/\./g, "`"));
       mod.propagate(prop);
       prop.origin = mod.origin;
     }
