@@ -67,6 +67,7 @@ exports.runTests = function(filter) {
   test("double_ref");
   test("proto");
   test("generic");
+  test("array");
 
   test({load: ["node_simple"], plugins: {node: true}});
   test({load: ["node_require_private"], plugins: {node: true}});
@@ -83,4 +84,6 @@ exports.runTests = function(filter) {
   // !define.!requirejs.requirejs_dep.a duplicates the definition instead of
   // referring to !requirejs.requirejs_const.
   test({load: ["requirejs_const", "requirejs_dep"], include: ["requirejs_dep", "requirejs_const"], plugins: {requirejs: true}});
+
+  test("recursive");
 };
