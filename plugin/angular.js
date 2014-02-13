@@ -86,6 +86,13 @@
     return result;
   }
 
+  infer.registerFunction("angular_callFilter", function(self, args, argNodes) {
+    var mod = self.getType();
+    if (mod && argNodes && argNodes[0] && argNodes[0].type == "Literal")
+      if (!mod.filters) mod.filters = {};
+        mod.filters[argNodes[0].value] = {"originNode": argNodes[0], "fnType" : argNodes[1]};
+  });
+  
   infer.registerFunction("angular_callInject", function(argN) {
     return function(self, args, argNodes) {
       var mod = self.getType();
@@ -134,12 +141,13 @@
     return ngDefs && ngDefs.Module.getProp("prototype").getType();
   }
 
-  function declareMod(name, includes) {
+  function declareMod(name, includes, originNode) {
     var cx = infer.cx(), data = cx.parent._angular;
     var proto = moduleProto(cx);
     var mod = new infer.Obj(proto || true);
     if (!proto) data.nakedModules.push(mod);
     mod.origin = cx.curOrigin;
+    mod.originNode = originNode;
     mod.injector = new Injector();
     mod.metaData = {includes: includes};
     for (var i = 0; i < includes.length; ++i) {
@@ -166,7 +174,7 @@
     if (typeof name == "string")
       mod = infer.cx().parent._angular.modules[name];
     if (!mod)
-      mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]));
+      mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]), argNodes[0]);
     return mod;
   });
 
@@ -334,7 +342,7 @@
           factory: "service.$provide.factory",
           filter: {
             "!type": "fn(name: string, filterFactory: fn()) -> !this",
-            "!effects": ["custom angular_callInject 1"],
+            "!effects": ["custom angular_callFilter"],
             "!url": "http://docs.angularjs.org/api/ng.$filterProvider",
             "!doc": "Register filter factory function."
           },
