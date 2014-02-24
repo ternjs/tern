@@ -77,7 +77,7 @@ exports.runTests = function(filter) {
     if (m = text.match(/\/\/ loadfiles=\s*(.*)\s*\n/))
       m[1].split(/,\s*/g).forEach(function(f) {server.addFile(f);});
 
-    var typedef = /\/\/(<)?(\+|::?|:\?|doc:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
+    var typedef = /\/\/(<)?(\+\??|::?|:\?|doc:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -85,7 +85,7 @@ exports.runTests = function(filter) {
     while (m = typedef.exec(text)) (function(m) {
       var args = m[3], kind = m[2], directlyHere = m[1];
       util.addTest();
-      if (kind == "+") { // Completion test
+      if (kind == "+" || kind == "+?") { // Completion test
         var columnInfo = /\s*@(\d+)$/.exec(args), pos = m.index;
         if (columnInfo) {
           var line = acorn.getLineInfo(text, m.index).line;
@@ -94,7 +94,7 @@ exports.runTests = function(filter) {
         } else {
           while (/\s/.test(text.charAt(pos - 1))) --pos;
         }
-        var query = {type: "completions", end: pos, file: fname, guess: false};
+        var query = {type: "completions", end: pos, file: fname, guess: kind == "+?"};
         var andOthers = /,\s*\.\.\.$/.test(args);
         if (andOthers) args = args.slice(0, args.lastIndexOf(","));
         var parts = args ? args.split(/\s*,\s*/) : [];
