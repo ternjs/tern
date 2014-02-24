@@ -1244,6 +1244,11 @@
         "!type": "+HTMLCollection",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.styleSheets",
         "!doc": "Returns a list of stylesheet objects for stylesheets explicitly linked into or embedded in a document."
+      },
+      "currentScript": {
+        "!type": "+Node",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/document.currentScript",
+        "!doc": "Returns the <script> element whose script is currently being processed."
       }
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/document",
