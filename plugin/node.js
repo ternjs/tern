@@ -2840,7 +2840,7 @@
         length: "number",
         copy: "fn(targetBuffer: +Buffer, targetStart?: number, sourceStart?: number, sourceEnd?: number)",
         slice: "fn(start?: number, end?: number) -> +Buffer",
-        readUInt8: "fn(offset: number, noAsset?: bool) -> number",
+        readUInt8: "fn(offset: number, noAssert?: bool) -> number",
         readUInt16LE: "fn(offset: number, noAssert?: bool) -> number",
         readUInt16BE: "fn(offset: number, noAssert?: bool) -> number",
         readUInt32LE: "fn(offset: number, noAssert?: bool) -> number",
