@@ -1249,6 +1249,11 @@
         "!type": "+Node",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/document.currentScript",
         "!doc": "Returns the <script> element whose script is currently being processed."
+      },
+      "registerElement": {
+        "!type": "?",
+        "!url": "http://w3c.github.io/webcomponents/spec/custom/#extensions-to-document-interface-to-register",
+        "!doc": "The registerElement method of the Document interface provides a way to register a custom element and returns its custom element constructor."
       }
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/document",
