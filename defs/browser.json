@@ -2288,6 +2288,19 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/FileReader",
     "!doc": "The FileReader object lets web applications asynchronously read the contents of files (or raw data buffers) stored on the user's computer, using File or Blob objects to specify the file or data to read. File objects may be obtained from a FileList object returned as a result of a user selecting files using the <input> element, from a drag and drop operation's DataTransfer object, or from the mozGetAsFile() API on an HTMLCanvasElement."
   },
+  "URL": {
+    "createObjectURL": {
+      "!type": "fn(blob: +Blob) -> string",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL",
+      "!doc": "The URL.createObjectURL() static method creates a DOMString containing an URL representing the object given in parameter."
+
+    },
+    "revokeObjectURL": {
+      "!type": "fn(string)",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL.revokeObjectURL",
+      "!doc": "The URL.revokeObjectURL() static method releases an existing object URL which was previously created by calling window.URL.createObjectURL()."
+    }
+  },
   "Range": {
     "!type": "fn()",
     "prototype": {
