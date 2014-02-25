@@ -1270,6 +1270,270 @@
     "!url": "https://developer.mozilla.org/en/docs/Parsing_and_serializing_XML",
     "!doc": "The Web platform provides the following objects for parsing and serializing XML:"
   },
+  "HTMLElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement"
+  },
+  "HTMLAnchorElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement"
+  },
+  "HTMLAreaElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLAreaElement"
+  },
+  "HTMLAudioElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement"
+  },
+  "HTMLBaseElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLBaseElement"
+  },
+  "HTMLBodyElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLBodyElement"
+  },
+  "HTMLBRElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLBRElement"
+  },
+  "HTMLButtonElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement"
+  },
+  "HTMLCanvasElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement"
+  },
+  "HTMLDataElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDataElement"
+  },
+  "HTMLDataListElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDataListElement"
+  },
+  "HTMLDivElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement"
+  },
+  "HTMLDListElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDListElement"
+  },
+  "HTMLDocument": {
+    "!type": "Document",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDocument"
+  },
+  "HTMLEmbedElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLEmbedElement"
+  },
+  "HTMLFieldSetElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLFieldSetElement"
+  },
+  "HTMLFormControlsCollection": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormControlsCollection"
+  },
+  "HTMLFormElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement"
+  },
+  "HTMLHeadElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLHeadElement"
+  },
+  "HTMLHeadingElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLHeadingElement"
+  },
+  "HTMLHRElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLHRElement"
+  },
+  "HTMLHtmlElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLHtmlElement"
+  },
+  "HTMLIFrameElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement"
+  },
+  "HTMLImageElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement"
+  },
+  "HTMLInputElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement"
+  },
+  "HTMLKeygenElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLKeygenElement"
+  },
+  "HTMLLabelElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement"
+  },
+  "HTMLLegendElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLLegendElement"
+  },
+  "HTMLLIElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLLIElement"
+  },
+  "HTMLLinkElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLLinkElement"
+  },
+  "HTMLMapElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLMapElement"
+  },
+  "HTMLMediaElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement"
+  },
+  "HTMLMetaElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLMetaElement"
+  },
+  "HTMLMeterElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLMeterElement"
+  },
+  "HTMLModElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLModElement"
+  },
+  "HTMLObjectElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLObjectElement"
+  },
+  "HTMLOListElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLOListElement"
+  },
+  "HTMLOptGroupElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptGroupElement"
+  },
+  "HTMLOptionElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptionElement"
+  },
+  "HTMLOptionsCollection": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLOptionsCollection"
+  },
+  "HTMLOutputElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLOutputElement"
+  },
+  "HTMLParagraphElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLParagraphElement"
+  },
+  "HTMLParamElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLParamElement"
+  },
+  "HTMLPreElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLPreElement"
+  },
+  "HTMLProgressElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLProgressElement"
+  },
+  "HTMLQuoteElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLQuoteElement"
+  },
+  "HTMLScriptElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLScriptElement"
+  },
+  "HTMLSelectElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement"
+  },
+  "HTMLSourceElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLSourceElement"
+  },
+  "HTMLSpanElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLSpanElement"
+  },
+  "HTMLStyleElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLStyleElement"
+  },
+  "HTMLTableCaptionElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCaptionElement"
+  },
+  "HTMLTableCellElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCellElement"
+  },
+  "HTMLTableColElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableColElement"
+  },
+  "HTMLTableDataCellElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableDataCellElement"
+  },
+  "HTMLTableElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableElement"
+  },
+  "HTMLTableHeaderCellElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableHeaderCellElement"
+  },
+  "HTMLTableRowElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableRowElement"
+  },
+  "HTMLTableSectionElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableSectionElement"
+  },
+  "HTMLTextAreaElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTextAreaElement"
+  },
+  "HTMLTimeElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTimeElement"
+  },
+  "HTMLTitleElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTitleElement"
+  },
+  "HTMLTrackElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLTrackElement"
+  },
+  "HTMLUListElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLUListElement"
+  },
+  "HTMLUnknownElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLUnknownElement"
+  },
+  "HTMLVideoElement": {
+    "!type": "Element",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement"
+  },
   "Attr": {
     "!type": "fn()",
     "prototype": {
