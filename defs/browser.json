@@ -872,6 +872,26 @@
         "!type": "string",
         "!url": "https://developer.mozilla.org/en/docs/DOM/element.innerHTML",
         "!doc": "Sets or gets the HTML syntax describing the element's descendants."
+      },
+      "createdCallback": {
+        "!type": "fn()",
+        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-created-callback",
+        "!doc": "This callback is invoked after custom element instance is created and its definition is registered. The actual timing of this callback is defined further in this specification."
+      },
+      "attachedCallback": {
+        "!type": "fn()",
+        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-entered-view-callback",
+        "!doc": "Unless specified otherwise, this callback must be enqueued whenever custom element is inserted into a document and this document has a browsing context."
+      },
+      "detachedCallback": {
+        "!type": "fn()",
+        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-left-view-callback",
+        "!doc": "Unless specified otherwise, this callback must be enqueued whenever custom element is removed from the document and this document has a browsing context."
+      },
+      "attributeChangedCallback": {
+        "!type": "fn()",
+        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-attribute-changed-callback",
+        "!doc": "Unless specified otherwise, this callback must be enqueued whenever custom element's attribute is added, changed or removed."
       }
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/Element",
