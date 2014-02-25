@@ -90,7 +90,7 @@
     var mod = self.getType();
     if (mod && argNodes && argNodes[0] && argNodes[0].type == "Literal") {
       if (!mod.filters) mod.filters = {};
-      mod.filters[argNodes[0].value] = {"nodeOfName": argNodes[0], "fnType" : argNodes[1]};
+      mod.filters[argNodes[0].value] = {"originNode": argNodes[0], "fnType" : argNodes[1]};
     }
   });
   
@@ -142,14 +142,15 @@
     return ngDefs && ngDefs.Module.getProp("prototype").getType();
   }
 
-  function declareMod(name, includes, nodeOfName) {
+  function declareMod(name, includes, node) {
     var cx = infer.cx(), data = cx.parent._angular;
     var proto = moduleProto(cx);
     var mod = new infer.Obj(proto || true);
     if (!proto) data.nakedModules.push(mod);
     mod.origin = cx.curOrigin;
-    mod.nodeOfName = nodeOfName;
-    mod.injector = new Injector();
+    if (typeof node == "string" && !mod.span) mod.span = node;
+    else if (node && typeof node == "object" && !mod.originNode) mod.originNode = node;
+    mod.injector = new Injector(); 
     mod.metaData = {includes: includes};
     for (var i = 0; i < includes.length; ++i) {
       var depMod = data.modules[includes[i]];
@@ -225,7 +226,7 @@
     var mods = defs && defs["!ng"];
     if (mods) for (var name in mods.props) {
       var obj = mods.props[name].getType();
-      var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || []);
+      var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || [], obj.span);
       mod.origin = defName;
       for (var prop in obj.props) {
         var val = obj.props[prop], tp = val.getType();
