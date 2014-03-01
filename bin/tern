@@ -23,6 +23,7 @@ if (portArg > -1) {
 }
 
 function findProjectDir() {
+
   var dir = process.cwd();
   for (;;) {
     try {
@@ -32,6 +33,7 @@ function findProjectDir() {
     if (shorter == dir) return null;
     dir = shorter;
   }
+
 }
 
 var defaultConfig = {
@@ -41,11 +43,25 @@ var defaultConfig = {
   ecmaScript: true
 };
 
+//config pass via CLI argument
+var cliConfig = false;
+var configArg = process.argv.indexOf("--config");
+if (configArg > -1) {
+  cliConfig = process.argv[configArg + 1];
+  cliConfig = JSON.parse(cliConfig);
+  for (var option in defaultConfig) if (!cliConfig.hasOwnProperty(option))
+    cliConfig[option] = defaultConfig[option];
+
+  defaultConfig = cliConfig;
+}
+
 function readProjectFile(dir) {
   var data = JSON.parse(fs.readFileSync(path.resolve(dir, projectFileName), "utf8"));
+
   for (var option in defaultConfig) if (!data.hasOwnProperty(option))
     data[option] = defaultConfig[option];
   return data;
+
 }
 
 function findFile(file, projectDir, fallbackDir) {
@@ -85,7 +101,7 @@ function loadPlugins(projectDir, plugins) {
     require(found);
     options[path.basename(plugin)] = val;
   }
-  
+
   defaultPlugins.forEach(function(name) {
     if (!plugins.hasOwnProperty(name)) {
       options[name] = true;
@@ -97,8 +113,17 @@ function loadPlugins(projectDir, plugins) {
 
 var projectDir = findProjectDir();
 if (projectDir) {
+  //.tern-project has the first priority
   var config = readProjectFile(projectDir);
-} else {
+}
+else if (cliConfig != false)
+{
+  //config pass via CLI will be second
+  projectDir = process.cwd();
+  var config = cliConfig;
+}
+else {
+  //fallback the default config
   projectDir = process.cwd();
   var config = defaultConfig;
 }
