@@ -53,7 +53,9 @@ that instead of the HTTP server described here.)
 When started, the server will look for a `.tern-project` file in the
 current directory or one of the directories above that, and use it for
 its <<configuration,configuration>>. If no project file is found,
-it'll fall back to an empty default configuration.
+it'll fall back to a default configuration. You can change this
+default configuration by putting a `.tern-config` file, with the same
+format as `.tern-project`, in your home directory.
 
 A server write the port it is listening on (which is random) to
 standard output on startup. It will serve a <<protocol,simple JSON

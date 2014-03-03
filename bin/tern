@@ -40,9 +40,14 @@ var defaultConfig = {
   plugins: {},
   ecmaScript: true
 };
+var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config"))) {
+  defaultConfig = readProjectFile(path.resolve(homeDir, ".tern-config"));
+   console.log("default", defaultConfig.libs);
+}
 
-function readProjectFile(dir) {
-  var data = JSON.parse(fs.readFileSync(path.resolve(dir, projectFileName), "utf8"));
+function readProjectFile(fileName) {
+  var data = JSON.parse(fs.readFileSync(fileName, "utf8"));
   for (var option in defaultConfig) if (!data.hasOwnProperty(option))
     data[option] = defaultConfig[option];
   return data;
@@ -97,7 +102,7 @@ function loadPlugins(projectDir, plugins) {
 
 var projectDir = findProjectDir();
 if (projectDir) {
-  var config = readProjectFile(projectDir);
+  var config = readProjectFile(path.resolve(projectDir, projectFileName));
 } else {
   projectDir = process.cwd();
   var config = defaultConfig;
