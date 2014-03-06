@@ -11,7 +11,7 @@
     }
   },
   "jQuery": {
-    "!type": "fn(selector: string, context: frameElement) -> jQuery.fn",
+    "!type": "fn(selector: string, context?: frameElement) -> jQuery.fn",
     "!url": "http://api.jquery.com/jquery/",
     "!doc": "Return a collection of matched elements either found in the DOM based on passed argument(s) or created by passing an HTML string.",
     "fn": {
