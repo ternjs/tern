@@ -436,7 +436,7 @@
         "!doc": "Get the closest ancestor element that is positioned."
       },
       "on": {
-        "!type": "fn(events: string, selector?: string, data?: ?, handler: fn(+jQuery.Event)) -> jQuery.fn",
+        "!type": "fn(events: string, handler: fn(+jQuery.Event)) -> jQuery.fn",
         "!url": "http://api.jquery.com/on/",
         "!doc": "Attach an event handler function for one or more events to the selected elements."
       },
