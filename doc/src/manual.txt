@@ -354,9 +354,13 @@ before giving up on it. Defaults to `1000`.
 
 A server object has the following methods:
 
-[[tern.Server.addFile]] `addFile(name: string, text?: string)`::
+[[tern.Server.addFile]] `addFile(name: string, text?: string, parent?: string)`::
 Register a file with the server. Note that files can also be
-<<protocol_files,included>> in requests.
+<<protocol_files,included>> in requests. When using this to
+automatically load a dependency, specify the name of the file (as Tern
+knows it) as the third argument. That way, the file is counted towards
+the <<dependency_budget,dependency budget>> of the root of its
+dependency graph.
 
 [[tern.Server.delFile]] `delFile(name: string)`:: Unregister a file.
 
@@ -570,6 +574,7 @@ directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at `{}` when you don't need to pass
 any options.
 
+[[dependency_budget]]
 To configure the amount of work Tern is prepared to do to load a
 single dependency, the `dependencyBudget` option can be added to a
 project file. It indicates the maximum size of the files loaded in

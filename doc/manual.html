@@ -713,12 +713,16 @@ before giving up on it. Defaults to <code>1000</code>.
 <p> A server object has the following methods:</p>
 <dl>
 <dt>
-<a id="tern.Server.addFile"></a> <code>addFile(name: string, text?: string)</code>
+<a id="tern.Server.addFile"></a> <code>addFile(name: string, text?: string, parent?: string)</code>
 </dt>
 <dd>
 <p>
 Register a file with the server. Note that files can also be
-<a href="#protocol_files">included</a> in requests.
+<a href="#protocol_files">included</a> in requests. When using this to
+automatically load a dependency, specify the name of the file (as Tern
+knows it) as the third argument. That way, the file is counted towards
+the <a href="#dependency_budget">dependency budget</a> of the root of its
+dependency graph.
 </p>
 </dd>
 <dt>
@@ -987,7 +991,7 @@ plugins, either in the project dir or under <code>plugin/</code> in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
-<p> To configure the amount of work Tern is prepared to do to load a
+<p>  <a id="dependency_budget"></a>To configure the amount of work Tern is prepared to do to load a
 single dependency, the <code>dependencyBudget</code> option can be added to a
 project file. It indicates the maximum size of the files loaded in
 response to a single dependency (through plugins that load
