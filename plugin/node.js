@@ -42,8 +42,8 @@
     return scope;
   }
 
-  function resolveModule(server, name) {
-    server.addFile(name);
+  function resolveModule(server, name, parent) {
+    server.addFile(name, null, server._node.currentOrigin);
     return getModule(server._node, name);
   }
 
@@ -74,9 +74,8 @@
       else {
         // If the module resolves to a file that doesn't exist, then it is likely a node.js stdlib
         // module that is not predefined below.
-        if (fs.existsSync(file) && /^(\.js)?$/.test(path.extname(file))) {
-          server.addFile(relativePath(server.options.projectDir, file));
-        }
+        if (fs.existsSync(file) && /^(\.js)?$/.test(path.extname(file)))
+          server.addFile(relativePath(server.options.projectDir, file), null, data.currentOrigin);
         return data.modules[file] = new infer.AVal;
       }
     };
@@ -143,6 +142,7 @@
       modules: Object.create(null),
       options: options || {},
       currentFile: null,
+      currentRequires: [],
       currentOrigin: null,
       server: server
     };
@@ -150,6 +150,7 @@
     server.on("beforeLoad", function(file) {
       this._node.currentFile = resolveProjectPath(server, file.name);
       this._node.currentOrigin = file.name;
+      this._node.currentRequires = [];
       file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
     });
 

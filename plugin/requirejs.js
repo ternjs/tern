@@ -77,7 +77,7 @@
 
     if (!known) {
       known = getModule(name, data);
-      data.server.addFile(name);
+      data.server.addFile(name, null, data.currentFile);
     }
     return known;
   }

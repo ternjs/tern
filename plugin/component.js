@@ -19,7 +19,7 @@
   }
 
   function resolveModule(server, name) {
-    server.addFile(name);
+    server.addFile(name, null, server._component.currentName);
     return getModule(server._component, name);
   }
 
@@ -113,7 +113,7 @@
         if (!fs.statSync(resolve(dir, file)).isFile()) return infer.ANull;
       } catch(e) { return infer.ANull; }
 
-      server.addFile(file);
+      server.addFile(file, null, data.currentName);
       return data.modules[file] = data.modules[name] = new infer.AVal;
     };
   })();
@@ -123,16 +123,18 @@
       modules: Object.create(null),
       options: options || {},
       currentFile: null,
+      currentName: null,
       server: server
     };
 
     server.on("beforeLoad", function(file) {
       this._component.currentFile = file.name.replace(/\\/g, "/");
+      this._component.currentName = file.name;
       file.scope = buildWrappingScope(file.scope, file.name, file.ast);
     });
 
     server.on("afterLoad", function(file) {
-      this._component.currentFile = null;
+      this._component.currentFile = this._component.currentName = null;
       exportsFromScope(file.scope).propagate(getModule(this._component, file.name));
     });
 

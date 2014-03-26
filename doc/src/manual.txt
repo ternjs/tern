@@ -563,12 +563,21 @@ always be loaded, it may be an array of filenames or glob patterns
 Tern from loading certain files. It also takes an array of file names
 or glob patterns.
 
-Finally, `plugins` is an object used to load and configure Tern
+The `plugins` field may hold object used to load and configure Tern
 plugins. The names of the properties refer to files that implement
 plugins, either in the project dir or under `plugin/` in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at `{}` when you don't need to pass
 any options.
+
+To configure the amount of work Tern is prepared to do to load a
+single dependency, the `dependencyBudget` option can be added to a
+project file. It indicates the maximum size of the files loaded in
+response to a single dependency (through plugins that load
+dependencies, such as the <<plugin_node,node>> and
+<<plugin_requirejs,RequireJS>> plugins), counted in expressions. The
+default value is 20 000. Files loaded as dependencies of dependencies
+count towards the budget of the original dependency.
 
 [[plugin_doc_comment]]
 ==== Doc comments plugin ====

@@ -38,7 +38,8 @@ var defaultConfig = {
   libs: [],
   loadEagerly: false,
   plugins: {},
-  ecmaScript: true
+  ecmaScript: true,
+  dependencyBudget: tern.defaultOptions.dependencyBudget
 };
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config"))) {
@@ -123,7 +124,8 @@ function startServer(dir, config) {
     defs: defs,
     plugins: plugins,
     debug: verbose,
-    projectDir: dir
+    projectDir: dir,
+    dependencyBudget: config.dependencyBudget
   });
 
   if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
