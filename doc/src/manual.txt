@@ -145,6 +145,9 @@ on will be included.
 the properties of `Object.prototype` unless they have been spelled out
 by at least to characters.
 
+`includeKeywords` (optional, default `false`);; Whether to include
+JavaScript keywords when completing something that is not a property.
+
 +
 The result returned will be an object with `start` and `end`
 properties, which give the start and end <<offsets,offsets>> of the word that was

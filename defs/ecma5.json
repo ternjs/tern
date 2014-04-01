@@ -876,7 +876,7 @@
       "!doc": "Returns the arctangent (in radians) of a number."
     },
     "atan2": {
-      "!type": "fn(number, number) -> number",
+      "!type": "fn(y: number, x: number) -> number",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/atan2",
       "!doc": "Returns the arctangent of the quotient of its arguments."
     },

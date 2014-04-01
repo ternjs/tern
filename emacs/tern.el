@@ -212,7 +212,7 @@ list of strings, giving the binary name and arguments.")
 ;; Completion
 
 (defun tern-completion-at-point-fn ()
-  (tern-run-query #'tern-do-complete "completions" (point)))
+  (tern-run-query #'tern-do-complete '((type . "completions") (includeKeywords . t)) (point)))
 
 (defun tern-completion-at-point ()
   (or (tern-completion-matches-last)
