@@ -20,3 +20,8 @@ requirejs(["foo", "bar!abc", "useexports", "simplifiedcommon", "subdir/zap"], fu
 requirejs(["jquery"], function($) {
   $.fx.off; //: bool
 });
+
+requirejs(["require"], function(require) {
+  require("jquery").fx.off; //: bool
+  require("requireme").someprop; //: string
+});
