@@ -21,7 +21,7 @@
          (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
          (url-request-data (json-encode doc))
          (url-show-status nil)
-         (url (url-parse-make-urlobj "http" nil nil "127.0.0.1" port "/" nil nil nil)))
+         (url (url-parse-make-urlobj "http" nil nil tern-server port "/" nil nil nil)))
     (url-http url #'tern-req-finished (list c))))
 
 (defun tern-req-finished (c)
@@ -58,18 +58,20 @@
       (return (if (consp tern-known-port)
                   (funcall c nil (cdr tern-known-port))
                 (funcall c tern-known-port nil))))
-    (unless (buffer-file-name)
-      (return (funcall c nil "Buffer is not associated with a file")))
-    (let ((deactivate-mark nil)
-          (port-file (expand-file-name ".tern-port" (tern-project-dir))))
-      (when (file-exists-p port-file)
-        (let ((port (string-to-number (with-temp-buffer
-                                        (insert-file-contents port-file)
-                                        (buffer-string)))))
-          (unless (eq port ignore-port)
-            (setf tern-known-port port)
-            (return (funcall c port nil))))))
-    (tern-start-server c)))
+    (if tern-explicit-port
+        (funcall c tern-explicit-port nil)
+      (unless (buffer-file-name)
+        (return (funcall c nil "Buffer is not associated with a file")))
+      (let ((deactivate-mark nil)
+            (port-file (expand-file-name ".tern-port" (tern-project-dir))))
+        (when (file-exists-p port-file)
+          (let ((port (string-to-number (with-temp-buffer
+                                          (insert-file-contents port-file)
+                                          (buffer-string)))))
+            (unless (eq port ignore-port)
+              (setf tern-known-port port)
+              (return (funcall c port nil))))))
+      (tern-start-server c))))
 
 (defvar tern-command
   (let* ((script-file (or load-file-name
@@ -109,6 +111,8 @@ list of strings, giving the binary name and arguments.")
 (defvar tern-last-point-pos nil)
 
 (defvar tern-known-port nil)
+(defvar tern-server nil)
+(defvar tern-explicit-port nil)
 (defvar tern-project-dir nil)
 
 (defvar tern-last-completions nil)
@@ -168,7 +172,9 @@ list of strings, giving the binary name and arguments.")
                             (setf retrying t)
                             (let ((old-port tern-known-port))
                               (setf tern-known-port nil)
-                              (tern-find-server callback old-port)))
+                              (if tern-explicit-port
+                                  (funcall callback nil err)
+                                (tern-find-server callback old-port))))
                            (t (funcall f err data))))))
     (tern-find-server callback)))
 
@@ -200,7 +206,7 @@ list of strings, giving the binary name and arguments.")
                     (with-current-buffer (find-file-noselect (expand-file-name (cdr (assq 'name file)) tern-project-dir))
                       (setf tern-buffer-is-dirty nil))))
                 (funcall f data))
-               ((not (eq mode :silent)) (tern-message "Request failed: %s" (cdr err))))))
+               ((not (eq mode :silent)) (tern-message "Request failed: %s" err)))))
      doc)))
 
 (defun tern-send-buffer-to-server ()
@@ -488,9 +494,11 @@ list of strings, giving the binary name and arguments.")
 ;; Connection management
 
 ;;;###autoload
-(defun tern-use-server (port)
-  (interactive "nPort to connect to: ")
-  (setf tern-known-port port))
+(defun tern-use-server (port server)
+  (interactive "nPort to connect to: \nsServer: ")
+  (setf tern-explicit-port port)
+  (setf tern-known-port nil)
+  (setf tern-server (if (string= server "") "127.0.0.1" server)))
 
 ;; Mode plumbing
 
@@ -544,6 +552,8 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-mode-enable ()
   (set (make-local-variable 'tern-known-port) nil)
+  (set (make-local-variable 'tern-server) "127.0.0.1")
+  (set (make-local-variable 'tern-explicit-port) nil)
   (set (make-local-variable 'tern-project-dir) nil)
   (set (make-local-variable 'tern-last-point-pos) nil)
   (set (make-local-variable 'tern-last-completions) nil)
