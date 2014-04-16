@@ -30,7 +30,7 @@
 
   function buildWrappingScope(parent, origin, node) {
     var scope = new infer.Scope(parent);
-    scope.node = node;
+    scope.originNode = node;
     infer.cx().definitions.node.require.propagate(scope.defProp("require"));
     var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
     module.propagate(scope.defProp("module"));
