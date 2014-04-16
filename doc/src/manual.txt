@@ -67,6 +67,9 @@ The following command-line flags are supported:
 `--port <number>`:: Specify a port to listen on, instead of the
 default behavior of letting the OS pick a random unused port.
 
+`--host <host>`:: Specify a host to listen on. Defaults to 127.0.0.1.
+Pass `null` or `any` to listen on all available hosts.
+
 `--persistent`:: By default, the server will shut itself down after
 five minutes of inactivity. Pass it a this option to disable
 auto-shutdown.
