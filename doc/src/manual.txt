@@ -1113,3 +1113,8 @@ ctags files from JavaScript code by using Tern's inference engine.
 
 The http://codemirror.net[CodeMirror] browser-based editor has an
 http://codemirror.net/demo/tern.html[addon] for integrating with Tern.
+
+=== tern.ace ===
+
+https://github.com/angelozerr/tern.ace[tern.ace] integrates Tern in
+the http://ace.c9.io/[ACE] editor.
