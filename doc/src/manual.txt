@@ -1121,3 +1121,8 @@ http://codemirror.net/demo/tern.html[addon] for integrating with Tern.
 
 https://github.com/angelozerr/tern.ace[tern.ace] integrates Tern in
 the http://ace.c9.io/[ACE] editor.
+
+=== tern.orion ===
+
+https://github.com/angelozerr/tern.orion[tern.orion] integrates Tern in
+the http://www.eclipse.org/orion/[Orion] editor.
