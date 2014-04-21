@@ -3,7 +3,7 @@
 
 ;; Author:  <m.sakurai at kiwanami.net>
 ;; Version: 0.0.1
-;; Package-Requires: ((tern "0.0.1") (auto-complete "1.4") (emacs "24"))
+;; Package-Requires: ((tern "0.0.1") (auto-complete "1.4") (cl-lib "0.5") (emacs "24"))
 
 ;;; Commentary:
 
@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'tern)
 (require 'auto-complete)
 
@@ -51,7 +51,7 @@
    (point)))
 
 (defun tern-ac-complete-response (data)
-  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
+  (let ((cs (cl-loop for elt across (cdr (assq 'completions data)) collect elt))
         (start (+ 1 (cdr (assq 'start data))))
         (end (+ 1 (cdr (assq 'end data)))))
     (setq tern-last-completions (list (buffer-substring-no-properties start end) start end cs))
@@ -97,9 +97,9 @@
 (eval-after-load 'auto-complete
   '(progn
      (ac-define-source tern-completion
-       '((candidates . tern-ac-completion-matches)
-         (prefix . tern-ac-completion-prefix)
-         (requires . -1)))))
+                       '((candidates . tern-ac-completion-matches)
+                         (prefix . tern-ac-completion-prefix)
+                         (requires . -1)))))
 
 ;;;###autoload
 (defun tern-ac-setup ()

@@ -4,9 +4,9 @@
 ;; Author: Marijn Haverbeke
 ;; URL: http://ternjs.net/
 ;; Version: 0.0.1
-;; Package-Requires: ((json "1.2") (emacs "24"))
+;; Package-Requires: ((json "1.2") (cl-lib "0.5") (emacs "24"))
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'json)
 (require 'url)
 (require 'url-http)
@@ -45,23 +45,23 @@
   (or tern-project-dir
       (and (not (buffer-file-name)) (setf tern-project-dir ""))
       (let ((project-dir (file-name-directory (buffer-file-name))))
-        (loop for cur = project-dir then (let ((shorter (file-name-directory (substring cur 0 (1- (length cur))))))
-                                           (and (< (length shorter) (length cur)) shorter))
-              while cur do
-              (when (file-exists-p (expand-file-name ".tern-project" cur))
-                (return (setf project-dir cur))))
+        (cl-loop for cur = project-dir then (let ((shorter (file-name-directory (substring cur 0 (1- (length cur))))))
+                                              (and (< (length shorter) (length cur)) shorter))
+                 while cur do
+                 (when (file-exists-p (expand-file-name ".tern-project" cur))
+                   (cl-return (setf project-dir cur))))
         (setf tern-project-dir project-dir))))
 
 (defun tern-find-server (c &optional ignore-port)
-  (block nil
+  (cl-block nil
     (when tern-known-port
-      (return (if (consp tern-known-port)
-                  (funcall c nil (cdr tern-known-port))
-                (funcall c tern-known-port nil))))
+      (cl-return (if (consp tern-known-port)
+                     (funcall c nil (cdr tern-known-port))
+                   (funcall c tern-known-port nil))))
     (if tern-explicit-port
         (funcall c tern-explicit-port nil)
       (unless (buffer-file-name)
-        (return (funcall c nil "Buffer is not associated with a file")))
+        (cl-return (funcall c nil "Buffer is not associated with a file")))
       (let ((deactivate-mark nil)
             (port-file (expand-file-name ".tern-port" (tern-project-dir))))
         (when (file-exists-p port-file)
@@ -70,7 +70,7 @@
                                           (buffer-string)))))
             (unless (eq port ignore-port)
               (setf tern-known-port port)
-              (return (funcall c port nil))))))
+              (cl-return (funcall c port nil))))))
       (tern-start-server c))))
 
 (defvar tern-command
@@ -124,17 +124,17 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-get-partial-file (at)
   (let* (min-indent start-pos end-pos
-         (min-pos (max 0 (- at 2000))))
+                    (min-pos (max 0 (- at 2000))))
     (save-excursion
       (goto-char at)
-      (loop
-       (unless (re-search-backward "\\bfunction\\b" min-pos t) (return))
+      (cl-loop
+       (unless (re-search-backward "\\bfunction\\b" min-pos t) (cl-return))
        (let ((indent (current-indentation))
              (pos (line-beginning-position)))
          (when (or (not min-indent) (< indent min-indent))
            (setf min-indent indent min-indent-pos pos))
          (goto-char pos)
-         (when (<= pos min-pos) (return))))
+         (when (<= pos min-pos) (cl-return))))
       (unless start-pos (goto-char min-pos) (setf start-pos (line-beginning-position))))
     (save-excursion
       (goto-char (min (+ at 1000) (point-max)))
@@ -168,7 +168,7 @@ list of strings, giving the binary name and arguments.")
                        (funcall f err nil))))
     (setf runner (lambda (err data)
                    (with-current-buffer buffer
-                     (cond ((and err (eq (cadar err) 'connection-failed) (not retrying))
+                     (cond ((and err (eq (cl-cadar err) 'connection-failed) (not retrying))
                             (setf retrying t)
                             (let ((old-port tern-known-port))
                               (setf tern-known-port nil)
@@ -180,7 +180,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-run-query (f query pos &optional mode)
   (when (stringp query) (setf query `((type . ,query))))
-  (let ((generation (incf tern-command-generation))
+  (let ((generation (cl-incf tern-command-generation))
         (doc `((query . ,query)))
         (files (and (eq mode :full-file) (tern-modified-sibling-buffers)))
         file-name
@@ -190,7 +190,7 @@ list of strings, giving the binary name and arguments.")
      ((and (not (eq mode :full-file)) (> (buffer-size) 8000))
       (push (tern-get-partial-file pos) files)
       (setf file-name "#0")
-      (decf pos (cdr (assq 'offset (car files)))))
+      (cl-decf pos (cdr (assq 'offset (car files)))))
      (t
       (push `((type . "full") (text . ,(buffer-string)) (name . ,(tern-project-relative-file))) files)
       (setf file-name (tern-project-relative-file))))
@@ -228,7 +228,7 @@ list of strings, giving the binary name and arguments.")
       'tern-completion-at-point-fn))
 
 (defun tern-do-complete (data)
-  (let ((cs (loop for elt across (cdr (assq 'completions data)) collect elt))
+  (let ((cs (cl-loop for elt across (cdr (assq 'completions data)) collect elt))
         (start (+ 1 (cdr (assq 'start data))))
         (end (+ 1 (cdr (assq 'end data)))))
     (setf tern-last-completions (list (buffer-substring-no-properties start end) start end cs))
@@ -237,7 +237,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-completion-matches-last ()
   (when tern-last-completions
-    (destructuring-bind (word start end list) tern-last-completions
+    (cl-destructuring-bind (word start end list) tern-last-completions
       (and (<= end (point-max))
            (equal word (buffer-substring-no-properties start end))
            (if (= (point) end)
@@ -247,9 +247,9 @@ list of strings, giving the binary name and arguments.")
                   (string-match-p "^[a-zA-Z0-9_$]*$" (buffer-substring-no-properties end (point)))
                   (let ((new-word (buffer-substring-no-properties start (point))))
                     (list start (point)
-                          (loop for elt in list
-                                when (eq (compare-strings word 0 (length word) new-word 0 (length word)) t)
-                                collect elt)))))))))
+                          (cl-loop for elt in list
+                                   when (eq (compare-strings word 0 (length word) new-word 0 (length word)) t)
+                                   collect elt)))))))))
 
 ;; Argument hints
 
@@ -262,13 +262,13 @@ list of strings, giving the binary name and arguments.")
   (when tern-update-argument-hints-async
     (cancel-timer tern-update-argument-hints-async))
   (setq tern-update-argument-hints-async
-          (run-at-time 
-           (* 0.001 tern-update-argument-hints-timer) nil
-           (lambda ()
-             (condition-case err
-                 (tern-update-argument-hints)
-               (t (message "tern-update-argument-hints : %S" err)))
-             (setq tern-update-argument-hints-async nil)))))
+        (run-at-time 
+         (* 0.001 tern-update-argument-hints-timer) nil
+         (lambda ()
+           (condition-case err
+               (tern-update-argument-hints)
+             (t (message "tern-update-argument-hints : %S" err)))
+           (setq tern-update-argument-hints-async nil)))))
 
 (defun tern-update-argument-hints ()
   (let ((opening-paren (cadr (syntax-ppss))))
@@ -287,14 +287,14 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-skip-matching-brackets (end-chars)
   (let ((depth 0) (end (+ (point) 500)))
-    (loop while (< (point) (point-max)) do
-          (let ((next (char-after (point))))
-            (cond
-             ((and (<= depth 0) (find next end-chars)) (return t))
-             ((or (eq next ?\)) (eq next ?\]) (eq next ?\})) (decf depth))
-             ((or (eq next ?\() (eq next ?\[) (eq next ?\{)) (incf depth))
-             ((> (point) end) (return nil)))
-            (forward-char)))))
+    (cl-loop while (< (point) (point-max)) do
+             (let ((next (char-after (point))))
+               (cond
+                ((and (<= depth 0) (cl-find next end-chars)) (cl-return t))
+                ((or (eq next ?\)) (eq next ?\]) (eq next ?\})) (cl-decf depth))
+                ((or (eq next ?\() (eq next ?\[) (eq next ?\{)) (cl-incf depth))
+                ((> (point) end) (cl-return nil)))
+               (forward-char)))))
 
 (defun tern-parse-function-type (data)
   (let ((type (cdr (assq 'type data)))
@@ -305,14 +305,14 @@ list of strings, giving the binary name and arguments.")
         (insert type)
         (goto-char 4)
         (let (args retval)
-          (loop until (eq (char-after (point)) ?\)) do
-                (let ((name (when (looking-at "\\([a-zA-Z0-9_$?]*\\):\\s-*")
-                              (goto-char (match-end 0))
-                              (match-string 1)))
-                      (typestart (point)))
-                  (tern-skip-matching-brackets '(?\) ?\,))
-                  (push (cons name (buffer-substring typestart (point))) args))
-                (when (eq (char-after (point)) ?\,) (forward-char 2)))
+          (cl-loop until (eq (char-after (point)) ?\)) do
+                   (let ((name (when (looking-at "\\([a-zA-Z0-9_$?]*\\):\\s-*")
+                                 (goto-char (match-end 0))
+                                 (match-string 1)))
+                         (typestart (point)))
+                     (tern-skip-matching-brackets '(?\) ?\,))
+                     (push (cons name (buffer-substring typestart (point))) args))
+                   (when (eq (char-after (point)) ?\,) (forward-char 2)))
           (when (looking-at ") -> ")
             (setf retval (buffer-substring (+ (point) 5) (point-max))))
           (list name (nreverse args) retval))))))
@@ -322,27 +322,27 @@ list of strings, giving the binary name and arguments.")
     (save-excursion
       (let ((cur-point (point)))
         (goto-char (1+ start))
-        (loop for i from 0 do
-              (let ((found-end (tern-skip-matching-brackets '(?\) ?\,))))
-                (when (>= (point) cur-point) (return i))
-                (when (or (not found-end) (looking-at ")")) (return nil))
-                (forward-char 1)))))))
+        (cl-loop for i from 0 do
+                 (let ((found-end (tern-skip-matching-brackets '(?\) ?\,))))
+                   (when (>= (point) cur-point) (cl-return i))
+                   (when (or (not found-end) (looking-at ")")) (cl-return nil))
+                   (forward-char 1)))))))
 
 (defun tern-show-argument-hints ()
   (declare (special message-log-max))
-  (destructuring-bind (paren . type) tern-last-argument-hints
+  (cl-destructuring-bind (paren . type) tern-last-argument-hints
     (let ((parts ())
           (current-arg (tern-find-current-arg paren)))
-      (destructuring-bind (name args ret) type
+      (cl-destructuring-bind (name args ret) type
         (push (propertize name 'face 'font-lock-function-name-face) parts)
         (push "(" parts)
-        (loop for arg in args for i from 0 do
-              (unless (zerop i) (push ", " parts))
-              (let ((name (or (car arg) "?")))
-                (push (if (eq i current-arg) (propertize name 'face 'highlight) name) parts))
-              (unless (equal (cdr arg) "?")
-                (push ": " parts)
-                (push (propertize (cdr arg) 'face 'font-lock-type-face) parts)))
+        (cl-loop for arg in args for i from 0 do
+                 (unless (zerop i) (push ", " parts))
+                 (let ((name (or (car arg) "?")))
+                   (push (if (eq i current-arg) (propertize name 'face 'highlight) name) parts))
+                 (unless (equal (cdr arg) "?")
+                   (push ": " parts)
+                   (push (propertize (cdr arg) 'face 'font-lock-type-face) parts)))
         (push ")" parts)
         (when ret
           (push " -> " parts)
@@ -355,20 +355,20 @@ list of strings, giving the binary name and arguments.")
 (defun tern-do-refactor (data)
   (let ((per-file ())
         (orig-buffer (current-buffer)))
-    (loop for change across (cdr (assq 'changes data)) do
-          (let ((found (assoc-string (cdr (assq 'file change)) per-file)))
-            (unless found (setf found (list (cdr (assq 'file change)))) (push found per-file))
-            (push change (cdr found))))
-    (loop for (file . changes) in per-file do
-          (setf changes (sort changes (lambda (a b) (> (cdr (assq 'start a)) (cdr (assq 'start b))))))
-          (find-file (expand-file-name file (tern-project-dir)))
-          (loop for change in changes do
-                (let ((start (1+ (cdr (assq 'start change))))
-                      (end (1+ (cdr (assq 'end change)))))
-                (delete-region start end)
-                (save-excursion
-                  (goto-char start)
-                  (insert (cdr (assq 'text change)))))))
+    (cl-loop for change across (cdr (assq 'changes data)) do
+             (let ((found (assoc-string (cdr (assq 'file change)) per-file)))
+               (unless found (setf found (list (cdr (assq 'file change)))) (push found per-file))
+               (push change (cdr found))))
+    (cl-loop for (file . changes) in per-file do
+             (setf changes (sort changes (lambda (a b) (> (cdr (assq 'start a)) (cdr (assq 'start b))))))
+             (find-file (expand-file-name file (tern-project-dir)))
+             (cl-loop for change in changes do
+                      (let ((start (1+ (cdr (assq 'start change))))
+                            (end (1+ (cdr (assq 'end change)))))
+                        (delete-region start end)
+                        (save-excursion
+                          (goto-char start)
+                          (insert (cdr (assq 'text change)))))))
     (switch-to-buffer orig-buffer)))
 
 (defun tern-rename-variable (new-name)
@@ -386,12 +386,12 @@ list of strings, giving the binary name and arguments.")
     (run-with-timer tern-flash-timeout nil 'delete-overlay overlay)))
 
 (defun tern-do-highlight (data)
-  (loop for ref across (cdr (assq 'refs data)) do
-        (let ((file (cdr (assq 'file ref))))
-          (when (string= buffer-file-name (expand-file-name file (tern-project-dir)))
-            (let ((start (1+ (cdr (assq 'start ref))))
-                  (end (1+ (cdr (assq 'end ref)))))
-              (tern-flash-region start end))))))
+  (cl-loop for ref across (cdr (assq 'refs data)) do
+           (let ((file (cdr (assq 'file ref))))
+             (when (string= buffer-file-name (expand-file-name file (tern-project-dir)))
+               (let ((start (1+ (cdr (assq 'start ref))))
+                     (end (1+ (cdr (assq 'end ref)))))
+                 (tern-flash-region start end))))))
 
 (defun tern-highlight-refs ()
   (interactive)
@@ -444,8 +444,8 @@ list of strings, giving the binary name and arguments.")
         (let (nearest nearest-dist)
           (save-excursion
             (goto-char (point-min))
-            (loop
-             (unless (search-forward cx nil t) (return))
+            (cl-loop
+             (unless (search-forward cx nil t) (cl-return))
              (let* ((here (- (point) (length cx)))
                     (dist (abs (- cx-start here))))
                (when (or (not nearest-dist) (< dist nearest-dist))
@@ -456,7 +456,7 @@ list of strings, giving the binary name and arguments.")
 (defun tern-pop-find-definition ()
   (interactive)
   (when tern-find-definition-stack
-    (destructuring-bind (file . pos) (pop tern-find-definition-stack)
+    (cl-destructuring-bind (file . pos) (pop tern-find-definition-stack)
       (tern-go-to-position file pos))))
 
 (defun tern-go-to-position (file pos)
