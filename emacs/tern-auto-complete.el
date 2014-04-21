@@ -97,9 +97,9 @@
 (eval-after-load 'auto-complete
   '(progn
      (ac-define-source tern-completion
-       '((candidates . tern-ac-completion-matches)
-         (prefix . tern-ac-completion-prefix)
-         (requires . -1)))))
+                       '((candidates . tern-ac-completion-matches)
+                         (prefix . tern-ac-completion-prefix)
+                         (requires . -1)))))
 
 ;;;###autoload
 (defun tern-ac-setup ()
