@@ -92,7 +92,7 @@ function loadPlugins(projectDir, plugins) {
     var found = findFile(plugin + ".js", projectDir, path.resolve(distDir, "plugin"));
     if (!found) {
       try {
-        found = require.resolve(plugin);
+        found = require.resolve("tern-" + plugin);
       } catch (e) {
         process.stderr.write("Failed to find plugin " + plugin + ".\n");
         continue;
