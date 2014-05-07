@@ -32,7 +32,10 @@
 
 ;;; Completion
 
-(defvar tern-ac-on-dot t "[AC] If t, tern enable completion by auto-completion.")
+(defcustom tern-ac-on-dot t
+  "[AC] If t, tern enable completion by auto-completion."
+  :type 'boolean
+  :group 'auto-complete)
 
 (defvar tern-ac-complete-reply nil  "[internal] tern-ac-complete-reply.")
 
