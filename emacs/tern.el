@@ -427,6 +427,7 @@ list of strings, giving the binary name and arguments.")
   (interactive)
   (let ((varname (and (or prompt-var (not (tern-at-interesting-expression)))
                       (read-from-minibuffer "Variable: "))))
+    (push-mark)
     (tern-run-query #'tern-show-definition `((type . "definition") (variable . ,varname)) (point))))
 
 (defun tern-find-definition-by-name ()
