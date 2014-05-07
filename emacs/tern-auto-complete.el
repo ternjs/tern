@@ -94,12 +94,10 @@
         tern-ac-complete-request-point)))
 
 ;; (makunbound 'ac-source-tern-completion)
-(eval-after-load 'auto-complete
-  '(progn
-     (ac-define-source tern-completion
-                       '((candidates . tern-ac-completion-matches)
-                         (prefix . tern-ac-completion-prefix)
-                         (requires . -1)))))
+(ac-define-source tern-completion
+  '((candidates . tern-ac-completion-matches)
+    (prefix . tern-ac-completion-prefix)
+    (requires . -1)))
 
 ;;;###autoload
 (defun tern-ac-setup ()
