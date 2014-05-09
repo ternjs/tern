@@ -1818,6 +1818,11 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/event.stopImmediatePropagation",
         "!doc": "Prevents other listeners of the same event to be called."
       },
+      "type": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/event.type",
+        "!doc": "Returns a string containing the type of event."
+      },
       "NONE": "number",
       "CAPTURING_PHASE": "number",
       "AT_TARGET": "number",
