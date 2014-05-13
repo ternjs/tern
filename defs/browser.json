@@ -2665,7 +2665,7 @@
   "window": {
     "!type": "<top>",
     "!url": "https://developer.mozilla.org/en/docs/DOM/window",
-    "!doc": "This section provides a brief reference for all of the methods, properties, and events available through the DOM window object. The window object implements the Window interface, which in turn inherits from the AbstractView interface. Some additional global functions, namespaces objects, and constructors, not typically associated with the window, but available on it, are listed in the JavaScript Reference."
+    "!doc": "The window object represents a window containing a DOM document."
   },
   "opener": {
     "!type": "<top>",
