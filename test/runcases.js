@@ -56,8 +56,8 @@ function serverOptions(context, text) {
   };
 }
 
-exports.runTests = function(filter) {
-  var caseDir = util.resolve("test/cases");
+exports.runTests = function(filter, caseDir) {
+  caseDir = caseDir || util.resolve("test/cases");
   fs.readdirSync(caseDir).forEach(function(name) {
     if (filter && name.indexOf(filter) == -1) return;
 
