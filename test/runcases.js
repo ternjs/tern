@@ -28,8 +28,17 @@ function getDefs(text) {
 
 function getPlugins(text) {
   var spec = /\/\/ plugin=(\w+)(?: (.*))?\n/g, m, plugins = {doc_comment: true};
-  while (m = spec.exec(text))
-    plugins[m[1]] = (m[2] && JSON.parse(m[2])) || (m[1] == "node" && {modules: nodeModules}) || {};
+  while (m = spec.exec(text)) {
+    if (m[2]) {
+      var options = JSON.parse(m[2]);
+      if (options)
+        plugins[m[1]] = options;
+      else
+        delete plugins[m[1]];
+    } else {
+      plugins[m[1]] = (m[1] == "node" && {modules: nodeModules}) || {};
+    }
+  }
   return plugins;
 }
 
