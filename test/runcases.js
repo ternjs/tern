@@ -61,13 +61,14 @@ exports.runTests = function(filter) {
   fs.readdirSync(caseDir).forEach(function(name) {
     if (filter && name.indexOf(filter) == -1) return;
 
-    util.addFile();
     var fname = name, context = caseDir;
     if (fs.statSync(path.resolve(context, name)).isDirectory()) {
       if (name == "node_modules" || name == "defs") return;
       context = path.join(context, name);
       fname = "main.js";
     }
+    if (!/\.js$/.test(fname)) return;
+    util.addFile();
 
     var text = fs.readFileSync(path.join(context, fname), "utf8"), m;
     var server = new tern.Server(serverOptions(context, text));
