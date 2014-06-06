@@ -19,6 +19,7 @@ engine>> to do the actual type inference.
 *** <<plugin_node,node>>
 *** <<plugin_requirejs,RequireJS>>
 *** <<plugin_angular,Angular.js>>
+*** <<plugin_third_party,Third-party plugins>>
 ** <<configuration,Project configuration>>
 ** <<utils,Utilities>>
 * <<infer,Inference engine>>
@@ -653,6 +654,23 @@ Adds the `angular` object to the top-level environment, and tries to
 wire up some of the bizarre dependency management scheme from this
 library, so that dependency injections get the right types. Enabled
 with the name `"angular"`.
+
+[[plugin_third_party]]
+==== Third-party plugins ====
+
+It is possible to write third-party plugins and distribute them
+independently using https://www.npmjs.org[npm]. The plugin package name
+must match the pattern "tern-'name'" to indicate it is a Tern plugin. If
+a 'name' attribute is specified in the `plugins` section of the project
+configuration, and '`name`'`.js` is not present in the project directory or
+Tern's own `plugin` directory, Tern will search for an installed package
+named "tern-'name'" to load as a plugin.
+
+Plugin packages should specify the Tern version required as a
+http://blog.nodejs.org/2013/02/07/peer-dependencies[peer dependency]. In
+order for the plugin to register with the correct Tern module instance,
+Tern and the plugin should be installed side-by-side (both globally, or
+both locally in the same directory).
 
 [[utils]]
 === Utilities ===

@@ -70,6 +70,11 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 <a href="#plugin_angular">Angular.js</a>
 </p>
 </li>
+<li>
+<p>
+<a href="#plugin_third_party">Third-party plugins</a>
+</p>
+</li>
 </ul></div>
 </li>
 <li>
@@ -1100,6 +1105,19 @@ example <code>{"acorn": "lib/acorn/"}</code>.
 wire up some of the bizarre dependency management scheme from this
 library, so that dependency injections get the right types. Enabled
 with the name <code>"angular"</code>.</p>
+<h4> <a id="plugin_third_party"></a>Third-party plugins</h4>
+<p> It is possible to write third-party plugins and distribute them
+independently using <a href="https://www.npmjs.org">npm</a>. The plugin package name
+must match the pattern "tern-<em>name</em>" to indicate it is a Tern plugin. If
+a <em>name</em> attribute is specified in the <code>plugins</code> section of the project
+configuration, and <em><code>name</code></em><code>.js</code> is not present in the project directory or
+Tern&#8217;s own <code>plugin</code> directory, Tern will search for an installed package
+named "tern-<em>name</em>" to load as a plugin.</p>
+<p> Plugin packages should specify the Tern version required as a
+<a href="http://blog.nodejs.org/2013/02/07/peer-dependencies">peer dependency</a>. In
+order for the plugin to register with the correct Tern module instance,
+Tern and the plugin should be installed side-by-side (both globally, or
+both locally in the same directory).</p>
 <h3> <a id="utils"></a>Utilities</h3>
 <dl>
 <dt>
