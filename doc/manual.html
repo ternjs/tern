@@ -238,14 +238,18 @@ servers for the same project).
 <p> Sending queries to a Tern server is done by making <code>POST</code> requests to
 the server&#8217;s port (using <code>/</code> as the requests&#8217;s path) with a
 <a href="http://json.org">JSON</a> document in the body of the request.</p>
-<p> This document should be an object, with two optional fields, <code>query</code>
-and <code>files</code>. The first describes the kind of information you want to
-ask for. It may be omitted if the request is only used to push new
+<p> This document should be an object, with three optional fields,
+<code>query</code>, <code>files</code>, and <code>timeout</code>.</p>
+<p> The first (<code>query</code>) describes the kind of information you are
+requesting. It may be omitted if the request is only used to push new
 code to the server (in which case you&#8217;ll get an empty object, <code>{}</code> as
 response). The <code>files</code> property, if given, contains an array of file
 specifications, as described below. It may be omitted when the query
 should operate on the code that the server already has, without adding
-anything new.</p>
+anything new. When the <code>timeout</code> field is set, it should contain a
+number, which is interpreted as the maximum amount of milliseconds to
+work (CPU work, ignoring I/O) on this request before returning with a
+timeout error.</p>
 <p> A query is an object with at least a <code>type</code> property, which determines
 what kind of query it is. Depending on the type, other properties must
 or may be present in order to provide further details.</p>
