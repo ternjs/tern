@@ -983,49 +983,6 @@ do someting useful in this function.
 </p>
 </dd>
 </dl>
-<h3> <a id="configuration"></a>Project configuration</h3>
-<p> A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
-like this:</p>
-<pre data-language="application/x-json" class="cm-s-default">{
-  <span class="cm-string cm-property">"libs"</span>: [
-    <span class="cm-string">"browser"</span>,
-    <span class="cm-string">"jquery"</span>
-  ],
-  <span class="cm-string cm-property">"loadEagerly"</span>: [
-    <span class="cm-string">"importantfile.js"</span>
-  ],
-  <span class="cm-string cm-property">"plugins"</span>: {
-    <span class="cm-string cm-property">"requirejs"</span>: {
-      <span class="cm-string cm-property">"baseURL"</span>: <span class="cm-string">"./"</span>,
-      <span class="cm-string cm-property">"paths"</span>: {}
-    }
-  }
-}</pre>
-<p> The <code>libs</code> property refers to the <a href="#typedef">JSON type descriptions</a>
-that should be loaded into the environment for this project. See the
-<code>defs/</code> directory for examples. The strings given here will be
-suffixed with <code>.json</code>, and searched for first in the project&#8217;s own
-dir, and then in the <code>defs/</code> directory of the Tern distribution.</p>
-<p> By default, local files are loaded into the Tern server when they are
-opened by the editor. <code>loadEagerly</code> allows you to force some files to
-always be loaded, it may be an array of filenames or glob patterns
-(i.e. <code>foo/bar/*.js</code>). The <code>dontLoad</code> option can be used to prevent
-Tern from loading certain files. It also takes an array of file names
-or glob patterns.</p>
-<p> The <code>plugins</code> field may hold object used to load and configure Tern
-plugins. The names of the properties refer to files that implement
-plugins, either in the project dir or under <code>plugin/</code> in the Tern
-directory. Their values are configuration objects that will be passed
-to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
-any options.</p>
-<p>  <a id="dependency_budget"></a>To configure the amount of work Tern is prepared to do to load a
-single dependency, the <code>dependencyBudget</code> option can be added to a
-project file. It indicates the maximum size of the files loaded in
-response to a single dependency (through plugins that load
-dependencies, such as the <a href="#plugin_node">node</a> and
-<a href="#plugin_requirejs">RequireJS</a> plugins), counted in expressions. The
-default value is 20 000. Files loaded as dependencies of dependencies
-count towards the budget of the original dependency.</p>
 <h4> <a id="plugin_doc_comment"></a>Doc comments plugin</h4>
 <p> This plugin, which is enabled by default in the <code>bin/tern</code> server,
 parses comments before function declarations, variable declarations,
@@ -1122,6 +1079,49 @@ named "tern-<em>name</em>" to load as a plugin.</p>
 order for the plugin to register with the correct Tern module instance,
 Tern and the plugin should be installed side-by-side (both globally, or
 both locally in the same directory).</p>
+<h3> <a id="configuration"></a>Project configuration</h3>
+<p> A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
+like this:</p>
+<pre data-language="application/x-json" class="cm-s-default">{
+  <span class="cm-string cm-property">"libs"</span>: [
+    <span class="cm-string">"browser"</span>,
+    <span class="cm-string">"jquery"</span>
+  ],
+  <span class="cm-string cm-property">"loadEagerly"</span>: [
+    <span class="cm-string">"importantfile.js"</span>
+  ],
+  <span class="cm-string cm-property">"plugins"</span>: {
+    <span class="cm-string cm-property">"requirejs"</span>: {
+      <span class="cm-string cm-property">"baseURL"</span>: <span class="cm-string">"./"</span>,
+      <span class="cm-string cm-property">"paths"</span>: {}
+    }
+  }
+}</pre>
+<p> The <code>libs</code> property refers to the <a href="#typedef">JSON type descriptions</a>
+that should be loaded into the environment for this project. See the
+<code>defs/</code> directory for examples. The strings given here will be
+suffixed with <code>.json</code>, and searched for first in the project&#8217;s own
+dir, and then in the <code>defs/</code> directory of the Tern distribution.</p>
+<p> By default, local files are loaded into the Tern server when they are
+opened by the editor. <code>loadEagerly</code> allows you to force some files to
+always be loaded, it may be an array of filenames or glob patterns
+(i.e. <code>foo/bar/*.js</code>). The <code>dontLoad</code> option can be used to prevent
+Tern from loading certain files. It also takes an array of file names
+or glob patterns.</p>
+<p> The <code>plugins</code> field may hold object used to load and configure Tern
+plugins. The names of the properties refer to files that implement
+plugins, either in the project dir or under <code>plugin/</code> in the Tern
+directory. Their values are configuration objects that will be passed
+to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
+any options.</p>
+<p>  <a id="dependency_budget"></a>To configure the amount of work Tern is prepared to do to load a
+single dependency, the <code>dependencyBudget</code> option can be added to a
+project file. It indicates the maximum size of the files loaded in
+response to a single dependency (through plugins that load
+dependencies, such as the <a href="#plugin_node">node</a> and
+<a href="#plugin_requirejs">RequireJS</a> plugins), counted in expressions. The
+default value is 20 000. Files loaded as dependencies of dependencies
+count towards the budget of the original dependency.</p>
 <h3> <a id="utils"></a>Utilities</h3>
 <dl>
 <dt>
