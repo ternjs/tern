@@ -111,6 +111,7 @@
       else return to;
     },
     join: function(a, b) {
+      if (b && b.charAt(0) != ".") return b;
       if (a && b) return a + "/" + b;
       else return (a || "") + (b || "");
     },
