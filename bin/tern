@@ -48,10 +48,8 @@ var defaultConfig = {
   dependencyBudget: tern.defaultOptions.dependencyBudget
 };
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config"))) {
+if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config")))
   defaultConfig = readProjectFile(path.resolve(homeDir, ".tern-config"));
-   console.log("default", defaultConfig.libs);
-}
 
 function readProjectFile(fileName) {
   var data = JSON.parse(fs.readFileSync(fileName, "utf8"));
