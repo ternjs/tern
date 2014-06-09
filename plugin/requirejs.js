@@ -17,12 +17,7 @@
     return parts.join("/");
   }
 
-  var path = {
-    dirname: function(path) {
-      var lastSep = path.lastIndexOf("/");
-      return lastSep === -1 ? "" : path.slice(0, lastSep);
-    }
-  };
+  var path = require('path');
 
   function resolveName(name, data) {
     var excl = name.indexOf("!");
@@ -34,7 +29,7 @@
       return name + (hasExt ? "" : ".js");
 
     if(name.charAt(0) === '.') {
-      return flattenPath(path.dirname(data.currentFile) + name + ".js");
+      return flattenPath(path.join(path.dirname(data.currentFile), name + ".js"));
     }
 
     var base = opts.baseURL || '';
