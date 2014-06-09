@@ -17,6 +17,13 @@
     return parts.join("/");
   }
 
+  var path = {
+    dirname: function(path) {
+      var lastSep = path.lastIndexOf("/");
+      return lastSep === -1 ? "" : path.slice(0, lastSep);
+    }
+  };
+
   function resolveName(name, data) {
     var excl = name.indexOf("!");
     if (excl > -1) name = name.slice(0, excl);
@@ -26,7 +33,11 @@
     if (hasExt || /^(?:\w+:|\/)/.test(name))
       return name + (hasExt ? "" : ".js");
 
-    var base = opts.baseURL || "";
+    if(name.charAt(0) === '.') {
+      return flattenPath(path.dirname(data.currentFile) + name + ".js");
+    }
+
+    var base = opts.baseURL || '';
     if (base && base.charAt(base.length - 1) != "/") base += "/";
     if (opts.paths) {
       var known = opts.paths[name];
@@ -101,22 +112,6 @@
     return f.replace(/\.js$/, '');
   }
 
-  var path = {
-    dirname: function(path) {
-      var lastSep = path.lastIndexOf("/");
-      return lastSep == -1 ? "" : path.slice(0, lastSep);
-    },
-    relative: function(from, to) {
-      if (to.indexOf(from) == 0) return to.slice(from.length);
-      else return to;
-    },
-    join: function(a, b) {
-      if (b && b.charAt(0) != ".") return b;
-      if (a && b) return a + "/" + b;
-      else return (a || "") + (b || "");
-    },
-  };
-
   infer.registerFunction("requireJS", function(_self, args, argNodes) {
     var server = infer.cx().parent, data = server && server._requireJS;
     if (!data || !args.length) return infer.ANull;
@@ -127,9 +122,8 @@
     var deps = [], fn;
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length == 2 ? 0 : 1];
-      var base = path.relative(server.options.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
-        deps.push(getInterface(path.join(base, node.value), data));
+        deps.push(getInterface(node.value, data));
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") {
@@ -138,7 +132,7 @@
             deps.push(exports);
             out.addType(exports, EXPORT_OBJ_WEIGHT);
           } else {
-            deps.push(getInterface(path.join(base, elt.value), data));
+            deps.push(getInterface(elt.value, data));
           }
         }
       }
