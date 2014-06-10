@@ -17,7 +17,15 @@
     return parts.join("/");
   }
 
-  var path = require('path');
+  var path = {
+    dirname: function(path) {
+      return path.substring(0, path.lastIndexOf('/'));
+    },
+    join: function() {
+      var args = Array.prototype.slice.call(arguments);
+      return args.join('/').replace(/\/+/g, '/');
+    }
+  };
 
   function resolveName(name, data) {
     var excl = name.indexOf("!");
