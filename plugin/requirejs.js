@@ -18,8 +18,8 @@
   }
 
   var path = {
-    dirname: function(path) {
-      return path.substring(0, path.lastIndexOf('/'));
+    dirname: function(p) {
+      return p.substring(0, p.lastIndexOf('/'));
     },
     join: function() {
       var args = Array.prototype.slice.call(arguments);
