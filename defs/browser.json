@@ -1274,7 +1274,9 @@
         "!type": "fn(type: string, options?: ?)",
         "!url": "http://w3c.github.io/webcomponents/spec/custom/#extensions-to-document-interface-to-register",
         "!doc": "The registerElement method of the Document interface provides a way to register a custom element and returns its custom element constructor."
-      }
+      },
+      "querySelector": "Element.prototype.querySelector",
+      "querySelectorAll": "Element.prototype.querySelectorAll"
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/document",
     "!doc": "Each web page loaded in the browser has its own document object. This object serves as an entry point to the web page's content (the DOM tree, including elements such as <body> and <table>) and provides functionality global to the document (such as obtaining the page's URL and creating new elements in the document)."
