@@ -374,13 +374,15 @@ JavaScript keywords when completing something that is not a property.
 </dd>
 </dl>
 <p> The result returned will be an object with <code>start</code> and <code>end</code>
-properties, which give the start and end <a href="#offsets">offsets</a> of the word that was
-completed, and a <code>completions</code> property holding an array of
-completions. When one of the <code>types</code>, <code>depths</code>, <code>docs</code>, <code>urls</code>, or
-<code>origins</code> options was passed, the array will hold objects with a
-<code>name</code> property (the completion text), and, depending on the options,
-<code>type</code>, <code>depth</code>, <code>doc</code>, <code>url</code>, and <code>origin</code> properties. When none of
-these options are enabled, the result array will hold plain strings.</p>
+properties, which give the start and end <a href="#offsets">offsets</a> of the
+word that was completed, an <code>isProperty</code> property that holds a boolean
+indicating whether the completion is for a property or a variable, and
+a <code>completions</code> property holding an array of completions. When one of
+the <code>types</code>, <code>depths</code>, <code>docs</code>, <code>urls</code>, or <code>origins</code> options was
+passed, the array will hold objects with a <code>name</code> property (the
+completion text), and, depending on the options, <code>type</code>, <code>depth</code>,
+<code>doc</code>, <code>url</code>, and <code>origin</code> properties. When none of these options are
+enabled, the result array will hold plain strings.</p>
 </dd>
 <dt>
 <a id="req_type"></a><code>type</code>

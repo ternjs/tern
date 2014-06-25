@@ -159,13 +159,15 @@ JavaScript keywords when completing something that is not a property.
 
 +
 The result returned will be an object with `start` and `end`
-properties, which give the start and end <<offsets,offsets>> of the word that was
-completed, and a `completions` property holding an array of
-completions. When one of the `types`, `depths`, `docs`, `urls`, or
-`origins` options was passed, the array will hold objects with a
-`name` property (the completion text), and, depending on the options,
-`type`, `depth`, `doc`, `url`, and `origin` properties. When none of
-these options are enabled, the result array will hold plain strings.
+properties, which give the start and end <<offsets,offsets>> of the
+word that was completed, an `isProperty` property that holds a boolean
+indicating whether the completion is for a property or a variable, and
+a `completions` property holding an array of completions. When one of
+the `types`, `depths`, `docs`, `urls`, or `origins` options was
+passed, the array will hold objects with a `name` property (the
+completion text), and, depending on the options, `type`, `depth`,
+`doc`, `url`, and `origin` properties. When none of these options are
+enabled, the result array will hold plain strings.
 
 [[req_type]]`type`:: Query the type of something.
 
