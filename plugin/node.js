@@ -82,7 +82,8 @@
   function normPath(name) { return name.replace(/\\/g, "/"); }
 
   function resolveProjectPath(server, pth) {
-    return resolvePath(normPath(server.options.projectDir) + "/", normPath(pth));
+    var base = server.options.projectDir ? normPath(server.options.projectDir) + "/" : "";
+    return resolvePath(base, normPath(pth));
   }
 
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
@@ -136,6 +137,33 @@
       mods.props[name].propagate(mod);
     }
   }
+  
+  function moduleCompletion(file, wordStart, wordEnd, gather) {
+    var expression = getStringCallExpression(file, wordStart, wordEnd);
+    if (expression) {
+      var callee = expression.node.callee;
+      if (callee.name === 'require') {
+        var cx = infer.cx(), server = cx.parent, data = server._node;
+        for(var name in data.modules) if (name != 'Module') gather(name, data.modules, 0);
+      }
+    }
+  }
+  
+  function getStringCallExpression(file, wordStart, wordEnd) {
+    var callExpr = infer.findExpressionAround(file.ast, null, wordStart, file.scope, "CallExpression");
+    if (callExpr && callExpr.node.arguments) {
+      for (var i = 0; i < callExpr.node.arguments.length; i++) {
+        var nodeArg = callExpr.node.arguments[i];
+        if (isStringAround(nodeArg, wordStart, wordEnd)) return callExpr;
+      }
+    }  
+    return null;
+  }
+  
+  function isStringAround(node, start, end) {
+    return node.type == "Literal" && typeof node.value == "string" &&
+      node.start == start - 1 && node.end <= end + 1;
+  }  
 
   tern.registerPlugin("node", function(server, options) {
     server._node = {
@@ -168,7 +196,8 @@
 
     return {defs: defs,
             passes: {preCondenseReach: preCondenseReach,
-                     postLoadDef: postLoadDef}};
+                     postLoadDef: postLoadDef,
+                     completion: moduleCompletion}};
   });
 
   tern.defineQueryType("node_exports", {
