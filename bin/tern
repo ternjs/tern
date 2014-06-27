@@ -96,7 +96,8 @@ function loadPlugins(projectDir, plugins) {
         continue;
       }
     }
-    require(found);
+    var mod = require(found);
+    if (mod.hasOwnProperty("initialize")) mod.initialize(distDir);
     options[path.basename(plugin)] = val;
   }
   
