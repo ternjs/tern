@@ -1082,7 +1082,7 @@ must have a package name matching the pattern "tern-<em>name</em>".</p>
 the Tern distribution should export a single method <code>initialize(ternDir:
 string)</code> which takes the location of the Tern distribution loading the
 plugin as an argument. Tern will call this method immediately after loading
-the plugin to tell the plugin where to find Tern modules. A plugin without
+the plugin to tell the plugin where to find Tern modules. A plugin with
 this method will work regardless of its install location relative to the
 Tern distribution, but plugins without it may fail to find Tern modules or
 even silently load the wrong Tern modules depending on install location.</p>
