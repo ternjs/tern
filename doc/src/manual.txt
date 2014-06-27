@@ -611,18 +611,27 @@ with the name `"angular"`.
 ==== Third-party plugins ====
 
 It is possible to write third-party plugins and distribute them
-independently using https://www.npmjs.org[npm]. The plugin package name
-must match the pattern "tern-'name'" to indicate it is a Tern plugin. If
-a 'name' attribute is specified in the `plugins` section of the project
-configuration, and '`name`'`.js` is not present in the project directory or
-Tern's own `plugin` directory, Tern will search for an installed package
-named "tern-'name'" to load as a plugin.
+independently, either as packages using https://www.npmjs.org[npm] or as
+raw JavaScript files.
 
-Plugin packages should specify the Tern version required as a
-http://blog.nodejs.org/2013/02/07/peer-dependencies[peer dependency]. In
-order for the plugin to register with the correct Tern module instance,
-Tern and the plugin should be installed side-by-side (both globally, or
-both locally in the same directory).
+When a 'name' attribute is specified in the `plugins` section of the
+project configuration, Tern first searches for a file '`name`'`.js` in its
+distribution `plugin` directory, then for a file '`name`'`.js` in the
+user's project directory, and finally for an installed package named
+"tern-'name'" to load as a plugin. A plugin distributed as an npm package
+must have a package name matching the pattern "tern-'name'".
+
+The main module for a third-party plugin that will be installed outside of
+the Tern distribution should export a single method `initialize(ternDir:
+string)` which takes the location of the Tern distribution loading the
+plugin as an argument. Tern will call this method immediately after loading
+the plugin to tell the plugin where to find Tern modules. A plugin without
+this method will work regardless of its install location relative to the
+Tern distribution, but plugins without it may fail to find Tern modules or
+even silently load the wrong Tern modules depending on install location.
+
+Plugin packages can specify the Tern version required as a
+http://blog.nodejs.org/2013/02/07/peer-dependencies[peer dependency].
 
 [[configuration]]
 === Project configuration ===
