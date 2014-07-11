@@ -2564,7 +2564,7 @@
           "!doc": "Stop a timer that was previously created with setInterval(). The callback will not execute."
         },
         setImmediate: {
-          "!type": "fn(callback: fn(), ms: number) -> timers.Timer",
+          "!type": "fn(callback: fn()) -> timers.Timer",
           "!url": "http://nodejs.org/api/timers.html#timers_setimmediate_callback_arg",
           "!doc": "Schedule the 'immediate' execution of callback after I/O events callbacks."
         },
