@@ -11,11 +11,15 @@
 (require 'url)
 (require 'url-http)
 
+(defvar tern-known-port nil)
+(defvar tern-server nil)
+(defvar tern-explicit-port nil)
+(defvar tern-project-dir nil)
+
 (defun tern-message (fmt &rest objects)
   (apply 'message fmt objects))
 
 (defun tern-req (port doc c)
-  (declare (special url-mime-charset-string url-request-method url-request-data url-show-status))
   (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
          (url-request-method "POST")
          (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
@@ -24,11 +28,9 @@
          (url (url-parse-make-urlobj "http" nil nil tern-server port "/" nil nil nil)))
     (url-http url #'tern-req-finished (list c))))
 
-;; This is necessary to force proper dynamic binding below, for some reason.
-(defvar url-callback-function)
-
 (defun tern-req-finished (c)
-  (declare (special url-http-process url-callback-function))
+  (defvar url-http-process)
+  (defvar url-callback-function)
   (let ((is-error (and (consp c) (eq (car c) :error)))
         (found-body (search-forward "\n\n" nil t))
         (deactivate-mark nil))
@@ -114,11 +116,6 @@ list of strings, giving the binary name and arguments.")
 (defvar tern-activity-since-command -1)
 (defvar tern-last-point-pos nil)
 
-(defvar tern-known-port nil)
-(defvar tern-server nil)
-(defvar tern-explicit-port nil)
-(defvar tern-project-dir nil)
-
 (defvar tern-last-completions nil)
 (defvar tern-last-argument-hints nil)
 (defvar tern-buffer-is-dirty nil)
@@ -136,7 +133,7 @@ list of strings, giving the binary name and arguments.")
        (let ((indent (current-indentation))
              (pos (line-beginning-position)))
          (when (or (not min-indent) (< indent min-indent))
-           (setf min-indent indent min-indent-pos pos))
+           (setf min-indent indent))
          (goto-char pos)
          (when (<= pos min-pos) (cl-return))))
       (unless start-pos (goto-char min-pos) (setf start-pos (line-beginning-position))))
@@ -333,7 +330,6 @@ list of strings, giving the binary name and arguments.")
                    (forward-char 1)))))))
 
 (defun tern-show-argument-hints ()
-  (declare (special message-log-max))
   (cl-destructuring-bind (paren . type) tern-last-argument-hints
     (let ((parts ())
           (current-arg (tern-find-current-arg paren)))
@@ -533,7 +529,6 @@ list of strings, giving the binary name and arguments.")
     (tern-update-argument-hints-async)))
 
 (defun tern-left-buffer ()
-  (declare (special buffer-list-update-hook))
   (when (and tern-buffer-is-dirty (not (buffer-file-name (car (buffer-list)))))
     (setf tern-buffer-is-dirty nil)
     (let ((buffer-list-update-hook ()))
