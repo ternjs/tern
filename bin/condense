@@ -43,7 +43,8 @@ function loadPlugin(name, val) {
       process.exit(1);
     }
   }
-  require(found);
+  var mod = require(found);
+  if (mod.hasOwnProperty("initialize")) mod.initialize(ourDir);
   plugins[path.basename(name, ".js")] = val;
 }
 
