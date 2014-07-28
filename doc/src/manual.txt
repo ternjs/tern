@@ -1125,6 +1125,13 @@ See the readme files in those repositories for details.
 https://github.com/angelozerr/tern.java[tern.java] is a Tern client
 written in Java. It includes Eclipse integration.
 
+[[tern_for_gedit]]
+=== gedit ===
+
+https://github.com/Swatinem/tern_for_gedit[tern_for_gedit] integrates
+Tern with the https://github.com/Swatinem/tern_for_gedit[gedit]
+editor.
+
 [[software]]
 == Related Software ==
 
