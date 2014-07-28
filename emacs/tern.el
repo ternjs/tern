@@ -15,7 +15,6 @@
   (apply 'message fmt objects))
 
 (defun tern-req (port doc c)
-  (declare (special url-mime-charset-string url-request-method url-request-data url-show-status))
   (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
          (url-request-method "POST")
          (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
@@ -28,7 +27,6 @@
 (defvar url-callback-function)
 
 (defun tern-req-finished (c)
-  (declare (special url-http-process url-callback-function))
   (let ((is-error (and (consp c) (eq (car c) :error)))
         (found-body (search-forward "\n\n" nil t))
         (deactivate-mark nil))
@@ -333,7 +331,6 @@ list of strings, giving the binary name and arguments.")
                    (forward-char 1)))))))
 
 (defun tern-show-argument-hints ()
-  (declare (special message-log-max))
   (cl-destructuring-bind (paren . type) tern-last-argument-hints
     (let ((parts ())
           (current-arg (tern-find-current-arg paren)))
@@ -533,7 +530,6 @@ list of strings, giving the binary name and arguments.")
     (tern-update-argument-hints-async)))
 
 (defun tern-left-buffer ()
-  (declare (special buffer-list-update-hook))
   (when (and tern-buffer-is-dirty (not (buffer-file-name (car (buffer-list)))))
     (setf tern-buffer-is-dirty nil)
     (let ((buffer-list-update-hook ()))
