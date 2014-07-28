@@ -11,6 +11,11 @@
 (require 'url)
 (require 'url-http)
 
+(defvar tern-known-port nil)
+(defvar tern-server nil)
+(defvar tern-explicit-port nil)
+(defvar tern-project-dir nil)
+
 (defun tern-message (fmt &rest objects)
   (apply 'message fmt objects))
 
@@ -110,11 +115,6 @@ list of strings, giving the binary name and arguments.")
 (defvar tern-activity-since-command -1)
 (defvar tern-last-point-pos nil)
 
-(defvar tern-known-port nil)
-(defvar tern-server nil)
-(defvar tern-explicit-port nil)
-(defvar tern-project-dir nil)
-
 (defvar tern-last-completions nil)
 (defvar tern-last-argument-hints nil)
 (defvar tern-buffer-is-dirty nil)
@@ -132,7 +132,7 @@ list of strings, giving the binary name and arguments.")
        (let ((indent (current-indentation))
              (pos (line-beginning-position)))
          (when (or (not min-indent) (< indent min-indent))
-           (setf min-indent indent min-indent-pos pos))
+           (setf min-indent indent))
          (goto-char pos)
          (when (<= pos min-pos) (cl-return))))
       (unless start-pos (goto-char min-pos) (setf start-pos (line-beginning-position))))
