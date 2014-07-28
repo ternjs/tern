@@ -23,10 +23,8 @@
          (url (url-parse-make-urlobj "http" nil nil tern-server port "/" nil nil nil)))
     (url-http url #'tern-req-finished (list c))))
 
-;; This is necessary to force proper dynamic binding below, for some reason.
-(defvar url-callback-function)
-
 (defun tern-req-finished (c)
+  (defvar url-callback-function)
   (let ((is-error (and (consp c) (eq (car c) :error)))
         (found-body (search-forward "\n\n" nil t))
         (deactivate-mark nil))
