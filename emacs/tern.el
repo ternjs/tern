@@ -29,6 +29,7 @@
     (url-http url #'tern-req-finished (list c))))
 
 (defun tern-req-finished (c)
+  (defvar url-http-process)
   (defvar url-callback-function)
   (let ((is-error (and (consp c) (eq (car c) :error)))
         (found-body (search-forward "\n\n" nil t))
