@@ -7,9 +7,10 @@ integration of existing editors.
 Thanks to a group of generous [crowd funders][2], Tern is open-source
 software, under an MIT license.
 
-There are currently [Emacs][emacs], [Vim][vim], [Sublime Text][st],
-[Light Table][lt], and [gedit][gedit] plugins available, and built-in
-support in [Brackets][brackets] and [Edge Code][edge_code].
+There are currently plugins available for [Emacs][emacs] (and Emacs
+[company-mode][cmode]), [Vim][vim], [Sublime Text][st],
+[Light Table][lt], and [gedit][gedit], and built-in support in
+[Brackets][brackets] and [Edge Code][edge_code].
 
 For further documentation, see the [project page][1] and the
 [manual][3].
@@ -25,3 +26,4 @@ For further documentation, see the [project page][1] and the
 [gedit]: https://github.com/Swatinem/tern_for_gedit
 [brackets]: http://brackets.io
 [edge_code]: http://html.adobe.com/edge/code
+[cmode]: https://github.com/proofit404/company-tern
