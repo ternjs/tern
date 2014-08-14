@@ -17,7 +17,7 @@ engine>> to do the actual type inference.
 ** <<plugins,Server plugins>>
 *** <<plugin_doc_comment,Doc comments>>
 *** <<plugin_node,node>>
-*** <<plugin_requirejs,RequireJS>>
+** <<plugin_requirejs,RequireJS>>
 *** <<plugin_angular,Angular.js>>
 *** <<plugin_third_party,Third-party plugins>>
 ** <<configuration,Project configuration>>
@@ -598,6 +598,15 @@ These options are understood:
 
 `paths`:: An object mapping filename prefixes to specific paths. For
 example `{"acorn": "lib/acorn/"}`.
+
+`override`:: An object that can be used to override some dependency
+names to refer to predetermined types. The value associated with a
+name can be a string starting with the character `=`, in which case
+the part after the `=` will be interpreted as a global variable (or
+dot-separated path) that contains the proper type. If it is a string
+not starting with `=`, it is interpreted as the path to the file that
+contains the code for the module. If it is an object, it is
+interpreted as <<typedef,JSON type definition>>.
 
 [[plugin_angular]]
 ==== Angular.js plugin ====
