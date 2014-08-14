@@ -60,11 +60,13 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 <a href="#plugin_node">node</a>
 </p>
 </li>
+</ul></div>
+</li>
 <li>
 <p>
 <a href="#plugin_requirejs">RequireJS</a>
 </p>
-</li>
+<div class="ulist"><ul>
 <li>
 <p>
 <a href="#plugin_angular">Angular.js</a>
@@ -1063,6 +1065,21 @@ The base path to prefix to dependency filenames.
 <p>
 An object mapping filename prefixes to specific paths. For
 example <code>{"acorn": "lib/acorn/"}</code>.
+</p>
+</dd>
+<dt>
+<code>override</code>
+</dt>
+<dd>
+<p>
+An object that can be used to override some dependency
+names to refer to predetermined types. The value associated with a
+name can be a string starting with the character <code>=</code>, in which case
+the part after the <code>=</code> will be interpreted as a global variable (or
+dot-separated path) that contains the proper type. If it is a string
+not starting with <code>=</code>, it is interpreted as the path to the file that
+contains the code for the module. If it is an object, it is
+interpreted as <a href="#typedef">JSON type definition</a>.
 </p>
 </dd>
 </dl>
