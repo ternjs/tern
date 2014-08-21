@@ -8,7 +8,7 @@ function test(name, f) {
     if (!added) { util.addFile(); added = true; }
     util.addTest();
     
-    f(new tern.Server({defs: [util.ecma5]}));
+    f(new tern.Server({defs: [util.ecma5], debug: true}));
   });
 }
 
@@ -39,6 +39,57 @@ test("reloadProps", function(server) {
       var compls = data.completions;
       compls.sort();
       if (compls.join() != "kapow,name") util.failure("reloadProps: Reloading properties failed (" + compls + ")");
+    });
+  });
+});
+
+test("reloadVar", function(server) {
+  server.addFile("a.js", "var x = 1;");
+  server.flush(function() {
+    server.request({files: [{name: "a.js", type: "full", text: "var x = 'hi';"}],
+                    query: {type: "type", end: {line: 0, ch: 5}, file: "a.js"}}, function(err, data) {
+
+      if (err) return util.failure(err);
+      if (data.type != "string")
+        util.failure("reloadVar: var did not get new string type (" + data.type + ")");
+    });
+  });
+});
+
+test("reloadForeignProp", function(server) {
+  server.addFile("a.js", "Date.foo = 100;");
+  server.flush(function() {
+    server.request({files: [{name: "a.js", type: "full", text: "Date.foo"}],
+                    query: {type: "type", end: {line: 0, ch: 8}, file: "a.js"}}, function(err, data) {
+      if (err) return util.failure(err);
+      if (data.type != "?")
+        util.failure("reloadForeignProp: reload did not clear Date.foo (" + data.type + ")");
+    });
+  });
+});
+
+test("reloadCalledForeignProp", function(server) {
+  server.addFile("a.js", "Date.foo = function(a) { return a; };");
+  server.addFile("b.js", "Date.foo('hi');");
+  server.flush(function() {
+    server.request({files: [{name: "a.js", type: "full", text: "Date.foo = function(a) { return a + 1; };"}],
+                    query: {type: "type", end: {line: 0, ch: 33}, file: "a.js"}}, function(err, data) {
+      if (err) return util.failure(err);
+      if (data.type != "string")
+        util.failure("reloadCalledForeignProp: reload cleared argument type for Date.foo (" + data.type + ")");
+    });
+  });
+});
+
+test("reloadDelFile", function(server) {
+  server.addFile("a.js", "function foobar() { return 10; }");
+  server.flush(function() {
+    server.delFile("a.js");
+    server.request({files: [{name: "b.js", type: "full", text: "foobar"}],
+                    query: {type: "type", end: {line: 0, ch: 6}, file: "b.js"}}, function(err, data) {
+      if (err) return util.failure(err);
+      if (data.type != "?")
+        util.failure("reloadDelFile: deleting a file did not clear the variable it created (" + data.type + ")");
     });
   });
 });
