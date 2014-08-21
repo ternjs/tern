@@ -17,6 +17,11 @@ c; //:: {x: number, y: [string]}
 function foo(a, b) { return hohoho(); }
 foo; //: fn(a: number, b: string) -> [number]
 
+/** @this Date */
+var abc = function() {
+  this; //: Date
+};
+
 /**
  * This is also a function
  * @returns {string}

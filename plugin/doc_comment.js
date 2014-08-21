@@ -213,14 +213,19 @@
   }
 
   function jsdocInterpretComments(node, scope, aval, comments) {
-    var type, args, ret, foundOne;
+    var type, args, ret, foundOne, self, parsed;
 
     for (var i = 0; i < comments.length; ++i) {
       var comment = comments[i];
-      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?)\s+(.*)/g, m;
+      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this)\s+(.*)/g, m;
       while (m = decl.exec(comment)) {
-        var parsed = parseTypeOuter(scope, m[2]);
-        if (!parsed) continue;
+        if (m[1] == "this" && (parsed = parseType(scope, m[2], 0))) {
+          self = parsed.type;
+          foundOne = true;
+          continue;
+        }
+
+        if (!(parsed = parseTypeOuter(scope, m[2]))) continue;
         foundOne = true;
 
         switch(m[1]) {
@@ -238,10 +243,10 @@
       }
     }
 
-    if (foundOne) applyType(type, args, ret, node, aval);
+    if (foundOne) applyType(type, self, args, ret, node, aval);
   };
 
-  function applyType(type, args, ret, node, aval) {
+  function applyType(type, self, args, ret, node, aval) {
     var fn;
     if (node.type == "VariableDeclaration") {
       var decl = node.declarations[0];
@@ -255,7 +260,7 @@
       if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
     }
 
-    if (fn && (args || ret)) {
+    if (fn && (args || ret || self)) {
       if (args) for (var i = 0; i < fn.argNames.length; ++i) {
         var name = fn.argNames[i], known = args[name];
         if (!known && (known = args[name + "?"]))
@@ -263,6 +268,7 @@
         if (known) known.propagate(fn.args[i]);
       }
       if (ret) ret.propagate(fn.retval);
+      if (self) self.propagate(fn.self);
     } else if (type) {
       type.propagate(aval);
     }
