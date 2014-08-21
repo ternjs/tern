@@ -12,11 +12,17 @@
 })(function(infer, tern, comment, walk) {
   "use strict";
 
-  tern.registerPlugin("doc_comment", function() {
+  tern.registerPlugin("doc_comment", function(server) {
+    server.jsdocTypedefs = Object.create(null);
+    server.on("reset", function() {
+      server.jsdocTypedefs = Object.create(null);
+    });
+
     return {
       passes: {
-        "postParse": postParse,
-        "postInfer": postInfer
+        postParse: postParse,
+        postInfer: postInfer,
+        postLoadDef: postLoadDef
       }
     };
   });
@@ -38,6 +44,8 @@
   }
 
   function postInfer(ast, scope) {
+    jsdocParseTypedefs(ast.sourceFile.text, scope);
+
     walk.simple(ast, {
       VariableDeclaration: function(node, scope) {
         if (node.commentsBefore)
@@ -64,6 +72,14 @@
         }
       }
     }, infer.searchVisitor, scope);
+  }
+
+  function postLoadDef(data) {
+    var defs = data["!typedef"];
+    var cx = infer.cx(), orig = data["!name"];
+    if (defs) for (var name in defs)
+      cx.parent.jsdocTypedefs[name] =
+        maybeInstance(infer.def.parse(defs[name], orig, name), name);
   }
 
   // COMMENT INTERPRETATION
@@ -181,17 +197,15 @@
           val.type.propagate(type.defProp("<i>"));
         }
       } else {
-        var found = scope.hasProp(word);
-        if (found) found = found.getType();
-        if (!found) {
+        while (/[\w$.]/.test(str.charAt(pos))) ++pos;
+        var path = str.slice(start, pos);
+        var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
+        if (defs && (path in defs))
+          type = defs[path];
+        else if (found = infer.def.parsePath(path, scope))
+          type = maybeInstance(found.getType(), path); 
+        else
           type = infer.ANull;
-        } else if (found instanceof infer.Fn && /^[A-Z]/.test(word)) {
-          var proto = found.getProp("prototype").getType();
-          if (proto instanceof infer.Obj) type = infer.getInstance(proto);
-          else type = found;
-        } else {
-          type = found;
-        }
       }
     }
 
@@ -203,12 +217,22 @@
     return {type: type, end: pos, isOptional: isOptional};
   }
 
+  function maybeInstance(type, path) {
+    if (type instanceof infer.Fn && /^[A-Z]/.test(path)) {
+      var proto = type.getProp("prototype").getType();
+      if (proto instanceof infer.Obj) return infer.getInstance(proto);
+    }
+    return type;
+  }
+
   function parseTypeOuter(scope, str, pos) {
     pos = skipSpace(str, pos || 0);
     if (str.charAt(pos) != "{") return null;
     var result = parseType(scope, str, pos + 1);
-    if (!result || str.charAt(result.end) != "}") return null;
-    ++result.end;
+    if (!result) return null;
+    var end = skipSpace(str, result.end);
+    if (str.charAt(end) != "}") return null;
+    result.end = end + 1;
     return result;
   }
 
@@ -245,6 +269,18 @@
 
     if (foundOne) applyType(type, self, args, ret, node, aval);
   };
+
+  function jsdocParseTypedefs(text, scope) {
+    var cx = infer.cx();
+
+    var re = /\s@typedef\s+(.*)/g, m;
+    while (m = re.exec(text)) {
+      var parsed = parseTypeOuter(scope, m[1]);
+      var name = parsed && m[1].slice(parsed.end).match(/^\s*([\w$]+)/);
+      if (name)
+        cx.parent.jsdocTypedefs[name[1]] = parsed.type;
+    }
+  }
 
   function applyType(type, self, args, ret, node, aval) {
     var fn;

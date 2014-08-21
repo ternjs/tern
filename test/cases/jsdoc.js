@@ -58,3 +58,12 @@ closureMap[1]; //: bool
 function takesOpt(a) { console.log(a || 20); }
 
 takesOpt; //: fn(a?: number)
+
+/** @typedef {Array.<boolean>} Bitset */
+
+someNonDeclarationStatement();
+
+/** @type {Bitset} */
+var myBitset = getABitset();
+
+myBitset; //: [bool]
