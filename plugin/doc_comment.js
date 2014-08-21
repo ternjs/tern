@@ -5,11 +5,11 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
-               require("acorn/util/walk"));
+               require("acorn/acorn"), require("acorn/util/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "../lib/comment", "acorn/util/walk"], mod);
-  mod(tern, tern, tern.comment, acorn.walk);
-})(function(infer, tern, comment, walk) {
+    return define(["../lib/infer", "../lib/tern", "../lib/comment", "acorn/acorn", "acorn/util/walk"], mod);
+  mod(tern, tern, tern.comment, acorn, acorn.walk);
+})(function(infer, tern, comment, acorn, walk) {
   "use strict";
 
   tern.registerPlugin("doc_comment", function(server) {
@@ -108,6 +108,13 @@
     return pos;
   }
 
+  function isIdentifier(string) {
+    if (!acorn.isIdentifierStart(string.charCodeAt(0))) return false;
+    for (var i = 1; i < string.length; i++)
+      if (!acorn.isIdentifierChar(string.charCodeAt(i))) return false;
+    return true;
+  }
+
   function parseLabelList(scope, str, pos, close) {
     var labels = [], types = [];
     for (var first = true; ; first = false) {
@@ -116,7 +123,7 @@
       var colon = str.indexOf(":", pos);
       if (colon < 0) return null;
       var label = str.slice(pos, colon);
-      if (!/^[\w$]+$/.test(label)) return null;
+      if (!isIdentifier(label)) return null;
       labels.push(label);
       pos = colon + 1;
       var type = parseType(scope, str, pos);
@@ -167,7 +174,8 @@
       pos = fields.end;
     } else {
       var start = pos;
-      while (/[\w$]/.test(str.charAt(pos))) ++pos;
+      if (!acorn.isIdentifierStart(str.charCodeAt(pos))) return null;
+      while (acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
       if (start == pos) return null;
       var word = str.slice(start, pos);
       if (/^(number|integer)$/i.test(word)) type = infer.cx().num;
@@ -197,7 +205,8 @@
           val.type.propagate(type.defProp("<i>"));
         }
       } else {
-        while (/[\w$.]/.test(str.charAt(pos))) ++pos;
+        while (str.charCodeAt(pos) == 46 ||
+               acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
         var path = str.slice(start, pos);
         var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
         if (defs && (path in defs))
@@ -258,7 +267,7 @@
         case "type":
           type = parsed.type; break;
         case "param": case "arg": case "argument":
-          var name = m[2].slice(parsed.end).match(/^\s*([\w$]+)/);
+          var name = m[2].slice(parsed.end).match(/^\s*(\S+)/);
           if (!name) continue;
           var argname = name[1] + (parsed.isOptional ? "?" : "");
           (args || (args = Object.create(null)))[argname] = parsed.type;
@@ -276,7 +285,7 @@
     var re = /\s@typedef\s+(.*)/g, m;
     while (m = re.exec(text)) {
       var parsed = parseTypeOuter(scope, m[1]);
-      var name = parsed && m[1].slice(parsed.end).match(/^\s*([\w$]+)/);
+      var name = parsed && m[1].slice(parsed.end).match(/^\s*(\S+)/);
       if (name)
         cx.parent.jsdocTypedefs[name[1]] = parsed.type;
     }

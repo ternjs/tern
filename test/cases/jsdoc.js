@@ -67,3 +67,10 @@ someNonDeclarationStatement();
 var myBitset = getABitset();
 
 myBitset; //: [bool]
+
+function NonAscïį() { this.length = "hi"; }
+
+/** @type {NonAscïį} */
+var inst;
+
+inst.length; //: string
