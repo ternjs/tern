@@ -89,9 +89,12 @@
   "The command to be run to start the Tern server. Should be a
 list of strings, giving the binary name and arguments.")
 
+(defvar tern-flags '() "Command line arguments to be passed to the
+Tern server. Should be a list of strings.")
+
 (defun tern-start-server (c)
   (let* ((default-directory tern-project-dir)
-         (proc (apply #'start-process "Tern" nil tern-command))
+         (proc (apply #'start-process "Tern" nil (append tern-command tern-flags)))
          (all-output ""))
     (set-process-query-on-exit-flag proc nil)
     (set-process-sentinel proc (lambda (_proc _event)
