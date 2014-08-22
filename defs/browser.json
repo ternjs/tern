@@ -369,7 +369,7 @@
         "!doc": "Returns a set of elements which have all the given class names. When called on the document object, the complete document is searched, including the root node. You may also call getElementsByClassName on any element; it will return only elements which are descendants of the specified root element with the given class names."
       },
       "querySelector": {
-        "!type": "fn(selectors: string) -> +Node",
+        "!type": "fn(selectors: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Element.querySelector",
         "!doc": "Returns the first element that is a descendent of the element on which it is invoked that matches the specified group of selectors."
       },
