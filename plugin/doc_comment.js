@@ -211,8 +211,8 @@
         var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
         if (defs && (path in defs))
           type = defs[path];
-        else if (found = infer.def.parsePath(path, scope))
-          type = maybeInstance(found.getType(), path); 
+        else if (found = infer.def.parsePath(path, scope).getType())
+          type = maybeInstance(found, path); 
         else
           type = infer.ANull;
       }
