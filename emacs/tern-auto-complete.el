@@ -50,7 +50,7 @@
    (lambda (data) 
      (tern-ac-complete-response data)
      (funcall cc))
-   `((type . "completions") (types . t) (docs . t))
+   `((type . "completions") (types . t) (docs . t) (caseInsensitive . t))
    (point)))
 
 (defun tern-ac-complete-response (data)
