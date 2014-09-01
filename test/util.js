@@ -18,6 +18,8 @@ exports.failure = function(message) {
   ++failed;
 };
 
+exports.hasFailed = function() { return failed > 0; };
+
 process.on("exit", function() {
   console.log("Ran " + tests + " tests from " + files + " files.");
   console.log(failed ? failed + " failures!" : "All passed.");
