@@ -82,7 +82,7 @@
   function normPath(name) { return name.replace(/\\/g, "/"); }
 
   function resolveProjectPath(server, pth) {
-    return resolvePath(normPath(server.options.projectDir) + "/", normPath(pth));
+    return resolvePath(normPath(server.options.projectDir || "") + "/", normPath(pth));
   }
 
   infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
