@@ -1170,6 +1170,16 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla#Executing_Commands",
         "!doc": "Run command to manipulate the contents of an editable region."
       },
+      "querySelector": {
+        "!type": "fn(selectors: string) -> +Element",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.querySelector",
+        "!doc": "Returns the first element that is a descendent of the element on which it is invoked that matches the specified group of selectors."
+      },
+      "querySelectorAll": {
+        "!type": "fn(selectors: string) -> +NodeList",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/Element.querySelectorAll",
+        "!doc": "Returns a non-live NodeList of all elements descended from the element on which it is invoked that match the specified group of CSS selectors."
+      },
       "queryCommandEnabled": {
         "!type": "fn(cmd: string) -> bool",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document",
