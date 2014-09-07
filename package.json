@@ -16,10 +16,10 @@
   "dependencies": {
     "acorn": ">=0.5.0",
     "glob": "3",
-    "minimatch": "0.2"
+    "minimatch": "0.2",
+    "typescript": "^1.0.1"
   },
   "devDependencies": {
-    "codemirror": "git://github.com/marijnh/CodeMirror.git",
-    "typescript": "0.9.5"
+    "codemirror": "git://github.com/marijnh/CodeMirror.git"
   }
 }
