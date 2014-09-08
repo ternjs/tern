@@ -20,5 +20,6 @@
   "laxcomma" : false,
   "laxbreak" : true,
   "lastsemic": true,
-  "globals"  : {}
+  "globals"  : {"tern": true, "acorn": true, "define": true},
+  "loopfunc" : true
 }
