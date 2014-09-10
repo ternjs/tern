@@ -45,7 +45,7 @@
       data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
       data.require.computeRet = function(_self, _args, argNodes) {
         if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string")
-          return getInterface(argNodes[0].value, data);
+          return getInterface(path.join(path.dirname(data.currentFile), argNodes[0].value), data);
         return infer.ANull;
       };
     }
