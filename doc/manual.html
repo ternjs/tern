@@ -850,28 +850,25 @@ nested objects specify properties of object types. Properties prefixed
 with an exclamation point (<code>!</code>) hold special directives, all other
 properties refer to variable or property names.</p>
 <p> Here is an example:</p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>{
-  "!name": "mylibrary",
-  "!define": {
-    "point": {
-      "x": "number",
-      "y": "number"
+<pre data-language="application/x-json" class="cm-s-default">{
+  <span class="cm-string cm-property">"!name"</span>: <span class="cm-string">"mylibrary"</span>,
+  <span class="cm-string cm-property">"!define"</span>: {
+    <span class="cm-string cm-property">"point"</span>: {
+      <span class="cm-string cm-property">"x"</span>: <span class="cm-string">"number"</span>,
+      <span class="cm-string cm-property">"y"</span>: <span class="cm-string">"number"</span>
     }
   },
-  "MyConstructor": {
-    "!type": "fn(arg: string)",
-    "staticFunction": "fn() -&gt; bool",
-    "prototype": {
-      "property": "[number]",
-      "clone": "fn() -&gt; +MyConstructor",
-      "getPoint": "fn(i: number) -&gt; point"
+  <span class="cm-string cm-property">"MyConstructor"</span>: {
+    <span class="cm-string cm-property">"!type"</span>: <span class="cm-string">"fn(arg: string)"</span>,
+    <span class="cm-string cm-property">"staticFunction"</span>: <span class="cm-string">"fn() -> bool"</span>,
+    <span class="cm-string cm-property">"prototype"</span>: {
+      <span class="cm-string cm-property">"property"</span>: <span class="cm-string">"[number]"</span>,
+      <span class="cm-string cm-property">"clone"</span>: <span class="cm-string">"fn() -> +MyConstructor"</span>,
+      <span class="cm-string cm-property">"getPoint"</span>: <span class="cm-string">"fn(i: number) -> point"</span>
     }
   },
-  "someOtherGlobal": "string"
+  <span class="cm-string cm-property">"someOtherGlobal"</span>: <span class="cm-string">"string"</span>
 }</pre>
-</div></div>
 <p> This defines a library that sets two globals, <code>MyConstructor</code> holding
 a constructor function, and <code>someOtherGlobal</code> holding a string. The
 origin of the types, variables, and properties defined by this
@@ -968,6 +965,18 @@ passing the syntax tree and a <a href="#infer_scope">scope</a> object.
 <dd>
 <p>
 Run after the type inference pass.
+</p>
+</dd>
+<dt>
+<code>"typeAt" (file, end, expr, type)</code>
+</dt>
+<dd>
+<p>
+Run after Tern attempts to find the
+type at the position <code>end</code> in the given file, this should return either
+the given type (already calculated by Tern and earlier <code>"typeAt"</code>
+passes) or an alternate type to be used instead. This is useful when a
+plugin can provide a more helpful type than Tern (e.g. within comments).
 </p>
 </dd>
 </dl>
@@ -1111,24 +1120,21 @@ even silently load the wrong Tern modules depending on install location.</p>
 <h3> <a id="configuration"></a>Project configuration</h3>
 <p> A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
 like this:</p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>{
-  "libs": [
-    "browser",
-    "jquery"
+<pre data-language="application/x-json" class="cm-s-default">{
+  <span class="cm-string cm-property">"libs"</span>: [
+    <span class="cm-string">"browser"</span>,
+    <span class="cm-string">"jquery"</span>
   ],
-  "loadEagerly": [
-    "importantfile.js"
+  <span class="cm-string cm-property">"loadEagerly"</span>: [
+    <span class="cm-string">"importantfile.js"</span>
   ],
-  "plugins": {
-    "requirejs": {
-      "baseURL": "./",
-      "paths": {}
+  <span class="cm-string cm-property">"plugins"</span>: {
+    <span class="cm-string cm-property">"requirejs"</span>: {
+      <span class="cm-string cm-property">"baseURL"</span>: <span class="cm-string">"./"</span>,
+      <span class="cm-string cm-property">"paths"</span>: {}
     }
   }
 }</pre>
-</div></div>
 <p> The <code>libs</code> property refers to the <a href="#typedef">JSON type descriptions</a>
 that should be loaded into the environment for this project. See the
 <code>defs/</code> directory for examples. The strings given here will be
@@ -1775,21 +1781,15 @@ Clone this repository somewhere. Do <code>npm install</code> to get the
 Make Emacs aware of <code>emacs/tern.el</code>. For example by adding this to
   your <code>.emacs</code> file:
 </p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>(add-to-list 'load-path "/path/to/tern/emacs/")
-(autoload 'tern-mode "tern.el" nil t)</pre>
-</div></div>
+<pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">add-to-list</span> '<span class="cm-variable">load-path</span> <span class="cm-string">"/path/to/tern/emacs/"</span><span class="cm-bracket">)</span>
+<span class="cm-bracket">(</span><span class="cm-variable">autoload</span> '<span class="cm-variable">tern-mode</span> <span class="cm-string">"tern.el"</span> <span class="cm-atom">nil</span> <span class="cm-atom">t</span><span class="cm-bracket">)</span></pre>
 </li>
 <li>
 <p>
 Optionally set <code>tern-mode</code> to be automatically enabled for your
   JavaScript mode of choice. Here&#8217;s the snippet for <code>js-mode</code>:
 </p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>(add-hook 'js-mode-hook (lambda () (tern-mode t)))</pre>
-</div></div>
+<pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">add-hook</span> '<span class="cm-variable">js-mode-hook</span> <span class="cm-bracket">(</span><span class="cm-variable">lambda</span> <span class="cm-bracket">()</span> <span class="cm-bracket">(</span><span class="cm-variable">tern-mode</span> <span class="cm-atom">t</span><span class="cm-bracket">)))</span></pre>
 </li>
 </ol></div>
 <p> The Emacs mode uses the <code>bin/tern</code> server, and project configuration
@@ -1845,13 +1845,10 @@ open the associated URL (if any).
 </dl>
 <h4> <a id="_auto_complete"></a>Auto-Complete</h4>
 <p> If you want to use <code>auto-complete.el</code> for completion, append following codes:</p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>(eval-after-load 'tern
-   '(progn
-      (require 'tern-auto-complete)
-      (tern-ac-setup)))</pre>
-</div></div>
+<pre data-language="commonlisp" class="cm-s-default"><span class="cm-bracket">(</span><span class="cm-variable">eval-after-load</span> '<span class="cm-variable">tern</span>
+   '<span class="cm-bracket">(</span><span class="cm-variable">progn</span>
+      <span class="cm-bracket">(</span><span class="cm-variable">require</span> '<span class="cm-variable">tern-auto-complete</span><span class="cm-bracket">)</span>
+      <span class="cm-bracket">(</span><span class="cm-variable">tern-ac-setup</span><span class="cm-bracket">)))</span></pre>
 <p> If <code>tern-ac-on-dot</code> is non-nil (default), typing <code>.</code>(dot) invokes auto-complete to select completions.
 Calling the command <code>tern-ac-complete</code>, one can invoke auto-complete manually.</p>
 <h3> <a id="vim"></a>Vim</h3>

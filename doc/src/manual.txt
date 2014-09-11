@@ -531,6 +531,12 @@ passing the syntax tree and a <<infer_scope,scope>> object.
 
 `"postInfer" (ast, scope)`;; Run after the type inference pass.
 
+`"typeAt" (file, end, expr, type)`;; Run after Tern attempts to find the
+type at the position `end` in the given file, this should return either
+the given type (already calculated by Tern and earlier `"typeAt"`
+passes) or an alternate type to be used instead. This is useful when a
+plugin can provide a more helpful type than Tern (e.g. within comments).
+
 [[tern.defineQueryType]]`tern.defineQueryType(name: string, desc: object)`::
 Defines a new type of query with the server. The `desc` object is a
 property describing the request. It should at least have a `run`
