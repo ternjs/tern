@@ -970,6 +970,18 @@ passing the syntax tree and a <a href="#infer_scope">scope</a> object.
 Run after the type inference pass.
 </p>
 </dd>
+<dt>
+<code>"typeAt" (file, end, expr, type)</code>
+</dt>
+<dd>
+<p>
+Run after Tern attempts to find the
+type at the position <code>end</code> in the given file, this should return either
+the given type (already calculated by Tern and earlier <code>"typeAt"</code>
+passes) or an alternate type to be used instead. This is useful when a
+plugin can provide a more helpful type than Tern (e.g. within comments).
+</p>
+</dd>
 </dl>
 </dd>
 <dt>
