@@ -9,8 +9,8 @@ software, under an MIT license.
 
 There are currently plugins available for [Emacs][emacs] (and Emacs
 [company-mode][cmode]), [Vim][vim], [Sublime Text][st],
-[Light Table][lt], and [gedit][gedit], and built-in support in
-[Brackets][brackets] and [Edge Code][edge_code].
+[Eclipse][ec], [Light Table][lt], and [gedit][gedit], 
+and built-in support in [Brackets][brackets] and [Edge Code][edge_code].
 
 For further documentation, see the [project page][1] and the
 [manual][3].
@@ -22,6 +22,7 @@ For further documentation, see the [project page][1] and the
 [emacs]: http://ternjs.net/doc/manual.html#emacs
 [vim]: https://github.com/marijnh/tern_for_vim
 [st]: https://github.com/marijnh/tern_for_sublime
+[ec]: https://github.com/angelozerr/tern.java
 [lt]: https://github.com/mortalapeman/LT-TernJS
 [gedit]: https://github.com/Swatinem/tern_for_gedit
 [brackets]: http://brackets.io
