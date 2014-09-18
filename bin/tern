@@ -13,6 +13,7 @@ var projectFileName = ".tern-project", portFileName = ".tern-port";
 var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
 
 var persistent = process.argv.indexOf("--persistent") > -1;
+var disableLoadingLocal = process.argv.indexOf("--disable-loading-local") > -1;
 var verbose = process.argv.indexOf("--verbose") > -1;
 var noPortFile = process.argv.indexOf("--no-port-file") > -1;
 var host = "127.0.0.1";
@@ -60,7 +61,7 @@ function readProjectFile(fileName) {
 
 function findFile(file, projectDir, fallbackDir) {
   var local = path.resolve(projectDir, file);
-  if (fs.existsSync(local)) return local;
+  if (!disableLoadingLocal && fs.existsSync(local)) return local;
   var shared = path.resolve(fallbackDir, file);
   if (fs.existsSync(shared)) return shared;
 }
