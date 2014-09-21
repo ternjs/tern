@@ -17,7 +17,7 @@ engine>> to do the actual type inference.
 ** <<plugins,Server plugins>>
 *** <<plugin_doc_comment,Doc comments>>
 *** <<plugin_node,node>>
-** <<plugin_requirejs,RequireJS>>
+*** <<plugin_requirejs,RequireJS>>
 *** <<plugin_angular,Angular.js>>
 *** <<plugin_third_party,Third-party plugins>>
 ** <<configuration,Project configuration>>
@@ -35,6 +35,7 @@ engine>> to do the actual type inference.
 ** <<vim,Vim>>
 ** <<sublime_text,Sublime Text>>
 ** <<tern_java,Eclipse>>
+** <<tern_for_gedit,Gedit>>
 * <<software,Related Software>>
 
 [[server]]
