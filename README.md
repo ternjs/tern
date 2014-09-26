@@ -22,6 +22,7 @@ For further documentation, see the [project page][1] and the
 [emacs]: http://ternjs.net/doc/manual.html#emacs
 [vim]: https://github.com/marijnh/tern_for_vim
 [st]: https://github.com/marijnh/tern_for_sublime
+[ec]: https://github.com/angelozerr/tern.java
 [lt]: https://github.com/mortalapeman/LT-TernJS
 [gedit]: https://github.com/Swatinem/tern_for_gedit
 [brackets]: http://brackets.io
