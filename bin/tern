@@ -52,8 +52,18 @@ var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFIL
 if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config")))
   defaultConfig = readProjectFile(path.resolve(homeDir, ".tern-config"));
 
+function readJSON(fileName) {
+  var file = fs.readFileSync(fileName, "utf8");
+  try {
+    return JSON.parse(file);
+  } catch (e) {
+    console.error("Bad JSON in " + fileName + ": " + e.message);
+    process.exit(1);
+  }
+}
+
 function readProjectFile(fileName) {
-  var data = JSON.parse(fs.readFileSync(fileName, "utf8"));
+  var data = readJSON(fileName);
   for (var option in defaultConfig) if (!data.hasOwnProperty(option))
     data[option] = defaultConfig[option];
   return data;
@@ -75,7 +85,7 @@ function findDefs(projectDir, config) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";
     var found = findFile(file, projectDir, path.resolve(distDir, "defs"));
-    if (found) defs.push(JSON.parse(fs.readFileSync(found, "utf8")));
+    if (found) defs.push(readJSON(found));
     else process.stderr.write("Failed to find library " + src[i] + ".\n");
   }
   return defs;
