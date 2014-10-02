@@ -87,3 +87,6 @@ exports.runTests = function(filter) {
 
   test("recursive");
 };
+
+var filter = process.argv[2];
+exports.runTests(filter);
