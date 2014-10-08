@@ -24,7 +24,7 @@ exports.runTests = function(filter) {
     var unionType = new def.TypeParser(typeString, "", null, true).parseType("??", true);
     util.addTest();
     util.addFile();
-    if (unionType.toString() !== "number,string") util.failure("parsing " + typeString + " failed, got: " + unionType.toString());
+    if (unionType.toString() !== "(number|string)") util.failure("parsing " + typeString + " failed, got: " + unionType.toString());
   });
 
 }
