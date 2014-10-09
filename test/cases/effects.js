@@ -7,7 +7,7 @@ b; //: [bool]
 var c = [];
 c.push("hi");
 c.push(10);
-c; //: [(string|number)]
+c; //: [?]
 
 var d;
 function setD(a) { d = a; }
