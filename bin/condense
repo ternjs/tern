@@ -2,13 +2,14 @@
 
 var tern = require("../lib/tern"), condense = require("../lib/condense");
 var path = require("path"), fs = require("fs");
-require("../plugin/doc_comment");
+var disableDocComment = process.argv.indexOf("--disable-doc-comment") > -1;
+if (!disableDocComment) require("../plugin/doc_comment");
 
 var localDir = process.cwd(), ourDir = path.resolve(__dirname, "..");
 var spans = true;
 
 function usage(exit) {
-  console.error("usage: " + process.argv[1] + " [--name name] [--plugin name]* [--def name]* [+extrafile.js]* [file.js]+");
+  console.error("usage: " + process.argv[1] + " [--no-spans] [--disable-doc-comment] [--name name] [--plugin name]* [--def name]* [+extrafile.js]* [file.js]+");
   if (exit != null) process.exit(exit);
 }
 
@@ -60,6 +61,7 @@ for (var i = 2, len = process.argv.length; i < len; ++i) {
     loadDef(process.argv[++i]);
   } else if (cur == "--name" && i < len - 1) {
     name = process.argv[++i];
+  } else if (cur == "--disable-doc-comment") {
   } else if (cur == "--no-spans") {
     spans = false;
   } else if (cur.charAt(0) == "-") {
