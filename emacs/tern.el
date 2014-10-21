@@ -264,7 +264,7 @@ list of strings, giving the binary name and arguments.")
   (when tern-update-argument-hints-async
     (cancel-timer tern-update-argument-hints-async))
   (setq tern-update-argument-hints-async
-        (run-at-time 
+        (run-at-time
          (* 0.001 tern-update-argument-hints-timer) nil
          (lambda ()
            (condition-case err
@@ -384,7 +384,17 @@ list of strings, giving the binary name and arguments.")
   "Temporarily highlight region from START to END."
   (let ((overlay (make-overlay start end)))
     (overlay-put overlay 'face 'highlight)
-    (run-with-timer tern-flash-timeout nil 'delete-overlay overlay)))
+    (overlay-put overlay 'evaporate t)
+    (overlay-put overlay 'tern-highlight-refs t)
+    (when tern-flash-timeout
+      (run-with-timer tern-flash-timeout nil 'delete-overlay overlay))))
+
+(defun %tern-highlight-overlays ()
+  (sort (cl-loop for overlay in (overlays-in (point-min) (point-max))
+                 when (overlay-get overlay 'tern-highlight-refs)
+                 collect overlay)
+        (lambda (a b)
+          (< (overlay-start a) (overlay-start b)))))
 
 (defun tern-do-highlight (data)
   (cl-loop for ref across (cdr (assq 'refs data)) do
@@ -392,11 +402,50 @@ list of strings, giving the binary name and arguments.")
              (when (string= buffer-file-name (expand-file-name file (tern-project-dir)))
                (let ((start (1+ (cdr (assq 'start ref))))
                      (end (1+ (cdr (assq 'end ref)))))
-                 (tern-flash-region start end))))))
+                 (tern-flash-region start end)))))
+  (message "%d occurrences" (length (cdr (assq 'refs data))))
+  (unless tern-flash-timeout
+    (%tern-highlight-mode 1)))
 
 (defun tern-highlight-refs ()
   (interactive)
-  (tern-run-query #'tern-do-highlight "refs" (point) :silent))
+  (tern-run-query #'tern-do-highlight "refs" (point) :full-file))
+
+;; a minor mode for easily walking through the references
+
+(defun tern-goto-next-symbol ()
+  (interactive)
+  (catch 'done
+    (dolist (i (%tern-highlight-overlays))
+      (let ((x (overlay-start i)))
+        (when (> x (point))
+          (goto-char x)
+          (throw 'done nil))))))
+
+(defun tern-goto-prev-symbol ()
+  (interactive)
+  (catch 'done
+    (dolist (i (reverse (%tern-highlight-overlays)))
+      (when (< (overlay-end i) (point))
+        (goto-char (overlay-start i))
+        (throw 'done nil)))))
+
+(defun tern-forget-highlighting ()
+  (interactive)
+  (remove-overlays (point-min) (point-max) 'tern-highlight-refs t)
+  (%tern-highlight-mode 0))
+
+(defvar tern-highlight-mode-keymap (make-sparse-keymap))
+(define-key tern-highlight-mode-keymap (kbd "C-<down>") 'tern-goto-next-symbol)
+(define-key tern-highlight-mode-keymap (kbd "C-<up>") 'tern-goto-prev-symbol)
+(define-key tern-highlight-mode-keymap (kbd "ESC") 'tern-forget-highlighting)
+(define-key tern-highlight-mode-keymap (kbd "C-g") 'tern-forget-highlighting)
+
+(define-minor-mode %tern-highlight-mode
+  "Internal mode used by `tern-mode` while highlighting references"
+  nil
+  nil
+  tern-highlight-mode-keymap)
 
 ;; Jump-to-definition
 
@@ -542,6 +591,7 @@ list of strings, giving the binary name and arguments.")
 (define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
 (define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
 (define-key tern-mode-keymap [(control ?c) (control ?d)] 'tern-get-docs)
+(define-key tern-mode-keymap [(meta ??)] 'tern-highlight-refs)
 
 ;;;###autoload
 (define-minor-mode tern-mode
