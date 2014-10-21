@@ -438,7 +438,7 @@ list of strings, giving the binary name and arguments.")
 (defvar tern-highlight-mode-keymap (make-sparse-keymap))
 (define-key tern-highlight-mode-keymap (kbd "C-<down>") 'tern-goto-next-symbol)
 (define-key tern-highlight-mode-keymap (kbd "C-<up>") 'tern-goto-prev-symbol)
-(define-key tern-highlight-mode-keymap (kbd "ESC") 'tern-forget-highlighting)
+(define-key tern-highlight-mode-keymap (kbd "<escape>") 'tern-forget-highlighting)
 (define-key tern-highlight-mode-keymap (kbd "C-g") 'tern-forget-highlighting)
 
 (define-minor-mode %tern-highlight-mode
