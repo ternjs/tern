@@ -2934,7 +2934,7 @@
   "ononline": {
     "!type": "?",
     "!url": "https://developer.mozilla.org/en/docs/DOM/document.ononline",
-    "!doc": ",fgh s dgkljgsdfl dfjg sdlgj sdlg sdlfj dlg jkdfkj dfjgdfkglsdfjsdlfkgj hdflkg hdlkfjgh dfkjgh"
+    "!doc": "\"online\" event is fired when the browser switches between online and offline mode."
   },
   "onoffline": {
     "!type": "?",
