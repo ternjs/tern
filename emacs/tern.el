@@ -85,7 +85,7 @@
                           buffer-file-name))
          (bin-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file))))
          (tern-itself (list (if (file-exists-p bin-file) bin-file "tern"))))
-    (if (eq system-type 'windows-nt) (cons "node" tern-itself) tern-itself))
+    (if (or (eq system-type 'windows-nt) (eq system-type 'darwin)) (cons "node" tern-itself) tern-itself))
   "The command to be run to start the Tern server. Should be a
 list of strings, giving the binary name and arguments.")
 
