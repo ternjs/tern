@@ -396,7 +396,7 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-highlight-refs ()
   (interactive)
-  (tern-run-query #'tern-do-highlight "refs" (point) :silent))
+  (tern-run-query #'tern-do-highlight "refs" (point)))
 
 ;; Jump-to-definition
 
