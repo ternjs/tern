@@ -46,8 +46,8 @@
   (setq tern-last-point-pos (point))
   (setq tern-ac-complete-reply nil)
   (setq tern-ac-complete-request-point (point))
-  (tern-run-query 
-   (lambda (data) 
+  (tern-run-query
+   (lambda (data)
      (tern-ac-complete-response data)
      (funcall cc))
    `((type . "completions") (types . t) (docs . t) (caseInsensitive . t))
@@ -83,10 +83,10 @@
      (let ((doc (cdr (assq 'doc item)))
            (type (cdr (assq 'type item)))
            (name (cdr (assq 'name item))))
-       (popup-make-item 
+       (popup-make-item
         name
         :symbol (if (string-match "fn" type) "f" "v")
-        :summary (truncate-string-to-width 
+        :summary (truncate-string-to-width
                   type tern-ac-completion-truncate-length 0 nil "...")
         :document (concat type "\n\n" doc))))
    tern-ac-complete-reply))
