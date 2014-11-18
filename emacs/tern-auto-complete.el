@@ -72,7 +72,8 @@
   "Insert dot and complete code at point by tern."
   (interactive)
   (insert ".")
-  (tern-ac-complete))
+  (unless (nth 4 (syntax-ppss))
+    (tern-ac-complete)))
 
 (defvar tern-ac-completion-truncate-length 22
   "[AC] truncation length for type summary.")
