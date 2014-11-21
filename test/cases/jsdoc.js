@@ -74,3 +74,22 @@ function NonAscïį() { this.length = "hi"; }
 var inst;
 
 inst.length; //: string
+
+/** @type {bogus.Type} */
+var bogus = abcdef();
+
+bogus; //: bogus.Type
+
+/** @type {bogus.Overridden} */
+var again = 10;
+
+again; //: number
+
+/**
+ * @return {bogus.Retval}
+ * @param {bogus.Arg} a
+ */
+function functionBogus(a) { return hohoho(); }
+
+functionBogus; //: fn(a: bogus.Arg) -> bogus.Retval
+

@@ -116,7 +116,7 @@
   }
 
   function parseLabelList(scope, str, pos, close) {
-    var labels = [], types = [];
+    var labels = [], types = [], madeUp = false;
     for (var first = true; ; first = false) {
       pos = skipSpace(str, pos);
       if (first && str.charAt(pos) == close) break;
@@ -129,6 +129,7 @@
       var type = parseType(scope, str, pos);
       if (!type) return null;
       pos = type.end;
+      madeUp = madeUp || type.madeUp;
       types.push(type.type);
       pos = skipSpace(str, pos);
       var next = str.charAt(pos);
@@ -136,12 +137,12 @@
       if (next == close) break;
       if (next != ",") return null;
     }
-    return {labels: labels, types: types, end: pos};
+    return {labels: labels, types: types, end: pos, madeUp: madeUp};
   }
 
   function parseType(scope, str, pos) {
     pos = skipSpace(str, pos);
-    var type;
+    var type, madeUp = false;
 
     if (str.indexOf("function(", pos) == pos) {
       var args = parseLabelList(scope, str, pos + 9, ")"), ret = infer.ANull;
@@ -153,12 +154,14 @@
         if (!retType) return null;
         pos = retType.end;
         ret = retType.type;
+        madeUp = retType.madeUp;
       }
       type = new infer.Fn(null, infer.ANull, args.types, args.labels, ret);
     } else if (str.charAt(pos) == "[") {
       var inner = parseType(scope, str, pos + 1);
       if (!inner) return null;
       pos = skipSpace(str, inner.end);
+      madeUp = inner.madeUp;
       if (str.charAt(pos) != "]") return null;
       ++pos;
       type = new infer.Arr(inner.type);
@@ -172,6 +175,7 @@
         fields.types[i].propagate(field);
       }
       pos = fields.end;
+      madeUp = fields.madeUp;
     } else {
       var start = pos;
       if (!acorn.isIdentifierStart(str.charCodeAt(pos))) return null;
@@ -187,6 +191,7 @@
           var inAngles = parseType(scope, str, pos + 2);
           if (!inAngles) return null;
           pos = skipSpace(str, inAngles.end);
+          madeUp = inAngles.madeUp;
           if (str.charAt(pos++) != ">") return null;
           inner = inAngles.type;
         }
@@ -197,10 +202,12 @@
           var key = parseType(scope, str, pos + 2);
           if (!key) return null;
           pos = skipSpace(str, key.end);
+          madeUp = madeUp || key.madeUp;
           if (str.charAt(pos++) != ",") return null;
           var val = parseType(scope, str, pos);
           if (!val) return null;
           pos = skipSpace(str, val.end);
+          madeUp = key.madeUp || val.madeUp;
           if (str.charAt(pos++) != ">") return null;
           val.type.propagate(type.defProp("<i>"));
         }
@@ -209,12 +216,18 @@
                acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
         var path = str.slice(start, pos);
         var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
-        if (defs && (path in defs))
+        if (defs && (path in defs)) {
           type = defs[path];
-        else if (found = infer.def.parsePath(path, scope).getType())
+        } else if (found = infer.def.parsePath(path, scope).getType()) {
           type = maybeInstance(found, path); 
-        else
-          type = infer.ANull;
+        } else {
+          if (!cx.jsdocPlaceholders) cx.jsdocPlaceholders = Object.create(null);
+          if (!(path in cx.jsdocPlaceholders))
+            type = cx.jsdocPlaceholders[path] = new infer.Obj(null, path);
+          else
+            type = cx.jsdocPlaceholders[path];
+          madeUp = true;
+        }
       }
     }
 
@@ -223,7 +236,7 @@
       ++pos;
       isOptional = true;
     }
-    return {type: type, end: pos, isOptional: isOptional};
+    return {type: type, end: pos, isOptional: isOptional, madeUp: madeUp};
   }
 
   function maybeInstance(type, path) {
@@ -253,7 +266,7 @@
       var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this)\s+(.*)/g, m;
       while (m = decl.exec(comment)) {
         if (m[1] == "this" && (parsed = parseType(scope, m[2], 0))) {
-          self = parsed.type;
+          self = parsed;
           foundOne = true;
           continue;
         }
@@ -263,14 +276,14 @@
 
         switch(m[1]) {
         case "returns": case "return":
-          ret = parsed.type; break;
+          ret = parsed; break;
         case "type":
-          type = parsed.type; break;
+          type = parsed; break;
         case "param": case "arg": case "argument":
           var name = m[2].slice(parsed.end).match(/^\s*(\S+)/);
           if (!name) continue;
           var argname = name[1] + (parsed.isOptional ? "?" : "");
-          (args || (args = Object.create(null)))[argname] = parsed.type;
+          (args || (args = Object.create(null)))[argname] = parsed;
           break;
         }
       }
@@ -289,6 +302,11 @@
       if (name)
         cx.parent.jsdocTypedefs[name[1]] = parsed.type;
     }
+  }
+
+  var WEIGHT_MADEUP = 1;
+  function propagateWithWeight(type, target) {
+    type.type.propagate(target, type.madeUp ? WEIGHT_MADEUP : undefined);
   }
 
   function applyType(type, self, args, ret, node, aval) {
@@ -310,12 +328,12 @@
         var name = fn.argNames[i], known = args[name];
         if (!known && (known = args[name + "?"]))
           fn.argNames[i] += "?";
-        if (known) known.propagate(fn.args[i]);
+        if (known) propagateWithWeight(known, fn.args[i]);
       }
-      if (ret) ret.propagate(fn.retval);
-      if (self) self.propagate(fn.self);
+      if (ret) propagateWithWeight(ret, fn.retval);
+      if (self) propagateWithWeight(self, fn.self);
     } else if (type) {
-      type.propagate(aval);
+      propagateWithWeight(type, aval);
     }
   };
 });
