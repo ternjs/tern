@@ -212,10 +212,11 @@ list of strings, giving the binary name and arguments.")
      doc)))
 
 (defun tern-send-buffer-to-server ()
-  (tern-run-request (lambda (_err _data))
-                    `((files . [((type . "full")
-                                 (name . ,(tern-project-relative-file))
-                                 (text . ,(buffer-string)))]))))
+  (when (buffer-file-name)
+    (tern-run-request (lambda (_err _data))
+                      `((files . [((type . "full")
+                                   (name . ,(tern-project-relative-file))
+                                   (text . ,(buffer-string)))])))))
 
 ;; Completion
 
@@ -264,7 +265,7 @@ list of strings, giving the binary name and arguments.")
   (when tern-update-argument-hints-async
     (cancel-timer tern-update-argument-hints-async))
   (setq tern-update-argument-hints-async
-        (run-at-time 
+        (run-at-time
          (* 0.001 tern-update-argument-hints-timer) nil
          (lambda ()
            (condition-case err
