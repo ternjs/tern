@@ -12,11 +12,14 @@
 })(function(infer, tern, comment, acorn, walk) {
   "use strict";
 
-  tern.registerPlugin("doc_comment", function(server) {
+  var fullDocs=false;
+  
+  tern.registerPlugin("doc_comment", function(server, options) {
     server.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
       server.jsdocTypedefs = Object.create(null);
     });
+   if(options && options.fullDocs) fullDocs=true;
 
     return {
       passes: {
@@ -94,7 +97,7 @@
     }
 
     var first = comments[0], dot = first.search(/\.\s/);
-    if (dot > 5) first = first.slice(0, dot + 1);
+    if (!fullDocs && dot > 5) first = first.slice(0, dot + 1);
     first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
     if (aval instanceof infer.AVal) aval.doc = first;
     if (type) type.doc = first;
