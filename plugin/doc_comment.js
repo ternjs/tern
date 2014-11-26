@@ -19,7 +19,7 @@
     server.on("reset", function() {
       server.jsdocTypedefs = Object.create(null);
     });
-   if(options && options.fullDocs) fullDocs=true;
+    fullDocs = options && options.fullDocs;
 
     return {
       passes: {
