@@ -96,11 +96,17 @@
         type = null;
     }
 
-    var first = comments[0], dot = first.search(/\.\s/);
-    if (!fullDocs && dot > 5) first = first.slice(0, dot + 1);
-    first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
-    if (aval instanceof infer.AVal) aval.doc = first;
-    if (type) type.doc = first;
+    var result = comments[comments.length - 1];
+    if (fullDocs) result = result.trim().replace(/\n {0,}\* {0,}/g, "\n");
+    else{
+      var dot = result.search(/\.\s/);
+      if (dot > 5) result = result.slice(0, dot + 1);
+      result = result.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
+    }
+    result = result.replace(/^\s{0,}\*{1,}\s{0,}/, "");
+    
+    if (aval instanceof infer.AVal) aval.doc = result;
+    if (type) type.doc = result;
   }
 
   // Parses a subset of JSDoc-style comments in order to include the
