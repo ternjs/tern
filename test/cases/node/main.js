@@ -69,3 +69,8 @@ doc.f1; //doc: doc for f1
 doc.f2; //doc: doc for f2
 
 module.exports. //+
+
+// completion on known require module
+require("f //+ fs
+// completion on custom require module
+require("my //+ mymod
