@@ -168,9 +168,173 @@
 
     return {defs: defs,
             passes: {preCondenseReach: preCondenseReach,
-                     postLoadDef: postLoadDef}};
+                     postLoadDef: postLoadDef,
+                     completion: completion}};
   });
+  
+  /**
+   * Returns completion for require modules.
+   */
+  function completion(file, query) {
+    var wordStart = resolvePos(file, query.end);
+    var word = null, completions = [];
+    var cx = infer.cx(), server = cx.parent, data = server._node, locals = cx.definitions.node;
+    var currentFile = data.currentFile || resolveProjectPath(server, file.name);
+    
+    function gather(modules) {
+      // loop for each modules
+      for(var name in modules) {
+        if (name != currentFile) {
+          // current module is different from the current file module
+          // resolve the module path
+          var moduleName = resolveModulePath(name, currentFile);
+          if (moduleName && !(query.filter !== false && word &&
+              (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0)) {
+            // module path matches the current word, add the module to the completion
+            var rec = {name: moduleName}, val = modules[name];
+            infer.resetGuessing();
+            var type = val.getType();
+            rec.guess = infer.didGuess();
+            if (query.types)
+              rec.type = "module";
+            if (query.docs)
+              maybeSet(rec, "doc", val.doc || type && type.doc);
+            if (query.urls)
+              maybeSet(rec, "url", val.url || type && type.url);
+            if (query.origins)
+              maybeSet(rec, "origin", val.origin || type && type.origin);        
+            completions.push(rec);
+          }
+        }
+      }
+    }
+    
+    var callExpr = infer.findExpressionAround(file.ast, null, wordStart, file.scope, "CallExpression");
+    if (callExpr && callExpr.node.arguments && callExpr.node.callee && callExpr.node.callee.name === 'require') {
+      for (var i = 0; i < callExpr.node.arguments.length; i++) {
+        var nodeArg = callExpr.node.arguments[i], wordEnd = nodeArg.end - 1;
+        if (nodeArg.type == "Literal" && typeof nodeArg.value == "string") {
+          // here we are inside require(' node string
+          // compute the word to search and word start
+          word = nodeArg.value.slice(0, nodeArg.value.length - (wordEnd - wordStart));
+          wordStart = nodeArg.start + 1;
+          // search from local node modules (fs, os, etc)
+          gather(locals);
+          // search from custom node modules
+          gather(data.modules);          
+          return {start: outputPos(query, file, wordStart),
+             end: outputPos(query, file, wordEnd),
+             isProperty: false,
+             completions: completions};
+        }
+      }
+    } 
+  }
+  
+  /**
+   * Resolve the module path of the given module name by using the current file. 
+   */
+  function resolveModulePath(name, currentFile) {
+    
+    function startsWith(str, prefix) {
+      return str.slice(0, prefix.length) == prefix;
+    }
 
+    function endsWith(str, suffix) {
+      return str.slice(-suffix.length) == suffix;
+    }
+    
+    if (name.indexOf('/') == -1) return name;
+    // module name has '/', compute the module path
+    var modulePath = normPath(relativePath(currentFile + '/..', name));
+    if (startsWith(modulePath, 'node_modules')) {
+      // module name starts with node_modules, remove it
+      modulePath = modulePath.substring('node_modules'.length + 1, modulePath.length);
+      if (endsWith(modulePath, 'index.js')) {
+        // module name ends with index.js, remove it.
+       modulePath = modulePath.substring(0, modulePath.length - 'index.js'.length - 1);
+      }
+    } else if (!startsWith(modulePath, '../')) {
+      // module name is not inside node_modules and there is not ../, add ./ 
+      modulePath = './' + modulePath;
+    }
+    if (endsWith(modulePath, '.js')) {
+      // remove js extension
+      modulePath = modulePath.substring(0, modulePath.length - '.js'.length);    
+    }    
+    return modulePath;
+  }
+  
+  // START Copy/Paste of tern function -> It should be cool if those following functions will be provided by tern as public API
+  
+  function maybeSet(obj, prop, val) {
+    if (val != null) obj[prop] = val;
+  }
+  
+  function resolvePos(file, pos, tolerant) {
+    if (typeof pos != "number") {
+      var lineStart = findLineStart(file, pos.line);
+      if (lineStart == null) {
+        if (tolerant) pos = file.text.length;
+        else throw ternError("File doesn't contain a line " + pos.line);
+      } else {
+        pos = lineStart + pos.ch;
+      }
+    }
+    if (pos > file.text.length) {
+      if (tolerant) pos = file.text.length;
+      else throw ternError("Position " + pos + " is outside of file.");
+    }
+    return pos;
+  }
+  
+  var offsetSkipLines = 25;
+
+  function findLineStart(file, line) {
+    var text = file.text, offsets = file.lineOffsets || (file.lineOffsets = [0]);
+    var pos = 0, curLine = 0;
+    var storePos = Math.min(Math.floor(line / offsetSkipLines), offsets.length - 1);
+    var pos = offsets[storePos], curLine = storePos * offsetSkipLines;
+
+    while (curLine < line) {
+      ++curLine;
+      pos = text.indexOf("\n", pos) + 1;
+      if (pos == 0) return null;
+      if (curLine % offsetSkipLines == 0) offsets.push(pos);
+    }
+    return pos;
+  }
+  
+  function asLineChar(file, pos) {
+    if (!file) return {line: 0, ch: 0};
+    var offsets = file.lineOffsets || (file.lineOffsets = [0]);
+    var text = file.text, line, lineStart;
+    for (var i = offsets.length - 1; i >= 0; --i) if (offsets[i] <= pos) {
+      line = i * offsetSkipLines;
+      lineStart = offsets[i];
+    }
+    for (;;) {
+      var eol = text.indexOf("\n", lineStart);
+      if (eol >= pos || eol < 0) break;
+      lineStart = eol + 1;
+      ++line;
+    }
+    return {line: line, ch: pos - lineStart};
+  }
+
+  function outputPos(query, file, pos) {
+    if (query.lineCharPositions) {
+      var out = asLineChar(file, pos);
+      if (file.type == "part")
+        out.line += file.offsetLines != null ? file.offsetLines : asLineChar(file.backing, file.offset).line;
+      return out;
+    } else {
+      return pos + (file.type == "part" ? file.offset : 0);
+    }
+  }
+  
+  // END Copy/Paste of tern function -> It should be cool if those following functions will be provided by tern as public API 
+  
   tern.defineQueryType("node_exports", {
     takesFile: true,
     run: function(server, query, file) {
