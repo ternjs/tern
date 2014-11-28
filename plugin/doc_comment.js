@@ -97,7 +97,7 @@
     }
 
     var result = comments[comments.length - 1];
-    if (fullDocs) result = result.trim().replace(/\n {0,}\* {0,}/g, "\n");
+    if (fullDocs) result = result.trim().replace(/\n {0,}\t{0,} {0,}\* ?/g, "\n");
     else{
       var dot = result.search(/\.\s/);
       if (dot > 5) result = result.slice(0, dot + 1);
@@ -228,7 +228,7 @@
         if (defs && (path in defs)) {
           type = defs[path];
         } else if (found = infer.def.parsePath(path, scope).getType()) {
-          type = maybeInstance(found, path); 
+          type = maybeInstance(found, path);
         } else {
           if (!cx.jsdocPlaceholders) cx.jsdocPlaceholders = Object.create(null);
           if (!(path in cx.jsdocPlaceholders))
