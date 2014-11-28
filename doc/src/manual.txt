@@ -564,6 +564,10 @@ property.
 To turn this plugin off, set `doc_comment: null` in your
 <<option_plugins,plugin option>>.
 
+The plugin understands the following configuration parameters:
+
+`fullDocs`:: Can be set to `true` to return the full comment text instead of the first sentence.
+
 [[plugin_node]]
 ==== Node.js plugin ====
 

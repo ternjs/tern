@@ -12,11 +12,14 @@
 })(function(infer, tern, comment, acorn, walk) {
   "use strict";
 
-  tern.registerPlugin("doc_comment", function(server) {
+  var fullDocs=false;
+  
+  tern.registerPlugin("doc_comment", function(server, options) {
     server.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
       server.jsdocTypedefs = Object.create(null);
     });
+    fullDocs = options && options.fullDocs;
 
     return {
       passes: {
@@ -93,11 +96,17 @@
         type = null;
     }
 
-    var first = comments[0], dot = first.search(/\.\s/);
-    if (dot > 5) first = first.slice(0, dot + 1);
-    first = first.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
-    if (aval instanceof infer.AVal) aval.doc = first;
-    if (type) type.doc = first;
+    var result = comments[comments.length - 1];
+    if (fullDocs) result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
+    else{
+      var dot = result.search(/\.\s/);
+      if (dot > 5) result = result.slice(0, dot + 1);
+      result = result.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
+    }
+    result = result.replace(/^\s{0,}\*{1,}\s{0,}/, "");
+    
+    if (aval instanceof infer.AVal) aval.doc = result;
+    if (type) type.doc = result;
   }
 
   // Parses a subset of JSDoc-style comments in order to include the
@@ -219,7 +228,7 @@
         if (defs && (path in defs)) {
           type = defs[path];
         } else if (found = infer.def.parsePath(path, scope).getType()) {
-          type = maybeInstance(found, path); 
+          type = maybeInstance(found, path);
         } else {
           if (!cx.jsdocPlaceholders) cx.jsdocPlaceholders = Object.create(null);
           if (!(path in cx.jsdocPlaceholders))
