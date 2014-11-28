@@ -175,11 +175,12 @@
   /**
    * Returns completion for require modules.
    */
-  function completion(file, query) {
-    var wordStart = resolvePos(file, query.end);
+  function completion(file, query) {   
+    var wordPos = resolvePos(file, query.end);
     var word = null, completions = [];
     var cx = infer.cx(), server = cx.parent, data = server._node, locals = cx.definitions.node;
     var currentFile = data.currentFile || resolveProjectPath(server, file.name);
+    var wrapAsObjs = query.types || query.depths || query.docs || query.urls || query.origins;
     
     function gather(modules) {
       // loop for each modules
@@ -191,43 +192,56 @@
           if (moduleName && !(query.filter !== false && word &&
               (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0)) {
             // module path matches the current word, add the module to the completion
-            var rec = {name: moduleName}, val = modules[name];
-            infer.resetGuessing();
-            var type = val.getType();
-            rec.guess = infer.didGuess();
-            if (query.types)
-              rec.type = "module";
-            if (query.docs)
-              maybeSet(rec, "doc", val.doc || type && type.doc);
-            if (query.urls)
-              maybeSet(rec, "url", val.url || type && type.url);
-            if (query.origins)
-              maybeSet(rec, "origin", val.origin || type && type.origin);        
+            var rec = wrapAsObjs ? {name: moduleName} : moduleName;
             completions.push(rec);
+            
+            if ((query.types || query.docs || query.urls || query.origins)) {
+              var val = modules[name];
+              infer.resetGuessing();
+              var type = val.getType();
+              rec.guess = infer.didGuess();
+              if (query.types)
+                rec.type = "module";
+              if (query.docs)
+                maybeSet(rec, "doc", val.doc || type && type.doc);
+              if (query.urls)
+                maybeSet(rec, "url", val.url || type && type.url);
+              if (query.origins)
+                maybeSet(rec, "origin", val.origin || type && type.origin);
+            }            
           }
         }
       }
     }
     
-    var callExpr = infer.findExpressionAround(file.ast, null, wordStart, file.scope, "CallExpression");
-    if (callExpr && callExpr.node.arguments && callExpr.node.callee && callExpr.node.callee.name === 'require') {
-      for (var i = 0; i < callExpr.node.arguments.length; i++) {
-        var nodeArg = callExpr.node.arguments[i], wordEnd = nodeArg.end - 1;
-        if (nodeArg.type == "Literal" && typeof nodeArg.value == "string") {
-          // here we are inside require(' node string
-          // compute the word to search and word start
-          word = nodeArg.value.slice(0, nodeArg.value.length - (wordEnd - wordStart));
-          wordStart = nodeArg.start + 1;
-          // search from local node modules (fs, os, etc)
-          gather(locals);
-          // search from custom node modules
-          gather(data.modules);          
-          return {start: outputPos(query, file, wordStart),
-             end: outputPos(query, file, wordEnd),
-             isProperty: false,
-             completions: completions};
-        }
-      }
+    function getQuote(c) {
+      return c === '\'' || c === '"' ? c : null; 
+    }
+    
+    var callExpr = infer.findExpressionAround(file.ast, null, wordPos, file.scope, "CallExpression");
+    if (callExpr && callExpr.node.arguments && callExpr.node.callee && callExpr.node.callee.name === 'require') {      
+      var nodeArg = callExpr.node.arguments[0];
+      if (nodeArg) {
+        // here we are inside require(' node string
+        // compute the word to search and word start
+        var startQuote = getQuote(nodeArg.raw.charAt(0)), 
+            endQuote = getQuote(nodeArg.raw.length > 1 ? nodeArg.raw.charAt(nodeArg.raw.length - 1) : null);  
+        var wordEnd = endQuote != null ? nodeArg.end - 1: nodeArg.end,                         
+            wordStart = startQuote != null ? nodeArg.start + 1: nodeArg.start,    
+        word = nodeArg.value.slice(0, nodeArg.value.length - (wordEnd - wordPos));
+        if (query.caseInsensitive) word = word.toLowerCase();
+        // search from local node modules (fs, os, etc)
+        gather(locals);
+        // search from custom node modules
+        gather(data.modules);          
+        return {start: outputPos(query, file, wordStart),
+           end: outputPos(query, file, wordEnd),
+           isProperty: false,
+           isStringAround: true,
+           startQuote: startQuote,
+           endQuote: endQuote,
+           completions: completions};
+      }      
     } 
   }
   
