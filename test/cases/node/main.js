@@ -71,6 +71,6 @@ doc.f2; //doc: doc for f2
 module.exports. //+
 
 // completion on known require module
-require("f //+ fs
+require('f //+ 'fs'
 // completion on custom require module
-require("my //+ mymod
+require("my //+ "mymod"

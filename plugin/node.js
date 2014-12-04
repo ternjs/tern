@@ -169,87 +169,85 @@
     return {defs: defs,
             passes: {preCondenseReach: preCondenseReach,
                      postLoadDef: postLoadDef,
-                     completion: completion}};
+                     completion: findCompletions}};
   });
-  
-  /**
-   * Returns completion for require modules.
-   */
-  function completion(file, query) {   
-    var wordPos = tern.resolvePos(file, query.end);
-    var word = null, completions = [];
-    var cx = infer.cx(), server = cx.parent, data = server._node, locals = cx.definitions.node;
+
+  // Completes CommonJS module names in strings passed to require
+  function findCompletions(file, query) {
+    var wordEnd = tern.resolvePos(file, query.end);
+    var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
+    if (!callExpr) return;
+    var callNode = callExpr.node;
+    if (callNode.callee.type != "Identifier" || callNode.callee.name != "require" ||
+        callNode.arguments.length < 1) return;
+    var argNode = callNode.arguments[0];
+    if (argNode.type != "Literal" || typeof argNode.value != "string" ||
+        argNode.start > wordEnd || argNode.end < wordEnd) return;
+
+    var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
+    if (word && word.charAt(word.length - 1) == quote)
+      word = word.slice(0, word.length - 1);
+    var completions = completeModuleName(query, file, word);
+    if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
+      ++wordEnd;
+    return {
+      start: tern.outputPos(query, file, argNode.start),
+      end: tern.outputPos(query, file, wordEnd),
+      isProperty: false,
+      completions: completions.map(function(name) {
+        var string = JSON.stringify(name);
+        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
+        return string;
+      })
+    };
+  }
+
+  function completeModuleName(query, file, word) {
+    var completions = [];
+    var cx = infer.cx(), server = cx.parent, data = server._node;
     var currentFile = data.currentFile || resolveProjectPath(server, file.name);
     var wrapAsObjs = query.types || query.depths || query.docs || query.urls || query.origins;
-    
+
     function gather(modules) {
-      // loop for each modules
-      for(var name in modules) {
-        if (name != currentFile) {
-          // current module is different from the current file module
-          // resolve the module path
-          var moduleName = resolveModulePath(name, currentFile);
-          if (moduleName && !(query.filter !== false && word &&
+      for (var name in modules) {
+        if (name == currentFile) continue;
+
+        var moduleName = resolveModulePath(name, currentFile);
+        if (moduleName &&
+            !(query.filter !== false && word &&
               (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0)) {
-            // module path matches the current word, add the module to the completion
-            var rec = wrapAsObjs ? {name: moduleName} : moduleName;
-            completions.push(rec);
-            
-            if ((query.types || query.docs || query.urls || query.origins)) {
-              var val = modules[name];
-              infer.resetGuessing();
-              var type = val.getType();
-              rec.guess = infer.didGuess();
-              if (query.types)
-                rec.type = "module";
-              if (query.docs)
-                maybeSet(rec, "doc", val.doc || type && type.doc);
-              if (query.urls)
-                maybeSet(rec, "url", val.url || type && type.url);
-              if (query.origins)
-                maybeSet(rec, "origin", val.origin || type && type.origin);
-            }            
+          var rec = wrapAsObjs ? {name: moduleName} : moduleName;
+          completions.push(rec);
+
+          if (query.types || query.docs || query.urls || query.origins) {
+            var val = modules[name];
+            infer.resetGuessing();
+            var type = val.getType();
+            rec.guess = infer.didGuess();
+            if (query.types)
+              rec.type = infer.toString(val);
+            if (query.docs)
+              maybeSet(rec, "doc", val.doc || type && type.doc);
+            if (query.urls)
+              maybeSet(rec, "url", val.url || type && type.url);
+            if (query.origins)
+              maybeSet(rec, "origin", val.origin || type && type.origin);
           }
         }
       }
     }
-    
-    function getQuote(c) {
-      return c === '\'' || c === '"' ? c : null; 
-    }
-    
-    var callExpr = infer.findExpressionAround(file.ast, null, wordPos, file.scope, "CallExpression");
-    if (callExpr && callExpr.node.arguments && callExpr.node.callee && callExpr.node.callee.name === 'require') {      
-      var nodeArg = callExpr.node.arguments[0];
-      if (nodeArg) {
-        // here we are inside require(' node string
-        // compute the word to search and word start
-        var startQuote = getQuote(nodeArg.raw.charAt(0)), 
-            endQuote = getQuote(nodeArg.raw.length > 1 ? nodeArg.raw.charAt(nodeArg.raw.length - 1) : null);  
-        var wordEnd = endQuote != null ? nodeArg.end - 1: nodeArg.end,                         
-            wordStart = startQuote != null ? nodeArg.start + 1: nodeArg.start,    
-        word = nodeArg.value.slice(0, nodeArg.value.length - (wordEnd - wordPos));
-        if (query.caseInsensitive) word = word.toLowerCase();
-        // search from local node modules (fs, os, etc)
-        gather(locals);
-        // search from custom node modules
-        gather(data.modules);          
-        return {start: tern.outputPos(query, file, wordStart),
-           end: tern.outputPos(query, file, wordEnd),
-           isProperty: false,
-           isStringAround: true,
-           startQuote: startQuote,
-           endQuote: endQuote,
-           completions: completions};
-      }      
-    } 
+
+    if (query.caseInsensitive) word = word.toLowerCase();
+    gather(cx.definitions.node);
+    gather(data.modules);
+    return completions;
   }
-  
+
   /**
-   * Resolve the module path of the given module name by using the current file. 
+   * Resolve the module path of the given module name by using the current file.
    */
   function resolveModulePath(name, currentFile) {
-    
+
     function startsWith(str, prefix) {
       return str.slice(0, prefix.length) == prefix;
     }
@@ -257,7 +255,7 @@
     function endsWith(str, suffix) {
       return str.slice(-suffix.length) == suffix;
     }
-    
+
     if (name.indexOf('/') == -1) return name;
     // module name has '/', compute the module path
     var modulePath = normPath(relativePath(currentFile + '/..', name));
@@ -269,20 +267,20 @@
        modulePath = modulePath.substring(0, modulePath.length - 'index.js'.length - 1);
       }
     } else if (!startsWith(modulePath, '../')) {
-      // module name is not inside node_modules and there is not ../, add ./ 
+      // module name is not inside node_modules and there is not ../, add ./
       modulePath = './' + modulePath;
     }
     if (endsWith(modulePath, '.js')) {
       // remove js extension
-      modulePath = modulePath.substring(0, modulePath.length - '.js'.length);    
-    }    
+      modulePath = modulePath.substring(0, modulePath.length - '.js'.length);
+    }
     return modulePath;
   }
-  
+
   function maybeSet(obj, prop, val) {
     if (val != null) obj[prop] = val;
   }
-   
+
   tern.defineQueryType("node_exports", {
     takesFile: true,
     run: function(server, query, file) {
