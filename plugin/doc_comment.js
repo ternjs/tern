@@ -13,7 +13,7 @@
   "use strict";
 
   var WG_MADEUP = 1, WG_STRONG = 101;
-  
+
   tern.registerPlugin("doc_comment", function(server, options) {
     server.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
@@ -109,7 +109,7 @@
       result = result.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
     }
     result = result.replace(/^\s*\*+\s*/, "");
-    
+
     if (aval instanceof infer.AVal) aval.doc = result;
     if (type) type.doc = result;
   }

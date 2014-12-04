@@ -256,7 +256,6 @@
       var m;
       if (m = path.match(/^!ng\.([^\.]+)\._inject_([^\.]+)^/)) {
         var mod = mods[m[1].replace(/`/g, ".")];
-        console.log(mod.injector.fields, m[2]);
         var field = mod.injector.fields[m[2]];
         var data = state.types[path];
         if (field.span) data.span = field.span;

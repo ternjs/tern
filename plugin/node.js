@@ -42,7 +42,7 @@
     return scope;
   }
 
-  function resolveModule(server, name, parent) {
+  function resolveModule(server, name, _parent) {
     server.addFile(name, null, server._node.currentOrigin);
     return getModule(server._node, name);
   }
