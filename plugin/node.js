@@ -195,7 +195,8 @@
       end: tern.outputPos(query, file, wordEnd),
       isProperty: false,
       completions: completions.map(function(rec) {
-        var string = JSON.stringify(typeof rec == "string" ? rec : rec.name);
+        var name = typeof rec == "string" ? rec : rec.name;
+        var string = JSON.stringify(name);
         if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
         if (typeof rec == "string") return string;
         rec.displayName = name;
