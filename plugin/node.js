@@ -176,7 +176,7 @@
    * Returns completion for require modules.
    */
   function completion(file, query) {   
-    var wordPos = resolvePos(file, query.end);
+    var wordPos = tern.resolvePos(file, query.end);
     var word = null, completions = [];
     var cx = infer.cx(), server = cx.parent, data = server._node, locals = cx.definitions.node;
     var currentFile = data.currentFile || resolveProjectPath(server, file.name);
@@ -234,8 +234,8 @@
         gather(locals);
         // search from custom node modules
         gather(data.modules);          
-        return {start: outputPos(query, file, wordStart),
-           end: outputPos(query, file, wordEnd),
+        return {start: tern.outputPos(query, file, wordStart),
+           end: tern.outputPos(query, file, wordEnd),
            isProperty: false,
            isStringAround: true,
            startQuote: startQuote,
@@ -279,76 +279,10 @@
     return modulePath;
   }
   
-  // START Copy/Paste of tern function -> It should be cool if those following functions will be provided by tern as public API
-  
   function maybeSet(obj, prop, val) {
     if (val != null) obj[prop] = val;
   }
-  
-  function resolvePos(file, pos, tolerant) {
-    if (typeof pos != "number") {
-      var lineStart = findLineStart(file, pos.line);
-      if (lineStart == null) {
-        if (tolerant) pos = file.text.length;
-        else throw ternError("File doesn't contain a line " + pos.line);
-      } else {
-        pos = lineStart + pos.ch;
-      }
-    }
-    if (pos > file.text.length) {
-      if (tolerant) pos = file.text.length;
-      else throw ternError("Position " + pos + " is outside of file.");
-    }
-    return pos;
-  }
-  
-  var offsetSkipLines = 25;
-
-  function findLineStart(file, line) {
-    var text = file.text, offsets = file.lineOffsets || (file.lineOffsets = [0]);
-    var pos = 0, curLine = 0;
-    var storePos = Math.min(Math.floor(line / offsetSkipLines), offsets.length - 1);
-    var pos = offsets[storePos], curLine = storePos * offsetSkipLines;
-
-    while (curLine < line) {
-      ++curLine;
-      pos = text.indexOf("\n", pos) + 1;
-      if (pos == 0) return null;
-      if (curLine % offsetSkipLines == 0) offsets.push(pos);
-    }
-    return pos;
-  }
-  
-  function asLineChar(file, pos) {
-    if (!file) return {line: 0, ch: 0};
-    var offsets = file.lineOffsets || (file.lineOffsets = [0]);
-    var text = file.text, line, lineStart;
-    for (var i = offsets.length - 1; i >= 0; --i) if (offsets[i] <= pos) {
-      line = i * offsetSkipLines;
-      lineStart = offsets[i];
-    }
-    for (;;) {
-      var eol = text.indexOf("\n", lineStart);
-      if (eol >= pos || eol < 0) break;
-      lineStart = eol + 1;
-      ++line;
-    }
-    return {line: line, ch: pos - lineStart};
-  }
-
-  function outputPos(query, file, pos) {
-    if (query.lineCharPositions) {
-      var out = asLineChar(file, pos);
-      if (file.type == "part")
-        out.line += file.offsetLines != null ? file.offsetLines : asLineChar(file.backing, file.offset).line;
-      return out;
-    } else {
-      return pos + (file.type == "part" ? file.offset : 0);
-    }
-  }
-  
-  // END Copy/Paste of tern function -> It should be cool if those following functions will be provided by tern as public API 
-  
+   
   tern.defineQueryType("node_exports", {
     takesFile: true,
     run: function(server, query, file) {
