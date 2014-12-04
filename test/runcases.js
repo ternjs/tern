@@ -98,22 +98,11 @@ exports.runTests = function(filter, caseDir) {
       if (kind == "+" || kind == "+?") { // Completion test
         var columnInfo = /\s*@(\d+)$/.exec(args), pos = m.index;
         if (columnInfo) {
-          //if (text.indexOf('require(') != -1) 
-            
           var line = acorn.getLineInfo(text, m.index).line;
           pos = {line: line - 1, ch: Number(columnInfo[1]) - 1};
           args = args.slice(0, columnInfo.index);
         } else {
-          if (text.indexOf('require(" //+ fs') != -1) {
-            console.log(text)  
-            console.log(pos)  
-          }
-          
           while (/\s/.test(text.charAt(pos - 1))) --pos;
-          
-          if (text.indexOf('require(" //+ fs') != -1) {
-            console.log(pos)  
-          }
         }
         var query = {type: "completions", end: pos, file: fname, guess: kind == "+?"};
         var andOthers = /,\s*\.\.\.$/.test(args);
@@ -124,11 +113,9 @@ exports.runTests = function(filter, caseDir) {
           var match = andOthers || parts.length == resp.completions.length;
           for (var i = 0; i < parts.length && match; ++i)
             if (resp.completions.indexOf(parts[i]) < 0) match = false;
-          if (!match) {
-            console.log(resp.completions)
+          if (!match)
             fail(m, "Completion set failed at hint: " + parts[i - 1] +
                  "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
-          }
         });
       } else if (kind == "exports:") {
         server.request({query: {type: "node_exports", file: fname}}, function(err, resp) {
