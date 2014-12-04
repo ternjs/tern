@@ -13,15 +13,16 @@
   "use strict";
 
   var WG_MADEUP = 1, WG_STRONG = 101;
-  var fullDocs=false;
   
   tern.registerPlugin("doc_comment", function(server, options) {
     server.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
       server.jsdocTypedefs = Object.create(null);
     });
-    server._docCommentWeight = options && options.strong ? WG_STRONG : undefined;
-    fullDocs = options && options.fullDocs;
+    server._docComment = {
+      weight: options && options.strong ? WG_STRONG : undefined,
+      fullDocs: options && options.fullDocs
+    };
 
     return {
       passes: {
@@ -91,21 +92,23 @@
 
   function interpretComments(node, comments, scope, aval, type) {
     jsdocInterpretComments(node, scope, aval, comments);
+    var cx = infer.cx();
 
     if (!type && aval instanceof infer.AVal && aval.types.length) {
       type = aval.types[aval.types.length - 1];
-      if (!(type instanceof infer.Obj) || type.origin != infer.cx().curOrigin || type.doc)
+      if (!(type instanceof infer.Obj) || type.origin != cx.curOrigin || type.doc)
         type = null;
     }
 
     var result = comments[comments.length - 1];
-    if (fullDocs) result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
-    else{
+    if (cx.parent._docComment.fullDocs) {
+      result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
+    } else {
       var dot = result.search(/\.\s/);
       if (dot > 5) result = result.slice(0, dot + 1);
       result = result.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
     }
-    result = result.replace(/^\s{0,}\*{1,}\s{0,}/, "");
+    result = result.replace(/^\s*\*+\s*/, "");
     
     if (aval instanceof infer.AVal) aval.doc = result;
     if (type) type.doc = result;
@@ -316,7 +319,7 @@
   }
 
   function propagateWithWeight(type, target) {
-    var weight = infer.cx().parent._docCommentWeight;
+    var weight = infer.cx().parent._docComment.weight;
     type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
   }
 
