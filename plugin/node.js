@@ -198,6 +198,7 @@
         var string = JSON.stringify(typeof rec == "string" ? rec : rec.name);
         if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
         if (typeof rec == "string") return string;
+        rec.displayName = name;
         rec.name = string;
         return rec;
       })
