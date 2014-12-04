@@ -111,7 +111,7 @@ function loadPlugins(projectDir, plugins) {
     if (mod.hasOwnProperty("initialize")) mod.initialize(distDir);
     options[path.basename(plugin)] = val;
   }
-  
+
   defaultPlugins.forEach(function(name) {
     if (!plugins.hasOwnProperty(name)) {
       options[name] = true;

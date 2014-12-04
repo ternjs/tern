@@ -12,11 +12,14 @@
 })(function(infer, tern, comment, acorn, walk) {
   "use strict";
 
-  tern.registerPlugin("doc_comment", function(server) {
+  var WG_MADEUP = 1, WG_STRONG = 101;
+
+  tern.registerPlugin("doc_comment", function(server, options) {
     server.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
       server.jsdocTypedefs = Object.create(null);
     });
+    server._docCommentWeight = options && options.strong ? WG_STRONG : undefined;
 
     return {
       passes: {
@@ -304,9 +307,9 @@
     }
   }
 
-  var WEIGHT_MADEUP = 1;
   function propagateWithWeight(type, target) {
-    type.type.propagate(target, type.madeUp ? WEIGHT_MADEUP : undefined);
+    var weight = infer.cx().parent._docCommentWeight;
+    type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
   }
 
   function applyType(type, self, args, ret, node, aval) {
