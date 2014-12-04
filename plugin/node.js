@@ -168,9 +168,31 @@
 
     return {defs: defs,
             passes: {preCondenseReach: preCondenseReach,
-                     postLoadDef: postLoadDef}};
+                     postLoadDef: postLoadDef,
+                     typeAt: typeAt}};
   });
 
+  function typeAt(file, end, expr, type) {
+    if (expr && expr.node.type == 'Literal') {
+      // we are inside string, check if we are inside require() function
+      var callExpr = infer.findExpressionAround(file.ast, null, end, file.scope, "CallExpression");
+      if (callExpr && callExpr.node.callee && callExpr.node.callee.name == 'require') {
+        // here we are inside string node inside require function
+        var argNode = expr.node, name = argNode.value, cx = infer.cx(), server = cx.parent, data = server._node, locals = cx.definitions.node;
+        // is a local module (fs, etc)
+        var mod = locals[name];          
+        if (!mod) {
+          // is a custom module?
+          var currentFile = data.currentFile || resolveProjectPath(server, file.name);
+          mod = resolveModule(server, name, currentFile);        
+        }
+        // returns the type of the module.
+        if (mod && mod.getType && mod.getType() != null) return mod.getType();
+      }
+    }
+    return type;
+  }
+  
   tern.defineQueryType("node_exports", {
     takesFile: true,
     run: function(server, query, file) {
