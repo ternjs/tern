@@ -194,10 +194,12 @@
       start: tern.outputPos(query, file, argNode.start),
       end: tern.outputPos(query, file, wordEnd),
       isProperty: false,
-      completions: completions.map(function(name) {
-        var string = JSON.stringify(name);
+      completions: completions.map(function(rec) {
+        var string = JSON.stringify(typeof rec == "string" ? rec : rec.name);
         if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
-        return string;
+        if (typeof rec == "string") return string;
+        rec.name = string;
+        return rec;
       })
     };
   }
