@@ -284,6 +284,26 @@
   function maybeSet(obj, prop, val) {
     if (val != null) obj[prop] = val;
   }
+  
+  if (tern.registerLint) {
+    tern.registerLint("nodeRequire_lint", function(node, addMessage, getRule) {
+      var rule = getRule("UnknownModule");
+      if (!rule) return;
+      var cx = infer.cx(), server = cx.parent, data = server._node;
+      var argNodes = node.arguments;
+      if (argNodes && argNodes.length && argNodes[0].type == "Literal" || typeof argNodes[0].value == "string") {
+        var name = argNodes[0].value, locals = cx.definitions.node;
+        // is a local module (fs, etc)
+        var mod = locals[name];                  
+        if (!mod) {
+          // is a custom module?
+          var currentFile = data.currentFile || resolveProjectPath(server, node.sourceFile.name);
+          mod = resolveModule(server, name, currentFile);        
+        }
+        if (!(mod && mod.getType())) addMessage(argNodes[0], "Unknown module '" + name + "'", rule.severity);
+      }
+    });    
+  }
 
   tern.defineQueryType("node_exports", {
     takesFile: true,
@@ -317,6 +337,9 @@
     "!define": {
       require: {
         "!type": "fn(id: string) -> !custom:nodeRequire",
+        "!data": {
+          "!lint": "nodeRequire_lint",
+        },
         resolve: {
           "!type": "fn() -> string",
           "!url": "http://nodejs.org/api/globals.html#globals_require_resolve",
