@@ -298,9 +298,13 @@
         if (!mod) {
           // is a custom module?
           var currentFile = data.currentFile || resolveProjectPath(server, node.sourceFile.name);
-          mod = resolveModule(server, name, currentFile);        
+          if (currentFile) {
+            var relative = /^\.{0,2}\//.test(name);
+            if (relative) name = resolvePath(currentFile, name);
+            mod = resolveModule(server, name, currentFile);
+          }          
         }
-        if (!(mod && mod.getType())) addMessage(argNodes[0], "Unknown module '" + name + "'", rule.severity);
+        if (!(mod && (mod.getFunctionType() || mod.getType()))) addMessage(argNodes[0], "Unknown module '" + argNodes[0].value + "'", rule.severity);
       }
     });    
   }
