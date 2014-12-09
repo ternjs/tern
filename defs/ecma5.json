@@ -29,7 +29,7 @@
       "!doc": "Creates a new object with the specified prototype object and properties."
     },
     "defineProperty": {
-      "!type": "fn(obj: ?, prop: string, desc: ?)",
+      "!type": "fn(obj: ?, prop: string, desc: ?) -> !custom:Object_defineProperty",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/defineProperty",
       "!doc": "Defines a new property directly on an object, or modifies an existing property on an object, and returns the object. If you want to see how to use the Object.defineProperty method with a binary-flags-like syntax, see this article."
     },

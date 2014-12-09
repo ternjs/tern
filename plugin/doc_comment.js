@@ -45,8 +45,19 @@
       ObjectExpression: function(node) {
         for (var i = 0; i < node.properties.length; ++i)
           attachComments(node.properties[i].key);
+      },
+      CallExpression: function(node) {
+        if (isDefinePropertyCall(node)) attachComments(node);
       }
     });
+  }
+
+  function isDefinePropertyCall(node) {
+    return node.callee.type == "MemberExpression" &&
+      node.callee.object.name == "Object" &&
+      node.callee.property.name == "defineProperty" &&
+      node.arguments.length >= 3 &&
+      typeof node.arguments[1].value == "string";
   }
 
   function postInfer(ast, scope) {
@@ -75,6 +86,15 @@
           if (key.commentsBefore)
             interpretComments(prop, key.commentsBefore, scope,
                               node.objType.getProp(key.name));
+        }
+      },
+      CallExpression: function(node, scope) {
+        if (node.commentsBefore && isDefinePropertyCall(node)) {
+          var type = infer.expressionType({node: node.arguments[0], state: scope}).getType();
+          if (type && type instanceof infer.Obj) {
+            var prop = type.props[node.arguments[1].value];
+            if (prop) interpretComments(node, node.commentsBefore, scope, prop);
+          }
         }
       }
     }, infer.searchVisitor, scope);
@@ -333,6 +353,7 @@
     } else if (node.type == "AssignmentExpression") {
       if (node.right.type == "FunctionExpression")
         fn = node.right.body.scope.fnType;
+    } else if (node.type == "CallExpression") {
     } else { // An object property
       if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
     }
