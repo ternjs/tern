@@ -336,6 +336,10 @@ an existing file, and an `offset` property, either an integer or a
 `{line, ch}` object, indicating the approximate position of the
 fragment in the file.
 
+To remove a file from the server's model of the project, you can
+include an object with a `name` property that identifies the file and
+a `type` property of `"delete"`.
+
 [[server_api]]
 === Programming interface ===
 

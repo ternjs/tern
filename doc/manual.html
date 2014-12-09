@@ -684,6 +684,9 @@ the file (starting at a line boundary), a <code>name</code> property referring t
 an existing file, and an <code>offset</code> property, either an integer or a
 <code>{line, ch}</code> object, indicating the approximate position of the
 fragment in the file.</p>
+<p> To remove a file from the server&#8217;s model of the project, you can
+include an object with a <code>name</code> property that identifies the file and
+a <code>type</code> property of <code>"delete"</code>.</p>
 <h3> <a id="server_api"></a>Programming interface</h3>
 <p> <a id="tern.Server"></a> The base server (without HTTP or configuration-file
 reading) is implemented in <code>lib/tern.js</code>. That package exposes a
