@@ -1,0 +1,263 @@
+{
+  "angular": {
+    "label": "AngularJS",
+    "homepage": "https://angularjs.org/",
+    "description": "Adds AngularJS support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.java.git"
+    }
+  },
+  "aui": {
+    "label": "AlloyUI",
+    "homepage": "http://alloyui.com/",
+    "description": "Adds AlloyUI support. AlloyUI is a framework built on top of YUI3 (JavaScript) that uses Bootstrap (HTML/CSS) to provide a simple API for building high scalable applications.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.yuidoc.git"
+    }
+  },
+  "browser": {
+    "label": "Browser",
+    "homepage": "https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM",
+    "description": "Adds Browser support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "chai": {
+    "label": "Chai",
+    "homepage": "http://chaijs.com/",
+    "description": "Adds Chai support. Chai is a BDD / TDD assertion library for node and the browser that can be delightfully paired with any javascript testing framework.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "chrome-apps": {
+    "label": "Chrome Apps",
+    "homepage": "https://developer.chrome.com/apps/",
+    "description": "A Tern plugin adding support for Chrome Apps API. Chrome Apps deliver an experience as capable as a native app, but as safe as a web page. Just like web apps, Chrome Apps are written in HTML5, JavaScript, and CSS. But Chrome Apps look and behave like native apps, and they have native-like capabilities that are much more powerful than those available to web apps.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MetaMemoryT/tern-chrome-apps.git"
+    }
+  },
+  "ckeditor": {
+    "label": "CKEditor",
+    "homepage": "http://ckeditor.com/",
+    "description": "Add CKEditor support. The best web text editor for everyone",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.jsduck.git"
+    }
+  },
+  "closure": {
+    "label": "Closure",
+    "homepage": "https://developers.google.com/closure/library/",
+    "description": "Adds support for Closure Compiler annotations and the Closure Library. The Closure Library is a broad, well-tested, modular, and cross-browser JavaScript library. You can pull just what you need from a large set of reusable UI widgets and controls, and from lower-level utilities for DOM manipulation, server communication, animation, data structures, unit testing, rich-text editing, and more..",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/google/tern-closure"
+    }
+  },
+  "component": {
+    "label": "Component",
+    "homepage": "",
+    "description": "",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "cordovajs": {
+    "label": "Cordova JavaScript",
+    "homepage": "http://cordova.apache.org/",
+    "description": "Adds Cordova Javascript support. Apache Cordova is a platform for building native mobile applications using HTML, CSS and JavaScript",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.java.git"
+    }
+  },
+  "doc_comment": {
+    "label": "JSDoc Support",
+    "homepage": "http://ternjs.net/doc/manual.html#plugin_doc_comment",
+    "description": "This plugin, which is enabled by default in the bin/tern server, parses comments before function declarations, variable declarations, and object properties. It will look for JSDoc-style type declarations, and try to parse them and add them to the inferred types, and it will treat the first sentence of comment text as the docstring for the defined variable or property.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "dojotoolkit": {
+    "label": "Dojo Toolkit",
+    "homepage": "http://dojotoolkit.org/",
+    "description": "Add Dojo Toolkit support. Dojo saves you time and scales with your development process, using web standards as its platform. It’s the toolkit experienced developers turn to for building high quality desktop and mobile web applications. From simple websites to large packaged enterprise applications whether desktop or mobile, Dojo will meet your needs.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.dojotoolkit.git"
+    }
+  },
+  "ecma5": {
+    "label": "EcmaScript 5",
+    "homepage": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+    "description": "Adds ECMAScript 5 support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "extjs": {
+    "label": "ExtJS",
+    "homepage": "http://www.sencha.com/products/extjs/",
+    "description": "Add ExtJS support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.jsduck.git"
+    }
+  },
+  "gas": {
+    "label": "Google Apps Script",
+    "homepage": "https://developers.google.com/apps-script/",
+    "description": "A Tern plugin adding Google Apps Script support. Google Apps Script is a scripting language based on JavaScript that lets you do new and cool things with Google Apps like Docs, Sheets, and Forms. There's nothing to install — we give you a code editor right in your browser, and your scripts run on Google's servers",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/aki2o/tern-gas.git"
+    }
+  },
+  "gmaps": {
+    "label": "Google Maps",
+    "homepage": "https://developers.google.com/maps/documentation/javascript/",
+    "description": "Add Google Maps Javascript API support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.googleapi.git"
+    }
+  },
+  "grunt": {
+    "label": "Grunt",
+    "homepage": "http://dojotoolkit.org/",
+    "description": "Add Grunt support. Grunt is the JavaScript Task Runner",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.java.git"
+    }
+  },
+  "jquery": {
+    "label": "jQuery",
+    "homepage": "http://jquery.com/",
+    "description": "Adds jQuery support. jQuery is a fast, small, and feature-rich JavaScript library. It makes things like HTML document traversal and manipulation, event handling, animation, and Ajax much simpler with an easy-to-use API that works across a multitude of browsers. With a combination of versatility and extensibility, jQuery has changed the way that millions of people write JavaScript.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "liferay": {
+    "label": "Liferay",
+    "homepage": "https://www.liferay.com/fr/",
+    "description": "Adds Liferay Javascript API support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-liferay.git"
+    }
+  },
+  "lint": {
+    "label": "Lint",
+    "homepage": "https://github.com/angelozerr/tern-lint",
+    "description": "This plugin validate JS files (but not syntax errors).",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-lint.git"
+    }
+  },
+  "meteor": {
+    "label": "Meteor",
+    "homepage": "https://www.meteor.com/",
+    "description": "Add Meteor support. Meteor is an open-source platform for building top-quality web apps in a fraction of the time, whether you're an expert developer or just getting started.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Slava/tern-meteor.git"
+    }
+  },
+  "node-express": {
+    "label": "Express",
+    "homepage": "http://expressjs.com/",
+    "description": "Add express web application framework for node support. Express is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-node-express.git"
+    }
+  },
+  "node-mongodb-native": {
+    "label": "Mongo DB Native NodeJS Driver",
+    "homepage": "http://mongodb.github.io/node-mongodb-native/",
+    "description": "Add node mongodb native support. Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.applications.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-node-mongodb-native.git"
+    }
+  },
+  "node-mongoose": {
+    "label": "Mongoose",
+    "homepage": "http://mongoosejs.com/",
+    "description": "Add mongoose support. mongoose is a elegant mongodb object modeling for node.js.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-node-mongoose.git"
+    }
+  },
+  "node": {
+    "label": "Node.js",
+    "homepage": "http://www.nodeclipse.org/",
+    "description": "Adds node.js support.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "qooxdoo": {
+    "label": "Qooxdoo",
+    "homepage": "http://qooxdoo.org/",
+    "description": "Add Qooxdoo support. qooxdoo is a universal JavaScript framework with a coherent set of individual components and a powerful toolchain. It is open source under liberal licenses, and supported by one of the world's leading web hosts, 1&1.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-qooxdoo.git"
+    }
+  },
+  "requirejs": {
+    "label": "RequireJS",
+    "homepage": "http://requirejs.org/",
+    "description": "Adds RequireJS support. RequireJS is a JavaScript file and module loader. It is optimized for in-browser use, but it can be used in other JavaScript environments, like Rhino and Node. Using a modular script loader like RequireJS will improve the speed and quality of your code.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "tabris": {
+    "label": "tabris.js",
+    "homepage": "https://github.com/eclipsesource/tabris-js",
+    "description": "Adds tabris.js Javascript API support. Native apps in JavaScript https://tabrisjs.com",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern-tabris.git"
+    }
+  },
+  "underscore": {
+    "label": "Underscore",
+    "homepage": "http://underscorejs.org/",
+    "description": "Adds Underscore support. Underscore is a JavaScript library that provides a whole mess of useful functional programming helpers without extending any built-in objects. It's the answer to the question: 'If I sit down in front of a blank HTML page, and want to start being productive immediately, what do I need?'and the tie to go along with jQuery's tux and Backbone's suspenders.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/marijnh/tern.git"
+    }
+  },
+  "yui": {
+    "label": "YUI",
+    "homepage": "http://yuilibrary.com/",
+    "description": "Adds YUI Library support. YUI is a free, open source JavaScript and CSS library for building richly interactive web applications.",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/angelozerr/tern.yuidoc.git"
+    }
+  }
+}
