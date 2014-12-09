@@ -764,6 +764,12 @@
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RangeError",
     "!doc": "Represents an error when a number is not within the correct range allowed."
   },
+  "TypeError": {
+    "!type": "fn(message: string)",
+    "prototype": "Error.prototype",
+    "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/TypeError",
+    "!doc": "Represents an error an error when a value is not of the expected type."
+  },
   "parseInt": {
     "!type": "fn(string: string, radix?: number) -> number",
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/parseInt",
