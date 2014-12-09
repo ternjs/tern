@@ -44,7 +44,7 @@
       },
       ObjectExpression: function(node) {
         for (var i = 0; i < node.properties.length; ++i)
-          attachComments(node.properties[i].key);
+          attachComments(node.properties[i]);
       },
       CallExpression: function(node) {
         if (isDefinePropertyCall(node)) attachComments(node);
@@ -82,10 +82,10 @@
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
-          var prop = node.properties[i], key = prop.key;
-          if (key.commentsBefore)
-            interpretComments(prop, key.commentsBefore, scope,
-                              node.objType.getProp(key.name));
+          var prop = node.properties[i];
+          if (prop.commentsBefore)
+            interpretComments(prop, prop.commentsBefore, scope,
+                              node.objType.getProp(prop.key.name));
         }
       },
       CallExpression: function(node, scope) {
