@@ -314,9 +314,9 @@
         case "type":
           type = parsed; break;
         case "param": case "arg": case "argument":
-          var name = m[2].slice(parsed.end).match(/^\s*(\S+)/);
-          if (!name) continue;
-          var argname = name[1] + (parsed.isOptional ? "?" : "");
+            var name = m[2].slice(parsed.end).match(/^\s*(\[?)\s*([^\]\s]+)\s*(\]?).*/);
+            if (!name) continue;         
+            var argname = name[2] + (parsed.isOptional || (name[1] === '[' && name[3] === ']') ? "?" : "");
           (args || (args = Object.create(null)))[argname] = parsed;
           break;
         }
