@@ -1965,9 +1965,9 @@
             size: "number",
             blksize: "number",
             blocks: "number",
-            atime: "Date",
-            mtime: "Date",
-            ctime: "Date"
+            atime: "+Date",
+            mtime: "+Date",
+            ctime: "+Date"
           },
           "!url": "http://nodejs.org/api/fs.html#fs_class_fs_stats",
           "!doc": "Objects returned from fs.stat(), fs.lstat() and fs.fstat() and their synchronous counterparts are of this type."
