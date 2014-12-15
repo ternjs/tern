@@ -245,13 +245,53 @@
         uri: "string",
         config: "fn() -> ?",
         exports: "?"
+      },
+      config: {
+        baseUrl: {
+          "!type": "string",
+          "!doc": "the root path to use for all module lookups",
+          "!url": "http://requirejs.org/docs/api.html#config-baseUrl"
+        },
+        paths: {
+          "!type": "?",
+          "!doc": "path mappings for module names not found directly under baseUrl. The path settings are assumed to be relative to baseUrl, unless the paths setting starts with a '/' or has a URL protocol in it ('like http:').",
+          "!url": "http://requirejs.org/docs/api.html#config-paths"
+        },
+        shim: {
+          "!type": "?",
+          "!url": "http://requirejs.org/docs/api.html#config-shim"
+        },
+        map: {
+          "!type": "?",
+          "!url": "http://requirejs.org/docs/api.html#config-map"
+        },
+        config: {
+          "!type": "?",
+          "!url": "http://requirejs.org/docs/api.html#config-moduleconfig"
+        },
+        packages: {
+          "!type": "?",
+          "!url": "http://requirejs.org/docs/api.html#config-packages"
+        },
+        nodeIdCompat: {
+          "!type": "?",
+          "!url": "http://requirejs.org/docs/api.html#config-nodeIdCompat"
+        },
+        waitSeconds: {
+          "!type": "number",
+          "!url": "http://requirejs.org/docs/api.html#config-waitSeconds"
+        },
+        context: {
+          "!type": "number",
+          "!url": "http://requirejs.org/docs/api.html#config-context"
+        }
       }
     },
     requirejs: {
       "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
       onError: "fn(err: +Error)",
       load: "fn(context: ?, moduleName: string, url: string)",
-      config: "fn(config: ?) -> !custom:requireJSConfig",
+      config: "fn(config: config) -> !custom:requireJSConfig",
       version: "string",
       isBrowser: "bool"
     },
