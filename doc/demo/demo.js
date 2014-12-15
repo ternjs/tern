@@ -79,6 +79,7 @@ CodeMirror.on(window, "load", function() {
 function initEditor() {
   var keyMap = {
     "Ctrl-I": function(cm) { server.showType(cm); },
+    "Ctrl-O": function(cm) { server.showDocs(cm); },
     "Ctrl-Space": function(cm) { server.complete(cm); },
     "Alt-.": function(cm) { server.jumpToDef(cm); },
     "Alt-,": function(cm) { server.jumpBack(cm); },
@@ -123,6 +124,7 @@ function initEditor() {
 var commands = {
   complete: function(cm) { server.complete(cm); },
   jumptodef: function(cm) { server.jumpToDef(cm); },
+  finddocs: function(cm) { server.showDocs(cm); },
   findtype: function(cm) { server.showType(cm); },
   rename: function(cm) { server.rename(cm); },
   addfile: function() {
