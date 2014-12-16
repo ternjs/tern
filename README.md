@@ -1,5 +1,7 @@
 # Tern
 
+[![Build Status](https://secure.travis-ci.org/marijnh/tern.png)](http://travis-ci.org/marijnh/tern)
+
 This is [Tern][1]. Tern is a stand-alone, editor-independent
 JavaScript analyzer that can be used to improve the JavaScript
 integration of existing editors.
