@@ -68,6 +68,7 @@ exports.runTests = function(filter) {
   test("proto");
   test("generic");
   test("array");
+  test("function_prop");
 
   test({load: ["node_simple"], plugins: {node: true}});
   test({load: ["node_require_private"], plugins: {node: true}});
