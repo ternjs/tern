@@ -114,7 +114,7 @@
       if (b && b.charAt(0) != ".") return b;
       if (a && b) return a + "/" + b;
       else return (a || "") + (b || "");
-    },
+    }
   };
 
   infer.registerFunction("requireJS", function(_self, args, argNodes) {
@@ -233,7 +233,7 @@
       passes: {
         preCondenseReach: preCondenseReach,
         postLoadDef: postLoadDef
-      },
+      }
     };
   });
 
