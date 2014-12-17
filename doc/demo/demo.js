@@ -94,7 +94,7 @@ function initEditor() {
 
   server = new CodeMirror.TernServer({
     defs: defs,
-    plugins: {requirejs: {}, doc_comment: true},
+    plugins: {requirejs: {}, doc_comment: true, complete_strings: true},
     switchToDoc: function(name) { selectDoc(docID(name)); },
     workerDeps: ["../../../acorn/acorn.js", "../../../acorn/acorn_loose.js",
                  "../../../acorn/util/walk.js", "../../../../lib/signal.js", "../../../../lib/tern.js",

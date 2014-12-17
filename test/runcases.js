@@ -8,6 +8,7 @@ require("../plugin/node.js");
 require("../plugin/doc_comment.js");
 require("../plugin/component.js");
 require("../plugin/angular.js");
+require("../plugin/complete_strings.js");
 var util = require("./util");
 
 var defData = {

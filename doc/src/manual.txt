@@ -16,6 +16,7 @@ engine>> to do the actual type inference.
 ** <<typedef,JSON type definitions>>
 ** <<plugins,Server plugins>>
 *** <<plugin_doc_comment,Doc comments>>
+*** <<plugin_complete_strings,String completion>>
 *** <<plugin_node,node>>
 *** <<plugin_requirejs,RequireJS>>
 *** <<plugin_angular,Angular.js>>
@@ -571,6 +572,14 @@ To turn this plugin off, set `doc_comment: null` in your
 The plugin understands the following configuration parameters:
 
 `fullDocs`:: Can be set to `true` to return the full comment text instead of the first sentence.
+
+[[plugin_complete_strings]]
+==== String completion plugin ====
+
+When enabled, this plugin will gather (short) strings in your code,
+and completing when inside a string will try to complete to previously
+seen strings. Takes a single option, `maxLength`, which controls the
+maximum length of string values to gather, and defaults to 15.
 
 [[plugin_node]]
 ==== Node.js plugin ====
