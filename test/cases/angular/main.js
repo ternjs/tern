@@ -39,3 +39,14 @@ angular.module('sample', ['ngResource', 'sample.config', 'sample.filters'])
 }])
 
 ;
+
+angular.module('docsScopeProblemExample', [])
+.directive('myCustomer', function() {
+  return {
+    //+ bindToController, compile, controller, controllerAs, template, templateUrl, ...
+  };
+}).directive('myCustomer', function() {
+  return {
+    t //+ template, templateNamespace, templateUrl, ...
+  };
+});
