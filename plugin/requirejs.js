@@ -337,7 +337,9 @@
         "!doc": "To detect errors that are not caught by local errbacks, you can override requirejs.onError()",
         "!url": "http://requirejs.org/docs/api.html#requirejsonerror"
       },
-      load: "fn(context: ?, moduleName: string, url: string)",
+      load: {
+        "!type": "fn(context: ?, moduleName: string, url: string)"
+      },
       config: "fn(config: config) -> !custom:requireJSConfig",
       version: "string",
       isBrowser: "bool"
