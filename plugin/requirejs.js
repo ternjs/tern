@@ -247,6 +247,7 @@
         exports: "?"
       },
       config: {
+        "!url": "http://requirejs.org/docs/api.html#config",
         baseUrl: {
           "!type": "string",
           "!doc": "the root path to use for all module lookups",
@@ -259,38 +260,86 @@
         },
         shim: {
           "!type": "?",
+          "!doc": "Configure the dependencies, exports, and custom initialization for older, traditional 'browser globals' scripts that do not use define() to declare the dependencies and set a module value.",
           "!url": "http://requirejs.org/docs/api.html#config-shim"
         },
         map: {
           "!type": "?",
+          "!doc": "For the given module prefix, instead of loading the module with the given ID, substitute a different module ID.",
           "!url": "http://requirejs.org/docs/api.html#config-map"
         },
         config: {
           "!type": "?",
+          "!doc": "There is a common need to pass configuration info to a module. That configuration info is usually known as part of the application, and there needs to be a way to pass that down to a module. In RequireJS, that is done with the config option for requirejs.config(). Modules can then read that info by asking for the special dependency 'module' and calling module.config().",
           "!url": "http://requirejs.org/docs/api.html#config-moduleconfig"
         },
         packages: {
           "!type": "?",
+          "!doc": "configures loading modules from CommonJS packages. See the packages topic for more information.",
           "!url": "http://requirejs.org/docs/api.html#config-packages"
         },
         nodeIdCompat: {
           "!type": "?",
+          "!doc": "Node treats module ID example.js and example the same. By default these are two different IDs in RequireJS. If you end up using modules installed from npm, then you may need to set this config value to true to avoid resolution issues.",
           "!url": "http://requirejs.org/docs/api.html#config-nodeIdCompat"
         },
         waitSeconds: {
           "!type": "number",
+          "!doc": "The number of seconds to wait before giving up on loading a script. Setting it to 0 disables the timeout. The default is 7 seconds.",
           "!url": "http://requirejs.org/docs/api.html#config-waitSeconds"
         },
         context: {
           "!type": "number",
+          "!doc": "A name to give to a loading context. This allows require.js to load multiple versions of modules in a page, as long as each top-level require call specifies a unique context string. To use it correctly, see the Multiversion Support section.",
           "!url": "http://requirejs.org/docs/api.html#config-context"
+        },
+        deps: {
+          "!type": "?",
+          "!doc": "An array of dependencies to load. Useful when require is defined as a config object before require.js is loaded, and you want to specify dependencies to load as soon as require() is defined. Using deps is just like doing a require([]) call, but done as soon as the loader has processed the configuration. It does not block any other require() calls from starting their requests for modules, it is just a way to specify some modules to load asynchronously as part of a config block.",
+          "!url": "http://requirejs.org/docs/api.html#config-deps"
+        },
+        callback: {
+          "!type": "fn()",
+          "!doc": "A function to execute after deps have been loaded. Useful when require is defined as a config object before require.js is loaded, and you want to specify a function to require after the configuration's deps array has been loaded.",
+          "!url": "http://requirejs.org/docs/api.html#config-callback"
+        },
+        enforceDefine: {
+          "!type": "bool",
+          "!doc": "If set to true, an error will be thrown if a script loads that does not call define() or have a shim exports string value that can be checked. See Catching load failures in IE for more information.",
+          "!url": "http://requirejs.org/docs/api.html#config-enforceDefine"
+        },
+        xhtml: {
+          "!type": "bool",
+          "!doc": "If set to true, document.createElementNS() will be used to create script elements.",
+          "!url": "http://requirejs.org/docs/api.html#config-xhtml"
+        },
+        urlArgs: {
+          "!type": "string",
+          "!doc": "Extra query string arguments appended to URLs that RequireJS uses to fetch resources. Most useful to cache bust when the browser or server is not configured correctly.",
+          "!url": "http://requirejs.org/docs/api.html#config-urlArgs"
+        },
+        scriptType: {
+          "!type": "string",
+          "!doc": "Specify the value for the type='' attribute used for script tags inserted into the document by RequireJS. Default is 'text/javascript'. To use Firefox's JavaScript 1.8 features, use 'text/javascript;version=1.8'.",
+          "!url": "http://requirejs.org/docs/api.html#config-scriptType"
+        },
+        skipDataMain: {
+          "!type": "bool",
+          "!doc": "Introduced in RequireJS 2.1.9: If set to true, skips the data-main attribute scanning done to start module loading. Useful if RequireJS is embedded in a utility library that may interact with other RequireJS library on the page, and the embedded version should not do data-main loading.",
+          "!url": "http://requirejs.org/docs/api.html#config-skipDataMain"
         }
       }
     },
     requirejs: {
       "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
-      onError: "fn(err: +Error)",
-      load: "fn(context: ?, moduleName: string, url: string)",
+      onError: {
+        "!type": "fn(err: +Error)",
+        "!doc": "To detect errors that are not caught by local errbacks, you can override requirejs.onError()",
+        "!url": "http://requirejs.org/docs/api.html#requirejsonerror"
+      },
+      load: {
+        "!type": "fn(context: ?, moduleName: string, url: string)"
+      },
       config: "fn(config: config) -> !custom:requireJSConfig",
       version: "string",
       isBrowser: "bool"
