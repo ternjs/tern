@@ -33,3 +33,8 @@ requirejs.config({
 requirejs.config({
   //+ baseUrl, config, context, map, nodeIdCompat, packages, paths, shim, ...
 });
+
+requirejs.config({
+  baseUrl: '',
+  //+ config, context, map, nodeIdCompat, packages, paths, shim, ...
+});
