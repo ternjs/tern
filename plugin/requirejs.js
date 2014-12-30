@@ -52,9 +52,24 @@
     return data.require;
   }
 
+  function getModuleInterface(data) {
+    var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
+    var expProp = mod.defProp("exports");
+    getExports(data).propagate(expProp, EXPORT_OBJ_WEIGHT);
+    expProp.propagate(getModule(data.currentFile, data));
+    return mod;
+  }
+
+  function getExports(data) {
+    var exports = new infer.Obj(true, "exports");
+    getModule(data.currentFile, data).addType(exports, EXPORT_OBJ_WEIGHT);
+    return exports;
+  }
+
   function getInterface(name, data) {
     if (name == "require") return getRequire(data);
-    if (name == "module") return infer.cx().definitions.requirejs.module;
+    if (name == "module") return getModuleInterface(data);
+    if (name == "exports") return getExports(data);
 
     if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
       var over = data.options.override[name];
@@ -125,6 +140,7 @@
     var out = getModule(name, data);
 
     var deps = [], fn;
+
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.options.projectDir, path.dirname(node.sourceFile.name));
@@ -132,21 +148,12 @@
         deps.push(getInterface(path.join(base, node.value), data));
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string") {
-          if (elt.value == "exports") {
-            var exports = new infer.Obj(true);
-            deps.push(exports);
-            out.addType(exports, EXPORT_OBJ_WEIGHT);
-          } else {
-            deps.push(getInterface(path.join(base, elt.value), data));
-          }
-        }
+        if (elt.type == "Literal" && typeof elt.value == "string")
+          deps.push(getInterface(path.join(base, elt.value), data));
       }
     } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
-      var exports = new infer.Obj(true);
-      deps.push(getInterface("require", data), exports);
-      out.addType(exports, EXPORT_OBJ_WEIGHT);
+      deps.push(getInterface("require", data), getInterface("exports", data));
       fn = args[0];
     }
 
@@ -243,8 +250,7 @@
       module: {
         id: "string",
         uri: "string",
-        config: "fn() -> ?",
-        exports: "?"
+        config: "fn() -> ?"
       },
       config: {
         "!url": "http://requirejs.org/docs/api.html#config",
