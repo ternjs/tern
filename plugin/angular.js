@@ -302,6 +302,83 @@
         preventDefault: "fn()",
         defaultPrevented: "bool"
       },
+      directiveObj: {
+        multiElement: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-multielement-",
+          "!doc": "When this property is set to true, the HTML compiler will collect DOM nodes between nodes with the attributes directive-name-start and directive-name-end, and group them together as the directive elements. It is recommended that this feature be used on directives which are not strictly behavioural (such as ngClick), and which do not manipulate or replace child nodes (such as ngInclude)."
+        },
+        priority: {
+          "!type": "number",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-priority-",
+          "!doc": "When there are multiple directives defined on a single DOM element, sometimes it is necessary to specify the order in which the directives are applied. The priority is used to sort the directives before their compile functions get called. Priority is defined as a number. Directives with greater numerical priority are compiled first. Pre-link functions are also run in priority order, but post-link functions are run in reverse order. The order of directives with the same priority is undefined. The default priority is 0."
+        },
+        terminal: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-terminal-",
+          "!doc": "If set to true then the current priority will be the last set of directives which will execute (any directives at the current priority will still execute as the order of execution on same priority is undefined). Note that expressions and other directives used in the directive's template will also be excluded from execution."
+        },
+        scope: {
+          "!type": "?",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-scope-",
+          "!doc": "If set to true, then a new scope will be created for this directive. If multiple directives on the same element request a new scope, only one new scope is created. The new scope rule does not apply for the root of the template since the root of the template always gets a new scope. If set to {} (object hash), then a new 'isolate' scope is created. The 'isolate' scope differs from normal scope in that it does not prototypically inherit from the parent scope. This is useful when creating reusable components, which should not accidentally read or modify data in the parent scope."
+        },
+        bindToController: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-bindtocontroller-",
+          "!doc": "When an isolate scope is used for a component (see above), and controllerAs is used, bindToController: true will allow a component to have its properties bound to the controller, rather than to scope. When the controller is instantiated, the initial values of the isolate scope bindings are already available."
+        },
+        controller: {
+          "!type": "fn()",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-require-",
+          "!doc": "Controller constructor function. The controller is instantiated before the pre-linking phase and it is shared with other directives (see require attribute). This allows the directives to communicate with each other and augment each other's behavior."
+        },
+        require: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-controller-",
+          "!doc": "Require another directive and inject its controller as the fourth argument to the linking function. The require takes a string name (or array of strings) of the directive(s) to pass in. If an array is used, the injected argument will be an array in corresponding order. If no such directive can be found, or if the directive does not have a controller, then an error is raised."
+        },
+        controllerAs: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-controlleras-",
+          "!doc": "Controller alias at the directive scope. An alias for the controller so it can be referenced at the directive template. The directive needs to define a scope for this configuration to be used. Useful in the case when directive is used as component."
+        },
+        restrict: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-restrict-",
+          "!doc": "String of subset of EACM which restricts the directive to a specific directive declaration style. If omitted, the defaults (elements and attributes) are used. E - Element name (default): <my-directive></my-directive>. A - Attribute (default): <div my-directive='exp'></div>. C - Class: <div class='my-directive: exp;'></div>. M - Comment: <!-- directive: my-directive exp --> "
+        },
+        templateNamespace: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-templatenamespace-",
+          "!doc": "String representing the document type used by the markup in the template. AngularJS needs this information as those elements need to be created and cloned in a special way when they are defined outside their usual containers like <svg> and <math>."
+        },
+        template: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-template-",
+          "!doc": "HTML markup that may: Replace the contents of the directive's element (default). Replace the directive's element itself (if replace is true - DEPRECATED). Wrap the contents of the directive's element (if transclude is true)."
+        },
+        templateUrl: {
+          "!type": "string",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-templateurl-",
+          "!doc": "This is similar to template but the template is loaded from the specified URL, asynchronously."
+        },
+        transclude: {
+          "!type": "bool",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-transclude-",
+          "!doc": "Extract the contents of the element where the directive appears and make it available to the directive. The contents are compiled and provided to the directive as a transclusion function."
+        },
+        compile: {
+          "!type": "fn(tElement: +Element, tAttrs: +Attr)",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-transclude-",
+          "!doc": "The compile function deals with transforming the template DOM. Since most directives do not do template transformation, it is not used often."
+        },
+        link: {
+          "!type": "fn(scope: ?, iElement: +Element, iAttrs: +Attr, controller: ?, transcludeFn: fn())",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-link-",
+          "!doc": "The link function is responsible for registering DOM listeners as well as updating the DOM. It is executed after the template has been cloned. This is where most of the directive logic will be put."
+        }
+      },      
       Module: {
         "!url": "http://docs.angularjs.org/api/angular.Module",
         "!doc": "Interface for configuring angular modules.",
@@ -325,7 +402,7 @@
             "!doc": "Register a controller."
           },
           directive: {
-            "!type": "fn(name: string, directiveFactory: fn()) -> !this",
+            "!type": "fn(name: string, directiveFactory: fn() -> +directiveObj) -> !this",
             "!effects": ["custom angular_regFieldCall"],
             "!url": "http://docs.angularjs.org/api/ng.$compileProvider#directive",
             "!doc": "Register a new directive with the compiler."
