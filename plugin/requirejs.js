@@ -153,7 +153,7 @@
       }
     } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
-      deps.push(getInterface("require", data), getInterface("exports", data));
+      deps.push(getInterface("require", data), getInterface("exports", data), getInterface("module", data));
       fn = args[0];
     }
 
