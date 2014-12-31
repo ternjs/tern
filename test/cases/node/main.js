@@ -74,3 +74,6 @@ module.exports. //+
 require('f //+ 'fs'
 // completion on custom require module
 require("my //+ "mymod"
+
+// go to definition for modulest
+require('./localfile'//loc: 1, 0, localfile.js
