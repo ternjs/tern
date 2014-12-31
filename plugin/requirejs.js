@@ -52,10 +52,10 @@
     return data.require;
   }
 
-  function getModuleInterface(data) {
+  function getModuleInterface(data, exports) {
     var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
     var expProp = mod.defProp("exports");
-    getExports(data).propagate(expProp, EXPORT_OBJ_WEIGHT);
+    exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     expProp.propagate(getModule(data.currentFile, data));
     return mod;
   }
@@ -67,10 +67,6 @@
   }
 
   function getInterface(name, data) {
-    if (name == "require") return getRequire(data);
-    if (name == "module") return getModuleInterface(data);
-    if (name == "exports") return getExports(data);
-
     if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
       var over = data.options.override[name];
       if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
@@ -139,21 +135,28 @@
     var name = data.currentFile;
     var out = getModule(name, data);
 
-    var deps = [], fn;
+    var deps = [], fn, exports, mod;
+
+    function interf(name) {
+      if (name == "require") return getRequire(data);
+      if (name == "exports") return exports || (exports = getExports(data));
+      if (name == "module") return mod || (mod = getModuleInterface(data, exports || (exports = getExports(data))));
+      return getInterface(name, data);
+    }
 
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.options.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
-        deps.push(getInterface(path.join(base, node.value), data));
+        deps.push(interf(path.join(base, node.value), data));
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string")
-          deps.push(getInterface(path.join(base, elt.value), data));
+          deps.push(interf(path.join(base, elt.value), data));
       }
     } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
-      deps.push(getInterface("require", data), getInterface("exports", data), getInterface("module", data));
+      deps.push(interf("require", data), interf("exports", data), interf("module", data));
       fn = args[0];
     }
 
