@@ -36,6 +36,7 @@
     module.propagate(scope.defProp("module"));
     var exports = new infer.Obj(true, "exports");
     module.origin = exports.origin = origin;
+    module.originNode = exports.originNode = scope.originNode;
     exports.propagate(scope.defProp("exports"));
     var moduleExports = scope.exports = module.defProp("exports");
     exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
@@ -137,6 +138,26 @@
     }
   }
 
+  function findTypeAt(file, pos, expr, type) {
+    var isStringLiteral = expr.node.type === "Literal" &&
+       typeof expr.node.value === "string";
+    var isRequireArg = !!expr.node.required;
+
+    if (isStringLiteral && isRequireArg) {
+      // The `type` is a value shared for all string literals.
+      // We must create a copy before modifying `origin` and `originNode`.
+      // Otherwise all string literals would point to the last jump location
+      type = Object.create(type);
+
+      // Provide a custom origin location pointing to the require()d file
+      var exportedType = expr.node.required.types[0];
+      type.origin = exportedType.origin;
+      type.originNode = exportedType.originNode;
+    }
+
+    return type;
+  }
+
   tern.registerPlugin("node", function(server, options) {
     server._node = {
       modules: Object.create(null),
@@ -169,7 +190,8 @@
     return {defs: defs,
             passes: {preCondenseReach: preCondenseReach,
                      postLoadDef: postLoadDef,
-                     completion: findCompletions}};
+                     completion: findCompletions,
+                     typeAt: findTypeAt}};
   });
 
   // Completes CommonJS module names in strings passed to require

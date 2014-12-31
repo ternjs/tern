@@ -150,12 +150,14 @@ exports.runTests = function(filter, caseDir) {
                    "instead of expected docstring\n  " + args);
             }
           } else if (kind == "loc:") { // Definition finding test
-            var pos = args.match(/^\s*(\d+),\s*(\d+)/), line = Number(pos[1]), col = Number(pos[2]);
+            var pos = args.match(/^\s*(\d+),\s*(\d+)(?:,\s*([^,]+))?/), line = Number(pos[1]), col = Number(pos[2]), file = pos[3];
+            var actualLoc = (file ? resp.origin + ":" : "") + (resp.start.line + 1) + ":" + resp.start.ch;
+            var expectedLoc = (file ? file + ":" : "") + line + ":" + col;
             if (!resp.start)
-              fail(m, "Did not find a definition.");
-            else if (resp.start.line + 1 != line || resp.start.ch != col)
-              fail(m, "Found definition at " + (resp.start.line + 1) + ":" + resp.start.ch +
-                   " instead of expected " + line + ":" + col);
+              fail(m, "Did not find a definition (expected " + expectedLoc + ").");
+            else if (resp.start.line + 1 != line || resp.start.ch != col || (file && file !== resp.origin))
+              fail(m, "Found definition at " + actualLoc +
+                   " instead of expected " + expectedLoc);
           } else if (kind == "origin:") { // Origin finding test
             if (resp.origin != args)
               fail(m, "Found origin\n  " + resp.origin + "\ninstead of expected origin\n  " + args);
