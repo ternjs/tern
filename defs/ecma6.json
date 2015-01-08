@@ -520,19 +520,23 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/flags"
       },
       "sticky": {
-       "!type": "bool",
+        "!type": "bool",
         "!doc": "The sticky property reflects whether or not the search is sticky (searches in strings only from the index indicated by the lastIndex property of this regular expression). sticky is a read-only property of an individual regular expression object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/sticky"
       }
     }
   },
   "Set": {
-    "!type": "fn(iterable: ?)",
+    "!type": "fn(iterable: [?])",
     "!doc": "The Set object lets you store unique values of any type, whether primitive values or object references.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
+    "length": {
+      "!type": "number",
+      "!doc": "The value of the length property is 1."
+    },
     "prototype": {
       "add": {
-        "!type": "fn(value: ?)",
+        "!type": "fn(value: ?) -> !this",
         "!doc": "The add() method appends a new element with a specified�value to the end of a Set object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/add"
       },
@@ -542,36 +546,37 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/clear"
       },
       "delete": {
-        "!type": "fn(value: ?)",
+        "!type": "fn(value: ?) -> bool",
         "!doc": "The delete() method removes the specified element from a Set object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/delete"
       },
       "entries": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The entries() method returns a new Iterator object that contains an array of [value, value] for each element in the Set object, in insertion order. For Set objects there is no key like in Map objects. However, to keep the API similar to the Map object, each entry has the same value for its key and value here, so that an array [value, value] is returned.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/entries"
       },
       "forEach": {
-        "!type": "fn(callback: ?, thisArg: ?)",
+        "!type": "fn(callback: fn(value: ?, value2: ?, set: +Set), thisArg?: ?)",
         "!doc": "The forEach() method executes a provided function once per each value in the Set object, in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/forEach"
       },
       "has": {
-        "!type": "fn(value: ?)",
+        "!type": "fn(value: ?) -> bool",
         "!doc": "The has() method returns a boolean indicating whether an element with the specified value exists in a Set object or not.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/has"
       },
       "keys": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The values() method returns a new Iterator object that contains the values for each element in the Set object in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/keys"
       },
       "size": {
+        "!type": "number",
         "!doc": "The size accessor property returns the number of elements in a Set object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/size"
       },
       "values": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The values() method returns a new Iterator object that contains the values for each element in the Set object in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/values"
       },
