@@ -308,87 +308,87 @@
   },
   "Math": {
     "acosh": {
-      "!type": "fn()",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.acosh() function returns the hyperbolic arc-cosine of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/acosh"
     },
     "asinh": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.asinh() function returns the hyperbolic arcsine of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/asinh"
     },
     "atanh": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.atanh() function returns the hyperbolic arctangent of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atanh"
     },
     "cbrt": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.cbrt() function returns the cube root of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/cbrt"
     },
     "clz32": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.clz32() function returns the number of leading zero bits in the 32-bit binary representation of a number.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/clz32"
     },
     "cosh": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.cosh() function returns the hyperbolic cosine of a number, that can be expressed using the constant e:",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/cosh"
     },
     "expm1": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.expm1() function returns ex - 1, where x is the argument, and e the base of the natural logarithms.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/expm1"
     },
     "fround": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.fround() function returns the nearest single precision float representation of a number.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/fround"
     },
     "hypot": {
-      "!type": "fn()",
+      "!type": "fn(value: number) -> number",
       "!doc": "The Math.hypot() function returns the square root of the sum of squares of its arguments, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/hypot"
     },
     "imul": {
-      "!type": "fn(a: ?, b: ?)",
+      "!type": "fn(a: number, b: number) -> number",
       "!doc": "The Math.imul() function returns the result of the C-like 32-bit multiplication of the two parameters.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul"
     },
     "log10": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.log10() function returns the base 10 logarithm of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log10"
     },
     "log1p": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.log1p() function returns the natural logarithm (base e) of 1 + a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log1p"
     },
     "log2": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.log2() function returns the base 2 logarithm of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log2"
     },
     "sign": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.sign() function returns the sign of a number, indicating whether the number is positive, negative or zero.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign"
     },
     "sinh": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.sinh() function returns the hyperbolic sine of a number, that can be expressed using the constant e:",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sinh"
     },
     "tanh": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.tanh() function returns the hyperbolic tangent of a number, that is",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/tanh"
     },
     "trunc": {
-      "!type": "fn(x: ?)",
+      "!type": "fn(x: number) -> number",
       "!doc": "The Math.trunc() function returns the integral part of a number by removing any fractional digits. It does not round any numbers. The function can be expressed with the floor() and ceil() function:",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/trunc"
     }
