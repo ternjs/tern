@@ -512,74 +512,17 @@
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/revocable"
     }
   },
-  "RegExp": {
-    "!type": "fn(pattern: ?, flags: ?, g: ?, i: ?, m: ?, y: ?)",
-    "!doc": "The RegExp constructor creates a regular expression object for matching text with a pattern.",
-    "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
+  "RegExp": {    
     "prototype": {
-      "exec": {
-        "!type": "fn(str: ?)",
-        "!doc": "The exec() method executes a search for a match in a specified string. Returns a result array, or null.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec"
-      },
       "flags": {
+        "!type": "string",
         "!doc": "The flags property returns a string consisting of the flags of the current regular expression object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/flags"
       },
-      "global": {
-        "!doc": "The global property indicates whether or not the 'g' flag is used with the regular expression. global is a read-only property of an individual regular expression instance.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/global"
-      },
-      "ignoreCase": {
-        "!doc": "The ignoreCase property indicates whether or not the 'i' flag is used with the regular expression. ignoreCase is a read-only property of an individual regular expression instance.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/ignoreCase"
-      },
-      "lastIndex": {
-        "!doc": "The lastIndex is a read/write integer property of regular expressions that specifies the index at which to start the next match.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex"
-      },
-      "match": {
-        "!type": "fn()",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/match"
-      },
-      "multiline": {
-        "!doc": "The multiline property indicates whether or not the 'm' flag is used with the regular expression. multiline is a read-only property of an individual regular expression instance.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/multiline"
-      },
-      "replace": {
-        "!type": "fn()",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/replace"
-      },
-      "search": {
-        "!type": "fn()",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/search"
-      },
-      "source": {
-        "!doc": "The source property returns a String containing the text of the pattern, excluding the forward slashes. It is a read-only property of an individual regular expression instance. source does not contain any flags (like 'g', 'i' or 'm') of the regular expression.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/source"
-      },
-      "split": {
-        "!type": "fn()",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/split"
-      },
       "sticky": {
+       "!type": "bool",
         "!doc": "The sticky property reflects whether or not the search is sticky (searches in strings only from the index indicated by the lastIndex property of this regular expression). sticky is a read-only property of an individual regular expression object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/sticky"
-      },
-      "test": {
-        "!type": "fn(str: ?)",
-        "!doc": "The test() method executes a search for a match between a regular expression and a specified string. Returns true or false.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test"
-      },
-      "toSource": {
-        "!type": "fn()",
-        "!doc": "The toSource() method returns a string representing the source code of the object.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/toSource"
-      },
-      "toString": {
-        "!type": "fn()",
-        "!doc": "The toString() method returns a string representing the regular expression.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/toString"
       }
     }
   },
