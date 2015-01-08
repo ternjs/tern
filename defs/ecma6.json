@@ -270,26 +270,27 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/forEach"
       },
       "get": {
-        "!type": "fn(key: ?)",
+        "!type": "fn(key: ?) -> !this.<i>",
         "!doc": "The get() method returns a specified element from a Map object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/get"
       },
       "has": {
-        "!type": "fn(key: ?)",
+        "!type": "fn(key: ?) -> bool",
         "!doc": "The has() method returns a boolean indicating whether an element with the specified key exists or not.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/has"
       },
       "keys": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The keys() method returns a new Iterator object that contains the keys for each element in the Map object in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/keys"
       },
       "set": {
-        "!type": "fn(key: ?, value: ?)",
+        "!type": "fn(key: ?, value: ?) -> !this",
         "!doc": "The set() method adds a new element with a specified key and value to a Map object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/set"
       },
       "size": {
+        "!type": "number",
         "!doc": "The size accessor property returns the number of elements in a Map object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/size"
       },
