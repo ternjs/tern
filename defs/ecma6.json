@@ -395,44 +395,47 @@
   },
   "Number": {
     "EPSILON": {
+      "!type": "number",
       "!doc": "The Number.EPSILON property represents the difference between one and the smallest value greater than one that can be represented as a Number.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON"
     },
     "MAX_SAFE_INTEGER": {
+      "!type": "number",
       "!doc": "The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (253 - 1).",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER"
     },
     "MIN_SAFE_INTEGER": {
+      "!type": "number",
       "!doc": "The Number.MIN_SAFE_INTEGER constant represents the minimum safe integer in JavaScript (-(253 - 1)).",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER"
     },
     "isFinite": {
-      "!type": "fn(testValue: ?)",
+      "!type": "fn(testValue: ?) -> bool",
       "!doc": "The Number.isFinite() method determines whether the passed value is finite.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite"
     },
     "isInteger": {
-      "!type": "fn(testValue: ?)",
+      "!type": "fn(testValue: ?) -> bool",
       "!doc": "The Number.isInteger() method determines whether the passed value is an integer.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger"
     },
     "isNaN": {
-      "!type": "fn(testValue: ?)",
+      "!type": "fn(testValue: ?) -> bool",
       "!doc": "The Number.isNaN() method determines whether the passed value is NaN. More robust version of the original global isNaN().",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN"
     },
     "isSafeInteger": {
-      "!type": "fn(testValue: ?)",
+      "!type": "fn(testValue: ?) -> bool",
       "!doc": "The Number.isSafeInteger() method determines whether the provided value is a number that is a safe integer. A safe integer is an integer that",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isSafeInteger"
     },
     "parseFloat": {
-      "!type": "fn(string: ?)",
+      "!type": "fn(string: string) -> number",
       "!doc": "The Number.parseFloat() method parses a string argument and returns a floating point number. This method behaves identically to the global function parseFloat() and is part of ECMAScript 6 (its purpose is modularization of globals).",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/parseFloat"
     },
     "parseInt": {
-      "!type": "fn(string: ?, radix: ?)",
+      "!type": "fn(string: string, radix?: number) -> number",
       "!doc": "The Number.parseInt() method parses a string argument and returns an integer of the specified radix or base. This method behaves identically to the global function parseInt() and is part of ECMAScript 6 (its purpose is modularization of globals).",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/parseInt"
     }
