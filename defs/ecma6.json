@@ -442,17 +442,17 @@
   },
   "Object": {
     "assign": {
-      "!type": "fn(target: ?, sources: ?)",
+      "!type": "fn(target: ?, sources: ?) -> ?",
       "!doc": "The Object.assign() method is used to copy the values of all enumerable own properties from one or more source objects to a target object. It will return the target object.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign"
     },
     "getOwnPropertySymbols": {
-      "!type": "fn(obj: ?)",
+      "!type": "fn(obj: ?) -> [?]",
       "!doc": "The Object.getOwnPropertySymbols() method returns an array of all symbol properties found directly upon a given object.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertySymbols"
     },
     "is": {
-      "!type": "fn(value1: ?, value2: ?)",
+      "!type": "fn(value1: ?, value2: ?) -> bool",
       "!doc": "The Object.is() method determines whether two values are the same value.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is"
     },
