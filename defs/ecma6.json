@@ -18,7 +18,7 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin"
       },
       "entries": {
-        "!type": "fn() -> !custom:Array_ctor",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The entries() method returns a new Array Iterator object that contains the key/value pairs for each index in the array.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries"
       },
@@ -265,7 +265,7 @@
       },
       "forEach": {
         "!type": "fn(callback: fn(value: ?, key: ?, map: +Map), thisArg?: ?)",
-        "!effects": ["call !0 this=!1 !this.<i> number"],
+        "!effects": ["call !0 this=!1 !this.<i> number !this"],
         "!doc": "The forEach() method executes a provided function once per each key/value pair in the Map object, in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/forEach"
       },
@@ -556,7 +556,8 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/entries"
       },
       "forEach": {
-        "!type": "fn(callback: fn(value: ?, value2: ?, set: +Set), thisArg?: ?)",
+        "!type": "fn(callback: fn(value: ?, value2: ?, set: +Set), thisArg?: ?)",		
+        "!effects": ["call !0 this=!1 !this.<i> number !this"],        
         "!doc": "The forEach() method executes a provided function once per each value in the Set object, in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/forEach"
       },
@@ -659,150 +660,184 @@
     }
   },
   "TypedArray": {
-    "!type": "fn()",
+    "!type": "fn(length: number)",
     "!doc": "A TypedArray object describes an array-like view of an underlying binary data buffer. There is no global property named TypedArray, nor is there a directly visible TypedArray constructor.  Instead, there are a number of different global properties, whose values are typed array constructors for specific element types, listed below. On the following pages you will find common properties and methods that can be used with any typed array containing elements of any type.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray",
     "BYTES_PER_ELEMENT": {
+      "!type": "number",
       "!doc": "The TypedArray.BYTES_PER_ELEMENT property represents the size in bytes of each element in an typed array.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/BYTES_PER_ELEMENT"
     },
-    "from": {
-      "!type": "fn()",
-      "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/from"
-    },
     "length": {
+      "!type": "number",
       "!doc": "The length accessor property represents the length (in elements) of a typed array.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/length"
     },
     "name": {
+      "!type": "string",
       "!doc": "The TypedArray.name property represents a string value of the typed array constructor name.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/name"
     },
-    "of": {
-      "!type": "fn()",
-      "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/of"
-    },
     "prototype": {
       "buffer": {
+        "!type": "+ArrayBuffer",
         "!doc": "The buffer accessor property represents the ArrayBuffer referenced by a TypedArray at construction time.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/buffer"
       },
       "byteLength": {
+        "!type": "number",
         "!doc": "The byteLength accessor property represents the length (in bytes) of a typed array from the start of its ArrayBuffer.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/byteLength"
       },
       "byteOffset": {
+        "!type": "number",
         "!doc": "The byteOffset accessor property represents the offset (in bytes) of a typed array from the start of its ArrayBuffer.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/byteOffset"
       },
       "copyWithin": {
-        "!type": "fn(target: ?, start: ?, end?: ?)",
+        "!type": "fn(target: number, start: number, end?: number) -> ?",
         "!doc": "The copyWithin() method copies the sequence of array elements within the array to the position starting at target. The copy is taken from the index positions of the second and third arguments start and end. The end argument is optional and defaults to the length of the array. This method has the same algorithm as Array.prototype.copyWithin. TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/copyWithin"
       },
       "entries": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The entries() method returns a new Array Iterator object that contains the key/value pairs for each index in the array.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/entries"
       },
       "every": {
-        "!type": "fn()",
+        "!type": "fn(callback: fn(currentValue: ?, index: number, array: +TypedArray) -> bool, thisArg?: ?) -> bool",
+        "!effects": [
+          "call !0 this=!1 !this.<i> number !this"
+        ],
+        "!doc": "The every() method tests whether all elements in the typed array pass the test implemented by the provided function. This method has the same algorithm as Array.prototype.every(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/every"
       },
       "fill": {
-        "!type": "fn()",
+        "!type": "fn(value: ?, start?: number, end?: number)",
+        "!doc": "The fill() method fills all the elements of a typed array from a start index to an end index with a static value. This method has the same algorithm as Array.prototype.fill(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/fill"
       },
       "filter": {
-        "!type": "fn()",
+        "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> !this",
+        "!effects": [
+          "call !0 this=!1 !this.<i> number"
+        ],
+        "!doc": "Creates a new array with all of the elements of this array for which the provided filtering function returns true. See also Array.prototype.filter().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/filter"
       },
       "find": {
-        "!type": "fn()",
+        "!type": "fn(callback: fn(element: ?, index: number, array: +TypedArray) -> bool, thisArg?: ?) -> ?",
+        "!effects": [
+          "call !0 this=!1 !this.<i> number !this"
+        ],
+        "!doc": "The find() method returns a value in the typed array, if an element satisfies the provided testing function. Otherwise undefined is returned. TypedArray is one of the typed array types here.\nSee also the findIndex() method, which returns the index of a found element in the typed array instead of its value.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/find"
       },
       "findIndex": {
-        "!type": "fn()",
+        "!type": "fn(callback: fn(element: ?, index: number, array: +TypedArray) -> bool, thisArg?: ?) -> number",
+        "!effects": [
+          "call !0 this=!1 !this.<i> number !this"
+        ],
+        "!doc": "The findIndex() method returns an index in the typed array, if an element in the typed array satisfies the provided testing function. Otherwise -1 is returned.\nSee also the find() method, which returns the value of a found element in the typed array instead of its index.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/findIndex"
       },
       "forEach": {
-        "!type": "fn()",
+        "!type": "fn(callback: fn(value: ?, key: ?, array: +TypedArray), thisArg?: ?)",
+        "!effects": ["call !0 this=!1 !this.<i> number !this"],
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/forEach"
       },
       "includes": {
-        "!type": "fn()",
+        "!type": "fn(searchElement: ?, fromIndex?: number) -> bool",
+        "!doc": "The includes() method determines whether a typed array includes a certain element, returning true or false as appropriate. This method has the same algorithm as Array.prototype.includes(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/includes"
       },
       "indexOf": {
-        "!type": "fn()",
+        "!type": "fn(searchElement: ?, fromIndex?: number) -> number",
+        "!doc": "The indexOf() method returns the first index at which a given element can be found in the typed array, or -1 if it is not present. This method has the same algorithm as Array.prototype.indexOf(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/indexOf"
       },
       "join": {
-        "!type": "fn()",
+        "!type": "fn(separator?: string) -> string",
+        "!doc": "The join() method joins all elements of an array into a string. This method has the same algorithm as Array.prototype.join(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/join"
       },
       "keys": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The keys() method returns a new Array Iterator object that contains the keys for each index in the array.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/keys"
       },
       "lastIndexOf": {
-        "!type": "fn()",
+        "!type": "fn(searchElement: ?, fromIndex?: number) -> number",
+        "!doc": "The lastIndexOf() method returns the last index at which a given element can be found in the typed array, or -1 if it is not present. The typed array is searched backwards, starting at fromIndex. This method has the same algorithm as Array.prototype.lastIndexOf(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf"
       },
+      "length": {
+        "!type": "number",
+        "!doc": "Returns the number of elements hold in the typed array. Fixed at construction time and thus read only.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/length"
+      },
       "map": {
-        "!type": "fn()",
+        "!type": "fn(f: fn(elt: ?, i: number) -> ?, context?: ?) -> [!0.!ret]",
+        "!effects": [
+          "call !0 this=!1 !this.<i> number"
+        ],
+        "!doc": "Creates a new array with the results of calling a provided function on every element in this array. See also Array.prototype.map().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/map"
       },
-      "move": {
-        "!type": "fn(start: ?, end: ?, target: ?)",
-        "!doc": "The move() method used to copy the sequence of array elements within the array to the position starting at target. However, this non-standard method has been replaced with the standard TypedArray.prototype.copyWithin() method. TypedArray is one of the typed array types here.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/move"
-      },
       "reduce": {
-        "!type": "fn()",
+        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> !0.!ret",
+        "!effects": [
+          "call !0 !1 !this.<i> number"
+        ],
+        "!doc": "Apply a function against an accumulator and each value of the array (from left-to-right) as to reduce it to a single value. See also Array.prototype.reduce().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/reduce"
       },
       "reduceRight": {
-        "!type": "fn()",
+        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number) -> ?, init?: ?) -> !0.!ret",
+        "!effects": [
+          "call !0 !1 !this.<i> number"
+        ],
+        "!doc": "Apply a function against an accumulator and each value of the array (from right-to-left) as to reduce it to a single value. See also Array.prototype.reduceRight().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/reduceRight"
       },
       "reverse": {
         "!type": "fn()",
+        "!doc": "The reverse() method reverses a typed array in place. The first typed array element becomes the last and the last becomes the first. This method has the same algorithm as Array.prototype.reverse(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/reverse"
       },
       "set": {
-        "!type": "fn(array: ?, typedarray: ?, offset?: ?)",
+        "!type": "fn(array: [?], offset?: ?)",
         "!doc": "The set() method stores multiple values in the typed array, reading input values from a specified array.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set"
       },
       "slice": {
-        "!type": "fn()",
+        "!type": "fn(from: number, to?: number) -> !this",
+        "!type": "Extracts a section of an array and returns a new array. See also Array.prototype.slice().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice"
       },
       "some": {
-        "!type": "fn()",
+        "!type": "fn(test: fn(elt: ?, i: number) -> bool, context?: ?) -> bool",
+        "!effects": [
+          "call !0 this=!1 !this.<i> number"
+        ],
+        "!doc": "The some() method tests whether some element in the typed array passes the test implemented by the provided function. This method has the same algorithm as Array.prototype.some(). TypedArray is one of the typed array types here.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/some"
       },
       "sort": {
-        "!type": "fn()",
+        "!type": "fn(compare?: fn(a: ?, b: ?) -> number)",
+        "!effects": [
+          "call !0 !this.<i> !this.<i>"
+        ],
+        "!type": "Sorts the elements of an array in place and returns the array. See also Array.prototype.sort().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/sort"
       },
       "subarray": {
-        "!type": "fn(begin?: ?, end?: ?)",
+        "!type": "fn(begin?: number, end?: number) -> +TypedArray",
         "!doc": "The subarray() method returns a new TypedArray on the same ArrayBuffer store and with the same element types as for this TypedArray object. The begin offset is inclusive and the end offset is exclusive. TypedArray is one of the typed array types.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/subarray"
       },
-      "toLocaleString": {
-        "!type": "fn()",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/toLocaleString"
-      },
-      "toString": {
-        "!type": "fn()",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/toString"
-      },
       "values": {
-        "!type": "fn()",
+        "!type": "fn() -> TODO_ITERATOR",
         "!doc": "The values() method returns a new Array Iterator object that contains the values for each index in the array.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/values"
       },
@@ -817,81 +852,75 @@
     "!type": "fn()",
     "!doc": "The Uint16Array typed array represents an array of 16-bit unsigned integers in the platform byte order. If control over byte order is needed, use DataView instead. The contents are initialized to 0. Once established, you can reference elements in the array using the object's methods, or using standard array index syntax (that is, using bracket notation).",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
-    "prototype": {
-      "!proto": "TypedArray.prototype"
-    },
     "length": "TypedArray.length",
     "BYTES_PER_ELEMENT": "TypedArray.BYTES_PER_ELEMENT",
     "name": "TypedArray.name",
     "from": "TypedArray.from",
-    "of": "TypedArray.of"
+    "of": "TypedArray.of",
+    "prototype": {
+      "!proto": "TypedArray.prototype"
+    }
   },
   "Uint32Array": {
     "!type": "fn()",
     "!doc": "The Uint32Array typed array represents an array of 32-bit unsigned integers in the platform byte order. If control over byte order is needed, use DataView instead. The contents are initialized to 0. Once established, you can reference elements in the array using the object's methods, or using standard array index syntax (that is, using bracket notation).",
-    "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
-    "prototype": {
-      "!proto": "TypedArray.prototype"
-    },
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",    
     "length": "TypedArray.length",
     "BYTES_PER_ELEMENT": "TypedArray.BYTES_PER_ELEMENT",
     "name": "TypedArray.name",
     "from": "TypedArray.from",
-    "of": "TypedArray.of"
+    "of": "TypedArray.of",
+    "prototype": {
+      "!proto": "TypedArray.prototype"
+    }
   },
   "Uint8Array": {
     "!type": "fn()",
     "!doc": "The Uint8Array typed array represents an array of 8-bit unsigned integers. The contents are initialized to 0. Once established, you can reference elements in the array using the object's methods, or using standard array index syntax (that is, using bracket notation).",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
-    "prototype": {
-      "!proto": "TypedArray.prototype"
-    },
     "length": "TypedArray.length",
     "BYTES_PER_ELEMENT": "TypedArray.BYTES_PER_ELEMENT",
     "name": "TypedArray.name",
     "from": "TypedArray.from",
-    "of": "TypedArray.of"
+    "of": "TypedArray.of",
+    "prototype": {
+      "!proto": "TypedArray.prototype"
+    }
   },
   "Uint8ClampedArray": {
     "!type": "fn()",
     "!doc": "The Uint8ClampedArray typed array represents an array of 8-bit unsigned integers clamped to 0-255. The contents are initialized to 0. Once established, you can reference elements in the array using the object's methods, or using standard array index syntax (that is, using bracket notation).",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
-    "prototype": {
-      "!proto": "TypedArray.prototype"
-    },
     "length": "TypedArray.length",
     "BYTES_PER_ELEMENT": "TypedArray.BYTES_PER_ELEMENT",
     "name": "TypedArray.name",
     "from": "TypedArray.from",
-    "of": "TypedArray.of"
+    "of": "TypedArray.of",
+    "prototype": {
+      "!proto": "TypedArray.prototype"
+    }
   },
   "WeakMap": {
-    "!type": "fn(iterable: ?)",
+    "!type": "fn(iterable: [?])",
     "!doc": "The WeakMap object is a collection of key/value pairs in which the keys are objects and the values can be arbitrary values.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
-    "clear": {
-      "!type": "fn()",
-      "!doc": "The clear() method removes all elements from a WeakMap object.",
-      "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap/clear"
-    },
+    "length": {
+      "!type": "number",
+      "!doc": "Length property whose value is 1 (number of constructor arguments)."
+    },    
     "prototype": {
-      "clear": {
-        "!type": "fn()",
-        "!doc": "The clear() method removes all elements from a WeakMap object.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap/clear"
-      },
       "delete": {
-        "!type": "fn(key: ?)",
+        "!type": "fn(key: ?) -> bool",
         "!doc": "The delete() method removes the specified element from a WeakMap object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap/delete"
       },
       "get": {
-        "!type": "fn(key: ?)",
+        "!type": "fn(key: ?) !this.<i>",
         "!doc": "The get() method returns a specified element from a WeakMap object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap/get"
       },
       "has": {
-        "!type": "fn(key: ?)",
+        "!type": "fn(key: ?) -> bool",
         "!doc": "The has() method returns a boolean indicating whether an element with the specified key exists in the WeakMap object or not.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap/has"
       },
@@ -903,27 +932,26 @@
     }
   },
   "WeakSet": {
-    "!type": "fn(iterable: ?)",
+    "!type": "fn(iterable: [?])",
     "!doc": "The WeakSet object lets you store weakly held objects in a collection.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
+    "length": {
+      "!type": "number",
+      "!doc": "Length property whose value is 1 (number of constructor arguments)."
+    },    
     "prototype": {
       "add": {
         "!type": "fn(value: ?)",
         "!doc": "The add() method appends a new object to the end of a WeakSet object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet/add"
       },
-      "clear": {
-        "!type": "fn()",
-        "!doc": "The clear() method removes all elements from a WeakSet object.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet/clear"
-      },
       "delete": {
-        "!type": "fn(value: ?)",
+        "!type": "fn(value: ?) -> bool",
         "!doc": "The delete() method removes the specified element from a WeakSet object.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet/delete"
       },
       "has": {
-        "!type": "fn(value: ?)",
+        "!type": "fn(value: ?) -> bool",
         "!doc": "The has() method returns a boolean indicating whether an object exists in a WeakSet or not.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet/has"
       }
