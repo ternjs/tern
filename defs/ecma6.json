@@ -589,43 +589,43 @@
   },
   "String": {
     "fromCodePoint": {
-      "!type": "fn(num1: ?)",
+      "!type": "fn(num1: ?) -> string",
       "!doc": "The static String.fromCodePoint() method returns a string created by using the specified sequence of code points.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/fromCodePoint"
     },
     "raw": {
-      "!type": "fn(callSite: ?, substitutions: ?, templateString: ?)",
+      "!type": "fn(callSite: ?, substitutions: ?, templateString: ?) -> string",
       "!doc": "The static String.raw() method is a tag function of template strings, like the r prefix in Python or the @ prefix in C# for string literals, this function is used to get the raw string form of template strings.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/raw"
     },
     "prototype": {
       "codePointAt": {
-        "!type": "fn(pos: ?)",
+        "!type": "fn(pos: number) -> number",
         "!doc": "The codePointAt() method returns a non-negative integer that is the UTF-16 encoded code point value.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/codePointAt"
       },
-      "contains": {
-        "!type": "fn(searchString: ?, position: ?)",
-        "!doc": "The includes() method determines whether one string may be found within another string, returning true or false as appropriate.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/contains"
-      },
       "endsWith": {
-        "!type": "fn(searchString: ?, position: ?)",
+        "!type": "fn(searchString: string, position?: number) -> bool",
         "!doc": "The endsWith() method determines whether a string ends with the characters of another string, returning true or false as appropriate.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith"
       },
+      "includes": {
+        "!type": "fn(searchString: string, position?: number) -> bool",
+        "!doc": "The includes() method determines whether one string may be found within another string, returning true or false as appropriate.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/contains"
+      },      
       "normalize": {
-        "!type": "fn(form: ?)",
+        "!type": "fn(form: string) -> string",
         "!doc": "The normalize() method returns the Unicode Normalization Form of a given string (if the value isn't a string, it will be converted to one first).",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize"
       },
       "repeat": {
-        "!type": "fn(count: ?)",
+        "!type": "fn(count: number) -> string",
         "!doc": "The repeat() method constructs and returns a new string which contains the specified number of copies of the string on which it was called, concatenated together.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat"
       },
       "startsWith": {
-        "!type": "fn(searchString: ?, position: ?)",
+        "!type": "fn(searchString: string, position?: number) -> bool",
         "!doc": "The startsWith() method determines whether a string begins with the characters of another string, returning true or false as appropriate.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith"
       }
