@@ -828,7 +828,7 @@
         "!effects": [
           "call !0 !this.<i> !this.<i>"
         ],
-        "!type": "Sorts the elements of an array in place and returns the array. See also Array.prototype.sort().",
+        "!doc": "Sorts the elements of an array in place and returns the array. See also Array.prototype.sort().",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/sort"
       },
       "subarray": {
