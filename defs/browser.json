@@ -1337,8 +1337,17 @@
     "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDataListElement"
   },
   "HTMLDivElement": {
-    "!type": "Element",
-    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement"
+    "!type": "fn()",
+    "prototype": {
+      "!proto": "Element.prototype",
+      "align": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement",
+        "!doc": "numerated property indicating alignment of the element's contents with respect to the surrounding context. The possible values are 'left', 'right', 'justify', and 'center'."
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement",
+    "!doc": "The HTMLDivElement interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating div elements."
   },
   "HTMLDListElement": {
     "!type": "Element",
