@@ -1086,7 +1086,7 @@
         "!doc": "Returns a Boolean value indicating whether the document or any element inside the document has focus. This method can be used to determine whether the active element in a document has focus."
       },
       "createElement": {
-        "!type": "fn(tagName: string) -> +Element",
+        "!type": "fn(tagName: string) -> !custom:Browser_createElement",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createElement",
         "!doc": "Creates the specified element."
       },
