@@ -13,6 +13,7 @@ var projectFileName = ".tern-project", portFileName = ".tern-port";
 var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
 
 var persistent = process.argv.indexOf("--persistent") > -1;
+var stripCRs = process.argv.indexOf("--strip-crs") > -1;
 var disableLoadingLocal = process.argv.indexOf("--disable-loading-local") > -1;
 var verbose = process.argv.indexOf("--verbose") > -1;
 var noPortFile = process.argv.indexOf("--no-port-file") > -1;
@@ -145,7 +146,8 @@ function startServer(dir, config) {
     plugins: plugins,
     debug: verbose,
     projectDir: dir,
-    dependencyBudget: config.dependencyBudget
+    dependencyBudget: config.dependencyBudget,
+    stripCRs: stripCRs
   });
 
   if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
