@@ -55,8 +55,8 @@
   function getModuleInterface(data, exports) {
     var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
     var expProp = mod.defProp("exports");
-    exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     expProp.propagate(getModule(data.currentFile, data));
+    exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     return mod;
   }
 
