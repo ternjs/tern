@@ -1,5 +1,25 @@
 {
   "!name": "ecma6",
+  "!define": {
+    "Promise.prototype": {
+      "catch": {
+        "!doc": "The catch() method returns a Promise and deals with rejected cases only. It behaves the same as calling Promise.prototype.then(undefined, onRejected).",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch",
+        "!type": "fn(onRejected: fn(reason: ?))"
+      },
+      "then": {
+        "!doc": "The then() method returns a Promise. It takes two arguments, both are callback functions for the success and failure cases of the Promise.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then",
+        "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?))",
+        "!effects": [
+          "call !0 !this.value"
+        ]
+      }
+    },
+    "promiseReject": {
+      "!type": "fn(reason: ?)"
+    }
+  },
   "Array": {
     "from": {
       "!type": "fn(arrayLike: [], mapFn?: fn(), thisArg?: ?) -> !custom:Array_ctor",
@@ -463,45 +483,30 @@
     }
   },
   "Promise": {
-    "!type": "fn(executor: fn(resolve: fn(), reject: fn()))",
+    "!type": "fn(executor: fn(resolve: fn(value: ?), reject: promiseReject)) -> !custom:Promise_ctor",
     "!doc": "The Promise object is used for deferred and asynchronous computations. A Promise is in one of the three states:",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
-    "length": {
-      "!type": "number",
-      "!doc": "Length property whose value is 1 (number of constructor arguments)."
-    },
     "all": {
-      "!type": "fn(iterable: [?]) -> +Promise",
+      "!type": "fn(iterable: [+Promise]) -> !0.<i>",
       "!doc": "The Promise.all(iterable) method returns a promise that resolves when all of the promises in the iterable argument have resolved.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all"
     },
     "race": {
-      "!type": "fn(iterable: [?]) -> +Promise",
+      "!type": "fn(iterable: [+Promise]) -> !0.<i>",
       "!doc": "The Promise.race(iterable) method returns a promise that resolves or rejects as soon as one of the promises in the iterable resolves or rejects, with the value or reason from that promise.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race"
     },
     "reject": {
-      "!type": "fn(reason: ?) -> +Promise",
+      "!type": "fn(reason: ?) -> !this",
       "!doc": "The Promise.reject(reason) method returns a Promise object that is rejected with the given reason.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject"
     },
     "resolve": {
-      "!type": "fn(value: ?) -> +Promise",
+      "!type": "fn(value: ?) -> +Promise[value=!0]",
       "!doc": "The Promise.resolve(value) method returns a Promise object that is resolved with the given value. If the value is a thenable (i.e. has a then method), the returned promise will 'follow' that thenable, adopting its eventual state; otherwise the returned promise will be fulfilled with the value.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve"
     },
-    "prototype": {
-      "catch": {
-        "!doc": "The catch() method returns a Promise and deals with rejected cases only. It behaves the same as calling Promise.prototype.then(undefined, onRejected).",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch",
-        "!type": "fn(onRejected: fn(reason: ?))"
-      },
-      "then": {
-        "!doc": "The then() method returns a Promise. It takes two arguments, both are callback functions for the success and failure cases of the Promise.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then",
-        "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?))"
-      }
-    }
+    "prototype": "Promise.prototype"
   },
   "Proxy": {
     "!type": "fn(target: ?, handler: ?)",
@@ -512,7 +517,7 @@
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/revocable"
     }
   },
-  "RegExp": {
+  "RegExp": {    
     "prototype": {
       "flags": {
         "!type": "string",
@@ -557,9 +562,7 @@
       },
       "forEach": {
         "!type": "fn(callback: fn(value: ?, value2: ?, set: +Set), thisArg?: ?)",
-        "!effects": ["call !0 this=!1 !this.<i> number !this"],
-        "!doc": "The forEach() method executes a provided function once per each value in the Set object, in insertion order.",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/forEach"
+        "!effects": ["call !0 this=!1 !this.<i> number !this"]
       },
       "has": {
         "!type": "fn(value: ?) -> bool",
@@ -904,10 +907,6 @@
     "!type": "fn(iterable: [?])",
     "!doc": "The WeakMap object is a collection of key/value pairs in which the keys are objects and the values can be arbitrary values.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
-    "length": {
-      "!type": "number",
-      "!doc": "Length property whose value is 1 (number of constructor arguments)."
-    },
     "prototype": {
       "delete": {
         "!type": "fn(key: ?) -> bool",
@@ -935,10 +934,6 @@
     "!type": "fn(iterable: [?])",
     "!doc": "The WeakSet object lets you store weakly held objects in a collection.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
-    "length": {
-      "!type": "number",
-      "!doc": "Length property whose value is 1 (number of constructor arguments)."
-    },
     "prototype": {
       "add": {
         "!type": "fn(value: ?)",

@@ -12,6 +12,7 @@ require("../plugin/complete_strings.js");
 var util = require("./util");
 
 var defData = {
+  ecma6: util.ecma6,
   browser: util.browser,
   jquery: util.jquery,
   underscore: util.underscore
