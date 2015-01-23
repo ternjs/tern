@@ -167,11 +167,15 @@ list of strings, giving the binary name and arguments.")
         callback runner)
     (setf callback (lambda (port err)
                      (if port
-                         (tern-req port doc runner)
+                         (condition-case err
+                             (tern-req port doc runner)
+                           (error (funcall runner (list err) nil)))
                        (funcall f err nil))))
     (setf runner (lambda (err data)
                    (with-current-buffer buffer
-                     (cond ((and err (eq (cl-cadar err) 'connection-failed) (not retrying))
+                     (cond ((and err (not retrying)
+                                 (or (eq (cl-cadar err) 'connection-failed)
+                                     (eq (caar err) 'file-error)))
                             (setf retrying t)
                             (let ((old-port tern-known-port))
                               (setf tern-known-port nil)
