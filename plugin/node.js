@@ -312,7 +312,7 @@
     run: function(server, query, file) {
       function describe(aval) {
         var target = {}, type = aval.getType(false);
-        target.type = infer.toString(type, 3);
+        target.type = infer.toString(aval, 3);
         var doc = aval.doc || (type && type.doc), url = aval.url || (type && type.url);
         if (doc) target.doc = doc;
         if (url) target.url = url;
@@ -323,7 +323,7 @@
 
       var known = server._node.modules[resolveProjectPath(server, file.name)];
       if (!known) return {};
-      var type = known.getType(false);
+      var type = known.getObjType(false);
       var resp = describe(known);
       if (type instanceof infer.Obj) {
         var props = resp.props = {};
