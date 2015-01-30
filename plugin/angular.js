@@ -378,7 +378,7 @@
           "!url": "https://docs.angularjs.org/api/ng/service/$compile#-link-",
           "!doc": "The link function is responsible for registering DOM listeners as well as updating the DOM. It is executed after the template has been cloned. This is where most of the directive logic will be put."
         }
-      },      
+      },
       Module: {
         "!url": "http://docs.angularjs.org/api/angular.Module",
         "!doc": "Interface for configuring angular modules.",

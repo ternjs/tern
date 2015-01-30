@@ -95,7 +95,7 @@
       }
 
       try {
-        var pkg = JSON.parse(fs.readFileSync(resolve(modDir, file + "/component.json")));
+        var pkg = JSON.parse(fs.readFileSync(resolve(dir, file + "/component.json")));
       } catch(e) {}
 
       if (pkg && pkg.main) {
