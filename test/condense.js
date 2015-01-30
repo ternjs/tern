@@ -69,6 +69,7 @@ exports.runTests = function(filter) {
   test("generic");
   test("array");
   test("function_prop");
+  test("uniontype");
 
   test({load: ["node_simple"], plugins: {node: true}});
   test({load: ["node_require_private"], plugins: {node: true}});
