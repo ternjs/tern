@@ -93,3 +93,15 @@ function functionBogus(a) { return hohoho(); }
 
 functionBogus; //: fn(a: bogus.Arg) -> bogus.Retval
 
+/** @type {string|number} */
+var stringOrNumber;
+
+stringOrNumber; //: string|number
+
+/**
+ * @param {string|null} a
+ * @return {Array.<Foo|number>}
+ */
+function unionFunction(a) { return argh(); }
+
+unionFunction; //: fn(a: string) -> [Foo|number]

@@ -90,7 +90,7 @@
       },
       CallExpression: function(node, scope) {
         if (node.commentsBefore && isDefinePropertyCall(node)) {
-          var type = infer.expressionType({node: node.arguments[0], state: scope}).getType();
+          var type = infer.expressionType({node: node.arguments[0], state: scope}).getObjType();
           if (type && type instanceof infer.Obj) {
             var prop = type.props[node.arguments[1].value];
             if (prop) interpretComments(node, node.commentsBefore, scope, prop);
@@ -175,6 +175,31 @@
   }
 
   function parseType(scope, str, pos) {
+    var type, union = false, madeUp = false;
+    for (;;) {
+      var inner = parseTypeInner(scope, str, pos);
+      if (!inner) return null;
+      madeUp = madeUp || inner.madeUp;
+      if (union) inner.type.propagate(union);
+      else type = inner.type;
+      pos = skipSpace(str, inner.end);
+      if (str.charAt(pos) != "|") break;
+      pos++;
+      if (!union) {
+        union = new infer.AVal;
+        type.propagate(union);
+        type = union;
+      }
+    }
+    var isOptional = false;
+    if (str.charAt(pos) == "=") {
+      ++pos;
+      isOptional = true;
+    }
+    return {type: type, end: pos, isOptional: isOptional, madeUp: madeUp};
+  }
+
+  function parseTypeInner(scope, str, pos) {
     pos = skipSpace(str, pos);
     var type, madeUp = false;
 
@@ -210,6 +235,13 @@
       }
       pos = fields.end;
       madeUp = fields.madeUp;
+    } else if (str.charAt(pos) == "(") {
+      var inner = parseType(scope, str, pos + 1);
+      if (!inner) return null;
+      pos = skipSpace(str, inner.end);
+      if (str.charAt(pos) != ")") return null;
+      ++pos;
+      type = inner.type;
     } else {
       var start = pos;
       if (!acorn.isIdentifierStart(str.charCodeAt(pos))) return null;
@@ -219,6 +251,7 @@
       if (/^(number|integer)$/i.test(word)) type = infer.cx().num;
       else if (/^bool(ean)?$/i.test(word)) type = infer.cx().bool;
       else if (/^string$/i.test(word)) type = infer.cx().str;
+      else if (/^(null|undefined)$/i.test(word)) type = infer.ANull;
       else if (/^array$/i.test(word)) {
         var inner = null;
         if (str.charAt(pos) == "." && str.charAt(pos + 1) == "<") {
@@ -252,7 +285,7 @@
         var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
         if (defs && (path in defs)) {
           type = defs[path];
-        } else if (found = infer.def.parsePath(path, scope).getType()) {
+        } else if (found = infer.def.parsePath(path, scope).getObjType()) {
           type = maybeInstance(found, path);
         } else {
           if (!cx.jsdocPlaceholders) cx.jsdocPlaceholders = Object.create(null);
@@ -265,17 +298,12 @@
       }
     }
 
-    var isOptional = false;
-    if (str.charAt(pos) == "=") {
-      ++pos;
-      isOptional = true;
-    }
-    return {type: type, end: pos, isOptional: isOptional, madeUp: madeUp};
+    return {type: type, end: pos, madeUp: madeUp};
   }
 
   function maybeInstance(type, path) {
     if (type instanceof infer.Fn && /^[A-Z]/.test(path)) {
-      var proto = type.getProp("prototype").getType();
+      var proto = type.getProp("prototype").getObjType();
       if (proto instanceof infer.Obj) return infer.getInstance(proto);
     }
     return type;
