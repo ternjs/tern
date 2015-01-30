@@ -7,5 +7,6 @@ require("../test/fragments").runTests(filter);
 require("../test/condense").runTests(filter);
 require("../test/timeout").runTests(filter);
 require("../test/reload").runTests(filter);
+require("../test/def-parser").runTests(filter);
 
 process.exit(require("../test/util").hasFailed());
