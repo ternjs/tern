@@ -28,6 +28,10 @@ requirejs(["require"], function(require) {
   require("requireme").someprop; //: string
 });
 
+requirejs(["named"], function(named) {
+  named.foo; //:: {a: number}
+});
+
 requirejs.config({
   p //+ packages, paths, ...
 });
