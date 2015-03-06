@@ -1,6 +1,8 @@
-// Parses comments above variable declarations, function declarations,
-// and object properties as docstrings and JSDoc-style type
-// annotations.
+// When enabled, this plugin will gather (short) strings in your code,
+// and completing when inside a string will try to complete to
+// previously seen strings. Takes a single option, maxLength, which
+// controls the maximum length of string values to gather, and
+// defaults to 15.
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
