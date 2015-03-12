@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/marijnh/tern.png)](http://travis-ci.org/marijnh/tern)
 [![NPM version](https://img.shields.io/npm/v/tern.svg)](https://www.npmjs.org/package/tern)  
-[Funding status: ![maintainer happiness](https://marijnhaverbeke.nl/fund/status_s.png)](https://marijnhaverbeke.nl/fund/)
+[Funding status: ![maintainer happiness](https://marijnhaverbeke.nl/fund/status_s.png?again)](https://marijnhaverbeke.nl/fund/)
 
 This is [Tern][1]. Tern is a stand-alone, editor-independent
 JavaScript analyzer that can be used to improve the JavaScript
