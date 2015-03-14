@@ -151,7 +151,7 @@ function startServer(dir, config) {
   });
 
   if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
-    glob.sync(pat).forEach(function(file) {
+    glob.sync(pat, { cwd: dir }).forEach(function(file) {
       server.addFile(file);
     });
   });
