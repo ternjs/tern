@@ -5,9 +5,9 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/comment"),
-               require("acorn/acorn"), require("acorn/util/walk"));
+               require("acorn"), require("acorn/dist/walk"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "../lib/comment", "acorn/acorn", "acorn/util/walk"], mod);
+    return define(["../lib/infer", "../lib/tern", "../lib/comment", "acorn/dist/acorn", "acorn/dist/walk"], mod);
   mod(tern, tern, tern.comment, acorn, acorn.walk);
 })(function(infer, tern, comment, acorn, walk) {
   "use strict";
