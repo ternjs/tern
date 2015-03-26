@@ -2539,6 +2539,42 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/DOMParser",
     "!doc": "DOMParser can parse XML or HTML source stored in a string into a DOM Document. DOMParser is specified in DOM Parsing and Serialization."
   },
+  "FormData": {
+    "!type": "fn()",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData",
+    "prototype": {
+      "append": {
+        "!type": "fn(name: string, value: ?, filename: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/append",
+        "!doc": "Appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist."
+      },
+      "delete": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/delete",
+        "!doc": "Deletes a key/value pair from a FormData object."
+      },
+      "get": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/get",
+        "!doc": "Returns the first value associated with a given key from within a FormData object."
+      },
+      "getAll": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/getAll",
+        "!doc": "Returns an array of all the values associated with a given key from within a FormData."
+      },
+      "has": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/has",
+        "!doc": "Returns a boolean stating whether a FormData object contains a certain key/value pair."
+      },
+      "set": {
+        "!type": "fn(name: string, value: ?, filename: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/set",
+        "!doc": "Sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist."
+      }
+    }
+  },
   "Selection": {
     "!type": "fn()",
     "prototype": {
