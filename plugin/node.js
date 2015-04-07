@@ -140,6 +140,7 @@
   }
 
   function findTypeAt(_file, _pos, expr, type) {
+    if (!expr) return type;
     var isStringLiteral = expr.node.type === "Literal" &&
        typeof expr.node.value === "string";
     var isRequireArg = !!expr.node.required;
