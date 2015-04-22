@@ -643,16 +643,24 @@ with the name `"angular"`.
 [[plugin_third_party]]
 ==== Third-party plugins ====
 
-It is possible to write third-party plugins and distribute them
-independently, either as packages using https://www.npmjs.org[npm] or as
-raw JavaScript files.
+It is possible to write third-party plugins or JSON type definitions
+and distribute them independently, either as packages using
+https://www.npmjs.org[npm] or as raw JavaScript files.
+
+When a _name_ attribute is specified in the `libs` section of the
+project configuration, Tern first searches for a file '`name`'`.json` in
+its distribution `defs` directory, then for a file '`name`'`.json` in
+the user's project directory, and finally for an installed package
+named `"tern-`'`name`'`"` to load as a JSON Type Definition. A JSON Type
+Definition distributed as an npm package must have a package name
+matching the pattern `"tern-`'`name`'`"`.
 
 When a 'name' attribute is specified in the `plugins` section of the
 project configuration, Tern first searches for a file '`name`'`.js` in its
 distribution `plugin` directory, then for a file '`name`'`.js` in the
 user's project directory, and finally for an installed package named
-"tern-'name'" to load as a plugin. A plugin distributed as an npm package
-must have a package name matching the pattern "tern-'name'".
+`"tern-`'`name`'`"` to load as a plugin. A plugin distributed as an npm package
+must have a package name matching the pattern `"tern-`'`name`'`"`.
 
 The main module for a third-party plugin that will be installed outside of
 the Tern distribution should export a single method `initialize(ternDir:

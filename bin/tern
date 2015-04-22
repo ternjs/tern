@@ -86,8 +86,15 @@ function findDefs(projectDir, config) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";
     var found = findFile(file, projectDir, path.resolve(distDir, "defs"));
+    if (!found) {
+      try {
+        found = require.resolve("tern-" + src[i]);
+      } catch (e) {
+        process.stderr.write("Failed to find library " + src[i] + ".\n");
+        continue;
+      }
+    }
     if (found) defs.push(readJSON(found));
-    else process.stderr.write("Failed to find library " + src[i] + ".\n");
   }
   return defs;
 }
