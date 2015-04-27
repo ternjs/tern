@@ -388,7 +388,7 @@
         "!doc": "Used to retrieve the matches when matching a string against a regular expression."
       },
       "replace": {
-        "!type": "fn(pattern: +RegExp, replacement: string) -> string",
+        "!type": "fn(pattern: string|+RegExp, replacement: string) -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/replace",
         "!doc": "Returns a new string with some or all matches of a pattern replaced by a replacement.  The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match."
       },
