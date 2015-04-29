@@ -86,9 +86,9 @@
            (name (cdr (assq 'name item))))
        (popup-make-item
         name
-        :symbol (if (string-match "fn" type) "f" "v")
+        :symbol (if (null type) "?" (if (string-match "fn" type) "f" "v"))
         :summary (truncate-string-to-width
-                  type tern-ac-completion-truncate-length 0 nil "...")
+                  (or type "?") tern-ac-completion-truncate-length 0 nil "...")
         :document (concat type "\n\n" doc))))
    tern-ac-complete-reply))
 
