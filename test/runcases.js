@@ -89,7 +89,7 @@ exports.runTests = function(filter, caseDir) {
     if (m = text.match(/\/\/ loadfiles=\s*(.*)\s*\n/))
       m[1].split(/,\s*/g).forEach(function(f) {server.addFile(f);});
 
-    var typedef = /\/\/(<)?(\+\??|::?|:\?|doc:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
+    var typedef = /\/\/(<)?(\+\??|:\?|::?|doc:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
