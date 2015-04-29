@@ -34,7 +34,7 @@
       "!doc": "Defines a new property directly on an object, or modifies an existing property on an object, and returns the object. If you want to see how to use the Object.defineProperty method with a binary-flags-like syntax, see this article."
     },
     "defineProperties": {
-      "!type": "fn(obj: ?, props: ?)",
+      "!type": "fn(obj: ?, props: ?) -> !custom:Object_defineProperties",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/defineProperty",
       "!doc": "Defines a new property directly on an object, or modifies an existing property on an object, and returns the object. If you want to see how to use the Object.defineProperty method with a binary-flags-like syntax, see this article."
     },
