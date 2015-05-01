@@ -1128,9 +1128,15 @@ wire up some of the bizarre dependency management scheme from this
 library, so that dependency injections get the right types. Enabled
 with the name <code>"angular"</code>.</p>
 <h4> <a id="plugin_third_party"></a>Third-party plugins</h4>
-<p> It is possible to write third-party plugins and distribute them
+<p> It is possible to write third-party plugins or JSON type definitions and distribute them
 independently, either as packages using <a href="https://www.npmjs.org">npm</a> or as
 raw JavaScript files.</p>
+<p> When a <em>name</em> attribute is specified in the <code>libs</code> section of the
+project configuration, Tern first searches for a file <em><code>name</code></em><code>.json</code> in its
+distribution <code>defs</code> directory, then for a file <em><code>name</code></em><code>.json</code> in the
+user&#8217;s project directory, and finally for an installed package named
+"tern-<em>name</em>" to load as a JSON Type Definition. A JSON Type Definition distributed as an npm package
+must have a package name matching the pattern "tern-<em>name</em>".</p>
 <p> When a <em>name</em> attribute is specified in the <code>plugins</code> section of the
 project configuration, Tern first searches for a file <em><code>name</code></em><code>.js</code> in its
 distribution <code>plugin</code> directory, then for a file <em><code>name</code></em><code>.js</code> in the
