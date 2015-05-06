@@ -384,7 +384,7 @@ list of strings, giving the binary name and arguments.")
 
 ;; Highlight references in scope
 
-(defvar tern-flash-timeout 0.5 "Delay before highlight overlay dissappears.")
+(defvar tern-flash-timeout 0.5 "Delay before the highlight overlay disappears.")
 
 (defun tern-flash-region (start end)
   "Temporarily highlight region from START to END."
