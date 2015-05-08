@@ -754,7 +754,7 @@ the code), tries to infer the types of the variables and properties in
 the code.
 
 The parser is implemented in a separate module,
-http:://marijnhaverbeke.nl/acorn[Acorn], which provides a regular
+http://marijnhaverbeke.nl/acorn[Acorn], which provides a regular
 JavaScript parser, an error-tolerant parser, and a number of utilities
 for iterating through and searching in abstract syntax trees. The
 syntax tree format used by Acorn and Tern is described in the
