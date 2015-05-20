@@ -13,7 +13,7 @@
   "use strict";
 
   var WG_MADEUP = 1, WG_STRONG = 101;
-
+  
   tern.registerPlugin("doc_comment", function(server, options) {
     server.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
@@ -21,7 +21,8 @@
     });
     server._docComment = {
       weight: options && options.strong ? WG_STRONG : undefined,
-      fullDocs: options && options.fullDocs
+      fullDocs: options && options.fullDocs,
+      simpleTypes: Object.create(null)
     };
 
     return {
@@ -199,6 +200,25 @@
     return {type: type, end: pos, isOptional: isOptional, madeUp: madeUp};
   }
 
+  function getSimpleType(name) {
+    var cx = infer.cx(), types = cx.parent && cx.parent._docComment.simpleTypes, type = types[name];
+    if (type) return type;
+    switch(name) {
+      case "bool":
+        type = new tern.Prim(infer.cx().protos.Boolean, "bool");
+        break;
+      case "num":
+        type = new tern.Prim(infer.cx().protos.Number, "num");
+        break;
+      case "str":
+        type = new tern.Prim(infer.cx().protos.String, "str");
+        break;        
+    }
+    type.origin = "doc";
+    types[name] = type;
+    return type;
+  }
+  
   function parseTypeInner(scope, str, pos) {
     pos = skipSpace(str, pos);
     var type, madeUp = false;
@@ -248,9 +268,9 @@
       while (acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
       if (start == pos) return null;
       var word = str.slice(start, pos);
-      if (/^(number|integer)$/i.test(word)) type = infer.cx().num;
-      else if (/^bool(ean)?$/i.test(word)) type = infer.cx().bool;
-      else if (/^string$/i.test(word)) type = infer.cx().str;
+      if (/^(number|integer)$/i.test(word)) type = getSimpleType("num");
+      else if (/^bool(ean)?$/i.test(word)) type = getSimpleType("bool");
+      else if (/^string$/i.test(word)) type = getSimpleType("str");
       else if (/^(null|undefined)$/i.test(word)) type = infer.ANull;
       else if (/^array$/i.test(word)) {
         var inner = null;
@@ -369,7 +389,6 @@
   function propagateWithWeight(type, target) {
     var weight = infer.cx().parent._docComment.weight;
     type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
-     type.type.fromComment = true; // mark the type is coming from the comment
   }
 
   function applyType(type, self, args, ret, node, aval) {
