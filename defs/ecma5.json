@@ -64,7 +64,7 @@
       "!doc": "Determine if an object is sealed."
     },
     "freeze": {
-      "!type": "fn(obj: ?)",
+      "!type": "fn(obj: ?) -> !0",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/freeze",
       "!doc": "Freezes an object: that is, prevents new properties from being added to it; prevents existing properties from being removed; and prevents existing properties, or their enumerability, configurability, or writability, from being changed. In essence the object is made effectively immutable. The method returns the object being frozen."
     },
