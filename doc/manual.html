@@ -956,6 +956,17 @@ configure the server. Its <code>defs</code> property may contain a <a href="#typ
 Currently the following passes are supported:</p>
 <dl>
 <dt>
+<code>"preParse" (text, options)</code>
+</dt>
+<dd>
+<p>
+Will be run right before a file is parsed,
+and passed the given text and options. If the function
+returns a new text value, the origin text will be overriden. This is useful for instance
+when a plugin is able to extract JavaScript content from an HTML file.
+</p>
+</dd>
+<dt>
 <code>"postParse" (ast, text)</code>
 </dt>
 <dd>
@@ -1294,7 +1305,7 @@ The top-level
 tree, and then tell Tern to analyze that.</p>
 <dl>
 <dt>
-<a id="infer.parse"></a><code>infer.parse(text: string) → AST</code>
+<a id="infer.parse"></a><code>infer.parse(text: string, passes: [], options?: {}) → AST</code>
 </dt>
 <dd>
 <p>
