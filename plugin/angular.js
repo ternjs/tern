@@ -641,6 +641,7 @@
           "!doc": "Converts Angular expression into a function."
         },
         $q: {
+          "!type": "fn(executor: fn(resolve: fn(value: ?) -> +Promise, reject: fn(value: ?) -> +Promise)) -> +Promise",
           "!url": "http://docs.angularjs.org/api/ng.$q",
           "!doc": "A promise/deferred implementation.",
           all: {
