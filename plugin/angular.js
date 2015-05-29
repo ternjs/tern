@@ -655,7 +655,7 @@
             "!doc": "Creates a Deferred object which represents a task which will finish in the future."
           },
           reject: {
-            "!type": "fn(reasion: ?) -> +Promise",
+            "!type": "fn(reason: ?) -> +Promise",
             "!url": "http://docs.angularjs.org/api/ng.$q#reject",
             "!doc": "Creates a promise that is resolved as rejected with the specified reason."
           },
