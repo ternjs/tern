@@ -98,9 +98,14 @@
     } else if (name in data.modules) {
       result = data.modules[name];
     } else if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
-      var scope = buildWrappingScope(cx.topScope, name);
-      infer.def.load(data.options.modules[name], scope);
-      result = data.modules[name] = scope.exports;
+      var mod = data.options.modules[name];
+      if (typeof(mod) == "string" && mod.charAt(0) == '$') {
+        result = cx.topScope.props[mod.substring(1)];
+      } else {
+        var scope = buildWrappingScope(cx.topScope, name);
+        infer.def.load(data.options.modules[name], scope);
+        result = data.modules[name] = scope.exports;
+      }
     } else {
       // data.currentFile is only available while analyzing a file; at query
       // time, determine the calling file from the caller's AST.
@@ -129,7 +134,12 @@
   }
 
   function postLoadDef(data) {
-    var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!node"];
+    var cx = infer.cx();
+    var def = cx.definitions[data["!name"]];
+    if (!def || !def["!node"]) {
+      return;
+    }
+    var mods = def["!node"];
     var data = cx.parent._node;
     if (mods) for (var name in mods.props) {
       var origin = name.replace(/`/g, ".");
