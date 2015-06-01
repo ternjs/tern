@@ -815,7 +815,7 @@ object.
 To push code into a context, you first parse it, yielding a syntax
 tree, and then tell Tern to analyze that.
 
-[[infer.parse]]`infer.parse(text: string) → AST`:: Parse a piece of
+[[infer.parse]]`infer.parse(file: File, text: string, passes: [], options?: {}) → AST`:: Parse a piece of
 code for use by Tern. Will automatically fall back to the
 error-tolerant parser if the regular parser can't parse the code.
 
