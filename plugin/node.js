@@ -99,8 +99,8 @@
       result = data.modules[name];
     } else if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
       var mod = data.options.modules[name];
-      if (typeof(mod) == "string" && mod.charAt(0) == '$') {
-        result = cx.topScope.props[mod.substring(1)];
+      if (typeof(mod) == "string" && mod.charAt(0) == '=') {
+        result = infer.def.parsePath(mod.slice(1));
       } else {
         var scope = buildWrappingScope(cx.topScope, name);
         infer.def.load(data.options.modules[name], scope);
