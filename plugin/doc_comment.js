@@ -121,14 +121,18 @@
     }
 
     var result = comments[comments.length - 1];
+
+
     if (cx.parent._docComment.fullDocs) {
       result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
     } else {
       var dot = result.search(/\.\s/);
       if (dot > 5) result = result.slice(0, dot + 1);
-      result = result.trim().replace(/\s*\n\s*\*\s*|\s{1,}/g, " ");
+      // Remove all space*space in beginning of the lines
+      result = result.replace(/^\n?( *\* *)/gm, "");
+      // Remove first newline
+      result = result.substring(1);
     }
-    result = result.replace(/^\s*\*+\s*/, "");
 
     if (aval instanceof infer.AVal) aval.doc = result;
     if (type) type.doc = result;
