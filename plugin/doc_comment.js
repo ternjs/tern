@@ -127,7 +127,7 @@
       var dot = result.search(/\.\s/);
       if (dot > 5) result = result.slice(0, dot + 1);
       // Remove all space*space in beginning of the lines
-      result = result.replace(/^\n?( *\* *)/gm, "");
+      result = result.replace(/^\n?([ \t]*\* *)/gm, "");
       // Remove first newline
       result = result.substring(1);
     }
