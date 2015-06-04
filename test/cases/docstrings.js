@@ -39,7 +39,9 @@ Quux; //doc: Quux is a thing.
  */
 var baz = "hi";
 
-baz; //doc: Extra bogus whitespace is also stripped.
+baz; /*doc:  Extra bogus 
+ 	  *  	whitespace is also stripped.
+      */
 
 var o = {
   // Get the name.
