@@ -121,8 +121,6 @@
     }
 
     var result = comments[comments.length - 1];
-
-
     if (cx.parent._docComment.fullDocs) {
       result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
     } else {
