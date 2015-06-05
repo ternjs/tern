@@ -125,6 +125,7 @@
 
     if (cx.parent._docComment.fullDocs) {
       result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
+      result = result.replace(/^\*/g, "");
     } else {
       var dot = result.search(/\.\s/);
       if (dot > 5) result = result.slice(0, dot + 1);
