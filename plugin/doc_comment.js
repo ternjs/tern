@@ -121,8 +121,6 @@
     }
 
     var result = comments[comments.length - 1];
-
-
     if (cx.parent._docComment.fullDocs) {
       result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
       result = result.replace(/^\*/g, "");
@@ -130,7 +128,7 @@
       var dot = result.search(/\.\s/);
       if (dot > 5) result = result.slice(0, dot + 1);
       // Remove all space*space in beginning of the lines
-      result = result.replace(/^\n?( *\* *)/gm, "");
+      result = result.replace(/^\n?([ \t]*\* *)/gm, "");
       // Remove first newline
       result = result.substring(1);
     }
