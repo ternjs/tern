@@ -510,24 +510,27 @@ list of strings, giving the binary name and arguments.")
 
 ;; Mode plumbing
 
-(defun tern-before-change (start end)
+(defun tern-after-change (start end prev-length)
+  "Track the dirty area of the buffer."
   (if tern-buffer-is-dirty
-      (setf (car tern-buffer-is-dirty) (min (car tern-buffer-is-dirty) start)
-            (cdr tern-buffer-is-dirty) (max (cdr tern-buffer-is-dirty) end))
-    (setf tern-buffer-is-dirty (cons start end)))
-  (when (> (- (cdr tern-buffer-is-dirty) (car tern-buffer-is-dirty)) 4000)
-    (run-at-time "200 millisec" nil
-                 (lambda (buf)
-                   (with-current-buffer buf
-                     (when tern-buffer-is-dirty
-                       (setf tern-buffer-is-dirty nil)
-                       (tern-send-buffer-to-server))))
-                 (current-buffer)))
+      (setf tern-buffer-is-dirty (cons (min start (car tern-buffer-is-dirty))
+                                       (max end   (cdr tern-buffer-is-dirty))))
+    (setf tern-buffer-is-dirty (cons start end))))
+
+(defvar tern-idle-time 1
+  "The time Emacs is allowed to idle before updating Tern's representation of the file.")
+(defvar tern-idle-timer nil
+  "The timer on which `tern-reparse-on-idle' runs.")
+(defun tern-reparse-on-idle ()
+  "Do some mode plumbing and refresh tern's representation of the buffer."
   (setf tern-last-point-pos nil)
-  (when (and tern-last-argument-hints (<= start (car tern-last-argument-hints)))
+  (when (and tern-last-argument-hints tern-buffer-is-dirty
+             (<= (car tern-buffer-is-dirty) (car tern-last-argument-hints)))
     (setf tern-last-argument-hints nil))
-  (when (and tern-last-completions (<= start (cadr tern-last-completions)))
-    (setf tern-last-completions nil)))
+  (when (and tern-last-completions tern-buffer-is-dirty
+             (<= (car tern-buffer-is-dirty) (cadr tern-last-completions)))
+    (setf tern-last-completions nil))
+  (tern-send-buffer-to-server))
 
 (defun tern-post-command ()
   (unless (eq (point) tern-last-point-pos)
@@ -568,14 +571,21 @@ list of strings, giving the binary name and arguments.")
   (set (make-local-variable 'tern-buffer-is-dirty) (and (buffer-modified-p) (cons (point-min) (point-max))))
   (make-local-variable 'completion-at-point-functions)
   (push 'tern-completion-at-point completion-at-point-functions)
-  (add-hook 'before-change-functions 'tern-before-change nil t)
+  ;; (add-hook 'before-change-functions 'tern-before-change nil t)
+  (add-hook 'after-change-functions 'tern-after-change nil t)
+  (set (make-local-variable 'tern-idle-timer)
+       (run-with-idle-timer tern-idle-time t #'tern-reparse-on-idle))
   (add-hook 'post-command-hook 'tern-post-command nil t)
-  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t))
+  (add-hook 'buffer-list-update-hook 'tern-left-buffer nil t)
+  (tern-send-buffer-to-server))
 
 (defun tern-mode-disable ()
   (setf completion-at-point-functions
         (remove 'tern-completion-at-point completion-at-point-functions))
-  (remove-hook 'before-change-functions 'tern-before-change t)
+  ;; (remove-hook 'before-change-functions 'tern-before-change t)
+  (when tern-idle-timer
+    (cancel-timer tern-idle-timer))
+  (remove-hook 'after-change-functions 'tern-after-change t)
   (remove-hook 'post-command-hook 'tern-post-command t)
   (remove-hook 'buffer-list-update-hook 'tern-left-buffer t))
 
