@@ -529,10 +529,10 @@ type definition>> data structure that the server should load, and its
 `passes` property may hold an object mapping pass names to functions.
 Currently the following passes are supported:
 
-`"preParse" (file, text, partial)`;; Will be run right before a file is parsed,
-and passed the given file, the given text and partial boolean. If the function
-returns a new text value, the origin text will be overriden. This is useful when a
-plugin is able to extract JavaScript content from an HTML file.
+`"preParse" (text, options)`;; Will be run right before a file is parsed,
+and passed the given text and options. If the function
+returns a new text value, the origin text will be overriden. This is useful for instance 
+when a plugin is able to extract JavaScript content from an HTML file.
 
 `"postParse" (ast, text)`;; Will be run right after a file is parsed,
 and passed the parse tree and the parsed file as arguments.
