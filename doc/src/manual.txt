@@ -529,6 +529,11 @@ type definition>> data structure that the server should load, and its
 `passes` property may hold an object mapping pass names to functions.
 Currently the following passes are supported:
 
+`"preParse" (text, options)`;; Will be run right before a file is parsed,
+and passed the given text and options. If the function
+returns a new text value, the origin text will be overriden. This is useful for instance 
+when a plugin is able to extract JavaScript content from an HTML file.
+
 `"postParse" (ast, text)`;; Will be run right after a file is parsed,
 and passed the parse tree and the parsed file as arguments.
 
@@ -808,7 +813,7 @@ object.
 To push code into a context, you first parse it, yielding a syntax
 tree, and then tell Tern to analyze that.
 
-[[infer.parse]]`infer.parse(text: string) → AST`:: Parse a piece of
+[[infer.parse]]`infer.parse(text: string, passes: [], options?: {}) → AST`:: Parse a piece of
 code for use by Tern. Will automatically fall back to the
 error-tolerant parser if the regular parser can't parse the code.
 
