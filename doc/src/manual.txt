@@ -571,8 +571,6 @@ To turn this plugin off, set `doc_comment: null` in your
 
 The plugin understands the following configuration parameters:
 
-`fullDocs`:: Can be set to `true` to return the full comment text instead of the first sentence.
-
 [[plugin_complete_strings]]
 ==== String completion plugin ====
 
