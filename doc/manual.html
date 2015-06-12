@@ -1626,15 +1626,14 @@ the <a href="http://marijnhaverbeke.nl/blog/tern.html">blog post</a> on the
 inference algorithm for some examples.</p>
 <dl>
 <dt>
-<a id="infer.constraint"></a><code>infer.constraint(props: string, methods: object) → constructor</code>
+<a id="infer.constraint"></a><code>infer.constraint(methods: object) → constructor</code>
 </dt>
 <dd>
 <p>
-This is a constructor-constructor for constraints. Given a
-comma-separated list of fields (for example <code>"prop, target"</code>), it will
-return a constructor that takes those fields as arguments and stores
-them in <code>this</code>, with a prototype that derives from a generic
-constraint type, extended with the properties specified in <code>methods</code>.
+This is a constructor-constructor for constraints. It&#8217;ll create a
+constructor with all the given methods copied into its prototype,
+which will run its <code>construct</code> method on its arguments when
+instantiated.
 </p>
 </dd>
 </dl>

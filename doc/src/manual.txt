@@ -983,12 +983,11 @@ additional constraints to propagate values in more indirect ways. See
 the http://marijnhaverbeke.nl/blog/tern.html[blog post] on the
 inference algorithm for some examples.
 
-[[infer.constraint]]`infer.constraint(props: string, methods: object) → constructor`::
-This is a constructor-constructor for constraints. Given a
-comma-separated list of fields (for example `"prop, target"`), it will
-return a constructor that takes those fields as arguments and stores
-them in `this`, with a prototype that derives from a generic
-constraint type, extended with the properties specified in `methods`.
+[[infer.constraint]]`infer.constraint(methods: object) → constructor`::
+This is a constructor-constructor for constraints. It'll create a
+constructor with all the given methods copied into its prototype,
+which will run its `construct` method on its arguments when
+instantiated.
 
 Beyond <<infer.AVal.addType,`addType`>>, there are a few optional
 methods that constraints can expose to tell the system something about
