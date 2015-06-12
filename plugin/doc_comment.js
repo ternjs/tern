@@ -110,6 +110,36 @@
 
   // COMMENT INTERPRETATION
 
+  function stripLeadingChars(lines) {
+    for (var head, i = 1; i < lines.length; i++) {
+      var line = lines[i], lineHead = line.match(/^\W*/)[0];
+      if (lineHead != line) {
+        if (head == null) {
+          head = lineHead;
+        } else {
+          var same = 0;
+          while (same < head.length && head.charCodeAt(same) == lineHead.charCodeAt(same)) ++same;
+          if (same < head.length) head = head.slice(0, same)
+        }
+      }
+    }
+    lines = lines.map(function(line, i) {
+      line = line.replace(/\s+$/, "");
+      if (i == 0 && head != null) {
+        for (var j = 0; j < head.length; j++) {
+          var found = line.indexOf(head.slice(j));
+          if (found == 0) return line.slice(head.length - j);
+        }
+      }
+      if (head == null || i == 0) return line.replace(/^[\s\*]*/, "");
+      if (line.length < head.length) return "";
+      return line.slice(head.length);
+    });
+    while (lines.length && !lines[lines.length - 1]) lines.pop();
+    while (lines.length && !lines[0]) lines.shift();
+    return lines;
+  }
+
   function interpretComments(node, comments, scope, aval, type) {
     jsdocInterpretComments(node, scope, aval, comments);
     var cx = infer.cx();
@@ -120,21 +150,14 @@
         type = null;
     }
 
-    var result = comments[comments.length - 1];
-    if (cx.parent._docComment.fullDocs) {
-      result = result.trim().replace(/\n[ \t]*\* ?/g, "\n");
-      result = result.replace(/^\*/g, "");
-    } else {
-      var dot = result.search(/\.\s/);
-      if (dot > 5) result = result.slice(0, dot + 1);
-      // Remove all space*space in beginning of the lines
-      result = result.replace(/^\n?([ \t]*\* *)/gm, "");
-      // Remove first newline
-      result = result.substring(1);
+    for (var i = comments.length - 1; i >= 0; i--) {
+      var text = stripLeadingChars(comments[i].split(/\r\n?|\n/)).join("\n");
+      if (text) {
+        if (aval instanceof infer.AVal) aval.doc = text;
+        if (type) type.doc = text;
+        break;
+      }
     }
-
-    if (aval instanceof infer.AVal) aval.doc = result;
-    if (type) type.doc = result;
   }
 
   // Parses a subset of JSDoc-style comments in order to include the
