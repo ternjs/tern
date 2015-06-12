@@ -146,9 +146,10 @@ exports.runTests = function(filter, caseDir) {
           if (err) throw err;
 
           if (kind == "doc:") { // Docstring test
-            if (resp.doc != args) {
+            var expected = args.replace(/\\n/g, "\n");
+            if (resp.doc != expected) {
               fail(m, "Found " + (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
-                   "instead of expected docstring\n  " + args);
+                   "instead of expected docstring\n  " + expected);
             }
           } else if (kind == "loc:") { // Definition finding test
             var pos = args.match(/^\s*(\d+),\s*(\d+)(?:,\s*([^,]+))?/), line = Number(pos[1]), col = Number(pos[2]), file = pos[3];

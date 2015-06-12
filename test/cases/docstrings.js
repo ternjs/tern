@@ -27,21 +27,36 @@ var abc = 20;
 
 abc; //doc: This describes abc.
 
-// Quux is a thing. And here are a bunch more sentences that would
-// make the docstring too long, and are thus wisely stripped by Tern's
-// brain-dead heuristics. Ayay.
+// Quux is a thing.
+// Two lines.
 function Quux() {}
 
-Quux; //doc: Quux is a thing.
+Quux; //doc: Quux is a thing.\nTwo lines.
 
-/*  Extra bogus 
- *  	whitespace is also stripped.
+/*
+ *  Extra bogus 
+ *  whitespace is also stripped.
  */
 var baz = "hi";
 
-baz; /*doc:  Extra bogus 
- 	  *  	whitespace is also stripped.
-      */
+baz; //doc: Extra bogus\nwhitespace is also stripped.
+
+/* starry format
+ * with first line text
+ */
+var oy = 1;
+
+oy; //doc: starry format\nwith first line text
+
+// Block of text
+// With some
+//  * indented
+//  * pieces
+//
+// And a blank line
+var arr = 6;
+
+arr; //doc: Block of text\nWith some\n * indented\n * pieces\n\nAnd a blank line
 
 var o = {
   // Get the name.

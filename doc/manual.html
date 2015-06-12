@@ -956,6 +956,17 @@ configure the server. Its <code>defs</code> property may contain a <a href="#typ
 Currently the following passes are supported:</p>
 <dl>
 <dt>
+<code>"preParse" (text, options)</code>
+</dt>
+<dd>
+<p>
+Will be run right before a file is parsed,
+and passed the given text and options. If the function
+returns a new text value, the origin text will be overriden. This is useful for instance
+when a plugin is able to extract JavaScript content from an HTML file.
+</p>
+</dd>
+<dt>
 <code>"postParse" (ast, text)</code>
 </dt>
 <dd>
@@ -1024,16 +1035,6 @@ property.</p>
 <p> To turn this plugin off, set <code>doc_comment: null</code> in your
 <a href="#option_plugins">plugin option</a>.</p>
 <p> The plugin understands the following configuration parameters:</p>
-<dl>
-<dt>
-<code>fullDocs</code>
-</dt>
-<dd>
-<p>
-Can be set to <code>true</code> to return the full comment text instead of the first sentence.
-</p>
-</dd>
-</dl>
 <h4> <a id="plugin_complete_strings"></a>String completion plugin</h4>
 <p> When enabled, this plugin will gather (short) strings in your code,
 and completing when inside a string will try to complete to previously
@@ -1304,7 +1305,7 @@ The top-level
 tree, and then tell Tern to analyze that.</p>
 <dl>
 <dt>
-<a id="infer.parse"></a><code>infer.parse(text: string) → AST</code>
+<a id="infer.parse"></a><code>infer.parse(text: string, passes: [], options?: {}) → AST</code>
 </dt>
 <dd>
 <p>
@@ -1636,15 +1637,14 @@ the <a href="http://marijnhaverbeke.nl/blog/tern.html">blog post</a> on the
 inference algorithm for some examples.</p>
 <dl>
 <dt>
-<a id="infer.constraint"></a><code>infer.constraint(props: string, methods: object) → constructor</code>
+<a id="infer.constraint"></a><code>infer.constraint(methods: object) → constructor</code>
 </dt>
 <dd>
 <p>
-This is a constructor-constructor for constraints. Given a
-comma-separated list of fields (for example <code>"prop, target"</code>), it will
-return a constructor that takes those fields as arguments and stores
-them in <code>this</code>, with a prototype that derives from a generic
-constraint type, extended with the properties specified in <code>methods</code>.
+This is a constructor-constructor for constraints. It&#8217;ll create a
+constructor with all the given methods copied into its prototype,
+which will run its <code>construct</code> method on its arguments when
+instantiated.
 </p>
 </dd>
 </dl>
