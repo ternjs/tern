@@ -315,6 +315,11 @@ Offsets returned by the server will be integers, unless the
 `lineCharPositions` field in the request was set to `true`, in which
 case they will be `{line, ch}` objects.
 
+The format of the `doc` field in responses will, by default, only
+contain the first few sentences of the documentation string, and have
+newlines stripped. To get the full string, with newlines intact, you
+can add a `docFormat` field to your query with the value `"full"`.
+
 [[variable]] Requests that take an input expression also accept a
 `variable` field which, when given, will cause the server to not look
 for an expression in the code, but to make up a variable expression

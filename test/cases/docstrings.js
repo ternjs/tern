@@ -31,7 +31,7 @@ abc; //doc: This describes abc.
 // Two lines.
 function Quux() {}
 
-Quux; //doc: Quux is a thing.\nTwo lines.
+Quux; //doc+: Quux is a thing.\nTwo lines.
 
 /*
  *  Extra bogus 
@@ -39,14 +39,14 @@ Quux; //doc: Quux is a thing.\nTwo lines.
  */
 var baz = "hi";
 
-baz; //doc: Extra bogus\nwhitespace is also stripped.
+baz; //doc: Extra bogus whitespace is also stripped.
 
 /* starry format
  * with first line text
  */
 var oy = 1;
 
-oy; //doc: starry format\nwith first line text
+oy; //doc: starry format with first line text
 
 // Block of text
 // With some
@@ -56,7 +56,20 @@ oy; //doc: starry format\nwith first line text
 // And a blank line
 var arr = 6;
 
-arr; //doc: Block of text\nWith some\n * indented\n * pieces\n\nAnd a blank line
+arr; //doc+: Block of text\nWith some\n * indented\n * pieces\n\nAnd a blank line
+
+// Split off sentences after the first 100 characters. If our pattern
+// happens to match. Here we are at about 90 so this one goes over and
+// would be removed.
+var aha = "";
+
+aha; //doc: Split off sentences after the first 100 characters. If our pattern happens to match.
+
+// Also ignore JSDoc-y stuff
+// @type {zoink}
+var xyzzy = false;
+
+xyzzy; //doc: Also ignore JSDoc-y stuff
 
 var o = {
   // Get the name.

@@ -112,7 +112,7 @@
 
   function stripLeadingChars(lines) {
     for (var head, i = 1; i < lines.length; i++) {
-      var line = lines[i], lineHead = line.match(/^\W*/)[0];
+      var line = lines[i], lineHead = line.match(/^[\s\*]*/)[0];
       if (lineHead != line) {
         if (head == null) {
           head = lineHead;

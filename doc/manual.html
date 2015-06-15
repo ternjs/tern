@@ -670,6 +670,10 @@ ch}</code> objects, where both <code>line</code> and <code>ch</code> are zero-ba
 Offsets returned by the server will be integers, unless the
 <code>lineCharPositions</code> field in the request was set to <code>true</code>, in which
 case they will be <code>{line, ch}</code> objects.</p>
+<p> The format of the <code>doc</code> field in responses will, by default, only
+contain the first few sentences of the documentation string, and have
+newlines stripped. To get the full string, with newlines intact, you
+can add a <code>docFormat</code> field to your query with the value <code>"full"</code>.</p>
 <p> <a id="variable"></a> Requests that take an input expression also accept a
 <code>variable</code> field which, when given, will cause the server to not look
 for an expression in the code, but to make up a variable expression
