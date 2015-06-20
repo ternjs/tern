@@ -337,12 +337,27 @@
           "!doc": "Introduced in RequireJS 2.1.9: If set to true, skips the data-main attribute scanning done to start module loading. Useful if RequireJS is embedded in a utility library that may interact with other RequireJS library on the page, and the embedded version should not do data-main loading.",
           "!url": "http://requirejs.org/docs/api.html#config-skipDataMain"
         }
+      },
+      RequireJSError: {
+        "prototype" : {
+          "!proto": "Error.prototype",
+          "requireType": {
+            "!type": "string",
+            "!doc": "A string value with a general classification, like 'timeout', 'nodefine', 'scripterror'.",
+            "!url": "http://requirejs.org/docs/api.html#errors"
+          },
+          "requireModules": {
+            "!type": "[string]",
+            "!doc": "An array of module names/URLs that timed out.",
+            "!url": "http://requirejs.org/docs/api.html#errors"
+          }
+        }
       }
     },
     requirejs: {
-      "!type": "fn(deps: [string], callback: fn(), errback: fn()) -> !custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn(), errback?: fn(err: +RequireJSError)) -> !custom:requireJS",
       onError: {
-        "!type": "fn(err: +Error)",
+        "!type": "fn(err: +RequireJSError)",
         "!doc": "To detect errors that are not caught by local errbacks, you can override requirejs.onError()",
         "!url": "http://requirejs.org/docs/api.html#requirejsonerror"
       },
