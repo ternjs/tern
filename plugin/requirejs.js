@@ -148,11 +148,11 @@
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.options.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
-        deps.push(interf(path.join(base, node.value), data));
+        node.required = interf(path.join(base, node.value), data); deps.push(node.required);
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string")
-          deps.push(interf(path.join(base, elt.value), data));
+          elt.required = interf(path.join(base, elt.value), data); deps.push(elt.required);
       }
     } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
       // Simplified CommonJS call
@@ -165,8 +165,10 @@
       if (!fn.isEmpty() && !fn.getFunctionType()) fn = null;
     }
 
-    if (fn) fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out));
-    else if (args.length) args[0].propagate(out);
+    if (fn) {
+      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out)); 
+      out.originNode = fn.originNode;
+    } else if (args.length) args[0].propagate(out);
 
     return infer.ANull;
   });
@@ -242,10 +244,34 @@
       defs: defs,
       passes: {
         preCondenseReach: preCondenseReach,
-        postLoadDef: postLoadDef
+        postLoadDef: postLoadDef,
+        typeAt: findTypeAt
       }
     };
   });
+
+  function findTypeAt(_file, _pos, expr, type) {
+    if (!expr) return type;
+    var isStringLiteral = expr.node.type === "Literal" &&
+       typeof expr.node.value === "string";
+    var isRequireArg = !!expr.node.required;
+
+    if (isStringLiteral && isRequireArg) {
+      // The `type` is a value shared for all string literals.
+      // We must create a copy before modifying `origin` and `originNode`.
+      // Otherwise all string literals would point to the last jump location
+      type = Object.create(type);
+
+      // Provide a custom origin location pointing to the require()d file
+      var exportedType;
+      if (expr.node.required && (exportedType = expr.node.required)) {
+        type.origin = exportedType.origin;
+        type.originNode = exportedType.originNode;
+      }
+    }
+
+    return type;
+  }
 
   var defs = {
     "!name": "requirejs",
