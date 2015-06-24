@@ -419,7 +419,10 @@
           fn.argNames[i] += "?";
         if (known) propagateWithWeight(known, fn.args[i]);
       }
-      if (ret) propagateWithWeight(ret, fn.retval);
+      if (ret) {
+        if (fn.retval == infer.ANull) fn.retval = new infer.AVal;
+        propagateWithWeight(ret, fn.retval);
+      }
       if (self) propagateWithWeight(self, fn.self);
     } else if (type) {
       propagateWithWeight(type, aval);
