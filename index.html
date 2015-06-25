@@ -83,6 +83,17 @@ post</a>.</p>
 
 <h2><a id="releases"></a>Release history</h2>
 
+<p class="release">25-06-2015: <a href="https://github.com/marijnh/tern/tree/0.12.0">Version 0.12</a></p>
+
+<ul class="release-note">
+  <li>Fix another infinite recursion bug</li>
+  <li>Rework doc comment stripping, allow passing <code>docFormat: "full"</code>
+  in a query to receive full strings.</li>
+  <li>Add a <code>preParse</code> hook that plugins can register.</li>
+  <li>Prevent observed calls from 'polluting' union types from JSON definitions.</li>
+  <li>Full <a href="https://github.com/marijnh/tern/compare/0.11.0...0.12.0">list of patches</a></li>
+</ul>
+
 <p class="release">29-04-2015: <a href="https://github.com/marijnh/tern/tree/0.11.0">Version 0.11</a></p>
 
 <ul class="release-note">
