@@ -5,12 +5,12 @@
       "catch": {
         "!doc": "The catch() method returns a Promise and deals with rejected cases only. It behaves the same as calling Promise.prototype.then(undefined, onRejected).",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch",
-        "!type": "fn(onRejected: fn(reason: ?))"
+        "!type": "fn(onRejected: fn(reason: ?)) -> +Promise"
       },
       "then": {
         "!doc": "The then() method returns a Promise. It takes two arguments, both are callback functions for the success and failure cases of the Promise.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then",
-        "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?))",
+        "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?)) -> +Promise",
         "!effects": [
           "call !0 !this.value"
         ]
