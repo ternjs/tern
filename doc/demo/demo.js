@@ -108,10 +108,10 @@ function initEditor() {
   editor.on("cursorActivity", function(cm) { server.updateArgHints(cm); });
 
   registerDoc("test.js", editor.getDoc());
-  registerDoc("test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
-  load("demo/underscore.js", function(body) {
+//  registerDoc("test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
+/*  load("demo/underscore.js", function(body) {
     registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
-  });
+  });*/
 
   CodeMirror.on(document.getElementById("docs"), "click", function(e) {
     var target = e.target || e.srcElement;
