@@ -326,7 +326,7 @@
     
     function gather(modules) {
       for (var name in modules) {
-        if (name == currentFile) continue;
+        if (name == currentFile || !modules[name].getType()) continue;
 
         var moduleName = name.substring(base.length, name.length);
         if (moduleName &&
