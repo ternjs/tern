@@ -277,7 +277,7 @@
     if (!callExpr) return;
     var callNode = callExpr.node;
     if (callNode.callee.type != "Identifier" || 
-        !(callNode.callee.name == "define" || callNode.callee.name == "require")||
+        !(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")||
         callNode.arguments.length < 1 || callNode.arguments[0].type != "ArrayExpression") return;
     var argNode = findRequireModule(callNode.arguments[0].elements, wordEnd);
     if (!argNode) return;
