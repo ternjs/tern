@@ -292,9 +292,11 @@
   function completeModuleName(query, file, word) {
     var completions = [];
     var cx = infer.cx(), server = cx.parent, data = server._requireJS;
-    var currentFile = null; //data.currentFile || resolveProjectPath(server, file.name);
+    var currentFile = data.currentFile;
     var wrapAsObjs = query.types || query.depths || query.docs || query.urls || query.origins;
-
+    var base = data.options.baseURL || "";
+    if (base && base.charAt(base.length - 1) != "/") base += "/";
+    
     function maybeSet(obj, prop, val) {
       if (val != null) obj[prop] = val;
     }
@@ -303,7 +305,7 @@
       for (var name in modules) {
         if (name == currentFile) continue;
 
-        var moduleName = name; //resolveModulePath(name, currentFile);
+        var moduleName = name.substring(base.length, name.length);
         if (moduleName &&
             !(query.filter !== false && word &&
               (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0)) {
