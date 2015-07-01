@@ -315,6 +315,11 @@ Offsets returned by the server will be integers, unless the
 `lineCharPositions` field in the request was set to `true`, in which
 case they will be `{line, ch}` objects.
 
+The format of the `doc` field in responses will, by default, only
+contain the first few sentences of the documentation string, and have
+newlines stripped. To get the full string, with newlines intact, you
+can add a `docFormat` field to your query with the value `"full"`.
+
 [[variable]] Requests that take an input expression also accept a
 `variable` field which, when given, will cause the server to not look
 for an expression in the code, but to make up a variable expression
@@ -529,6 +534,11 @@ type definition>> data structure that the server should load, and its
 `passes` property may hold an object mapping pass names to functions.
 Currently the following passes are supported:
 
+`"preParse" (text, options)`;; Will be run right before a file is parsed,
+and passed the given text and options. If the function
+returns a new text value, the origin text will be overriden. This is useful for instance 
+when a plugin is able to extract JavaScript content from an HTML file.
+
 `"postParse" (ast, text)`;; Will be run right after a file is parsed,
 and passed the parse tree and the parsed file as arguments.
 
@@ -570,8 +580,6 @@ To turn this plugin off, set `doc_comment: null` in your
 <<option_plugins,plugin option>>.
 
 The plugin understands the following configuration parameters:
-
-`fullDocs`:: Can be set to `true` to return the full comment text instead of the first sentence.
 
 [[plugin_complete_strings]]
 ==== String completion plugin ====
@@ -810,7 +818,7 @@ object.
 To push code into a context, you first parse it, yielding a syntax
 tree, and then tell Tern to analyze that.
 
-[[infer.parse]]`infer.parse(text: string) → AST`:: Parse a piece of
+[[infer.parse]]`infer.parse(text: string, passes: [], options?: {}) → AST`:: Parse a piece of
 code for use by Tern. Will automatically fall back to the
 error-tolerant parser if the regular parser can't parse the code.
 
@@ -985,12 +993,11 @@ additional constraints to propagate values in more indirect ways. See
 the http://marijnhaverbeke.nl/blog/tern.html[blog post] on the
 inference algorithm for some examples.
 
-[[infer.constraint]]`infer.constraint(props: string, methods: object) → constructor`::
-This is a constructor-constructor for constraints. Given a
-comma-separated list of fields (for example `"prop, target"`), it will
-return a constructor that takes those fields as arguments and stores
-them in `this`, with a prototype that derives from a generic
-constraint type, extended with the properties specified in `methods`.
+[[infer.constraint]]`infer.constraint(methods: object) → constructor`::
+This is a constructor-constructor for constraints. It'll create a
+constructor with all the given methods copied into its prototype,
+which will run its `construct` method on its arguments when
+instantiated.
 
 Beyond <<infer.AVal.addType,`addType`>>, there are a few optional
 methods that constraints can expose to tell the system something about

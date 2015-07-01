@@ -105,3 +105,10 @@ stringOrNumber; //: string|number
 function unionFunction(a) { return argh(); }
 
 unionFunction; //: fn(a: string) -> [Foo|number]
+
+/**
+ * @returns {string}
+ */
+function ui() {}
+
+ui(); //: string

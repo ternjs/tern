@@ -89,7 +89,7 @@ exports.runTests = function(filter, caseDir) {
     if (m = text.match(/\/\/ loadfiles=\s*(.*)\s*\n/))
       m[1].split(/,\s*/g).forEach(function(f) {server.addFile(f);});
 
-    var typedef = /\/\/(<)?(\+\??|:\?|::?|doc:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
+    var typedef = /\/\/(<)?(\+\??|:\?|::?|doc\+?:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -137,18 +137,20 @@ exports.runTests = function(filter, caseDir) {
           }
           start = expr.node.start; end = expr.node.end;
         }
-        var query = {type: kind == "doc:" ? "documentation" : kind == "loc:" ? "definition" : kind == "refs:" ? "refs" : "type",
+        var query = {type: /doc/.test(kind) ? "documentation" : kind == "loc:" ? "definition" : kind == "refs:" ? "refs" : "type",
                      start: start, end: end,
+                     docFormat: kind == "doc+:" ? "full" : null,
                      file: fname,
                      depth: kind == "::" ? 5 : null,
                      lineCharPositions: true};
         server.request({query: query}, function(err, resp) {
           if (err) throw err;
 
-          if (kind == "doc:") { // Docstring test
-            if (resp.doc != args) {
+          if (/doc/.test(kind)) { // Docstring test
+            var expected = args.replace(/\\n/g, "\n");
+            if (resp.doc != expected) {
               fail(m, "Found " + (resp.doc ? "docstring\n  " + resp.doc + "\n" : "no docstring ") +
-                   "instead of expected docstring\n  " + args);
+                   "instead of expected docstring\n  " + expected);
             }
           } else if (kind == "loc:") { // Definition finding test
             var pos = args.match(/^\s*(\d+),\s*(\d+)(?:,\s*([^,]+))?/), line = Number(pos[1]), col = Number(pos[2]), file = pos[3];

@@ -8,7 +8,8 @@
 })(function(infer, tern, comment, walk) {
   "use strict";
 
-  var SetDoc = infer.constraint("doc", {
+  var SetDoc = infer.constraint({
+    construct: function(doc) { this.doc = doc; },
     addType: function(type) {
       if (!type.doc) type.doc = this.doc;
     }
@@ -170,7 +171,10 @@
     return mod;
   });
 
-  var IsBound = infer.constraint("self, args, target", {
+  var IsBound = infer.constraint({
+    construct: function(self, args, target) {
+      this.self = self; this.args = args; this.target = target;
+    },
     addType: function(tp) {
       if (!(tp instanceof infer.Fn)) return;
       this.target.addType(new infer.Fn(tp.name, tp.self, tp.args.slice(this.args.length),
