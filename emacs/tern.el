@@ -6,6 +6,8 @@
 ;; Version: 0.0.1
 ;; Package-Requires: ((json "1.2") (cl-lib "0.5") (emacs "24"))
 
+;;; Code:
+
 (require 'cl-lib)
 (require 'json)
 (require 'url)
@@ -523,14 +525,15 @@ list of strings, giving the binary name and arguments.")
   "The timer on which `tern-reparse-on-idle' runs.")
 (defun tern-reparse-on-idle ()
   "Do some mode plumbing and refresh tern's representation of the buffer."
-  (setf tern-last-point-pos nil)
-  (when (and tern-last-argument-hints tern-buffer-is-dirty
-             (<= (car tern-buffer-is-dirty) (car tern-last-argument-hints)))
-    (setf tern-last-argument-hints nil))
-  (when (and tern-last-completions tern-buffer-is-dirty
-             (<= (car tern-buffer-is-dirty) (cadr tern-last-completions)))
-    (setf tern-last-completions nil))
-  (tern-send-buffer-to-server))
+  (when tern-mode
+    (setf tern-last-point-pos nil)
+    (when (and tern-last-argument-hints tern-buffer-is-dirty
+               (<= (car tern-buffer-is-dirty) (car tern-last-argument-hints)))
+      (setf tern-last-argument-hints nil))
+    (when (and tern-last-completions tern-buffer-is-dirty
+               (<= (car tern-buffer-is-dirty) (cadr tern-last-completions)))
+      (setf tern-last-completions nil))
+    (tern-send-buffer-to-server)))
 
 (defun tern-post-command ()
   (unless (eq (point) tern-last-point-pos)
