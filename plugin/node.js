@@ -161,6 +161,8 @@
       if (expr.node.required && (exportedType = expr.node.required.getType())) {
         type.origin = exportedType.origin;
         type.originNode = exportedType.originNode;
+        if (exportedType.doc) type.doc = exportedType.doc;
+        if (exportedType.url) type.url = exportedType.url;
       }
     }
 
@@ -344,6 +346,8 @@
       },
       Module: {
         "!type": "fn()",
+        "!url": "http://nodejs.org/api/modules.html",
+        "!doc": "Node has a simple module loading system. In Node, files and modules are in one-to-one correspondence.",
         prototype: {
           exports: {
             "!type": "?",
@@ -383,6 +387,8 @@
         }
       },
       events: {
+        "!url": "http://nodejs.org/api/events.html",
+        "!doc": "Many objects in Node emit events: a net.Server emits an event each time a peer connects to it, a fs.readStream emits an event when the file is opened. All objects which emit events are instances of events.EventEmitter.",
         EventEmitter: {
           prototype: {
             addListener: {
@@ -530,6 +536,8 @@
         "!doc": "A stream is an abstract interface implemented by various objects in Node. For example a request to an HTTP server is a stream, as is stdout. Streams are readable, writable, or both. All streams are instances of EventEmitter"
       },
       querystring: {
+        "!url": "http://nodejs.org/api/querystring.html",
+        "!doc": "This module provides utilities for dealing with query strings.",
         stringify: {
           "!type": "fn(obj: ?, sep?: string, eq?: string) -> string",
           "!url": "http://nodejs.org/api/querystring.html#querystring_querystring_stringify_obj_sep_eq",
@@ -552,6 +560,8 @@
         }
       },
       http: {
+        "!url": "http://nodejs.org/api/http.html",
+        "!doc": "The HTTP interfaces in Node are designed to support many features of the protocol which have been traditionally difficult to use. In particular, large, possibly chunk-encoded, messages. The interface is careful to never buffer entire requests or responses--the user is able to stream data.",
         STATUS_CODES: {},
         createServer: {
           "!type": "fn(listener?: fn(request: +http.IncomingMessage, response: +http.ServerResponse)) -> +http.Server",
@@ -779,6 +789,8 @@
         }
       },
       https: {
+        "!url": "http://nodejs.org/api/http.html",
+        "!doc": "HTTPS is the HTTP protocol over TLS/SSL. In Node this is implemented as a separate module.",
         Server: "http.Server",
         createServer: {
           "!type": "fn(listener?: fn(request: +http.IncomingMessage, response: +http.ServerResponse)) -> +https.Server",
@@ -885,6 +897,8 @@
         "!doc": "A single instance of Node runs in a single thread. To take advantage of multi-core systems the user will sometimes want to launch a cluster of Node processes to handle the load."
       },
       zlib: {
+        "!url": "http://nodejs.org/api/zlib.html",
+        "!doc": "This provides bindings to Gzip/Gunzip, Deflate/Inflate, and DeflateRaw/InflateRaw classes. Each class takes the same options, and is a readable/writable Stream.",
         Zlib: {
           "!type": "fn()",
           prototype: {
@@ -1048,6 +1062,8 @@
         Z_NULL: "number"
       },
       os: {
+        "!url": "http://nodejs.org/api/os.html",
+        "!doc": "Provides a few basic operating-system related utility functions.",
         tmpdir: {
           "!type": "fn() -> string",
           "!url": "http://nodejs.org/api/os.html#os_os_tmpdir",
@@ -1120,6 +1136,8 @@
         }
       },
       punycode: {
+        "!url": "http://nodejs.org/api/punycode.html",
+        "!doc": "Punycode.js is bundled with Node.js v0.6.2+. Use require('punycode') to access it. (To use it with other Node.js versions, use npm to install the punycode module first.)",
         decode: {
           "!type": "fn(string: string) -> string",
           "!url": "http://nodejs.org/api/punycode.html#punycode_punycode_decode_string",
@@ -1159,6 +1177,8 @@
         }
       },
       repl: {
+        "!url": "http://nodejs.org/api/repl.html",
+        "!doc": "A Read-Eval-Print-Loop (REPL) is available both as a standalone program and easily includable in other programs. The REPL provides a way to interactively run JavaScript and see the results. It can be used for debugging, testing, or just trying things out.",
         start: {
           "!type": "fn(options: ?) -> +events.EventEmitter",
           "!url": "http://nodejs.org/api/repl.html#repl_repl_start_options",
@@ -1166,6 +1186,8 @@
         }
       },
       readline: {
+        "!url": "http://nodejs.org/api/readline.html",
+        "!doc": "Readline allows reading of a stream (such as process.stdin) on a line-by-line basis.",
         createInterface: {
           "!type": "fn(options: ?) -> +readline.Interface",
           "!url": "http://nodejs.org/api/readline.html#readline_readline_createinterface_options",
@@ -1216,6 +1238,8 @@
         }
       },
       vm: {
+        "!url": "http://nodejs.org/api/vm.html",
+        "!doc": "JavaScript code can be compiled and run immediately or compiled, saved, and run later.",
         createContext: {
           "!type": "fn(initSandbox?: ?) -> ?",
           "!url": "http://nodejs.org/api/vm.html#vm_vm_createcontext_initsandbox",
@@ -1260,6 +1284,8 @@
         }
       },
       child_process: {
+        "!url": "http://nodejs.org/api/child_process.html",
+        "!doc": "Node provides a tri-directional popen(3) facility through the child_process module.",
         ChildProcess: {
           "!type": "fn()",
           prototype: {
@@ -1325,6 +1351,8 @@
         }
       },
       url: {
+        "!url": "http://nodejs.org/api/url.html",
+        "!doc": "This module has utilities for URL resolution and parsing. ",
         parse: {
           "!type": "fn(urlStr: string, parseQueryString?: bool, slashesDenoteHost?: bool) -> url.type",
           "!url": "http://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost",
@@ -1342,6 +1370,8 @@
         }
       },
       dns: {
+        "!url": "http://nodejs.org/api/dns.html",
+        "!doc": "This module contains functions that belong to two different categories:\n1) Functions that use the underlying operating system facilities to perform name resolution, and that do not necessarily do any network communication.\n2) Functions that connect to an actual DNS server to perform name resolution, and that always use the network to perform DNS queries.",
         lookup: {
           "!type": "fn(domain: string, callback: fn(err: +Error, address: string, family: number)) -> string",
           "!url": "http://nodejs.org/api/dns.html#dns_dns_lookup_domain_family_callback",
@@ -1394,6 +1424,8 @@
         }
       },
       net: {
+        "!url": "http://nodejs.org/api/net.html",
+        "!doc": "The net module provides you with an asynchronous network wrapper. It contains methods for creating both servers and clients (called streams).",
         createServer: {
           "!type": "fn(options?: ?, connectionListener?: fn(socket: +net.Socket)) -> +net.Server",
           "!url": "http://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener",
@@ -1562,6 +1594,8 @@
         }
       },
       dgram: {
+        "!url": "http://nodejs.org/api/dgram.html",
+        "!doc": "UDP / Datagram Sockets",
         createSocket: {
           "!type": "fn(type: string, callback?: fn()) -> +dgram.Socket",
           "!url": "http://nodejs.org/api/dgram.html#dgram_dgram_createsocket_type_callback",
@@ -1629,6 +1663,8 @@
         }
       },
       fs: {
+        "!url": "http://nodejs.org/api/fs.html",
+        "!doc": "File I/O is provided by simple wrappers around standard POSIX functions. To use this module do require('fs').\nAll the methods have asynchronous and synchronous forms.",
         rename: {
           "!type": "fn(oldPath: string, newPath: string, callback?: fn())",
           "!url": "http://nodejs.org/api/fs.html#fs_fs_rename_oldpath_newpath_callback",
@@ -2001,6 +2037,8 @@
         }
       },
       path: {
+        "!url": "http://nodejs.org/api/path.html",
+        "!doc": "This module contains utilities for handling and transforming file paths. Almost all these methods perform only string transformations. The file system is not consulted to check whether paths are valid.",
         normalize: {
           "!type": "fn(p: string) -> string",
           "!url": "http://nodejs.org/api/path.html#path_path_normalize_p",
@@ -2048,6 +2086,8 @@
         }
       },
       string_decoder: {
+        "!url": "http://nodejs.org/api/string_decoder.html",
+        "!doc": "StringDecoder decodes a buffer to a string. It is a simple interface to buffer.toString() but provides additional support for utf8.",
         StringDecoder: {
           "!type": "fn(encoding?: string)",
           prototype: {
@@ -2067,6 +2107,8 @@
         }
       },
       tls: {
+        "!url": "http://nodejs.org/api/tls.html",
+        "!doc": "The tls module uses OpenSSL to provide Transport Layer Security and/or Secure Socket Layer: encrypted stream communication.",
         CLIENT_RENEG_LIMIT: "number",
         CLIENT_RENEG_WINDOW: "number",
         SLAB_BUFFER_SIZE: "number",
@@ -2176,6 +2218,8 @@
         }
       },
       crypto: {
+        "!url": "http://nodejs.org/api/crypto.html",
+        "!doc": "The crypto module offers a way of encapsulating secure credentials to be used as part of a secure HTTPS net or http connection.\nIt also offers a set of wrappers for OpenSSL's hash, hmac, cipher, decipher, sign and verify methods.",
         getCiphers: {
           "!type": "fn() -> [string]",
           "!url": "http://nodejs.org/api/crypto.html#crypto_crypto_getciphers",
@@ -2428,6 +2472,8 @@
         DEFAULT_ENCODING: "string"
       },
       util: {
+        "!url": "http://nodejs.org/api/util.html",
+        "!doc": "The util module is primarily designed to support the needs of Node's internal APIs. Many of these utilities are useful for your own programs. If you find that these functions are lacking for your purposes, however, you are encouraged to write your own utilities. We are not interested in any future additions to the util module that are unnecessary for Node's internal functionality.",
         format: {
           "!type": "fn(format: string) -> string",
           "!url": "http://nodejs.org/api/util.html#util_util_format_format",
@@ -2550,6 +2596,8 @@
         "!doc": "This module is used for writing unit tests for your applications, you can access it with require('assert')."
       },
       tty: {
+        "!url": "http://nodejs.org/api/tty.html",
+        "!doc": "The tty module houses the tty.ReadStream and tty.WriteStream classes. In most cases, you will not need to use this module directly.",
         isatty: {
           "!type": "fn(fd: number) -> bool",
           "!url": "http://nodejs.org/api/tty.html#tty_tty_isatty_fd",
@@ -2557,6 +2605,8 @@
         }
       },
       domain: {
+        "!url": "http://nodejs.org/api/domain.html",
+        "!doc": "Domains provide a way to handle multiple different IO operations as a single group. If any of the event emitters or callbacks registered to a domain emit an error event, or throw an error, then the domain object will be notified, rather than losing the context of the error in the process.on('uncaughtException') handler, or causing the program to exit immediately with an error code.",
         create: {
           "!type": "fn() -> +events.EventEmitter",
           "!url": "http://nodejs.org/api/domain.html#domain_domain_create",
