@@ -169,7 +169,7 @@
     }
 
     if (fn) {
-      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out)); 
+      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out));
       out.originNode = fn.originNode;
     } else if (args.length) args[0].propagate(out);
 
@@ -276,7 +276,7 @@
     var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
     if (!callExpr) return;
     var callNode = callExpr.node;
-    if (callNode.callee.type != "Identifier" || 
+    if (callNode.callee.type != "Identifier" ||
         !(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")||
         callNode.arguments.length < 1 || callNode.arguments[0].type != "ArrayExpression") return;
     var argNode = findRequireModule(callNode.arguments[0].elements, wordEnd);
@@ -284,7 +284,7 @@
     var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
     if (word && word.charAt(word.length - 1) == quote)
       word = word.slice(0, word.length - 1);
-    var completions = completeModuleName(query, file, word);
+    var completions = completeModuleName(query, word);
     if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
       ++wordEnd;
     return {
@@ -303,7 +303,7 @@
       })
     };
   }
-  
+
   function findRequireModule(argsNode, wordEnd) {
     for (var i = 0; i < argsNode.length; i++) {
       var argNode = argsNode[i];
@@ -311,53 +311,28 @@
           argNode.start < wordEnd && argNode.end > wordEnd) return argNode;
     }
   }
-  
-  function completeModuleName(query, file, word) {
-    var completions = [];
+
+  function completeModuleName(query, word) {
     var cx = infer.cx(), server = cx.parent, data = server._requireJS;
     var currentFile = data.currentFile;
-    var wrapAsObjs = query.types || query.depths || query.docs || query.urls || query.origins;
     var base = data.options.baseURL || "";
     if (base && base.charAt(base.length - 1) != "/") base += "/";
-    
-    function maybeSet(obj, prop, val) {
-      if (val != null) obj[prop] = val;
-    }
-    
-    function gather(modules) {
-      for (var name in modules) {
-        if (name == currentFile || !modules[name].getType()) continue;
-
-        var moduleName = name.substring(base.length, name.length);
-        if (moduleName &&
-            !(query.filter !== false && word &&
-              (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0)) {
-          var rec = wrapAsObjs ? {name: moduleName} : moduleName;
-          completions.push(rec);
-
-          if (query.types || query.docs || query.urls || query.origins) {
-            var val = modules[name];
-            infer.resetGuessing();
-            var type = val.getType();
-            rec.guess = infer.didGuess();
-            if (query.types)
-              rec.type = infer.toString(val);
-            if (query.docs)
-              maybeSet(rec, "doc", val.doc || type && type.doc);
-            if (query.urls)
-              maybeSet(rec, "url", val.url || type && type.url);
-            if (query.origins)
-              maybeSet(rec, "origin", val.origin || type && type.origin);
-          }
-        }
-      }
-    }
 
     if (query.caseInsensitive) word = word.toLowerCase();
-    gather(data.interfaces);
+
+    var completions = [], modules = data.interfaces;
+    for (var name in modules) {
+      if (name == currentFile || !modules[name].getType()) continue;
+
+      var moduleName = name.substring(base.length, name.length);
+      if (moduleName &&
+          !(query.filter !== false && word &&
+            (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0))
+        tern.addCompletion(query, completions, moduleName, modules[name]);
+    }
     return completions;
   }
-  
+
   var defs = {
     "!name": "requirejs",
     "!define": {
