@@ -241,7 +241,6 @@
     var completions = [];
     var cx = infer.cx(), server = cx.parent, data = server._node;
     var currentFile = data.currentFile || resolveProjectPath(server, file.name);
-    var wrapAsObjs = query.types || query.depths || query.docs || query.urls || query.origins;
 
     function gather(modules) {
       for (var name in modules) {
@@ -250,25 +249,8 @@
         var moduleName = resolveModulePath(name, currentFile);
         if (moduleName &&
             !(query.filter !== false && word &&
-              (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0)) {
-          var rec = wrapAsObjs ? {name: moduleName} : moduleName;
-          completions.push(rec);
-
-          if (query.types || query.docs || query.urls || query.origins) {
-            var val = modules[name];
-            infer.resetGuessing();
-            var type = val.getType();
-            rec.guess = infer.didGuess();
-            if (query.types)
-              rec.type = infer.toString(val);
-            if (query.docs)
-              maybeSet(rec, "doc", val.doc || type && type.doc);
-            if (query.urls)
-              maybeSet(rec, "url", val.url || type && type.url);
-            if (query.origins)
-              maybeSet(rec, "origin", val.origin || type && type.origin);
-          }
-        }
+              (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0))
+          tern.addCompletion(query, completions, moduleName, modules[name]);
       }
     }
 
@@ -310,10 +292,6 @@
       modulePath = modulePath.substring(0, modulePath.length - '.js'.length);
     }
     return modulePath;
-  }
-
-  function maybeSet(obj, prop, val) {
-    if (val != null) obj[prop] = val;
   }
 
   tern.defineQueryType("node_exports", {
