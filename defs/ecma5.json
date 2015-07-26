@@ -174,7 +174,7 @@
         "!doc": "Joins all elements of an array into a string."
       },
       "splice": {
-        "!type": "fn(pos: number, amount: number)",
+        "!type": "fn(pos: number, amount: number, newelt?: ?) -> [?]",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/splice",
         "!doc": "Changes the content of an array, adding new elements while removing old elements."
       },
@@ -205,7 +205,7 @@
         "!doc": "Adds one or more elements to the beginning of an array and returns the new length of the array."
       },
       "slice": {
-        "!type": "fn(from: number, to?: number) -> !this",
+        "!type": "fn(from?: number, to?: number) -> !this",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/slice",
         "!doc": "Returns a shallow copy of a portion of an array."
       },
@@ -368,7 +368,7 @@
         "!doc": "Returns the calling string value converted to lower case, according to any locale-specific case mappings."
       },
       "split": {
-        "!type": "fn(pattern: string) -> [string]",
+        "!type": "fn(pattern?: string|+RegExp, limit?: number) -> [string]",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/split",
         "!doc": "Splits a String object into an array of strings by separating the string into substrings."
       },
