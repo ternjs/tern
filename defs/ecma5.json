@@ -233,57 +233,57 @@
         "!doc": "Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex."
       },
       "every": {
-        "!type": "fn(test: fn(elt: ?, i: number, array: !this) -> bool, context?: ?) -> bool",
+        "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> bool",
         "!effects": [
-          "call !0 this=!1 !this.<i> number"
+          "call !0 this=!1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/every",
         "!doc": "Tests whether all elements in the array pass the test implemented by the provided function."
       },
       "some": {
-        "!type": "fn(test: fn(elt: ?, i: number, array: !this) -> bool, context?: ?) -> bool",
+        "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> bool",
         "!effects": [
-          "call !0 this=!1 !this.<i> number"
+          "call !0 this=!1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/some",
         "!doc": "Tests whether some element in the array passes the test implemented by the provided function."
       },
       "filter": {
-        "!type": "fn(test: fn(elt: ?, i: number, array: !this) -> bool, context?: ?) -> !this",
+        "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> !this",
         "!effects": [
-          "call !0 this=!1 !this.<i> number"
+          "call !0 this=!1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter",
         "!doc": "Creates a new array with all elements that pass the test implemented by the provided function."
       },
       "forEach": {
-        "!type": "fn(f: fn(elt: ?, i: number, array: !this), context?: ?)",
+        "!type": "fn(f: fn(elt: ?, i: number, array: +Array), context?: ?)",
         "!effects": [
-          "call !0 this=!1 !this.<i> number"
+          "call !0 this=!1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/forEach",
         "!doc": "Executes a provided function once per array element."
       },
       "map": {
-        "!type": "fn(f: fn(elt: ?, i: number, array: !this) -> ?, context?: ?) -> [!0.!ret]",
+        "!type": "fn(f: fn(elt: ?, i: number, array: +Array) -> ?, context?: ?) -> [!0.!ret]",
         "!effects": [
-          "call !0 this=!1 !this.<i> number"
+          "call !0 this=!1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/map",
         "!doc": "Creates a new array with the results of calling a provided function on every element in this array."
       },
       "reduce": {
-        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: !this) -> ?, init?: ?) -> !0.!ret",
+        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: +Array) -> ?, init?: ?) -> !0.!ret",
         "!effects": [
-          "call !0 !1 !this.<i> number"
+          "call !0 !1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce",
         "!doc": "Apply a function against an accumulator and each value of the array (from left-to-right) as to reduce it to a single value."
       },
       "reduceRight": {
-        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: !this) -> ?, init?: ?) -> !0.!ret",
+        "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: +Array) -> ?, init?: ?) -> !0.!ret",
         "!effects": [
-          "call !0 !1 !this.<i> number"
+          "call !0 !1 !this.<i> number !this"
         ],
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/ReduceRight",
         "!doc": "Apply a function simultaneously against two values of the array (from right-to-left) as to reduce it to a single value."
