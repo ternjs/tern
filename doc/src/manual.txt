@@ -352,7 +352,7 @@ a `type` property of `"delete"`.
 [[tern.Server]] The base server (without HTTP or configuration-file
 reading) is implemented in `lib/tern.js`. That package exposes a
 `Server` constructor that can be used to create a server. It takes an
-object holding configuration options options as argument. These are
+object holding configuration options as argument. These are
 recognized (all have a default):
 
 [[option_defs]] `defs` (array of strings):: The <<typedef,definition>>

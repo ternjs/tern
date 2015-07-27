@@ -13,7 +13,7 @@ software, under an MIT license.
 
 There are currently plugins available for [Emacs][emacs] (and Emacs
 [company-mode][cmode]), [Vim][vim], [Sublime Text][st], [Eclipse (and general Java API)][ec],
-[Light Table][lt], and [gedit][gedit], and built-in support in
+[Light Table][lt], [Atom][atom] and [gedit][gedit], and built-in support in
 [Brackets][brackets] and [Edge Code][edge_code].
 
 For further documentation, see the [project page][1] and the
@@ -28,6 +28,7 @@ For further documentation, see the [project page][1] and the
 [vim]: https://github.com/marijnh/tern_for_vim
 [st]: https://github.com/marijnh/tern_for_sublime
 [lt]: https://github.com/mortalapeman/LT-TernJS
+[atom]: https://atom.io/packages/atom-ternjs
 [gedit]: https://github.com/Swatinem/tern_for_gedit
 [brackets]: http://brackets.io
 [edge_code]: http://html.adobe.com/edge/code

@@ -169,7 +169,7 @@
     }
 
     if (fn) {
-      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out)); 
+      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out));
       out.originNode = fn.originNode;
     } else if (args.length) args[0].propagate(out);
 
@@ -248,7 +248,8 @@
       passes: {
         preCondenseReach: preCondenseReach,
         postLoadDef: postLoadDef,
-        typeAt: findTypeAt
+        typeAt: findTypeAt,
+        completion: findCompletions
       }
     };
   });
@@ -268,6 +269,68 @@
     type.origin = exportedType.origin;
     type.originNode = exportedType.originNode;
     return type;
+  }
+
+  function findCompletions(file, query) {
+    var wordEnd = tern.resolvePos(file, query.end);
+    var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
+    if (!callExpr) return;
+    var callNode = callExpr.node;
+    if (callNode.callee.type != "Identifier" ||
+        !(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")||
+        callNode.arguments.length < 1 || callNode.arguments[0].type != "ArrayExpression") return;
+    var argNode = findRequireModule(callNode.arguments[0].elements, wordEnd);
+    if (!argNode) return;
+    var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
+    if (word && word.charAt(word.length - 1) == quote)
+      word = word.slice(0, word.length - 1);
+    var completions = completeModuleName(query, word);
+    if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
+      ++wordEnd;
+    return {
+      start: tern.outputPos(query, file, argNode.start),
+      end: tern.outputPos(query, file, wordEnd),
+      isProperty: false,
+      isObjectKey: false,
+      completions: completions.map(function(rec) {
+        var name = typeof rec == "string" ? rec : rec.name;
+        var string = JSON.stringify(name);
+        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
+        if (typeof rec == "string") return string;
+        rec.displayName = name;
+        rec.name = string;
+        return rec;
+      })
+    };
+  }
+
+  function findRequireModule(argsNode, wordEnd) {
+    for (var i = 0; i < argsNode.length; i++) {
+      var argNode = argsNode[i];
+      if (argNode.type == "Literal" && typeof argNode.value == "string" &&
+          argNode.start < wordEnd && argNode.end > wordEnd) return argNode;
+    }
+  }
+
+  function completeModuleName(query, word) {
+    var cx = infer.cx(), server = cx.parent, data = server._requireJS;
+    var currentFile = data.currentFile;
+    var base = data.options.baseURL || "";
+    if (base && base.charAt(base.length - 1) != "/") base += "/";
+
+    if (query.caseInsensitive) word = word.toLowerCase();
+
+    var completions = [], modules = data.interfaces;
+    for (var name in modules) {
+      if (name == currentFile || !modules[name].getType()) continue;
+
+      var moduleName = name.substring(base.length, name.length);
+      if (moduleName &&
+          !(query.filter !== false && word &&
+            (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0))
+        tern.addCompletion(query, completions, moduleName, modules[name]);
+    }
+    return completions;
   }
 
   var defs = {
