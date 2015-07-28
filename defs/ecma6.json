@@ -10,7 +10,7 @@
       "then": {
         "!doc": "The then() method returns a Promise. It takes two arguments, both are callback functions for the success and failure cases of the Promise.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then",
-        "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?)) -> !this",
+        "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?)) -> !custom:Promise_then",
         "!effects": [
           "call !0 !this.value"
         ]
