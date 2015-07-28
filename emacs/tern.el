@@ -519,7 +519,7 @@ list of strings, giving the binary name and arguments.")
                                        (max end   (cdr tern-buffer-is-dirty))))
     (setf tern-buffer-is-dirty (cons start end))))
 
-(defvar tern-idle-time 1
+(defvar tern-idle-time 2.5
   "The time Emacs is allowed to idle before updating Tern's representation of the file.")
 (defvar tern-idle-timer nil
   "The timer on which `tern-reparse-on-idle' runs.")
