@@ -314,7 +314,7 @@
 
   function completeModuleName(query, word) {
     var cx = infer.cx(), server = cx.parent, data = server._requireJS;
-    var currentFile = data.currentFile;
+    var currentName = stripJSExt(data.currentFile);
     var base = data.options.baseURL || "";
     if (base && base.charAt(base.length - 1) != "/") base += "/";
 
@@ -322,7 +322,7 @@
 
     var completions = [], modules = data.interfaces;
     for (var name in modules) {
-      if (name == currentFile || !modules[name].getType()) continue;
+      if (name == currentName || !modules[name].getType()) continue;
 
       var moduleName = name.substring(base.length, name.length);
       if (moduleName &&
