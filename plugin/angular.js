@@ -73,7 +73,7 @@
       }
       var last = node.elements[node.elements.length - 1];
       if (last && last.type == "FunctionExpression")
-        fnType = last.body.scope.fnType;
+        fnType = last.scope.fnType;
     }
     var result = new infer.AVal;
     if (asNew) {

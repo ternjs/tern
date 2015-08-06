@@ -73,7 +73,7 @@
         if (node.commentsBefore)
           interpretComments(node, node.commentsBefore, scope,
                             scope.getProp(node.id.name),
-                            node.body.scope.fnType);
+                            node.scope.fnType);
       },
       AssignmentExpression: function(node, scope) {
         if (node.commentsBefore)
@@ -401,15 +401,15 @@
     var fn;
     if (node.type == "VariableDeclaration") {
       var decl = node.declarations[0];
-      if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.body.scope.fnType;
+      if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.scope.fnType;
     } else if (node.type == "FunctionDeclaration") {
-      fn = node.body.scope.fnType;
+      fn = node.scope.fnType;
     } else if (node.type == "AssignmentExpression") {
       if (node.right.type == "FunctionExpression")
-        fn = node.right.body.scope.fnType;
+        fn = node.right.scope.fnType;
     } else if (node.type == "CallExpression") {
     } else { // An object property
-      if (node.value.type == "FunctionExpression") fn = node.value.body.scope.fnType;
+      if (node.value.type == "FunctionExpression") fn = node.value.scope.fnType;
     }
 
     if (fn && (args || ret || self)) {
