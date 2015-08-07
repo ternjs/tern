@@ -51,9 +51,6 @@ exports.runTests = function(filter) {
        {type: "type", end: 0, variable: "defaults"},
        function(data) { eq(data.type, "number"); });
 
-  test("find_def", 3424, "function foo() { hasFrontMatter; }",
-       {type: "definition", end: 31},
-       function(data) { eq(data.start, 873); });
   test("find_def_in_fragment", 3420, file.slice(3424, 5103),
        {type: "definition", end: 1280},
        function(data) { eq(data.start, 3429); });
