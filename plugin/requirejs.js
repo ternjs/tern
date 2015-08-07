@@ -157,7 +157,9 @@
           deps.push(elt.required);
         }
       }
-    } else if (argNodes && args.length == 1 && argNodes[0].type == "FunctionExpression" && argNodes[0].params.length) {
+    } else if (argNodes && args.length == 1 &&
+               /FunctionExpression/.test(argNodes[0].type) &&
+               argNodes[0].params.length) {
       // Simplified CommonJS call
       deps.push(interf("require", data), interf("exports", data), interf("module", data));
       fn = args[0];

@@ -60,7 +60,7 @@
 
   function applyWithInjection(mod, fnType, node, asNew) {
     var deps = [];
-    if (node.type == "FunctionExpression") {
+    if (/FunctionExpression/.test(node.type)) {
       for (var i = 0; i < node.params.length; ++i)
         deps.push(getInclude(mod, node.params[i].name));
     } else if (node.type == "ArrayExpression") {
@@ -72,7 +72,7 @@
           deps.push(infer.ANull);
       }
       var last = node.elements[node.elements.length - 1];
-      if (last && last.type == "FunctionExpression")
+      if (last && /FunctionExpression/.test(last.type))
         fnType = last.scope.fnType;
     }
     var result = new infer.AVal;

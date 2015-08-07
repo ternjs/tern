@@ -397,19 +397,21 @@
     type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
   }
 
+  function isFunExpr(node) { return node.type == "FunctionExpression" || node.type == "ArrowFunctionExpression" }
+
   function applyType(type, self, args, ret, node, aval) {
     var fn;
     if (node.type == "VariableDeclaration") {
       var decl = node.declarations[0];
-      if (decl.init && decl.init.type == "FunctionExpression") fn = decl.init.scope.fnType;
+      if (decl.init && isFunExpr(decl.init)) fn = decl.init.scope.fnType;
     } else if (node.type == "FunctionDeclaration") {
       fn = node.scope.fnType;
     } else if (node.type == "AssignmentExpression") {
-      if (node.right.type == "FunctionExpression")
+      if (isFunExpr(node.right))
         fn = node.right.scope.fnType;
     } else if (node.type == "CallExpression") {
     } else { // An object property
-      if (node.value.type == "FunctionExpression") fn = node.value.scope.fnType;
+      if (isFunExpr(node.value)) fn = node.value.scope.fnType;
     }
 
     if (fn && (args || ret || self)) {
