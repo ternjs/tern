@@ -833,7 +833,7 @@ analyzed in a context multiple times. The variables and properties
 that the context knows, as well as the types it assigns to them, will
 become the union of the variables and types created by the various
 forms of the code. When incrementally re-analyzing code as it is being
-edited, this leads to an degradation in the preciseness of the
+edited, this leads to a degradation in the preciseness of the
 results. To prevent that, it is possible to _purge_ all elements that
 come from a specific origin from a context.
 
