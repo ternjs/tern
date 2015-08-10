@@ -5,6 +5,7 @@ var acorn = require("acorn");
 var walk = require("acorn/dist/walk");
 require("../plugin/requirejs.js");
 require("../plugin/node.js");
+require("../plugin/es_modules.js");
 require("../plugin/doc_comment.js");
 require("../plugin/angular.js");
 require("../plugin/complete_strings.js");

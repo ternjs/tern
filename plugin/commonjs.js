@@ -45,11 +45,17 @@
     return node.value
   }
 
+  function hasProps(obj) {
+    if (obj) for (var prop in obj) return true
+  }
+
   tern.registerPlugin("commonjs", function(server, options) {
     server.loadPlugin("modules")
     server.mod.modules.on("wrapScope", initScope)
     server.mod.modules.on("getExports", function(file, mod) {
-      file.scope.exports.propagate(mod)
+      var exports = file.scope.exports
+      if (exports.types.length > 1 || hasProps(exports.getObjType()))
+        exports.propagate(mod)
     })
     server.mod.modules.modNameTests.push(isModuleName)
 
