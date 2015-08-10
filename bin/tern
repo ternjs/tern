@@ -148,6 +148,12 @@ function startServer(dir, config) {
       else
         fs.readFile(path.resolve(dir, name), "utf8", c);
     },
+    normalizeFilename: function(name) {
+      var pt = path.resolve(dir, name)
+      try { pt = fs.realPathSync(path.resolve(dir, name), true) }
+      catch(e) {}
+      return path.relative(dir, pt)
+    },
     async: true,
     defs: defs,
     plugins: plugins,

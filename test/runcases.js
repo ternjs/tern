@@ -6,7 +6,6 @@ var walk = require("acorn/dist/walk");
 require("../plugin/requirejs.js");
 require("../plugin/node.js");
 require("../plugin/doc_comment.js");
-require("../plugin/component.js");
 require("../plugin/angular.js");
 require("../plugin/complete_strings.js");
 var util = require("./util");
@@ -38,7 +37,8 @@ function getPlugins(text) {
       else
         delete plugins[m[1]];
     } else {
-      plugins[m[1]] = (m[1] == "node" && {modules: nodeModules}) || {};
+      plugins[m[1]] = {}
+      if (m[1] == "node") plugins.modules = {modules: nodeModules}
     }
   }
   return plugins;
@@ -89,7 +89,7 @@ exports.runTests = function(filter, caseDir) {
     if (m = text.match(/\/\/ loadfiles=\s*(.*)\s*\n/))
       m[1].split(/,\s*/g).forEach(function(f) {server.addFile(f);});
 
-    var typedef = /\/\/(<)?(\+\??|:\?|::?|doc\+?:|loc:|refs:|exports:|origin:) *([^\r\n]*)/g;
+    var typedef = /\/\/(<)?(\+\??|:\?|::?|doc\+?:|loc:|refs:|origin:) *([^\r\n]*)/g;
     function fail(m, str) {
       util.failure(name + ", line " + acorn.getLineInfo(text, m.index).line + ": " + str);
     }
@@ -118,11 +118,6 @@ exports.runTests = function(filter, caseDir) {
           if (!match)
             fail(m, "Completion set failed at hint: " + parts[i - 1] +
                  "\n     got: " + resp.completions.join(", ") + "\n  wanted: " + args);
-        });
-      } else if (kind == "exports:") {
-        server.request({query: {type: "node_exports", file: fname}}, function(err, resp) {
-          if (err) throw err;
-          if (resp.type != args) fail(m, "Export type failed. Got:\n    " + resp.type + "\nwanted:\n    " + args);
         });
       } else {
         var start, end;

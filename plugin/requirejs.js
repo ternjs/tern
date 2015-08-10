@@ -146,7 +146,7 @@
 
     if (argNodes && args.length > 1) {
       var node = argNodes[args.length == 2 ? 0 : 1];
-      var base = path.relative(server.options.projectDir, path.dirname(node.sourceFile.name));
+      var base = path.relative(server.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
         node.required = interf(path.join(base, node.value), data);
         deps.push(node.required);

@@ -1,6 +1,6 @@
 {
   "!define": {
-    "!node": {
+    "!modules": {
       "node_simple`js": {
         "!span": "0[0:0]-62[2:0]",
         "a": {

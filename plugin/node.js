@@ -1,391 +1,66 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require);
+    return mod(require("../lib/infer"), require("../lib/tern"), require("./commonjs"), require);
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern"], mod);
+    return define(["../lib/infer", "../lib/tern", "./commonjs"], mod);
   mod(tern, tern);
-})(function(infer, tern, require) {
-  "use strict";
+})(function(infer, tern, _, require) {
+  "use strict"
 
-  function resolvePath(base, path) {
-    if (path[0] == "/") return path;
-    var slash = base.lastIndexOf("/"), m;
-    if (slash >= 0) path = base.slice(0, slash + 1) + path;
-    while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
-      path = path.slice(0, m.index) + path.slice(m.index + m[0].length);
-    return path.replace(/(^|[^\.])\.\//g, "$1");
+  function resolve(name, parentFile) {
+    var cx = infer.cx(), locals = cx.definitions.node
+    if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name]
+
+    var resolved = resolveToFile(name, parentFile)
+    return resolved && cx.parent.normalizeFilename(resolved)
   }
 
-  function relativePath(from, to) {
-    if (from[from.length - 1] != "/") from += "/";
-    if (to.indexOf(from) == 0) return to.slice(from.length);
-    else return to;
-  }
-
-  function getModule(data, name) {
-    return data.modules[name] || (data.modules[name] = new infer.AVal);
-  }
-
-  var WG_DEFAULT_EXPORT = 95;
-
-  function buildWrappingScope(parent, origin, node) {
-    var scope = new infer.Scope(parent);
-    scope.originNode = node;
-    infer.cx().definitions.node.require.propagate(scope.defProp("require"));
-    var module = new infer.Obj(infer.cx().definitions.node.Module.getProp("prototype").getType());
-    module.propagate(scope.defProp("module"));
-    var exports = new infer.Obj(true, "exports");
-    module.origin = exports.origin = origin;
-    module.originNode = exports.originNode = scope.originNode;
-    exports.propagate(scope.defProp("exports"));
-    var moduleExports = scope.exports = module.defProp("exports");
-    exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
-    return scope;
-  }
-
-  function resolveModule(server, name, _parent) {
-    server.addFile(name, null, server._node.currentOrigin);
-    return getModule(server._node, name);
-  }
-
-  // Assume node.js & access to local file system
+  var resolveToFile
   if (require) (function() {
-    var fs = require("fs"), module_ = require("module"), path = require("path");
+    var module_ = require("module"), path = require("path")
 
-    relativePath = path.relative;
+    resolveToFile = function(name, parentFile) {
+      var projectDir = infer.cx().parent.projectDir
+      var fullParent = path.resolve(projectDir, parentFile)
+      var parentDir = path.dirname(fullParent)
+      if (/^\.\.?\//.test(name))
+        name = path.resolve(projectDir, parentDir, name)
 
-    resolveModule = function(server, name, parent) {
-      var data = server._node;
-      if (data.options.dontLoad == true ||
-          data.options.dontLoad && new RegExp(data.options.dontLoad).test(name) ||
-          data.options.load && !new RegExp(data.options.load).test(name))
-        return infer.ANull;
-
-      if (data.modules[name]) return data.modules[name];
-
-      var currentModule = {
-        id: parent,
-        paths: module_._nodeModulePaths(path.dirname(parent))
-      };
+      var parentModule = {
+        id: fullParent,
+        paths: module_._nodeModulePaths(parentDir)
+      }
       try {
-        var file = module_._resolveFilename(name, currentModule);
-      } catch(e) { return infer.ANull; }
-
-      var norm = normPath(file);
-      if (data.modules[norm]) return data.modules[norm];
-
-      if (fs.existsSync(file) && /^(\.js)?$/.test(path.extname(file)))
-        server.addFile(relativePath(server.options.projectDir, file), null, data.currentOrigin);
-      return data.modules[norm] = new infer.AVal;
-    };
-  })();
-
-  function normPath(name) { return name.replace(/\\/g, "/"); }
-
-  function resolveProjectPath(server, pth) {
-    return resolvePath(normPath(server.options.projectDir || "") + "/", normPath(pth));
-  }
-
-  infer.registerFunction("nodeRequire", function(_self, _args, argNodes) {
-    if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
-      return infer.ANull;
-    var cx = infer.cx(), server = cx.parent, data = server._node, name = argNodes[0].value;
-    var locals = cx.definitions.node;
-    var result;
-
-    if (locals[name] && /^[a-z_]*$/.test(name)) {
-      result = locals[name];
-    } else if (name in data.modules) {
-      result = data.modules[name];
-    } else if (data.options.modules && data.options.modules.hasOwnProperty(name)) {
-      var mod = data.options.modules[name];
-      if (typeof(mod) == "string" && mod.charAt(0) == "=") {
-        result = infer.def.parsePath(mod.slice(1));
-      } else {
-        var scope = buildWrappingScope(cx.topScope, name);
-        infer.def.load(data.options.modules[name], scope);
-        result = data.modules[name] = scope.exports;
-      }
-    } else {
-      // data.currentFile is only available while analyzing a file; at query
-      // time, determine the calling file from the caller's AST.
-      var currentFile = data.currentFile || resolveProjectPath(server, argNodes[0].sourceFile.name);
-
-      var relative = /^\.{0,2}\//.test(name);
-      if (relative) {
-        if (!currentFile) return argNodes[0].required || infer.ANull;
-        name = resolvePath(currentFile, name);
-      }
-      result = resolveModule(server, name, currentFile);
-    }
-    return argNodes[0].required = result;
-  });
-
-  function preCondenseReach(state) {
-    var mods = infer.cx().parent._node.modules;
-    var node = state.roots["!node"] = new infer.Obj(null);
-    for (var name in mods) {
-      var mod = mods[name];
-      var id = mod.origin || name;
-      var prop = node.defProp(id.replace(/\./g, "`"));
-      mod.propagate(prop);
-      prop.origin = mod.origin;
-    }
-  }
-
-  function postLoadDef(data) {
-    var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!node"];
-    var data = cx.parent._node;
-    if (mods) for (var name in mods.props) {
-      var origin = name.replace(/`/g, ".");
-      var mod = getModule(data, origin);
-      mod.origin = origin;
-      mods.props[name].propagate(mod);
-    }
-  }
-
-  function findTypeAt(_file, _pos, expr, type) {
-    if (!expr) return type;
-    var isStringLiteral = expr.node.type === "Literal" &&
-       typeof expr.node.value === "string";
-    var isRequireArg = !!expr.node.required;
-
-    if (isStringLiteral && isRequireArg) {
-      // The `type` is a value shared for all string literals.
-      // We must create a copy before modifying `origin` and `originNode`.
-      // Otherwise all string literals would point to the last jump location
-      type = Object.create(type);
-
-      // Provide a custom origin location pointing to the require()d file
-      var exportedType;
-      if (expr.node.required && (exportedType = expr.node.required.getType())) {
-        type.origin = exportedType.origin;
-        type.originNode = exportedType.originNode;
-        if (exportedType.doc) type.doc = exportedType.doc;
-        if (exportedType.url) type.url = exportedType.url;
+        return module_._resolveFilename(name, parentModule)
+      } catch(e) {
+        return null
       }
     }
+  })(); else (function() {
+    function resolvePath(base, path) {
+      if (path[0] == "/") return path;
+      var slash = base.lastIndexOf("/"), m;
+      if (slash >= 0) path = base.slice(0, slash + 1) + path;
+      while (m = /[^\/]*[^\/\.][^\/]*\/\.\.\//.exec(path))
+        path = path.slice(0, m.index) + path.slice(m.index + m[0].length);
+      return path.replace(/(^|[^\.])\.\//g, "$1");
+    }
 
-    return type;
-  }
+    resolveToFile = function(name, parentFile) {
+      return /^\.\.?\//.test(name) ? resolvePath(parentFile, name) : name
+    }
+  })()
 
   tern.registerPlugin("node", function(server, options) {
-    server._node = {
-      modules: Object.create(null),
-      options: options || {},
-      currentFile: null,
-      currentRequires: [],
-      currentOrigin: null,
-      server: server
-    };
+    server.loadPlugin("commonjs")
+    server.mod.modules.resolvers.push(resolve)
 
-    server.on("beforeLoad", function(file) {
-      this._node.currentFile = resolveProjectPath(server, file.name);
-      this._node.currentOrigin = file.name;
-      this._node.currentRequires = [];
-      file.scope = buildWrappingScope(file.scope, this._node.currentOrigin, file.ast);
-    });
-
-    server.on("afterLoad", function(file) {
-      var mod = getModule(this._node, this._node.currentFile);
-      mod.origin = this._node.currentOrigin;
-      file.scope.exports.propagate(mod);
-      this._node.currentFile = null;
-      this._node.currentOrigin = null;
-    });
-
-    server.on("reset", function() {
-      this._node.modules = Object.create(null);
-    });
-
-    return {defs: defs,
-            passes: {preCondenseReach: preCondenseReach,
-                     postLoadDef: postLoadDef,
-                     completion: findCompletions,
-                     typeAt: findTypeAt}};
-  });
-
-  // Completes CommonJS module names in strings passed to require
-  function findCompletions(file, query) {
-    var wordEnd = tern.resolvePos(file, query.end);
-    var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
-    if (!callExpr) return;
-    var callNode = callExpr.node;
-    if (callNode.callee.type != "Identifier" || callNode.callee.name != "require" ||
-        callNode.arguments.length < 1) return;
-    var argNode = callNode.arguments[0];
-    if (argNode.type != "Literal" || typeof argNode.value != "string" ||
-        argNode.start > wordEnd || argNode.end < wordEnd) return;
-
-    var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
-    if (word && word.charAt(word.length - 1) == quote)
-      word = word.slice(0, word.length - 1);
-    var completions = completeModuleName(query, file, word);
-    if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
-      ++wordEnd;
-    return {
-      start: tern.outputPos(query, file, argNode.start),
-      end: tern.outputPos(query, file, wordEnd),
-      isProperty: false,
-      completions: completions.map(function(rec) {
-        var name = typeof rec == "string" ? rec : rec.name;
-        var string = JSON.stringify(name);
-        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
-        if (typeof rec == "string") return string;
-        rec.displayName = name;
-        rec.name = string;
-        return rec;
-      })
-    };
-  }
-
-  function completeModuleName(query, file, word) {
-    var completions = [];
-    var cx = infer.cx(), server = cx.parent, data = server._node;
-    var currentFile = data.currentFile || resolveProjectPath(server, file.name);
-
-    function gather(modules) {
-      for (var name in modules) {
-        if (name == currentFile) continue;
-
-        var moduleName = resolveModulePath(name, currentFile);
-        if (moduleName &&
-            !(query.filter !== false && word &&
-              (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0))
-          tern.addCompletion(query, completions, moduleName, modules[name]);
-      }
-    }
-
-    if (query.caseInsensitive) word = word.toLowerCase();
-    gather(cx.definitions.node);
-    gather(data.modules);
-    return completions;
-  }
-
-  /**
-   * Resolve the module path of the given module name by using the current file.
-   */
-  function resolveModulePath(name, currentFile) {
-
-    function startsWith(str, prefix) {
-      return str.slice(0, prefix.length) == prefix;
-    }
-
-    function endsWith(str, suffix) {
-      return str.slice(-suffix.length) == suffix;
-    }
-
-    if (name.indexOf('/') == -1) return name;
-    // module name has '/', compute the module path
-    var modulePath = normPath(relativePath(currentFile + '/..', name));
-    if (startsWith(modulePath, 'node_modules')) {
-      // module name starts with node_modules, remove it
-      modulePath = modulePath.substring('node_modules'.length + 1, modulePath.length);
-      if (endsWith(modulePath, 'index.js')) {
-        // module name ends with index.js, remove it.
-       modulePath = modulePath.substring(0, modulePath.length - 'index.js'.length - 1);
-      }
-    } else if (!startsWith(modulePath, '../')) {
-      // module name is not inside node_modules and there is not ../, add ./
-      modulePath = './' + modulePath;
-    }
-    if (endsWith(modulePath, '.js')) {
-      // remove js extension
-      modulePath = modulePath.substring(0, modulePath.length - '.js'.length);
-    }
-    return modulePath;
-  }
-
-  tern.defineQueryType("node_exports", {
-    takesFile: true,
-    run: function(server, query, file) {
-      function describe(aval) {
-        var target = {}, type = aval.getType(false);
-        target.type = infer.toString(aval, 3);
-        var doc = aval.doc || (type && type.doc), url = aval.url || (type && type.url);
-        if (doc) target.doc = doc;
-        if (url) target.url = url;
-        var span = tern.getSpan(aval) || (type && tern.getSpan(type));
-        if (span) tern.storeSpan(server, query, span, target);
-        return target;
-      }
-
-      var known = server._node.modules[resolveProjectPath(server, file.name)];
-      if (!known) return {};
-      var type = known.getObjType(false);
-      var resp = describe(known);
-      if (type instanceof infer.Obj) {
-        var props = resp.props = {};
-        for (var prop in type.props)
-          props[prop] = describe(type.props[prop]);
-      }
-      return resp;
-    }
-  });
+    return {defs: defs}
+  })
 
   var defs = {
     "!name": "node",
     "!define": {
-      require: {
-        "!type": "fn(id: string) -> !custom:nodeRequire",
-        resolve: {
-          "!type": "fn() -> string",
-          "!url": "https://nodejs.org/api/globals.html#globals_require_resolve",
-          "!doc": "Use the internal require() machinery to look up the location of a module, but rather than loading the module, just return the resolved filename."
-        },
-        cache: {
-          "!url": "https://nodejs.org/api/globals.html#globals_require_cache",
-          "!doc": "Modules are cached in this object when they are required. By deleting a key value from this object, the next require will reload the module."
-        },
-        extensions: {
-          "!url": "https://nodejs.org/api/globals.html#globals_require_extensions",
-          "!doc": "Instruct require on how to handle certain file extensions."
-        },
-        "!url": "https://nodejs.org/api/globals.html#globals_require",
-        "!doc": "To require modules."
-      },
-      Module: {
-        "!type": "fn()",
-        "!url": "https://nodejs.org/api/modules.html",
-        "!doc": "Node has a simple module loading system. In Node, files and modules are in one-to-one correspondence.",
-        prototype: {
-          exports: {
-            "!type": "?",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_exports",
-            "!doc": "The exports object is created by the Module system. Sometimes this is not acceptable, many want their module to be an instance of some class. To do this assign the desired export object to module.exports. For example suppose we were making a module called a.js"
-          },
-          require: {
-            "!type": "require",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_require_id",
-            "!doc": "The module.require method provides a way to load a module as if require() was called from the original module."
-          },
-          id: {
-            "!type": "string",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_id",
-            "!doc": "The identifier for the module. Typically this is the fully resolved filename."
-          },
-          filename: {
-            "!type": "string",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_filename",
-            "!doc": "The fully resolved filename to the module."
-          },
-          loaded: {
-            "!type": "bool",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_loaded",
-            "!doc": "Whether or not the module is done loading, or is in the process of loading."
-          },
-          parent: {
-            "!type": "+Module",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_parent",
-            "!doc": "The module that required this one."
-          },
-          children: {
-            "!type": "[+Module]",
-            "!url": "https://nodejs.org/api/modules.html#modules_module_children",
-            "!doc": "The module objects required by this one."
-          }
-        }
-      },
       events: {
         "!url": "https://nodejs.org/api/events.html",
         "!doc": "Many objects in Node emit events: a net.Server emits an event each time a peer connects to it, a fs.readStream emits an event when the file is opened. All objects which emit events are instances of events.EventEmitter.",
@@ -1816,7 +1491,7 @@
           "!doc": "Synchronous readlink(2). Returns the symbolic link's string value."
         },
         realpath: {
-          "!type": "fn(path: string, cache: string, callback: fn(err: +Error, resolvedPath: string))",
+          "!type": "fn(path: string, cache: bool, callback: fn(err: +Error, resolvedPath: string))",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_realpath_path_cache_callback",
           "!doc": "Asynchronous realpath(2). The callback gets two arguments (err, resolvedPath). May use process.cwd to resolve relative paths. cache is an object literal of mapped paths that can be used to force a specific path resolution or avoid additional fs.stat calls for known real paths."
         },
@@ -3000,11 +2675,6 @@
     clearTimeout: "timers.clearTimeout",
     setInterval: "timers.setInterval",
     clearInterval: "timers.clearInterval",
-    module: {
-      "!type": "+Module",
-      "!url": "https://nodejs.org/api/globals.html#globals_module",
-      "!doc": "A reference to the current module. In particular module.exports is the same as the exports object. module isn't actually a global but rather local to each module."
-    },
     Buffer: {
       "!type": "fn(str: string, encoding?: string) -> +Buffer",
       prototype: {

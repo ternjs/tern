@@ -1,6 +1,6 @@
 {
   "!define": {
-    "!node": {
+    "!modules": {
       "node_export_function_a`js": {
         "!span": "0[0:0]-26[1:0]",
         "a": {
@@ -10,7 +10,7 @@
       },
       "node_other_module_type_ref`js": {
         "!span": "0[0:0]-51[1:0]",
-        "b": "!node.node_export_function_a`js.a"
+        "b": "!modules.node_export_function_a`js.a"
       }
     }
   },
