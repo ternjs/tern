@@ -14,6 +14,7 @@
     this.nonRelative = Object.create(null)
     this.resolvers = []
     this.modNameTests = []
+    this.completables = []
   }
 
   Modules.prototype = signal.mixin({
@@ -38,7 +39,7 @@
       return this.modules[name] = scope.exports
     },
     
-    resolveModuleInner: function(name, parentFile) {
+    resolveModule: function(name, parentFile) {
       var over = this.maybeOverride(name)
       if (over) return over
       if (this.options.dontLoad == true ||
@@ -46,24 +47,22 @@
           this.options.load && !new RegExp(this.options.load).test(name))
         return infer.ANull
 
-      var resolved
+      var resolved, relative = isRelative(name)
       for (var i = 0; !resolved && i < this.resolvers.length; i++)
         resolved = this.resolvers[i](name, parentFile)
       if (!resolved) return infer.ANull
-      if (typeof resolved != "string") return resolved
+      if (typeof resolved != "string") {
+        if (!relative) this.nonRelative[name] = true
+        return resolved
+      }
 
       var known = this.modules[resolved]
       if (known) return known
 
       if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
         this.server.addFile(resolved, null, parentFile)
+      if (!relative) this.nonRelative[name] = resolved
       return this.modules[resolved] = new infer.AVal
-    },
-
-    resolveModule: function(name, parentFile) {
-      var resolved = this.resolveModuleInner(name, parentFile)
-      if (!/^\.\.?\//.test(name) && resolved != infer.ANull) this.nonRelative[name] = true
-      return resolved
     },
 
     isModName: function(node) {
@@ -75,8 +74,74 @@
 
     get: function(name) {
       return this.modules[name] || (this.modules[name] = new infer.AVal)
-    }
+    },
+
+
+    completeModuleName: function(completions, query, word) {
+      function fromObj(obj, useVal) {
+        for (var name in obj)
+          if (filter(word, name, query))
+            tern.addCompletion(query, completions, name, useVal && obj[name])
+      }
+
+      for (var i = 0; i < this.completables.length; i++)
+        fromObj(this.completables[i](this.server), true)
+      if (this.options.modules) fromObj(this.options.modules, false)
+
+      var pathsSeen = Object.create(null)
+      for (var prop in this.nonRelative) {
+        var val = this.nonRelative[prop]
+        if (val == true || prop.indexOf("/") == -1) {
+          if (filter(word, prop, query)) tern.addCompletion(query, completions, prop)
+        } else if (prop.indexOf(word) == 0 && word.indexOf("/") > -1) {
+          var afterSlash = /.*?\/(.*)/.exec(prop)[1]
+          var found = val.indexOf(afterSlash)
+          if (found > -1) {
+            var dir = val.slice(0, found) + (/.*?\/(.*\/)?/.exec(word)[1] || "")
+            if (dir in pathsSeen) continue
+            pathsSeen[dir] = true
+            this.completeFileName(completions, query, null, word, dir)
+          }
+        }
+      }
+    },
+
+    completeFileName: function() {}
   })
+
+  if (require) (function() {
+    var fs = require("fs"), path = require("path")
+
+    Modules.prototype.completeFileName = function(completions, query, parentFile, word, dir) {
+      var pDir = this.server.projectDir
+      var endSlash = /\/$/.test(word)
+      if (parentFile) {
+        var pt = path.resolve(pDir, path.dirname(parentFile), word)
+        dir = endSlash ? pt : path.dirname(pt)
+      }
+      var base = endSlash ? word : path.dirname(word) + "/"
+      var filePart = endSlash ? "" : path.basename(word)
+
+      var me = this
+      fs.readdirSync(dir).forEach(function(file) {
+        if (/^\./.test(file)) return
+        if (filter(filePart, file, query)) {
+          var value = me.modules[path.relative(pDir, path.resolve(dir, file))]
+          if (/\.js$/.test(file)) file = file.slice(0, file.length - 3)
+          tern.addCompletion(query, completions, base + file, value)
+        }
+      })
+    }
+  }())
+
+  function isRelative(path) {
+    return /^\.\.?\//.test(path)
+  }
+
+  function filter(word, string, query) {
+    return query.filter === false || !word ||
+      (query.caseInsensitive ? string.toLowerCase() : string).indexOf(word) == 0
+  }
 
   function preCondenseReach(state) {
     var mods = infer.cx().parent.mod.modules.modules
@@ -137,9 +202,9 @@
       word = word.slice(0, word.length - 1)
     if (query.caseInsensitive) word = word.toLowerCase()
 
-    var completions
-    if (/^\.\.\//.test(word)) completions = completeFileName(query, file, word)
-    else completions = completeModuleName(query, word)
+    var completions = []
+    if (isRelative(word)) me.completeFileName(completions, query, file.name, word)
+    else me.completeModuleName(completions, query, word)
 
     if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
       ++wordEnd
@@ -158,48 +223,6 @@
       })
     }
   }
-
-  function completeModuleName(query, word) {
-    var completions = []
-    var cx = infer.cx()
-
-    function fromObj(obj) {
-      for (var name in obj) {
-        if (query.filter === false || !word ||
-            (query.caseInsensitive ? name.toLowerCase() : name).indexOf(word) == 0) {
-          var val = obj[name]
-          tern.addCompletion(query, completions, name, typeof val == "object" ? val : null)
-        }
-      }
-    }
-
-    fromObj(cx.definitions.node)
-    fromObj(cx.parent.mod.modules.nonRelative)
-    return completions
-  }
-
-  function completeFileName() { return [] }
-  if (require) (function() {
-    var fs = require("fs"), path = require("path")
-
-    completeFileName = function(query, file, word) {
-      var completions = [], server = infer.cx().parent, pDir = server.projectDir
-      var pt = path.resolve(pDir, file.name, word)
-      var filePart = path.basename(word)
-      var dir = /\/$/.test(pt) ? pt : path.dirname(pt)
-
-      fs.readdirSync(dir).forEach(function(file) {
-        if (/^\./.test(file)) return
-        if (query.filter === false || !filePart ||
-            (query.caseInsensitive ? file.toLowerCase() : file).indexOf(filePart) == 0) {
-          var value = server.mod.modules.modules[path.relative(pDir, path.resolve(dir, file))]
-          if (/\.js$/.test(file)) file = file.slice(0, file.length - 3)
-          tern.addCompletion(query, completions, file, value)
-        }
-      })
-      return completions
-    }
-  }())
 
   tern.registerPlugin("modules", function(server, options) {
     server.mod.modules = new Modules(server, options)
