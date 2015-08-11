@@ -472,7 +472,8 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-go-to-position (file pos)
   (find-file file)
-  (goto-char (min pos (point-max))))
+  (goto-char (min pos (point-max)))
+  (setf tern-last-point-pos (point)))
 
 ;; Query type
 
