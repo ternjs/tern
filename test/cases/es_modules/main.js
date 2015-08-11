@@ -3,10 +3,12 @@
 
 import foo from "./foo"
 foo //: number
-import {hello as holle} from "./foo"
+import {hello as holle //<loc: 3, 16
+       } from "./foo"
 holle //: fn() -> bool
 
-import * as blah from "./blah"
+import * as blah //<loc: 1, 0
+       from "./blah"
 blah //:: {a: number, b: string, c: bool, d: fn() -> number}
 
 import * as reexp from "./reexp"

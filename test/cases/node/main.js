@@ -71,12 +71,12 @@ doc.f2; //doc: doc for f2
 module.exports. //+
 
 // completion on known require module
-require('f //+ 'fs'
+require('f' //+ 'fs'
 // completion on custom require module
-require("my //+ "mymod"
+require("my" //+ "mymod"
 
 // go to definition for modulest
 require('./localfile'//loc: 1, 0, localfile.js
 
-require("./dir/ //+ "./dir/index", "./dir/lib"
-require("mod1/d //+ "mod1/dir1", "mod1/doc"
+require("./dir/" //+ "./dir/index", "./dir/lib"
+require("mod1/d" //+ "mod1/dir1", "mod1/doc"

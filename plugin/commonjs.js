@@ -33,16 +33,30 @@
     return resolved
   })
 
+  function isStaticRequire(_, node) {
+    if (node.type != "CallExpression" || node.callee.type != "Identifier" || node.callee.name != "require") return
+    var arg = node.arguments[0]
+    if (arg && arg.type == "Literal" && typeof arg.value == "string") return arg.value
+  }
+
   function isModuleName(node) {
     if (node.type != "Literal" || typeof node.value != "string") return false
 
-    var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "CallExpression")
-    if (!call || call.node.arguments[0] != node) return false
+    if (node.value == "./dir/ //+ ") console.log("START")
+    var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, isStaticRequire)
+    if (node.value == "./dir/ //+ ") console.log("END")
+    if (call && call.node.arguments[0] == node) return node.value
+  }
 
-    var callee = call.node.callee
-    if (callee.type != "Identifier" || callee.name != "require") return false
-
-    return node.value
+  function isImport(node) {
+    if (node.type != "Identifier") return
+    var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "VariableDeclarator"), name
+    if (!decl || decl.node.id != node) return
+    var init = decl.node.init
+    if (init && (name = isStaticRequire(0, init)))
+      return {name: name, prop: null}
+    if (init.type == "MemberExpression" && !init.computed && (name = isStaticRequire(0, init.object)))
+      return {name: name, prop: init.property.name}
   }
 
   function hasProps(obj) {
@@ -58,6 +72,7 @@
         exports.propagate(mod)
     })
     server.mod.modules.modNameTests.push(isModuleName)
+    server.mod.modules.importTests.push(isImport)
 
     return {defs: defs}
   })

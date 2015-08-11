@@ -105,7 +105,7 @@ exports.runTests = function(filter, caseDir) {
           pos = {line: line - 1, ch: Number(columnInfo[1]) - 1};
           args = args.slice(0, columnInfo.index);
         } else {
-          while (/\s/.test(text.charAt(pos - 1))) --pos;
+          while (/[\s'";]/.test(text.charAt(pos - 1))) --pos;
         }
         var query = {type: "completions", end: pos, file: fname, guess: kind == "+?"};
         var andOthers = /,\s*\.\.\.$/.test(args);

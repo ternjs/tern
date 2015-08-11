@@ -14,6 +14,7 @@
     this.nonRelative = Object.create(null)
     this.resolvers = []
     this.modNameTests = []
+    this.importTests = []
     this.completables = []
   }
 
@@ -65,12 +66,15 @@
       return this.modules[resolved] = new infer.AVal
     },
 
-    isModName: function(node) {
-      for (var i = 0; i < this.modNameTests.length; i++) {
-        var name = this.modNameTests[i](node)
+    findIn: function(array, node) {
+      for (var i = 0; i < array.length; i++) {
+        var name = array[i](node)
         if (name != null) return name
       }
     },
+
+    isModName: function(node) { return this.findIn(this.modNameTests, node) },
+    isImport: function(node) { return this.findIn(this.importTests, node) },
 
     get: function(name) {
       return this.modules[name] || (this.modules[name] = new infer.AVal)
@@ -167,11 +171,17 @@
   }
 
   function findTypeAt(_file, _pos, expr, type) {
+    if (!expr) return type
     var me = infer.cx().parent.mod.modules
-    var modName = expr && me.isModName(expr.node)
+    var modName = me.isModName(expr.node), imp, prop
+    if (imp = me.isImport(expr.node)) {
+      modName = imp.name
+      prop = imp.prop
+    }
     if (!modName) return type
 
-    var modType = me.resolveModule(modName, expr.node.sourceFile.name).getType()
+    var modType = me.resolveModule(modName, expr.node.sourceFile.name)
+    modType = (prop ? modType.getProp(prop) : modType).getType()
     if (!modType) return type
 
     // The `type` is a value shared for all string literals.

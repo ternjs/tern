@@ -16,6 +16,7 @@ var persistent = process.argv.indexOf("--persistent") > -1;
 var stripCRs = process.argv.indexOf("--strip-crs") > -1;
 var disableLoadingLocal = process.argv.indexOf("--disable-loading-local") > -1;
 var verbose = process.argv.indexOf("--verbose") > -1;
+var debug = verbose || process.argv.indexOf("--debug") > -1;
 var noPortFile = process.argv.indexOf("--no-port-file") > -1;
 var host = "127.0.0.1";
 var hostArg = process.argv.indexOf("--host");
@@ -157,7 +158,7 @@ function startServer(dir, config) {
     async: true,
     defs: defs,
     plugins: plugins,
-    debug: verbose,
+    debug: debug,
     projectDir: dir,
     dependencyBudget: config.dependencyBudget,
     stripCRs: stripCRs

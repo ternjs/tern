@@ -13,6 +13,8 @@
     function exp(prop, type, originNode) {
       if (!outObj) {
         outObj = new infer.Obj(true)
+        outObj.origin = file.name
+        outObj.originNode = file.ast
         out.addType(outObj)
       }
       type.propagate(outObj.defProp(prop, originNode))
@@ -76,9 +78,25 @@
     return node.value
   }
 
+  function isImport(node) {
+    if (node.type != "Identifier") return
+    var imp = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "ImportDeclaration")
+    if (!imp) return
+    var specs = imp.node.specifiers
+    for (var i = 0; i < specs.length; i++) {
+      var spec = specs[i]
+      if (spec.local != node) continue
+      var result = {name: imp.node.source.value, prop: null}
+      if (spec.type == "ImportDefaultSpecifier") result.prop = "default"
+      else if (spec.type == "ImportSpecifier") result.prop = spec.imported.name
+      return result
+    }
+  }
+
   tern.registerPlugin("es_modules", function(server) {
     server.loadPlugin("modules")
     server.mod.modules.on("getExports", connectModule)
     server.mod.modules.modNameTests.push(isModuleName)
+    server.mod.modules.importTests.push(isImport)
   })
 })
