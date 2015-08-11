@@ -1,10 +1,10 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require("./modules"), require)
+    return mod(require("../lib/infer"), require("../lib/tern"), require("./modules"))
   if (typeof define == "function" && define.amd) // AMD
     return define(["../lib/infer", "../lib/tern", "./modules"], mod)
   mod(tern, tern)
-})(function(infer, tern, _, require) {
+})(function(infer, tern) {
   "use strict"
 
   var WG_DEFAULT_EXPORT = 95
@@ -46,10 +46,10 @@
   }
 
   function hasProps(obj) {
-    if (obj) for (var prop in obj) return true
+    if (obj) for (var _prop in obj) return true
   }
 
-  tern.registerPlugin("commonjs", function(server, options) {
+  tern.registerPlugin("commonjs", function(server) {
     server.loadPlugin("modules")
     server.mod.modules.on("wrapScope", initScope)
     server.mod.modules.on("getExports", function(file, mod) {

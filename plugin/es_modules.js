@@ -69,14 +69,14 @@
   function isModuleName(node) {
     if (node.type != "Literal" || typeof node.value != "string") return false
 
-    var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, function(node) {
+    var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, function(_, node) {
       return node.type == "ImportDeclaration" || /Export(All|Named)Declaration/.test(node.type)
     })
     if (!decl || decl.source != node) return false
     return node.value
   }
 
-  tern.registerPlugin("es_modules", function(server, options) {
+  tern.registerPlugin("es_modules", function(server) {
     server.loadPlugin("modules")
     server.mod.modules.on("getExports", connectModule)
     server.mod.modules.modNameTests.push(isModuleName)

@@ -38,7 +38,7 @@
       infer.def.load(override, scope)
       return this.modules[name] = scope.exports
     },
-    
+
     resolveModule: function(name, parentFile) {
       var over = this.maybeOverride(name)
       if (over) return over
@@ -168,7 +168,7 @@
 
   function findTypeAt(_file, _pos, expr, type) {
     var me = infer.cx().parent.mod.modules
-    var modName = me.isModName(expr.node)
+    var modName = expr && me.isModName(expr.node)
     if (!modName) return type
 
     var modType = me.resolveModule(modName, expr.node.sourceFile.name).getType()
