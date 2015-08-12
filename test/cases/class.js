@@ -10,6 +10,11 @@ class Point2 {
   static origin() { return new Point2(0, 0) }
 }
 
+class Point4 extends Point3 {
+  constructor(x, y, z, u) { super(x, y, z); this.u = u }
+  argh() { return 2 }
+}
+
 var Point3 = class extends Point2 {
   constructor(x, y, z) { super(x, y); this.z = z }
   foobar() { return true }
@@ -28,3 +33,9 @@ var p3 = new Point3(0, 0, 5)
 p3 //: Point3
 p3.quux() //: number
 p3.foobar() //: bool
+
+var p4 = new Point4(1, 2, 3, 4)
+p4 //: Point4
+p4.argh() //: number
+p4.foobar() //: bool
+p4.quux() //: number
