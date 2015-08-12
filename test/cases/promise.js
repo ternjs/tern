@@ -1,5 +1,3 @@
-// environment=ecma6
-
 var p = new Promise(function(accept, reject) {
   reject; //: fn(reason: ?)
   accept({x: 20});

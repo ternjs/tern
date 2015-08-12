@@ -12,14 +12,13 @@ require("../plugin/complete_strings.js");
 var util = require("./util");
 
 var defData = {
-  ecma6: util.ecma6,
   browser: util.browser,
   jquery: util.jquery,
   underscore: util.underscore
 };
 
 function getDefs(text) {
-  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [util.ecma5];
+  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [util.ecma5, util.ecma6];
   while (m = spec.exec(text)) {
     var data = defData[m[1]];
     if (!data) throw new Error("Unknown environment: " + m[1]);

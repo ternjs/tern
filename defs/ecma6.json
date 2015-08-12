@@ -467,7 +467,7 @@
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign"
     },
     "getOwnPropertySymbols": {
-      "!type": "fn(obj: ?) -> [?]",
+      "!type": "fn(obj: ?) -> !custom:getOwnPropertySymbols",
       "!doc": "The Object.getOwnPropertySymbols() method returns an array of all symbol properties found directly upon a given object.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertySymbols"
     },
@@ -636,20 +636,22 @@
     }
   },
   "Symbol": {
-    "!type": "fn(description?: string)",
+    "!type": "fn(description?: string) -> !custom:getSymbol",
     "!doc": "A symbol is a unique and immutable data type and may be used as an identifier for object properties. The symbol object is an implicit object wrapper for the symbol primitive data type.",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
     "for": {
-      "!type": "fn(key: string) -> +Symbol",
+      "!type": "fn(key: string) -> !custom:getSymbol",
       "!doc": "The Symbol.for(key) method searches for existing symbols in a runtime-wide symbol registry with the given key and returns it if found. Otherwise a new symbol gets created in the global symbol registry with this key.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for"
     },
     "keyFor": {
-      "!type": "fn(sym: +Symbol) -> +Symbol",
+      "!type": "fn(sym: +Symbol) -> string",
       "!doc": "The Symbol.keyFor(sym) method retrieves a shared symbol key from the global symbol registry for the given symbol.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/keyFor"
     },
+    "iterator": ":Symbol.iterator",
     "prototype": {
+      "!stdProto": "Symbol",
       "toString": {
         "!type": "fn() -> string",
         "!doc": "The toString() method returns a string representing the specified Symbol object.",

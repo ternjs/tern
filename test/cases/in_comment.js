@@ -1,3 +1,3 @@
-// Ma //+ Math
+// Ma //+ Map, Math
 // Math.fl //+ floor
 // JSON. //+ parse, stringify
