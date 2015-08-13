@@ -16,3 +16,6 @@ for (var {a, b} of myIter) {
   a //: number
   b //: bool
 }
+
+for (let elt of [1, 2, 3])
+  elt //: number
