@@ -55,8 +55,7 @@
     server.loadPlugin("commonjs")
     server.mod.modules.resolvers.push(resolve)
     server.mod.modules.completables.push(function() { return server.cx.definitions.node })
-
-    return {defs: defs}
+    server.addDefs(defs)
   })
 
   var defs = {

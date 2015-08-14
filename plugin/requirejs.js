@@ -129,7 +129,7 @@
   };
 
   infer.registerFunction("requireJS", function(_self, args, argNodes) {
-    var server = infer.cx().parent, data = server && server._requireJS;
+    var server = infer.cx().parent, data = server && server.mod.requireJS;
     if (!data || !args.length) return infer.ANull;
 
     var name = data.currentFile;
@@ -196,7 +196,7 @@
   }
 
   infer.registerFunction("requireJSConfig", function(_self, _args, argNodes) {
-    var server = infer.cx().parent, data = server && server._requireJS;
+    var server = infer.cx().parent, data = server && server.mod.requireJS;
     if (data && argNodes && argNodes.length && argNodes[0].type == "ObjectExpression") {
       var config = parseExprNode(argNodes[0]);
       for (var key in config) if (config.hasOwnProperty(key)) {
@@ -213,7 +213,7 @@
   });
 
   function preCondenseReach(state) {
-    var interfaces = infer.cx().parent._requireJS.interfaces;
+    var interfaces = infer.cx().parent.mod.requireJS.interfaces;
     var rjs = state.roots["!requirejs"] = new infer.Obj(null);
     for (var name in interfaces) {
       var prop = rjs.defProp(name.replace(/\./g, "`"));
@@ -224,14 +224,14 @@
 
   function postLoadDef(data) {
     var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
-    var data = cx.parent._requireJS;
+    var data = cx.parent.mod.requireJS;
     if (interfaces) for (var name in interfaces.props) {
       interfaces.props[name].propagate(getInterface(name, data));
     }
   }
 
   tern.registerPlugin("requirejs", function(server, options) {
-    server._requireJS = {
+    server.mod.requireJS = {
       interfaces: Object.create(null),
       options: options || {},
       currentFile: null,
@@ -239,21 +239,19 @@
     };
 
     server.on("beforeLoad", function(file) {
-      this._requireJS.currentFile = file.name;
+      this.mod.requireJS.currentFile = file.name;
     });
     server.on("reset", function() {
-      this._requireJS.interfaces = Object.create(null);
-      this._requireJS.require = null;
+      this.mod.requireJS.interfaces = Object.create(null);
+      this.mod.requireJS.require = null;
     });
-    return {
-      defs: defs,
-      passes: {
-        preCondenseReach: preCondenseReach,
-        postLoadDef: postLoadDef,
-        typeAt: findTypeAt,
-        completion: findCompletions
-      }
-    };
+
+    server.on("preCondenseReach", preCondenseReach)
+    server.on("postLoadDef", postLoadDef)
+    server.on("typeAt", findTypeAt)
+    server.on("completion", findCompletions)
+
+    server.addDefs(defs)
   });
 
   function findTypeAt(_file, _pos, expr, type) {
@@ -315,7 +313,7 @@
   }
 
   function completeModuleName(query, word) {
-    var cx = infer.cx(), server = cx.parent, data = server._requireJS;
+    var cx = infer.cx(), server = cx.parent, data = server.mod.requireJS;
     var currentName = stripJSExt(data.currentFile);
     var base = data.options.baseURL || "";
     if (base && base.charAt(base.length - 1) != "/") base += "/";

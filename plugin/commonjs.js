@@ -69,10 +69,11 @@
       if (exports.types.length > 1 || hasProps(exports.getObjType()))
         exports.propagate(mod)
     })
+
     server.mod.modules.modNameTests.push(isModuleName)
     server.mod.modules.importTests.push(isImport)
 
-    return {defs: defs}
+    server.addDefs(defs)
   })
 
   var defs = {

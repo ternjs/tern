@@ -13,3 +13,5 @@ blah //:: {a: number, b: string, c: bool, d: fn() -> number}
 
 import * as reexp from "./reexp"
 reexp //:: {a: number, b: bool}
+
+import "./b" //+ "./blah"

@@ -15,22 +15,18 @@
   var WG_MADEUP = 1, WG_STRONG = 101;
 
   tern.registerPlugin("doc_comment", function(server, options) {
-    server.jsdocTypedefs = Object.create(null);
+    server.mod.jsdocTypedefs = Object.create(null);
     server.on("reset", function() {
-      server.jsdocTypedefs = Object.create(null);
+      server.mod.jsdocTypedefs = Object.create(null);
     });
-    server._docComment = {
+    server.mod.docComment = {
       weight: options && options.strong ? WG_STRONG : undefined,
       fullDocs: options && options.fullDocs
     };
 
-    return {
-      passes: {
-        postParse: postParse,
-        postInfer: postInfer,
-        postLoadDef: postLoadDef
-      }
-    };
+    server.on("postParse", postParse)
+    server.on("postInfer", postInfer)
+    server.on("postLoadDef", postLoadDef)
   });
 
   function postParse(ast, text) {
@@ -104,7 +100,7 @@
     var defs = data["!typedef"];
     var cx = infer.cx(), orig = data["!name"];
     if (defs) for (var name in defs)
-      cx.parent.jsdocTypedefs[name] =
+      cx.parent.mod.jsdocTypedefs[name] =
         maybeInstance(infer.def.parse(defs[name], orig, name), name);
   }
 
@@ -308,7 +304,7 @@
         while (str.charCodeAt(pos) == 46 ||
                acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
         var path = str.slice(start, pos);
-        var cx = infer.cx(), defs = cx.parent && cx.parent.jsdocTypedefs, found;
+        var cx = infer.cx(), defs = cx.parent && cx.parent.mod.jsdocTypedefs, found;
         if (defs && (path in defs)) {
           type = defs[path];
         } else if (found = infer.def.parsePath(path, scope).getObjType()) {
@@ -388,12 +384,12 @@
       var parsed = parseTypeOuter(scope, m[1]);
       var name = parsed && m[1].slice(parsed.end).match(/^\s*(\S+)/);
       if (name)
-        cx.parent.jsdocTypedefs[name[1]] = parsed.type;
+        cx.parent.mod.jsdocTypedefs[name[1]] = parsed.type;
     }
   }
 
   function propagateWithWeight(type, target) {
-    var weight = infer.cx().parent._docComment.weight;
+    var weight = infer.cx().parent.mod.docComment.weight;
     type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
   }
 

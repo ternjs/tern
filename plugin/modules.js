@@ -251,9 +251,9 @@
       this.mod.modules.modules = Object.create(null)
     })
 
-    return {passes: {preCondenseReach: preCondenseReach,
-                     postLoadDef: postLoadDef,
-                     typeAt: findTypeAt,
-                     completion: findCompletions}}
+    server.on("preCondenseReach", preCondenseReach)
+    server.on("postLoadDef", postLoadDef)
+    server.on("typeAt", findTypeAt)
+    server.on("completion", findCompletions)
   })
 })

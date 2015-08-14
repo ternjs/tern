@@ -136,7 +136,7 @@
   }
 
   function declareMod(name, includes) {
-    var cx = infer.cx(), data = cx.parent._angular;
+    var cx = infer.cx(), data = cx.parent.mod.angular;
     var proto = moduleProto(cx);
     var mod = new infer.Obj(proto || true);
     if (!proto) data.nakedModules.push(mod);
@@ -165,7 +165,7 @@
   infer.registerFunction("angular_module", function(_self, _args, argNodes) {
     var mod, name = argNodes && argNodes[0] && argNodes[0].type == "Literal" && argNodes[0].value;
     if (typeof name == "string")
-      mod = infer.cx().parent._angular.modules[name];
+      mod = infer.cx().parent.mod.angular.modules[name];
     if (!mod)
       mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]));
     return mod;
@@ -213,7 +213,7 @@
   function postLoadDef(json) {
     var cx = infer.cx(), defName = json["!name"], defs = cx.definitions[defName];
     if (defName == "angular") {
-      var proto = moduleProto(cx), naked = cx.parent._angular.nakedModules;
+      var proto = moduleProto(cx), naked = cx.parent.mod.angular.nakedModules;
       if (proto) for (var i = 0; i < naked.length; ++i) naked[i].proto = proto;
       return;
     }
@@ -236,7 +236,7 @@
   }
 
   function preCondenseReach(state) {
-    var mods = infer.cx().parent._angular.modules;
+    var mods = infer.cx().parent.mod.angular.modules;
     var modObj = new infer.Obj(null), found = 0;
     for (var name in mods) {
       var mod = mods[name];
@@ -255,7 +255,7 @@
   }
 
   function postCondenseReach(state) {
-    var mods = infer.cx().parent._angular.modules;
+    var mods = infer.cx().parent.mod.angular.modules;
     for (var path in state.types) {
       var m;
       if (m = path.match(/^!ng\.([^\.]+)\._inject_([^\.]+)^/)) {
@@ -269,7 +269,7 @@
   }
 
   function initServer(server) {
-    server._angular = {
+    server.mod.angular = {
       modules: Object.create(null),
       pendingImports: Object.create(null),
       nakedModules: []
@@ -278,13 +278,14 @@
 
   tern.registerPlugin("angular", function(server) {
     initServer(server);
+
     server.on("reset", function() { initServer(server); });
-    return {defs: defs,
-            passes: {postParse: postParse,
-                     postLoadDef: postLoadDef,
-                     preCondenseReach: preCondenseReach,
-                     postCondenseReach: postCondenseReach},
-            loadFirst: true};
+    server.on("postParse", postParse)
+    server.on("postLoadDef", postLoadDef)
+    server.on("preCondenseReach", preCondenseReach)
+    server.on("postCondenseReach", postCondenseReach)
+
+    server.addDefs(defs, true)
   });
 
   var defs = {

@@ -48,6 +48,7 @@ var defaultConfig = {
   loadEagerly: false,
   plugins: {},
   ecmaScript: true,
+  ecmaVersion: 6,
   dependencyBudget: tern.defaultOptions.dependencyBudget
 };
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -81,8 +82,11 @@ function findFile(file, projectDir, fallbackDir) {
 var distDir = path.resolve(__dirname, "..");
 
 function findDefs(projectDir, config) {
-  var defs = [], src = config.libs;
-  if (src.indexOf("ecma5") == -1 && config.ecmaScript) src = ["ecma5"].concat(src);
+  var defs = [], src = config.libs.slice();
+  if (config.ecmaScript) {
+    if (src.indexOf("ecma6") == -1 && config.ecmaVersion >= 6) src.unshift("ecma6")
+    if (src.indexOf("ecma5") == -1) src.unshift("ecma5")
+  }   
   for (var i = 0; i < src.length; ++i) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";
@@ -100,10 +104,14 @@ function findDefs(projectDir, config) {
   return defs;
 }
 
-var defaultPlugins = ["doc_comment"];
+function defaultPlugins(config) {
+  var result = ["doc_comment"]
+  if (config.ecmaVersion >= 6) result.push("es_modules")
+  return result
+}
 
-function loadPlugins(projectDir, plugins) {
-  var options = {};
+function loadPlugins(projectDir, config) {
+  var plugins = config.plugins, options = {};
   for (var plugin in plugins) {
     var val = plugins[plugin];
     if (!val) continue;
@@ -121,7 +129,7 @@ function loadPlugins(projectDir, plugins) {
     options[path.basename(plugin)] = val;
   }
 
-  defaultPlugins.forEach(function(name) {
+  defaultPlugins(config).forEach(function(name) {
     if (!plugins.hasOwnProperty(name)) {
       options[name] = true;
       require("../plugin/" + name);
@@ -141,7 +149,7 @@ var server = startServer(projectDir, config);
 
 function startServer(dir, config) {
   var defs = findDefs(dir, config);
-  var plugins = loadPlugins(dir, config.plugins);
+  var plugins = loadPlugins(dir, config);
   var server = new tern.Server({
     getFile: function(name, c) {
       if (config.dontLoad && config.dontLoad.some(function(pat) {return minimatch(name, pat)}))
@@ -160,6 +168,7 @@ function startServer(dir, config) {
     plugins: plugins,
     debug: debug,
     projectDir: dir,
+    ecmaVersion: config.ecmaVersion,
     dependencyBudget: config.dependencyBudget,
     stripCRs: stripCRs
   });
