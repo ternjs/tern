@@ -63,7 +63,7 @@ function argument hints will appear in the bar below the editor.</p>
       <option value=delfile>Remove this file</option>
     </select>
     <select id="projects">
-      <option>projects...</option>
+      <option>demos...</option>
     </select>
   </div>
   <form id="place"></form>
@@ -92,11 +92,11 @@ CTor.prototype.hallo = "hallo"
 var baz = new CTor
 baz.
 
-// You can press ctrl-q when the cursor is on a variable name to
-// rename it. Try it with CTor...
+// You can press ctrl-q when the cursor is on a variable
+// name to rename it. Try it with CTor...
 
-// When the cursor is in an argument list, the arguments are
-// shown below the editor.
+// When the cursor is in an argument list, the arguments
+// are shown below the editor.
 
 [1].reduce(  )
 </pre>
@@ -106,21 +106,28 @@ baz.
          data-plugins="requirejs doc_comments complete_strings"
          data-libs="ecma5 browser jquery">
 <pre id="main.js">
-requirejs(["module"], function(test) {
+// A simple set of three modules, connected with requirejs
+
+requirejs(["text_util", "output"], function(text, output) {
   window.addEventListener("load", function() {
-    var word = test.capitalize(test.garble(prompt("coconut")))
-    document.body.innerText = word
+    // Pressing alt-. on `garble` jumps to the module
+    var word = text.capitalize(text.garble(prompt("Hi", "")))
+    output.write(word)
   })
 })
 </pre>
 
-<pre id="module">
+<pre id="text_util.js">
+// Trivial requirejs-style module
+
 define(function() {
   return {
+    // Capitalize a string
     capitalize: function(word) {
       return word.charAt(0).toUpperCase() + word.slice(1)
     },
 
+    // Garble the vowels in a string
     garble: function(word) {
       return word.replace(/[auiyoe]/g, function() {
         return "auiyoe".charAt(Math.floor(Math.random() * 6))
@@ -130,19 +137,89 @@ define(function() {
 })
 </pre>
 
-<pre id=multimodule>
-(function(root, mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(exports, require("module"))
-  else if (typeof define == "function" && define.amd) // AMD
-    return define(["exports", "module"], mod)
-  else // Plain browser env
-    mod(root.multimodule = {}, root.module)
-})(this, function(exports, module) {
+<pre id="output.js">
+// This one is written using a multi-module-loader wrapper
+//
+// If Tern's requirejs plugin is loaded, it'll pick up the
+// call to define. Alternatively, when its commonjs plugin
+// is loaded, that'll handle the require calls.
 
-  exports.doSomething = function() {}
+(function(root, mod) {
+  if (typeof exports == "object" && typeof module == "object")
+    mod(exports, require("jquery")) // CommonJS
+  else if (typeof define == "function" && define.amd)
+    define(["exports", "jquery"], mod) // AMD
+  else
+    mod(root.output = {}, root.$) // Plain browser env
+})(this, function(exports, $) {
+
+  // Write some text to the bottom of the document
+  exports.write = function(text) {
+    $("body").append($("<pre></pre>").text(text))
+  }
 
 })
+</project>
+
+<project id="ES6"
+         data-plugins="es_modules doc_comments complete_strings"
+         data-libs="ecma5 ecma6">
+<pre id="index.js">
+// Tern can do ECMAScript 6 (2015) too!
+
+// Imports and exports work. You can complete module names, and
+// jump to the definition of things defined in modules.
+
+// (Press ctrl-. on `List` to jump to the class definition)
+import {List} from "./list"
+
+import * as myMath from "./mymath"
+
+const l = List.of(3, 4, 5)
+for (let elt of l.map(x => x * 2)) {
+  // Tern knows that `elt` is a number!
+  let output = myMath.halve(elt)
+  console.log(output)
+}
+
+// Raw template string
+let raw = String.raw`\n`
+
+// Default arguments
+Array.of(1, 2, 3, 4).find(x => x % 3 == 0)
+</pre>
+
+<pre id="list.js">
+export class List {
+  constructor(head, tail) {
+    this.head = head
+    this.tail = tail
+  },
+
+  static of(...elements) {
+    let result = null
+    for (let i = elements.length - 1; i >= 0; i--)
+      result = new List(elements[i], result)
+    return result
+  }
+
+  map(f) {
+    return new List(f(this.head), this.tail && this.tail.map(f))
+  }
+
+  *[Symbol.iterator]() {
+    for (let pos = this; pos; pos = pos.tail)
+      yield pos.head
+  }
+}
+</pre>
+
+<pre id="mymath">
+export const PI = 3
+
+export const halve = x => x / 2
+</pre>
+
 </project>
 
 </div>

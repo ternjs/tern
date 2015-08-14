@@ -26,6 +26,7 @@ function Project(name, place, config, docs) {
     var data = this.registerDoc(name, new CodeMirror.Doc(docs[name], "javascript"))
     if (!firstDoc) firstDoc = data
   }
+  this.setSelectedTab(firstDoc)
 
   var keyMap = {
     "Ctrl-I": function(cm) { server.showType(cm); },
@@ -168,10 +169,12 @@ function words(str) {
 
 function initProject(name, c) {
   var node = document.getElementById(name)
-  var plugins = {}
-  words(node.getAttribute("data-plugins")).forEach(function(name) { plugins[name] = true })
-
   loadDefs(words(node.getAttribute("data-libs")), function(defs) {
+    var plugins = {}
+    words(node.getAttribute("data-plugins")).forEach(function(name) { plugins[name] = true })
+
+    if (plugins.requirejs) plugins.requirejs = {override: {"jquery": "=$"}}
+
     loadFiles(node, function(files) {
       var place = document.getElementById("place")
       place.textContent = ""
