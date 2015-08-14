@@ -73,13 +73,15 @@ ul.tabs li.selected:after {
   box-shadow: -2px 2px 0 white;
 }
 
-#commands {
-  font-family: "Ubuntu Mono", monospace;
-  font-size: 11pt;
+#menus {
   position: absolute;
   right: 0;
   top: 0;
-  max-width: 10em;
+}
+#menus select {
+  font-family: "Ubuntu Mono", monospace;
+  font-size: 11pt;
+  width: 8em;
 }
 
 .CodeMirror div.CodeMirror-cursor {

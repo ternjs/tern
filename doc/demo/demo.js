@@ -1,6 +1,7 @@
-var defs = Object.create(null), project
+var project
 
-function Project(place, config, docs) {
+function Project(name, place, config, docs) {
+  this.name = name
   this.docs = Object.create(null)
   this.curDoc = null
   this.tabs = place.appendChild(document.createElement("ul"))
@@ -90,14 +91,6 @@ function load(file, c) {
 }
 
 CodeMirror.on(window, "load", function() {
-  var toLoad = ["ecma5", "ecma6", "browser", "jquery"], loaded = 0
-  for (var i = 0; i < toLoad.length; ++i) (function(i) {
-    load("../../defs/" + toLoad[i] + ".json", function(json) {
-      defs[toLoad[i]] = JSON.parse(json)
-      if (++loaded == toLoad.length) initProject("default")
-    })
-  })(i)
-
   var cmds = document.getElementById("commands")
   CodeMirror.on(cmds, "change", function() {
     if (!project || cmds.selectedIndex == 0) return
@@ -106,6 +99,32 @@ CodeMirror.on(window, "load", function() {
     project.editor.focus()
     if (found) found()
   })
+
+  var projects = document.getElementById("projects")
+  var projectNames = []
+  var projectTags = document.querySelectorAll("project")
+  for (var i = 0; i < projectTags.length; i++) {
+    var opt = projects.appendChild(document.createElement("option"))
+    projectNames.push(opt.textContent = projectTags[i].id)
+  }
+  CodeMirror.on(projects, "change", function() {
+    if (projects.selectedIndex != 0)
+      initProject(projects.value, function() {
+        projects.selectedIndex = 0
+        project.editor.focus()
+      })
+  })
+  function updateFromHash() {
+    var name = location.hash.slice(1)
+    if (projectNames.indexOf(name) > -1 &&
+        (!project || project.name != name)) {
+      initProject(name)
+      return true
+    }
+  }
+  CodeMirror.on(window, "hashchange", updateFromHash)
+
+  updateFromHash() || initProject("simple")
 })
 
 function loadFiles(project, c) {
@@ -126,24 +145,44 @@ function loadFiles(project, c) {
   inner(project.firstChild)
 }
 
+var defsLoaded = Object.create(null)
+function loadDefs(defs, c) {
+  var result = [], loaded = 0
+  for (var i = 0; i < defs.length; ++i) (function(i) {
+    var name = defs[i]
+    if (defsLoaded[name]) {
+      result[i] = defsLoaded[name]
+      if (++loaded == defs.length) c(result)
+    } else {
+      load("../../defs/" + name + ".json", function(json) {
+        defsLoaded[name] = result[i] = JSON.parse(json)
+        if (++loaded == defs.length) c(result)
+      })
+    }
+  })(i)
+}
+
 function words(str) {
   return str ? str.split(" ") : []
 }
 
-function initProject(name) {
+function initProject(name, c) {
   var node = document.getElementById(name)
-  var plugins = {}, myDefs = []
+  var plugins = {}
   words(node.getAttribute("data-plugins")).forEach(function(name) { plugins[name] = true })
-  words(node.getAttribute("data-libs")).forEach(function(name) { myDefs.push(defs[name]) })
-  
-  loadFiles(node, function(files) {
-    var place = document.getElementById("place")
-    place.textContent = ""
 
-    project = new Project(place, {
-      defs: myDefs,
-      plugins: plugins
-    }, files)
+  loadDefs(words(node.getAttribute("data-libs")), function(defs) {
+    loadFiles(node, function(files) {
+      var place = document.getElementById("place")
+      place.textContent = ""
+
+      project = new Project(name, place, {
+        defs: defs,
+        plugins: plugins
+      }, files)
+      location.hash = "#" + name
+      c && c()
+    })
   })
 }
 
@@ -167,4 +206,3 @@ var commands = {
     if (hasDoc) project.unregisterDoc(project.curDoc)
   }
 }
-

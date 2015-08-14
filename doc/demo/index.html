@@ -51,39 +51,45 @@ corner lists the commands and keyboard shortcuts available. Output and
 function argument hints will appear in the bar below the editor.</p>
 
 <div style="position: relative" id="demospace">
-  <select id="commands">
-    <option>commands...</option>
-    <option value=complete>Autocomplete (ctrl-space)</option>
-    <option value=jumptodef>Jump to definition (alt-.)</option>
-    <option value=finddocs>Describe (ctrl-o)</option>
-    <option value=findtype>Find type of (ctrl-i)</option>
-    <option value=rename>Rename variable (ctrl-q)</option>
-    <option value=addfile>Add a new file</option>
-    <option value=delfile>Remove this file</option>
-  </select>
+  <div id=menus>
+    <select id="commands">
+      <option>commands...</option>
+      <option value=complete>Autocomplete (ctrl-space)</option>
+      <option value=jumptodef>Jump to definition (alt-.)</option>
+      <option value=finddocs>Describe (ctrl-o)</option>
+      <option value=findtype>Find type of (ctrl-i)</option>
+      <option value=rename>Rename variable (ctrl-q)</option>
+      <option value=addfile>Add a new file</option>
+      <option value=delfile>Remove this file</option>
+    </select>
+    <select id="projects">
+      <option>projects...</option>
+    </select>
+  </div>
   <form id="place"></form>
 </div>
 
 <div style="display: none" id="projects">
-<project id="default"
-         data-plugins="requirejs doc_comments complete_strings"
-         data-libs="ecma5 browser jquery">
-<pre id="test.js">// Use ctrl-space to complete something
+<project id="simple"
+         data-plugins="doc_comments complete_strings"
+         data-libs="ecma5 browser">
+<pre id="test">
+// Use ctrl-space to complete something
 co
 document.body.a
 
 // Put the cursor in or after an expression, press ctrl-i to
 // find its type
 
-var foo = ["array", "of", "strings"];
-var bar = foo.slice(0, 2).join("").split("a")[0];
+var foo = ["array", "of", "strings"]
+var bar = foo.slice(0, 2).join("").split("a")[0]
 
 // Works for locally defined types too.
 
-function CTor() { this.size = 10; }
-CTor.prototype.hallo = "hallo";
+function CTor() { this.size = 10 }
+CTor.prototype.hallo = "hallo"
 
-var baz = new CTor;
+var baz = new CTor
 baz.
 
 // You can press ctrl-q when the cursor is on a variable name to
@@ -92,44 +98,53 @@ baz.
 // When the cursor is in an argument list, the arguments are
 // shown below the editor.
 
-[1].reduce(  );
+[1].reduce(  )
+</pre>
+</project>
 
-// And a little more advanced code...
-
-(function(exports) {
-  exports.randomElt = function(arr) {
-    return arr[Math.floor(arr.length * Math.random())];
-  };
-  exports.strList = "foo".split("");
-  exports.intList = exports.strList.map(function(s) { return s.charCodeAt(0); });
-})(window.myMod = {});
-
-var randomStr = myMod.randomElt(myMod.strList);
-var randomInt = myMod.randomElt(myMod.intList);
-
-// A test of the requirejs plug-in. Check the 'test_dep.js' tab,
-// notice that the test variable.
-
-requirejs(["test_dep.js"], function(test) {
-  var word = test.capitalize(test.garble("coconut"));
-  console.log(word);
-});
+<project id="requirejs"
+         data-plugins="requirejs doc_comments complete_strings"
+         data-libs="ecma5 browser jquery">
+<pre id="main.js">
+requirejs(["module"], function(test) {
+  window.addEventListener("load", function() {
+    var word = test.capitalize(test.garble(prompt("coconut")))
+    document.body.innerText = word
+  })
+})
 </pre>
 
-<pre id="test_dep.js">define(function() {
+<pre id="module">
+define(function() {
   return {
     capitalize: function(word) {
-      return word.charAt(0).toUpperCase() + word.slice(1);
+      return word.charAt(0).toUpperCase() + word.slice(1)
     },
+
     garble: function(word) {
       return word.replace(/[auiyoe]/g, function() {
-        return "auiyoe".charAt(Math.floor(Math.random() * 6));
-      });
+        return "auiyoe".charAt(Math.floor(Math.random() * 6))
+      })
     }
-  };
-});</pre>
-<pre id="underscore.js" file="underscore.js"></pre>
+  }
+})
+</pre>
+
+<pre id=multimodule>
+(function(root, mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    return mod(exports, require("module"))
+  else if (typeof define == "function" && define.amd) // AMD
+    return define(["exports", "module"], mod)
+  else // Plain browser env
+    mod(root.multimodule = {}, root.module)
+})(this, function(exports, module) {
+
+  exports.doSomething = function() {}
+
+})
 </project>
+
 </div>
 
 </body>
