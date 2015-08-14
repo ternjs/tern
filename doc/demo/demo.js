@@ -1,48 +1,81 @@
-var useWorker = false;
+var defs = Object.create(null), project
 
-var server, editor, defs = [];
-var Pos = CodeMirror.Pos;
+function Project(place, config, docs) {
+  this.docs = Object.create(null)
+  this.curDoc = null
+  this.tabs = place.appendChild(document.createElement("ul"))
+  this.tabs.className = "tabs"
+  var self = this
+  CodeMirror.on(this.tabs, "click", function(e) {
+    var target = e.target || e.srcElement
+    if (target.nodeName.toLowerCase() != "li") return
+    var doc = self.findDoc(target.textContent)
+    if (doc) self.selectDoc(doc)
+  })
 
-// Document management
-
-var docs = [], curDoc;
-
-function findDoc(name) { return docs[docID(name)]; }
-function docID(name) { for (var i = 0; i < docs.length; ++i) if (docs[i].name == name) return i; }
-
-function registerDoc(name, doc) {
-  server.addDoc(name, doc);
-  var data = {name: name, doc: doc};
-  docs.push(data);
-  var docTabs = document.getElementById("docs");
-  var li = docTabs.appendChild(document.createElement("li"));
-  li.appendChild(document.createTextNode(name));
-  if (editor.getDoc() == doc) {
-    setSelectedDoc(docs.length - 1);
-    curDoc = data;
+  var myConf = {
+    switchToDoc: function(name) { self.selectDoc(self.findDoc(name)) },
+    useWorker: false
   }
+  for (var prop in config) myConf[prop] = config[prop]
+  var server = this.server = new CodeMirror.TernServer(myConf)
+
+  var firstDoc
+  for (var name in docs) {
+    var data = this.registerDoc(name, new CodeMirror.Doc(docs[name], "javascript"))
+    if (!firstDoc) firstDoc = data
+  }
+
+  var keyMap = {
+    "Ctrl-I": function(cm) { server.showType(cm); },
+    "Ctrl-O": function(cm) { server.showDocs(cm); },
+    "Ctrl-Space": function(cm) { server.complete(cm); },
+    "Alt-.": function(cm) { server.jumpToDef(cm); },
+    "Alt-,": function(cm) { server.jumpBack(cm); },
+    "Ctrl-Q": function(cm) { server.rename(cm); }
+  }
+  this.editor = new CodeMirror(place, {
+    lineNumbers: true,
+    extraKeys: keyMap,
+    matchBrackets: true,
+    value: firstDoc.doc
+  })
+  this.editor.on("cursorActivity", function(cm) { server.updateArgHints(cm); })
 }
 
-function unregisterDoc(doc) {
-  server.delDoc(doc.name);
-  for (var i = 0; i < docs.length && doc != docs[i]; ++i) {}
-  docs.splice(i, 1);
-  var docList = document.getElementById("docs");
-  docList.removeChild(docList.childNodes[i]);
-  selectDoc(Math.max(0, i - 1));
-}
+Project.prototype = {
+  findDoc: function(name) { return this.docs[name] },
 
-function setSelectedDoc(pos) {
-  var docTabs = document.getElementById("docs");
-  for (var i = 0; i < docTabs.childNodes.length; ++i)
-    docTabs.childNodes[i].className = pos == i ? "selected" : "";
-}
+  registerDoc: function(name, doc) {
+    this.server.addDoc(name, doc)
+    var data = this.docs[name] = {
+      name: name,
+      doc: doc,
+      tab: this.tabs.appendChild(document.createElement("li"))
+    }
+    data.tab.textContent = name
+    return data
+  },
 
-function selectDoc(pos) {
-  server.hideDoc(curDoc.name);
-  setSelectedDoc(pos);
-  curDoc = docs[pos];
-  editor.swapDoc(curDoc.doc);
+  unregisterDoc: function(doc) {
+    this.server.delDoc(doc.name)
+    delete this.docs[doc.name]
+    this.tabs.removeChild(doc.tab)
+    if (this.curDoc == doc) for (var n in this.docs) return this.selectDoc(this.docs[n])
+  },
+
+  setSelectedTab: function(doc) {
+    for (var n = this.tabs.firstChild; n; n = n.nextSibling)
+      n.className = n.textContent == doc.name ? "selected" : ""
+  },
+
+  selectDoc: function(doc) {
+    if (doc == this.curDoc) return
+    this.server.hideDoc(this.curDoc)
+    this.setSelectedTab(doc)
+    this.curDoc = doc
+    this.editor.swapDoc(doc.doc)
+  }
 }
 
 // Initialization
@@ -57,87 +90,81 @@ function load(file, c) {
 }
 
 CodeMirror.on(window, "load", function() {
-  var files = ["../../defs/ecma5.json", "../../defs/ecma6.json", "../../defs/browser.json", "../../defs/jquery.json"];
-  var loaded = 0;
-  for (var i = 0; i < files.length; ++i) (function(i) {
-    load(files[i], function(json) {
-      defs[i] = JSON.parse(json);
-      if (++loaded == files.length) initEditor();
-    });
-  })(i);
+  var toLoad = ["ecma5", "ecma6", "browser", "jquery"], loaded = 0
+  for (var i = 0; i < toLoad.length; ++i) (function(i) {
+    load("../../defs/" + toLoad[i] + ".json", function(json) {
+      defs[toLoad[i]] = JSON.parse(json)
+      if (++loaded == toLoad.length) initProject("default")
+    })
+  })(i)
 
-  var cmds = document.getElementById("commands");
+  var cmds = document.getElementById("commands")
   CodeMirror.on(cmds, "change", function() {
-    if (!editor || cmds.selectedIndex == 0) return;
-    var found = commands[cmds.value];
-    cmds.selectedIndex = 0;
-    editor.focus();
-    if (found) found(editor);
-  });
-});
+    if (!project || cmds.selectedIndex == 0) return
+    var found = commands[cmds.value]
+    cmds.selectedIndex = 0
+    project.editor.focus()
+    if (found) found()
+  })
+})
 
-function initEditor() {
-  var keyMap = {
-    "Ctrl-I": function(cm) { server.showType(cm); },
-    "Ctrl-O": function(cm) { server.showDocs(cm); },
-    "Ctrl-Space": function(cm) { server.complete(cm); },
-    "Alt-.": function(cm) { server.jumpToDef(cm); },
-    "Alt-,": function(cm) { server.jumpBack(cm); },
-    "Ctrl-Q": function(cm) { server.rename(cm); }
-  };
+function loadFiles(project, c) {
+  var found = {}
+  function inner(node) {
+    while (node && node.nodeName != "PRE") node = node.nextSibling
+    if (!node) return c(found)
+    if (node.hasAttribute("file")) {
+      load(node.getAttribute("file"), function(data) {
+        found[node.id] = data
+        inner(node.nextSibling)
+      })
+    } else {
+      found[node.id] = node.textContent
+      inner(node.nextSibling)
+    }
+  }
+  inner(project.firstChild)
+}
 
-  editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-    lineNumbers: true,
-    extraKeys: keyMap,
-    matchBrackets: true
-  });
+function words(str) {
+  return str ? str.split(" ") : []
+}
 
-  server = new CodeMirror.TernServer({
-    defs: defs,
-    plugins: {requirejs: {}, doc_comment: true, complete_strings: true},
-    switchToDoc: function(name) { selectDoc(docID(name)); },
-    workerDeps: ["../../../acorn/dist/acorn.js", "../../../acorn/dist/acorn_loose.js",
-                 "../../../acorn/dist/walk.js", "../../../../lib/signal.js", "../../../../lib/tern.js",
-                 "../../../../lib/def.js", "../../../../lib/infer.js", "../../../../lib/comment.js",
-                 "../../../../plugin/requirejs.js", "../../../../plugin/doc_comment.js"],
-    workerScript: "../node_modules/codemirror/addon/tern/worker.js",
-    useWorker: useWorker
+function initProject(name) {
+  var node = document.getElementById(name)
+  var plugins = {}, myDefs = []
+  words(node.getAttribute("data-plugins")).forEach(function(name) { plugins[name] = true })
+  words(node.getAttribute("data-libs")).forEach(function(name) { myDefs.push(defs[name]) })
+  
+  loadFiles(node, function(files) {
+    var place = document.getElementById("place")
+    place.textContent = ""
 
-  });
-
-  editor.on("cursorActivity", function(cm) { server.updateArgHints(cm); });
-
-  registerDoc("test.js", editor.getDoc());
-  registerDoc("test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
-  load("underscore.js", function(body) {
-    registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
-  });
-
-  CodeMirror.on(document.getElementById("docs"), "click", function(e) {
-    var target = e.target || e.srcElement;
-    if (target.nodeName.toLowerCase() != "li") return;
-    for (var i = 0, c = target.parentNode.firstChild; ; ++i, (c = c.nextSibling))
-      if (c == target) return selectDoc(i);
-  });
+    project = new Project(place, {
+      defs: myDefs,
+      plugins: plugins
+    }, files)
+  })
 }
 
 var commands = {
-  complete: function(cm) { server.complete(cm); },
-  jumptodef: function(cm) { server.jumpToDef(cm); },
-  finddocs: function(cm) { server.showDocs(cm); },
-  findtype: function(cm) { server.showType(cm); },
-  rename: function(cm) { server.rename(cm); },
+  complete: function() { project.server.complete(project.editor) },
+  jumptodef: function() { project.server.jumpToDef(project.editor) },
+  finddocs: function() { project.server.showDocs(project.editor) },
+  findtype: function() { project.server.showType(project.editor) },
+  rename: function() { project.server.rename(project.editor) },
   addfile: function() {
-    var name = prompt("Name of the new buffer", "");
-    if (name == null) return;
-    if (!name) name = "test";
-    var i = 0;
-    while (findDoc(name + (i || ""))) ++i;
-    registerDoc(name + (i || ""), new CodeMirror.Doc("", "javascript"));
-    selectDoc(docs.length - 1);
+    var name = prompt("Name of the new buffer", "")
+    if (name == null) return
+    if (!name) name = "test"
+    var i = 0
+    while (project.findDoc(name + (i || ""))) ++i
+    project.selectDoc(project.registerDoc(name + (i || ""), new CodeMirror.Doc("", "javascript")))
   },
   delfile: function() {
-    if (docs.length == 1) return;
-    unregisterDoc(curDoc);
+    var hasDoc = false
+    for (var _ in project.docs) { hasDoc = true; break }
+    if (hasDoc) project.unregisterDoc(project.curDoc)
   }
-};
+}
+
