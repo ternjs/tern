@@ -116,7 +116,8 @@
       for (var prop in this.modules) {
         if (filter(path, prop, query)) {
           if (/\.js$/.test(prop)) prop = prop.slice(0, prop.length - 3)
-          tern.addCompletion(query, completions, prop, this.modules[prop])
+          var added = prop.slice(path.length)
+          tern.addCompletion(query, completions, word + added, this.modules[prop])
         }
       }
     }
