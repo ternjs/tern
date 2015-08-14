@@ -87,6 +87,10 @@
     return result;
   }
 
+  function getModule(name) {
+    return infer.cx().parent._angular.modules[name];  
+  }
+  
   infer.registerFunction("angular_callInject", function(argN) {
     return function(self, args, argNodes) {
       var mod = self.getType();
@@ -125,6 +129,8 @@
       for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string")
+          // mark node as module.
+          elt.module = true;
           strings.push(elt.value);
       }
     return strings;
@@ -165,9 +171,13 @@
   infer.registerFunction("angular_module", function(_self, _args, argNodes) {
     var mod, name = argNodes && argNodes[0] && argNodes[0].type == "Literal" && argNodes[0].value;
     if (typeof name == "string")
-      mod = infer.cx().parent._angular.modules[name];
-    if (!mod)
-      mod = declareMod(name, arrayNodeToStrings(argNodes && argNodes[1]));
+      mod = getModule(name);
+    var deps = arrayNodeToStrings(argNodes && argNodes[1]);
+    // FIXME: refresh module when deps changed.
+    if (!mod) mod = declareMod(name, deps);      
+    mod.originNode = argNodes[0];
+    // mark node as module.
+    argNodes[0].module = true;
     return mod;
   });
 
@@ -283,10 +293,85 @@
             passes: {postParse: postParse,
                      postLoadDef: postLoadDef,
                      preCondenseReach: preCondenseReach,
-                     postCondenseReach: postCondenseReach},
+                     postCondenseReach: postCondenseReach,
+                     typeAt: findTypeAt,
+                     completion: findCompletions},
             loadFirst: true};
   });
 
+  function findTypeAt(file, pos, expr, type) {
+    if (!expr) return type;
+    var isStringLiteral = expr.node.type === "Literal" &&
+       typeof expr.node.value === "string";
+    if (isStringLiteral) {
+      if(expr.node.module) {
+        var name = expr.node.value, mod = getModule(name);
+        if (mod) {
+          // The `type` is a value shared for all string literals.
+          // We must create a copy before modifying `origin` and `originNode`.
+          // Otherwise all string literals would point to the last jump location
+          type = Object.create(type);
+          if (mod.origin) type.origin = mod.origin;
+          if (mod.originNode) type.originNode = mod.originNode;
+        }
+      }
+    }
+    return type;
+  }
+  
+  function getCompletionType(expr) {
+    if (!expr) return null;
+    if (expr.node.module) return completeModuleName;
+    // TODO: support other completion type like templateUrl, controller, etc
+  }
+  
+  function findCompletions(file, query) {
+    var wordEnd = tern.resolvePos(file, query.end);
+    var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
+    var complete = getCompletionType(expr);
+    if (!complete) return;
+    var argNode = expr.node;
+    var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
+    if (word && word.charAt(word.length - 1) == quote)
+      word = word.slice(0, word.length - 1);
+    var completions = complete(query, file, argNode, word);
+    if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
+      ++wordEnd;
+    return {
+      start: tern.outputPos(query, file, argNode.start),
+      end: tern.outputPos(query, file, wordEnd),
+      isProperty: false,
+      completions: completions.map(function(rec) {
+        var name = typeof rec == "string" ? rec : rec.name;
+        var string = JSON.stringify(name);
+        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote;
+        if (typeof rec == "string") return string;
+        rec.displayName = name;
+        rec.name = string;
+        return rec;
+      })
+    };
+  }
+
+  function completeModuleName(query, file, argNode, word) {
+    var completions = [];
+    var cx = infer.cx(), server = cx.parent, data = server._angular;
+    
+    function gather(modules) {
+      for (var name in modules) {
+        if (name &&
+            !(query.filter !== false && word &&
+              (query.caseInsensitive ? name.toLowerCase() : name).indexOf(word) !== 0))
+          tern.addCompletion(query, completions, name, modules[name]);
+      }
+    }
+
+    if (query.caseInsensitive) word = word.toLowerCase();
+    gather(data.modules);
+    return completions;
+  }
+
+  
   var defs = {
     "!name": "angular",
     "!define": {
