@@ -128,10 +128,11 @@
     if (node && node.type == "ArrayExpression")
       for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string")
+        if (elt.type == "Literal" && typeof elt.value == "string") {
           // mark node as module.
           elt.module = true;
           strings.push(elt.value);
+        }
       }
     return strings;
   }
