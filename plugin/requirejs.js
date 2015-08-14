@@ -128,13 +128,8 @@
     }
   };
 
-  infer.registerFunction("requireJS", function(_self, args, argNodes) {
-    var server = infer.cx().parent, data = server && server.mod.requireJS;
-    if (!data || !args.length) return infer.ANull;
-
-    var name = data.currentFile;
-    var out = getModule(name, data);
-
+  function runModule(server, args, argNodes, out) {
+    var data = server.mod.requireJS;
     var deps = [], fn, exports, mod;
 
     function interf(name) {
@@ -171,11 +166,25 @@
     }
 
     if (fn) {
-      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out));
-      out.originNode = fn.originNode;
-    } else if (args.length) args[0].propagate(out);
+      fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out || infer.ANull));
+      if (out) out.originNode = fn.originNode;
+    } else if (out) {
+      args[0].propagate(out)
+    }
 
     return infer.ANull;
+  }
+
+  infer.registerFunction("requirejs_define", function(_self, args, argNodes) {
+    if (!args.length) return infer.ANull
+
+    var server = infer.cx().parent, data = server.mod.requireJS
+    return runModule(server, args, argNodes, getModule(data.currentFile, data))
+  });
+
+  infer.registerFunction("requirejs_require", function(_self, args, argNodes) {
+    if (!args.length) return infer.ANull
+    return runModule(infer.cx().parent, args, argNodes)
   });
 
   // Parse simple ObjectExpression AST nodes to their corresponding JavaScript objects.
@@ -195,7 +204,7 @@
     }
   }
 
-  infer.registerFunction("requireJSConfig", function(_self, _args, argNodes) {
+  infer.registerFunction("requirejs_config", function(_self, _args, argNodes) {
     var server = infer.cx().parent, data = server && server.mod.requireJS;
     if (data && argNodes && argNodes.length && argNodes[0].type == "ObjectExpression") {
       var config = parseExprNode(argNodes[0]);
@@ -284,7 +293,7 @@
     var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
     if (word && word.charAt(word.length - 1) == quote)
       word = word.slice(0, word.length - 1);
-    var completions = completeModuleName(query, word);
+    var completions = completeModuleName(query, word, file.name);
     if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
       ++wordEnd;
     return {
@@ -312,9 +321,9 @@
     }
   }
 
-  function completeModuleName(query, word) {
+  function completeModuleName(query, word, parentFile) {
     var cx = infer.cx(), server = cx.parent, data = server.mod.requireJS;
-    var currentName = stripJSExt(data.currentFile);
+    var currentName = stripJSExt(parentFile);
     var base = data.options.baseURL || "";
     if (base && base.charAt(base.length - 1) != "/") base += "/";
 
@@ -441,7 +450,7 @@
       }
     },
     requirejs: {
-      "!type": "fn(deps: [string], callback: fn(), errback?: fn(err: +RequireJSError)) -> !custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn(), errback?: fn(err: +RequireJSError)) -> !custom:requirejs_require",
       onError: {
         "!type": "fn(err: +RequireJSError)",
         "!doc": "To detect errors that are not caught by local errbacks, you can override requirejs.onError()",
@@ -450,13 +459,13 @@
       load: {
         "!type": "fn(context: ?, moduleName: string, url: string)"
       },
-      config: "fn(config: config) -> !custom:requireJSConfig",
+      config: "fn(config: config) -> !custom:requirejs_config",
       version: "string",
       isBrowser: "bool"
     },
     require: "requirejs",
     define: {
-      "!type": "fn(deps: [string], callback: fn()) -> !custom:requireJS",
+      "!type": "fn(deps: [string], callback: fn()) -> !custom:requirejs_define",
       amd: {
         jQuery: "bool"
       }

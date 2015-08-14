@@ -124,9 +124,9 @@
 
   function resolvePath(parent, sub) {
     if (/^https?:|^\//.test(sub)) return sub
-    if (!/\/$/.test(parent)) parent = parent + "/"
+    if (parent && !/\/$/.test(parent)) parent = parent + "/"
     var m
-    while (m = /^\.(\.)?\//.test(sub)) {
+    while (m = /^\.(\.)?\//.exec(sub)) {
       if (m[1] && parent.length > 1) {
         var lastSlash = parent.lastIndexOf("/", parent.length - 2)
         parent = lastSlash == -1 ? "" : parent.slice(0, lastSlash + 1)
