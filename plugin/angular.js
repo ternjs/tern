@@ -141,12 +141,14 @@
     return ngDefs && ngDefs.Module.getProp("prototype").getType();
   }
 
-  function declareMod(name, includes) {
+  function declareMod(name, includes, node) {
     var cx = infer.cx(), data = cx.parent._angular;
     var proto = moduleProto(cx);
     var mod = new infer.Obj(proto || true);
     if (!proto) data.nakedModules.push(mod);
     mod.origin = cx.curOrigin;
+    if (typeof node == "string" && !mod.span) mod.span = node;
+    else if (node && typeof node == "object" && !mod.originNode) mod.originNode = node;
     mod.injector = new Injector();
     mod.metaData = {includes: includes};
     for (var i = 0; i < includes.length; ++i) {
@@ -174,7 +176,7 @@
       mod = getModule(name);
     var deps = arrayNodeToStrings(argNodes && argNodes[1]);
     // FIXME: refresh module when deps changed.
-    if (!mod) mod = declareMod(name, deps);      
+    if (!mod) mod = declareMod(name, deps, argNodes[0]);      
     mod.originNode = argNodes[0];
     // mark node as module.
     argNodes[0].module = true;
@@ -230,7 +232,7 @@
     var mods = defs && defs["!ng"];
     if (mods) for (var name in mods.props) {
       var obj = mods.props[name].getType();
-      var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || []);
+      var mod = declareMod(name.replace(/`/g, "."), obj.metaData && obj.metaData.includes || [], mods.props[name].span);
       mod.origin = defName;
       for (var prop in obj.props) {
         var val = obj.props[prop], tp = val.getType();
