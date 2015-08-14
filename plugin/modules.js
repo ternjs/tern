@@ -51,6 +51,7 @@
       var resolved, relative = isRelative(name)
       for (var i = 0; !resolved && i < this.resolvers.length; i++)
         resolved = this.resolvers[i](name, parentFile)
+      if (!resolved) resolved = defaultResolver(name, parentFile)
       if (!resolved) return infer.ANull
       if (typeof resolved != "string") {
         if (!relative) this.nonRelative[name] = true
@@ -144,6 +145,14 @@
     var lastSlash = path.lastIndexOf("/")
     if (lastSlash == -1) return path
     else return path.slice(lastSlash + 1)
+  }
+
+  function defaultResolver(name, parentFile) {
+    if (!/^\.\.?\//.test(name)) return
+    var path = resolvePath(dirName(parentFile), name)
+    var server = infer.cx().parent
+    if (server.findFile(path)) return path
+    if (server.findFile(path + ".js")) return path + ".js"
   }
 
   // Under node, replace completeFileName with a version that actually
