@@ -110,9 +110,44 @@
       }
     },
 
-    completeFileName: function() {}
+    completeFileName: function(completions, query, parentFile, word, dir) {
+      var path = parentFile ? resolvePath(dirName(parentFile), word) : baseName(word)
+      for (var prop in this.modules) {
+        if (filter(path, prop, query)) {
+          if (/\.js$/.test(prop)) prop = prop.slice(0, prop.length - 3)
+          tern.addCompletion(query, completions, prop, this.modules[prop])
+        }
+      }
+    }
   })
 
+  function resolvePath(parent, sub) {
+    if (/^https?:|^\//.test(sub)) return sub
+    if (!/\/$/.test(parent)) parent = parent + "/"
+    var m
+    while (m = /^\.(\.)?\//.test(sub)) {
+      if (m[1] && parent.length > 1) {
+        var lastSlash = parent.lastIndexOf("/", parent.length - 2)
+        parent = lastSlash == -1 ? "" : parent.slice(0, lastSlash + 1)
+      }
+      sub = sub.slice(m[0].length)
+    }
+    return parent + sub
+  }
+
+  function dirName(path) {
+    var lastSlash = path.lastIndexOf("/")
+    if (lastSlash == -1) return ""
+    return path.slice(0, lastSlash + 1)
+  }
+  function baseName(path) {
+    var lastSlash = path.lastIndexOf("/")
+    if (lastSlash == -1) return path
+    else return path.slice(lastSlash + 1)
+  }
+
+  // Under node, replace completeFileName with a version that actually
+  // queries the file system
   if (require) (function() {
     var fs = require("fs"), path = require("path")
 
