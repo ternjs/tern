@@ -57,7 +57,7 @@ function load(file, c) {
 }
 
 CodeMirror.on(window, "load", function() {
-  var files = ["../defs/ecma5.json", "../defs/ecma6.json", "../defs/browser.json", "../defs/jquery.json"];
+  var files = ["../../defs/ecma5.json", "../../defs/ecma6.json", "../../defs/browser.json", "../../defs/jquery.json"];
   var loaded = 0;
   for (var i = 0; i < files.length; ++i) (function(i) {
     load(files[i], function(json) {
@@ -109,7 +109,7 @@ function initEditor() {
 
   registerDoc("test.js", editor.getDoc());
   registerDoc("test_dep.js", new CodeMirror.Doc(document.getElementById("requirejs_test_dep").firstChild.nodeValue, "javascript"));
-  load("demo/underscore.js", function(body) {
+  load("underscore.js", function(body) {
     registerDoc("underscore.js", new CodeMirror.Doc(body, "javascript"));
   });
 
