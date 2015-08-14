@@ -42,9 +42,7 @@
   function isModuleName(node) {
     if (node.type != "Literal" || typeof node.value != "string") return false
 
-    if (node.value == "./dir/ //+ ") console.log("START")
     var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, isStaticRequire)
-    if (node.value == "./dir/ //+ ") console.log("END")
     if (call && call.node.arguments[0] == node) return node.value
   }
 
