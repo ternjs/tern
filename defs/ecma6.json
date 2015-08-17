@@ -269,13 +269,13 @@
       },
       "find": {
         "!type": "fn(callback: fn(element: ?, index: number, array: [?]) -> bool, thisArg?: ?) -> !this.<i>",
-        "!effects": ["call !1 this=!2 !0.<i> number"],
+        "!effects": ["call !0 this=!2 !this.<i> number"],
         "!doc": "The find() method returns a value in the array, if an element in the array satisfies the provided testing function. Otherwise undefined is returned.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find"
       },
       "findIndex": {
         "!type": "fn(callback: fn(element: ?, index: number, array: [?]), thisArg?: ?) -> number",
-        "!effects": ["call !1 this=!2 !0.<i> number"],
+        "!effects": ["call !0 this=!2 !this.<i> number"],
         "!doc": "The findIndex() method returns an index in the array, if an element in the array satisfies the provided testing function. Otherwise -1 is returned.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex"
       },
