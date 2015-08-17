@@ -18,9 +18,13 @@ g //: ?
 foo([false], blah(), {g: "hello"}, 20)
 
 let i, j
-({i, j, k: [l, ...m]} = {i: 1, j: false, k: ["a", "b"]})
+;({i, j, k: [l, ...m]} = {i: 1, j: false, k: ["a", "b"]})
 
 i //: number
 j //: bool
 l //: string
 m //: [string]
+
+var out = {}
+;[out.prop] = [55]
+out.prop //: number
