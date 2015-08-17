@@ -26,5 +26,9 @@ l //: string
 m //: [string]
 
 var out = {}
-;[out.prop] = [55]
-out.prop //: number
+;[out.prop, out.prop2] = [55, true]
+out //:: {prop2: bool, prop: number}
+
+var [n, o] = ["a", false]
+n //: string
+o //: bool

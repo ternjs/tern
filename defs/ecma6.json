@@ -258,7 +258,7 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin"
       },
       "entries": {
-        "!type": "fn() -> +iter[:t=[!this.<i>]|number]",
+        "!type": "fn() -> +iter[:t=[number, !this.<i>]]",
         "!doc": "The entries() method returns a new Array Iterator object that contains the key/value pairs for each index in the array.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries"
       },
@@ -450,7 +450,7 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/delete"
       },
       "entries": {
-        "!type": "fn() -> +iter[:t=[!this.:value]]",
+        "!type": "fn() -> +iter[:t=[!this.:key, !this.:value]]",
         "!doc": "The entries() method returns a new Iterator object that contains the [key, value] pairs for each element in the Map object in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries"
       },
@@ -492,7 +492,7 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/values"
       },
       ":Symbol.iterator": {
-        "!type": "fn() -> +iter[:t=[!this.:value]]",
+        "!type": "fn() -> +iter[:t=[!this.:key, !this.:value]]",
         "!doc": "Returns a new Iterator object that contains the [key, value] pairs for each element in the Map object in insertion order.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/@@iterator"
       }
