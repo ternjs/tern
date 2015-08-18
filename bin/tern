@@ -211,7 +211,7 @@ httpServer.listen(port, host, function() {
 });
 
 function respondSimple(resp, status, text) {
-  resp.writeHead(status, {"content-type": "text/plain"});
+  resp.writeHead(status, {"content-type": "text/plain; charset=utf-8"});
   resp.end(text);
   if (verbose) console.log("Response: " + status + " " + text);
 }
@@ -223,7 +223,7 @@ function respond(resp, doc) {
 
   server.request(doc, function(err, data) {
     if (err) return respondSimple(resp, 400, String(err));
-    resp.writeHead(200, {"content-type": "application/json"});
+    resp.writeHead(200, {"content-type": "application/json; charset=utf-8"});
     if (verbose) console.log("Response: " + JSON.stringify(data, null, 2) + "\n");
     resp.end(JSON.stringify(data));
   });

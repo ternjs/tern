@@ -36,6 +36,7 @@
   (let ((is-error (and (consp c) (eq (car c) :error)))
         (found-body (search-forward "\n\n" nil t))
         (deactivate-mark nil))
+    (set-buffer-multibyte t)
     (if (or is-error (not found-body))
         (let ((message (and found-body
                             (buffer-substring-no-properties (point) (point-max))))
