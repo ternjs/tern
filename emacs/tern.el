@@ -25,7 +25,7 @@
   (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
          (url-request-method "POST")
          (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
-         (url-request-data (json-encode doc))
+         (url-request-data (encode-coding-string (json-encode doc) 'utf-8))
          (url-show-status nil)
          (url (url-parse-make-urlobj "http" nil nil tern-server port "/" nil nil nil)))
     (url-http url #'tern-req-finished (list c))))
