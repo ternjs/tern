@@ -42,7 +42,7 @@
       },
       ExportDefaultDeclaration: function(node) {
         var decl = node.declaration.id || node.declaration
-        exp("default", infer.expressionType({node: decl, scope: file.scope}), decl)
+        exp("default", infer.expressionType({node: decl, state: file.scope}), decl)
       },
       ExportNamedDeclaration: function(node) {
         var decl = node.declaration
