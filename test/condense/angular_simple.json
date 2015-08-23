@@ -6,6 +6,7 @@
           "includes": []
         },
         "!proto": "angular.Module.prototype",
+        "!span": "15[0:15]-20[0:20]",
         "_inject_fooVal": {
           "!span": "32[0:32]-40[0:40]",
           "info": {
@@ -21,6 +22,7 @@
           ]
         },
         "!proto": "angular.Module.prototype",
+        "!span": "76[2:15]-82[2:21]",
         "_inject_testVal": {
           "!doc": "Doc for testVal",
           "!span": "121[4:9]-130[4:18]",
