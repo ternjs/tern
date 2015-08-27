@@ -208,15 +208,9 @@
   // Completes CommonJS module names in strings passed to require
   function findCompletions(file, query) {
     var wordEnd = tern.resolvePos(file, query.end);
-    var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
-    if (!callExpr) return;
-    var callNode = callExpr.node;
-    if (callNode.callee.type != "Identifier" || callNode.callee.name != "require" ||
-        callNode.arguments.length < 1) return;
-    var argNode = callNode.arguments[0];
-    if (argNode.type != "Literal" || typeof argNode.value != "string" ||
-        argNode.start > wordEnd || argNode.end < wordEnd) return;
-
+    var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope);
+    if (!expr || !expr.node || !expr.node.required) return;
+    var argNode = expr.node;
     var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
     if (word && word.charAt(word.length - 1) == quote)
       word = word.slice(0, word.length - 1);
