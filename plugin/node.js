@@ -176,7 +176,9 @@
       currentFile: null,
       currentRequires: [],
       currentOrigin: null,
-      server: server
+      server: server,
+      resolveProjectPath: resolveProjectPath,
+      resolveModulePath: resolveModulePath
     };
 
     server.on("beforeLoad", function(file) {
