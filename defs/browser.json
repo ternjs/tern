@@ -3269,5 +3269,10 @@
     "rect": "fn(x: number, y: number, w: number, h: number)",
     "arc": "fn(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: bool)",
     "ellipse": "fn(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise: bool)"
+  },
+  "Image": {
+    "!type": "fn(width?: number, height?: number) -> +HTMLImageElement",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image",
+    "!doc": "Image Element constructor. Accepts two optional parameters: Image([unsigned long width, unsigned long height]). Returns an HTMLImageElement instance just as document.createElement('img') would."
   }
 }
