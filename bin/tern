@@ -106,7 +106,6 @@ function findDefs(projectDir, config) {
 
 function defaultPlugins(config) {
   var result = ["doc_comment"]
-  if (config.ecmaVersion >= 6) result.push("es_modules")
   return result
 }
 
