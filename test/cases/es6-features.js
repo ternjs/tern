@@ -26,3 +26,5 @@ console.log([for (a of [1, 2, ...it(10)]) a * 2])
 let [a, b] = [1, 2];
 
 let x = ([a], {b}) => a + b
+
+let [e1,,e3] = ["5", false, 6]
