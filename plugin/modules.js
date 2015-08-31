@@ -120,6 +120,18 @@
           tern.addCompletion(query, completions, word + added, this.modules[prop])
         }
       }
+    },
+    
+    getModType: function(node) {
+      var modName = this.isModName(node), imp, prop
+      if (imp = this.isImport(node)) {
+        modName = imp.name
+        prop = imp.prop
+      }
+      if (!modName) return type
+
+      var modType = this.resolveModule(modName, node.sourceFile.name)
+      return (prop ? modType.getProp(prop) : modType).getType()
     }
   })
 
@@ -218,15 +230,7 @@
   function findTypeAt(_file, _pos, expr, type) {
     if (!expr) return type
     var me = infer.cx().parent.mod.modules
-    var modName = me.isModName(expr.node), imp, prop
-    if (imp = me.isImport(expr.node)) {
-      modName = imp.name
-      prop = imp.prop
-    }
-    if (!modName) return type
-
-    var modType = me.resolveModule(modName, expr.node.sourceFile.name)
-    modType = (prop ? modType.getProp(prop) : modType).getType()
+    var modType = me.getModType(expr.node)
     if (!modType) return type
 
     // The `type` is a value shared for all string literals.
