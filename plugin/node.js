@@ -1,10 +1,10 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require("./node_resolve"), require);
+    return mod(require("../lib/tern"), require("./node_resolve"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./node_resolve"], mod);
+    return define(["../lib/tern", "./node_resolve"], mod);
   mod(tern, tern);
-})(function(infer, tern, _, require) {
+})(function(tern) {
   "use strict"
 
   tern.registerPlugin("node", function(server) {
