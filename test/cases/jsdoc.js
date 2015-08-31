@@ -61,12 +61,25 @@ takesOpt; //: fn(a?: number)
 
 /** @typedef {Array.<boolean>} Bitset */
 
+/**
+ * @typedef {Object} MyType
+ * @property {boolean} one - Property one
+ * @property {integer} two - And two
+ */
+
 someNonDeclarationStatement();
 
 /** @type {Bitset} */
 var myBitset = getABitset();
 
 myBitset; //: [bool]
+
+/** @type {MyType} */
+var myObj;
+
+myObj.one //: bool
+myObj.two //: number
+({}).one //: ?
 
 function NonAscïį() { this.length = "hi"; }
 
