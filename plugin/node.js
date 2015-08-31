@@ -129,7 +129,7 @@
               "!type": "fn(chunk: string|+Buffer, encoding?: string, callback?: fn()) -> bool",
               "!url": "https://nodejs.org/api/stream.html#stream_writable_write_chunk_encoding_callback_1",
               "!doc": "Writes chunk to the stream. Returns true if the data has been flushed to the underlying resource. Returns false to indicate that the buffer is full, and the data will be sent out in the future. The 'drain' event will indicate when the buffer is empty again."
-            },            
+            },
             cork: {
               "!type": "fn()",
               "!url": "https://nodejs.org/api/stream.html#stream_writable_cork",

@@ -111,7 +111,7 @@
       }
     },
 
-    completeFileName: function(completions, query, parentFile, word, dir) {
+    completeFileName: function(completions, query, parentFile, word, _dir) {
       var path = parentFile ? resolvePath(dirName(parentFile), word) : baseName(word)
       for (var prop in this.modules) {
         if (filter(path, prop, query)) {
