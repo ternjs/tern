@@ -62,7 +62,27 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 </li>
 <li>
 <p>
+<a href="#plugin_commonjs">CommonJS modules</a>
+</p>
+</li>
+<li>
+<p>
 <a href="#plugin_node">node</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugin_node_resolve">node-style module resolution</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugin_modules">Module-loading infrastructure</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#plugin_es_modules">ES6 module support</a>
 </p>
 </li>
 <li>
@@ -634,24 +654,6 @@ in its set of analyzed files.
 <p> Does not take any parameters. Returns an object with a <code>files</code>
 property holding an array of strings (the file names).</p>
 </dd>
-<dt>
-<a id="req_node_exports"></a><code>node_exports</code>
-</dt>
-<dd>
-<p>
-Only available when the
-<a href="#plugin_node">node.js plugin</a> is loaded. Get the exported type of a
-node module file.
-</p>
-<p> Takes a <code>file</code> field to indicate the file to query for. Returns an
-object with <code>type</code>, and optional <code>url</code>, <code>doc</code>, <code>origin</code>, <code>start, and
-`end</code> properties indicating the type and metainformation for the
-exports, plus, if the exported value is an object type, a <code>props</code>
-property containing an object mapping property names of this object to
-objects holding information about the types of the properties, again
-containing <code>type</code> and optional <code>url</code>, <code>doc</code>, <code>origin</code>, <code>start</code>, and
-<code>end</code> fields.</p>
-</dd>
 </dl>
 <p> <a id="loc_spec"></a> When specifying a location, which is needed for most of
 the query types, the required <code>file</code> field may hold either a filename,
@@ -820,12 +822,32 @@ an event handler for the named type of event.
 Unregister an event handler.
 </p>
 </dd>
+<dt>
+<a id="tern.Server.addDefs"></a> <code>addDefs(defs: object, atFront?: bool)</code>
+</dt>
+<dd>
+<p>
+Add
+a set of <a href="#typedef">type definitions</a> to the server. If <code>atFront</code> is
+true, they will be added before all other existing definitions.
+Otherwise, they are added at the back.
+</p>
+</dd>
+<dt>
+<a id="tern.Server.loadPlugin"></a> <code>loadPlugin(name: string, options?: object)</code>
+</dt>
+<dd>
+<p>
+Load a <a href="#plugins">server plugin</a> (or don&#8217;t do anything, if the plugin
+is already loaded).
+</p>
+</dd>
 </dl>
-<p> The server fires the following type of events (mostly useful for
-plugins):</p>
+<p> <a id="events"></a> The server fires the following type of events (mostly
+useful for plugins):</p>
 <dl>
 <dt>
-<a id="event_reset"></a> <code>reset ()</code>
+<a id="event_reset"></a> <code>"reset" ()</code>
 </dt>
 <dd>
 <p>
@@ -834,7 +856,7 @@ analysis data and starts a fresh run.
 </p>
 </dd>
 <dt>
-<a id="event_beforeLoad"></a> <code>beforeLoad (file)</code>
+<a id="event_beforeLoad"></a> <code>"beforeLoad" (file)</code>
 </dt>
 <dd>
 <p>
@@ -843,11 +865,73 @@ Before analyzing a file.
 </p>
 </dd>
 <dt>
-<a id="event_afterLoad"></a> <code>afterLoad (file)</code>
+<a id="event_afterLoad"></a> <code>"afterLoad" (file)</code>
 </dt>
 <dd>
 <p>
 After analyzing a file.
+</p>
+</dd>
+<dt>
+<a id="event_preParse"></a> <code>"preParse" (text, options)</code>
+</dt>
+<dd>
+<p>
+Will be run right
+before a file is parsed, and passed the given text and options. If a
+handler returns a new text value, the origin text will be overriden.
+This is useful for instance when a plugin is able to extract
+JavaScript content from an HTML file.
+</p>
+</dd>
+<dt>
+<a id="event_postParse"></a> <code>"postParse" (ast, text)</code>
+</dt>
+<dd>
+<p>
+Run right after a file
+is parsed, and passed the parse tree and the parsed file as arguments.
+</p>
+</dd>
+<dt>
+<a id="event_preInfer"></a> <code>"preInfer" (ast, scope)</code>
+</dt>
+<dd>
+<p>
+Run right before the
+type inference pass, passing the syntax tree and a
+<a href="#infer_scope">scope</a> object.
+</p>
+</dd>
+<dt>
+<a id="event_postInfer"></a> <code>"postInfer" (ast, scope)</code>
+</dt>
+<dd>
+<p>
+Run after the type
+inference pass.
+</p>
+</dd>
+<dt>
+<a id="event_typeAt"></a> <code>"typeAt" (file, end, expr, type)</code>
+</dt>
+<dd>
+<p>
+Run after Tern
+attempts to find the type at the position <code>end</code> in the given file. A
+handler may return either the given type (already calculated by Tern
+and earlier <code>"typeAt"</code> passes) or an alternate type to be used
+instead. This is useful when a plugin can provide a more helpful type
+than Tern (e.g. within comments).
+</p>
+</dd>
+<dt>
+<a id="event_completion"></a> <code>"completion" (file, query)</code>
+</dt>
+<dd>
+<p>
+Run at the start
+of a completion query. May return a <a href="#req_completions">valid completion result</a> to replace the default completion algorithm.
 </p>
 </dd>
 </dl>
@@ -951,64 +1035,11 @@ for the plugin with the given name. A Tern server, when
 <a href="#option_plugins">configured</a> to load this plugin, will call this
 initialization function, passing in the server instance and the
 options specified for the plugin (if any). This is the place where you
-register event handlers on the server and/or initialize the plugin&#8217;s
-state.
+register <a href="#tern.Server.on">event handlers</a> on the server, <a href="#tern.Server.addDefs">add</a>
+type definitions, <a href="#tern.Server.loadPlugin">load</a> other plugins as dependencies,
+and/or initialize the plugin&#8217;s state.
 </p>
-<p> An object returned from this function can be used to further
-configure the server. Its <code>defs</code> property may contain a <a href="#typedef">JSON type definition</a> data structure that the server should load, and its
-<code>passes</code> property may hold an object mapping pass names to functions.
-Currently the following passes are supported:</p>
-<dl>
-<dt>
-<code>"preParse" (text, options)</code>
-</dt>
-<dd>
-<p>
-Will be run right before a file is parsed,
-and passed the given text and options. If the function
-returns a new text value, the origin text will be overriden. This is useful for instance
-when a plugin is able to extract JavaScript content from an HTML file.
-</p>
-</dd>
-<dt>
-<code>"postParse" (ast, text)</code>
-</dt>
-<dd>
-<p>
-Will be run right after a file is parsed,
-and passed the parse tree and the parsed file as arguments.
-</p>
-</dd>
-<dt>
-<code>"preInfer" (ast, scope)</code>
-</dt>
-<dd>
-<p>
-Run right before the type inference pass,
-passing the syntax tree and a <a href="#infer_scope">scope</a> object.
-</p>
-</dd>
-<dt>
-<code>"postInfer" (ast, scope)</code>
-</dt>
-<dd>
-<p>
-Run after the type inference pass.
-</p>
-</dd>
-<dt>
-<code>"typeAt" (file, end, expr, type)</code>
-</dt>
-<dd>
-<p>
-Run after Tern attempts to find the
-type at the position <code>end</code> in the given file, this should return either
-the given type (already calculated by Tern and earlier <code>"typeAt"</code>
-passes) or an alternate type to be used instead. This is useful when a
-plugin can provide a more helpful type than Tern (e.g. within comments).
-</p>
-</dd>
-</dl>
+<p> See the server&#8217;s <a href="#events">list of events</a> for ways to wire up plugin behavior.</p>
 </dd>
 <dt>
 <a id="tern.defineQueryType"></a><code>tern.defineQueryType(name: string, desc: object)</code>
@@ -1044,14 +1075,29 @@ property.</p>
 and completing when inside a string will try to complete to previously
 seen strings. Takes a single option, <code>maxLength</code>, which controls the
 maximum length of string values to gather, and defaults to 15.</p>
+<h4> <a id="plugin_commonjs"></a>CommonJS module plugin</h4>
+<p> This plugin implements CommonJS-style (<code>require("foo")</code>) modules. It
+will wrap files in a file-local scope, and bind <code>require</code>, <code>module</code>,
+and <code>exports</code> in this scope. Does not implement a module resolution
+strategy (see for example <a href="#plugin_node_resolve">the <code>node_resolve</code> plugin</a>). Depends on the <a href="#plugin_modules"><code>modules</code></a> plugin.</p>
 <h4> <a id="plugin_node"></a>Node.js plugin</h4>
 <p> The <a href="http://nodejs.org">node.js</a> plugin, called <code>"node"</code>, provides
 variables that are part of the node environment, such as <code>process</code> and
-<code>require</code>, and hooks up <code>require</code> to try and find the dependencies
-that are being loaded, and assign them the correct types. It also
-includes types for the built-in modules that node.js provides (<code>"fs"</code>,
-<code>"http"</code>, etc).</p>
-<p> The plugin understands the following configuration parameters:</p>
+<code>__dirname</code>, and loads the <a href="#plugin_commonjs"><code>commonjs</code></a> and
+<a href="#plugin_node_resolve"><code>node_resolve</code></a> plugins to allow node-style
+module loading. It defines types for the built-in modules that node.js
+provides (<code>"fs"</code>, <code>"http"</code>, etc).</p>
+<h4> <a id="plugin_node_resolve"></a>Node.js resolve plugin ===</h4>
+<p> This plugin defines the node.js module resolution strategy—things like
+defaulting to <code>index.js</code> when requiring a directory and searching
+<code>node_modules</code> directories. It depends on the
+<a href="#plugin_modules"><code>modules</code> plugin</a>. Note that this plugin only does
+something meaningful when the Tern server is running on node.js
+itself.</p>
+<h4> <a id="plugin_modules"></a>Modules plugin</h4>
+<p> This is a supporting plugin to act as a dependency for other
+module-loading and module-resolving plugins. It understands the
+following configuration parameters:</p>
 <dl>
 <dt>
 <code>dontLoad</code>
@@ -1087,6 +1133,9 @@ JSON data.
 </p>
 </dd>
 </dl>
+<h4> <a id="plugin_es_modules"></a>ES modules plugin</h4>
+<p> Builds on top of the <a href="#plugin_modules"><code>modules</code> plugin</a> to support
+ECMAScript 6&#8217;s <code>import</code> and <code>export</code> based module inclusion.</p>
 <h4> <a id="plugin_requirejs"></a>RequireJS plugin</h4>
 <p> This plugin (<code>"requirejs"</code>) teaches the server to understand
 <a href="http://requirejs.org">RequireJS</a>-style dependency management. It
@@ -1309,7 +1358,7 @@ The top-level
 tree, and then tell Tern to analyze that.</p>
 <dl>
 <dt>
-<a id="infer.parse"></a><code>infer.parse(text: string, passes: [], options?: {}) → AST</code>
+<a id="infer.parse"></a><code>infer.parse(text: string, options?: {}) → AST</code>
 </dt>
 <dd>
 <p>

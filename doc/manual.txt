@@ -17,7 +17,11 @@ engine>> to do the actual type inference.
 ** <<plugins,Server plugins>>
 *** <<plugin_doc_comment,Doc comments>>
 *** <<plugin_complete_strings,String completion>>
+*** <<plugin_commonjs,CommonJS modules>>
 *** <<plugin_node,node>>
+*** <<plugin_node_resolve,node-style module resolution>>
+*** <<plugin_modules,Module-loading infrastructure>>
+*** <<plugin_es_modules,ES6 module support>>
 *** <<plugin_requirejs,RequireJS>>
 *** <<plugin_angular,Angular.js>>
 *** <<plugin_third_party,Third-party plugins>>
@@ -283,19 +287,6 @@ in its set of analyzed files.
 Does not take any parameters. Returns an object with a `files`
 property holding an array of strings (the file names).
 
-[[req_node_exports]]`node_exports`:: Only available when the
-<<plugin_node,node.js plugin>> is loaded. Get the exported type of a
-node module file.
-+
-Takes a `file` field to indicate the file to query for. Returns an
-object with `type`, and optional `url`, `doc`, `origin`, `start, and
-`end` properties indicating the type and metainformation for the
-exports, plus, if the exported value is an object type, a `props`
-property containing an object mapping property names of this object to
-objects holding information about the types of the properties, again
-containing `type` and optional `url`, `doc`, `origin`, `start`, and
-`end` fields.
-
 [[loc_spec]] When specifying a location, which is needed for most of
 the query types, the required `file` field may hold either a filename,
 or a string in the form `"#N"`, where `N` should be an integer
@@ -409,16 +400,52 @@ an event handler for the named type of event.
 [[tern.Server.off]] `off(eventType: string, handler: fn())`::
 Unregister an event handler.
 
-The server fires the following type of events (mostly useful for
-plugins):
+[[tern.Server.addDefs]] `addDefs(defs: object, atFront?: bool)`:: Add
+a set of <<typedef,type definitions>> to the server. If `atFront` is
+true, they will be added before all other existing definitions.
+Otherwise, they are added at the back.
 
-[[event_reset]] `reset ()`:: When the server throws away its current
+[[tern.Server.loadPlugin]] `loadPlugin(name: string, options?: object)`::
+Load a <<plugins,server plugin>> (or don't do anything, if the plugin
+is already loaded).
+
+[[events]] The server fires the following type of events (mostly
+useful for plugins):
+
+[[event_reset]] `"reset" ()`:: When the server throws away its current
 analysis data and starts a fresh run.
 
-[[event_beforeLoad]] `beforeLoad (file)`:: Before analyzing a file.
+[[event_beforeLoad]] `"beforeLoad" (file)`:: Before analyzing a file.
 `file` is an object holding `{name, text, scope}` properties.
 
-[[event_afterLoad]] `afterLoad (file)`:: After analyzing a file.
+[[event_afterLoad]] `"afterLoad" (file)`:: After analyzing a file.
+
+[[event_preParse]] `"preParse" (text, options)`:: Will be run right
+before a file is parsed, and passed the given text and options. If a
+handler returns a new text value, the origin text will be overriden.
+This is useful for instance when a plugin is able to extract
+JavaScript content from an HTML file.
+
+[[event_postParse]] `"postParse" (ast, text)`:: Run right after a file
+is parsed, and passed the parse tree and the parsed file as arguments.
+
+[[event_preInfer]] `"preInfer" (ast, scope)`:: Run right before the
+type inference pass, passing the syntax tree and a
+<<infer_scope,scope>> object.
+
+[[event_postInfer]] `"postInfer" (ast, scope)`:: Run after the type
+inference pass.
+
+[[event_typeAt]] `"typeAt" (file, end, expr, type)`:: Run after Tern
+attempts to find the type at the position `end` in the given file. A
+handler may return either the given type (already calculated by Tern
+and earlier `"typeAt"` passes) or an alternate type to be used
+instead. This is useful when a plugin can provide a more helpful type
+than Tern (e.g. within comments).
+
+[[event_completion]] `"completion" (file, query)`:: Run at the start
+of a completion query. May return a <<req_completions,valid completion
+result>> to replace the default completion algorithm.
 
 [[typedef]]
 === JSON type definitions ===
@@ -525,33 +552,11 @@ for the plugin with the given name. A Tern server, when
 <<option_plugins,configured>> to load this plugin, will call this
 initialization function, passing in the server instance and the
 options specified for the plugin (if any). This is the place where you
-register event handlers on the server and/or initialize the plugin's
-state.
+register <<tern.Server.on,event handlers>> on the server, <<tern.Server.addDefs,add>>
+type definitions, <<tern.Server.loadPlugin,load>> other plugins as dependencies,
+and/or initialize the plugin's state.
 +
-An object returned from this function can be used to further
-configure the server. Its `defs` property may contain a <<typedef,JSON
-type definition>> data structure that the server should load, and its
-`passes` property may hold an object mapping pass names to functions.
-Currently the following passes are supported:
-
-`"preParse" (text, options)`;; Will be run right before a file is parsed,
-and passed the given text and options. If the function
-returns a new text value, the origin text will be overriden. This is useful for instance 
-when a plugin is able to extract JavaScript content from an HTML file.
-
-`"postParse" (ast, text)`;; Will be run right after a file is parsed,
-and passed the parse tree and the parsed file as arguments.
-
-`"preInfer" (ast, scope)`;; Run right before the type inference pass,
-passing the syntax tree and a <<infer_scope,scope>> object.
-
-`"postInfer" (ast, scope)`;; Run after the type inference pass.
-
-`"typeAt" (file, end, expr, type)`;; Run after Tern attempts to find the
-type at the position `end` in the given file, this should return either
-the given type (already calculated by Tern and earlier `"typeAt"`
-passes) or an alternate type to be used instead. This is useful when a
-plugin can provide a more helpful type than Tern (e.g. within comments).
+See the server's <<events,list of events>> for ways to wire up plugin behavior.
 
 [[tern.defineQueryType]]`tern.defineQueryType(name: string, desc: object)`::
 Defines a new type of query with the server. The `desc` object is a
@@ -589,17 +594,41 @@ and completing when inside a string will try to complete to previously
 seen strings. Takes a single option, `maxLength`, which controls the
 maximum length of string values to gather, and defaults to 15.
 
+[[plugin_commonjs]]
+==== CommonJS module plugin ====
+
+This plugin implements CommonJS-style (`require("foo")`) modules. It
+will wrap files in a file-local scope, and bind `require`, `module`,
+and `exports` in this scope. Does not implement a module resolution
+strategy (see for example <<plugin_node_resolve,the `node_resolve`
+plugin>>). Depends on the <<plugin_modules,`modules`>> plugin.
+
 [[plugin_node]]
 ==== Node.js plugin ====
 
 The http://nodejs.org[node.js] plugin, called `"node"`, provides
 variables that are part of the node environment, such as `process` and
-`require`, and hooks up `require` to try and find the dependencies
-that are being loaded, and assign them the correct types. It also
-includes types for the built-in modules that node.js provides (`"fs"`,
-`"http"`, etc).
+`__dirname`, and loads the <<plugin_commonjs,`commonjs`>> and
+<<plugin_node_resolve,`node_resolve`>> plugins to allow node-style
+module loading. It defines types for the built-in modules that node.js
+provides (`"fs"`, `"http"`, etc).
 
-The plugin understands the following configuration parameters:
+[[plugin_node_resolve]]
+==== Node.js resolve plugin ===
+
+This plugin defines the node.js module resolution strategy—things like
+defaulting to `index.js` when requiring a directory and searching
+`node_modules` directories. It depends on the
+<<plugin_modules,`modules` plugin>>. Note that this plugin only does
+something meaningful when the Tern server is running on node.js
+itself.
+
+[[plugin_modules]]
+==== Modules plugin ====
+
+This is a supporting plugin to act as a dependency for other
+module-loading and module-resolving plugins. It understands the
+following configuration parameters:
 
 `dontLoad`:: Can be set to `true` to disable dynamic loading of
 required modules entirely, or to a regular expression to disable
@@ -615,6 +644,12 @@ itself. If given, should be an object mapping module names to either
 JSON objects defining the types in the module, or a string referring
 to a file name (relative to the project directory) that contains the
 JSON data.
+
+[[plugin_es_modules]]
+==== ES modules plugin ====
+
+Builds on top of the <<plugin_modules,`modules` plugin>> to support
+ECMAScript 6's `import` and `export` based module inclusion.
 
 [[plugin_requirejs]]
 ==== RequireJS plugin ====
@@ -818,7 +853,7 @@ object.
 To push code into a context, you first parse it, yielding a syntax
 tree, and then tell Tern to analyze that.
 
-[[infer.parse]]`infer.parse(text: string, passes: [], options?: {}) → AST`:: Parse a piece of
+[[infer.parse]]`infer.parse(text: string, options?: {}) → AST`:: Parse a piece of
 code for use by Tern. Will automatically fall back to the
 error-tolerant parser if the regular parser can't parse the code.
 
