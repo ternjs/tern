@@ -128,7 +128,7 @@
         modName = imp.name
         prop = imp.prop
       }
-      if (!modName) return type
+      if (!modName) return
 
       var modType = this.resolveModule(modName, node.sourceFile.name)
       return (prop ? modType.getProp(prop) : modType).getType()
