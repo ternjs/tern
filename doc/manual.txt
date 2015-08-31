@@ -354,6 +354,9 @@ objects to load into the server's environment.
 the object name the plugins, and their values hold options that will
 be passed to them.
 
+[[option_ecmaVersion]] `ecmaVersion` (number):: The ECMAScript version
+to parse. Should be either 5 or 6. Default is 6.
+
 [[option_getFile]] `getFile` (function):: Provides a way for the
 server to try and fetch the content of files. Depending on the `async`
 option, this is either a function that takes a filename and returns a
@@ -761,6 +764,11 @@ plugins, either in the project dir or under `plugin/` in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at `{}` when you don't need to pass
 any options.
+
+You can specify an `ecmaVersion` field to configure the version of
+ECMAScript that Tern parses. The default is 6, and leaving it at that
+should be safe even for ECMAScript 5 code, but you can set it to 5 as
+well.
 
 [[dependency_budget]]
 To configure the amount of work Tern is prepared to do to load a

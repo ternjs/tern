@@ -726,6 +726,15 @@ be passed to them.
 </p>
 </dd>
 <dt>
+<a id="option_ecmaVersion"></a> <code>ecmaVersion</code> (number)
+</dt>
+<dd>
+<p>
+The ECMAScript version
+to parse. Should be either 5 or 6. Default is 6.
+</p>
+</dd>
+<dt>
 <a id="option_getFile"></a> <code>getFile</code> (function)
 </dt>
 <dd>
@@ -1246,6 +1255,10 @@ plugins, either in the project dir or under <code>plugin/</code> in the Tern
 directory. Their values are configuration objects that will be passed
 to the plugins. You can leave them at <code>{}</code> when you don&#8217;t need to pass
 any options.</p>
+<p> You can specify an <code>ecmaVersion</code> field to configure the version of
+ECMAScript that Tern parses. The default is 6, and leaving it at that
+should be safe even for ECMAScript 5 code, but you can set it to 5 as
+well.</p>
 <p>  <a id="dependency_budget"></a>To configure the amount of work Tern is prepared to do to load a
 single dependency, the <code>dependencyBudget</code> option can be added to a
 project file. It indicates the maximum size of the files loaded in
