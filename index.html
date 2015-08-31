@@ -85,6 +85,37 @@ I gave about it at the Curry On conference.</p>
 
 <h2><a id="releases"></a>Release history</h2>
 
+<p class="release">31-08-2015: <a href="https://github.com/marijnh/tern/tree/0.14.0">Version 0.14</a></p>
+
+<ul class="release-note">
+  <li>Support for ECMAScript 6 constructs and standard library
+    <ul>
+      <li>Block scopes and let/const bindings
+      <li>Destructuring and default values
+      <li>Tuples/heterogenously typed arrays
+      <li>Rest arguments
+      <li>Generators
+      <li>Symbols and symbol properties
+      <li>For/of iteration
+      <li>Classes and super calls
+      <li>Extended object literal notation
+      <li>Arrow functions
+      <li>Template strings
+      <li>All methods and types added by the ES6 spec
+      <li>Improved existing support for Promises
+    </ul>
+  </li>
+  <li>Overhauled module system for <a href="doc/manual.html#plugin_commonjs">CommonJS modules</a>, separated it from node plugin</li>
+  <li>Add support for <a href="doc/manual.html#plugin_es_modules">ES6 modules</a></li>
+  <li><a href="doc/manual.html#plugins">Plugins</a> can now have dependencies. If your setup needs to explicitly load them, adjust accordingly</li>
+  <li>The <code>node_exports</code> query type was renamed to <code>exports</code> (and works on ES6 modules)</li>
+  <li>The <a href="doc/manual.html#tern.registerPlugin"><code>registerPlugin</code></a> interface was changed. The old style (returning an object) will be supported until 1.0</li>
+  <li>Improved completion of module names in CommonJS and ES6 module context</li>
+  <li>Phantom objects were added to support <code>foo.bar.baz = 10</code> if <code>foo.bar</code> doesn't have a type</li>
+  <li>Fix broken handling of non-ASCII requests in the Emacs mode</li>
+  <li>Full <a href="https://github.com/marijnh/tern/compare/0.13.0...0.14.0">list of patches</a></li>
+</ul>
+
 <p class="release">28-07-2015: <a href="https://github.com/marijnh/tern/tree/0.13.0">Version 0.13</a></p>
 
 <ul class="release-note">
