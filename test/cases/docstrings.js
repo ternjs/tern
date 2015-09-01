@@ -77,7 +77,9 @@ var o = {
   // The name
   name: "Harold",
   // A computed property
-  [1 + 1]: "OK"
+  [1 + 1]: "OK",
+  // A string property
+  'bar': 4
 };
 
 // The string "foo".
@@ -86,6 +88,7 @@ o.foo = "foo";
 o.getName; //doc: Get the name.
 o.name; //doc: The name
 o.foo; //doc: The string "foo".
+o.bar //doc: A string property
 
 class C {
   // The method
