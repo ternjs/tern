@@ -82,10 +82,13 @@
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
-          var prop = node.properties[i];
-          if (!prop.computed && prop.commentsBefore)
+          var propName, prop = node.properties[i];
+          if (prop.key.type == 'Literal') { propName = prop.key.value; }
+          else { propName = prop.key.name; }
+
+          if (!prop.computed && prop.commentsBefore && propName)
             interpretComments(prop, prop.commentsBefore, scope,
-                              node.objType.getProp(prop.key.name));
+                              node.objType.getProp(propName));
         }
       },
       Class: function(node, scope) {
