@@ -75,7 +75,9 @@ var o = {
   // Get the name.
   getName: function() { return this.name; },
   // The name
-  name: "Harold"
+  name: "Harold",
+  // A computed property
+  [1 + 1]: "OK"
 };
 
 // The string "foo".

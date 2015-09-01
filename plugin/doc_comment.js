@@ -79,7 +79,7 @@
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
           var prop = node.properties[i];
-          if (prop.commentsBefore)
+          if (!prop.computed && prop.commentsBefore)
             interpretComments(prop, prop.commentsBefore, scope,
                               node.objType.getProp(prop.key.name));
         }
