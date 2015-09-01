@@ -35,12 +35,10 @@
     walk.simple(ast, {
       VariableDeclaration: attachComments,
       FunctionDeclaration: attachComments,
+      MethodDefinition: attachComments,
+      Property: attachComments,
       AssignmentExpression: function(node) {
         if (node.operator == "=") attachComments(node);
-      },
-      ObjectExpression: function(node) {
-        for (var i = 0; i < node.properties.length; ++i)
-          attachComments(node.properties[i]);
       },
       CallExpression: function(node) {
         if (isDefinePropertyCall(node)) attachComments(node);
@@ -71,6 +69,12 @@
                             scope.getProp(node.id.name),
                             node.scope.fnType);
       },
+      ClassDeclaration: function(node, scope) {
+        if (node.commentsBefore)
+          interpretComments(node, node.commentsBefore, scope,
+                            scope.getProp(node.id.name),
+                            node.objType);
+      },
       AssignmentExpression: function(node, scope) {
         if (node.commentsBefore)
           interpretComments(node, node.commentsBefore, scope,
@@ -82,6 +86,16 @@
           if (!prop.computed && prop.commentsBefore)
             interpretComments(prop, prop.commentsBefore, scope,
                               node.objType.getProp(prop.key.name));
+        }
+      },
+      Class: function(node, scope) {
+        var proto = node.objType.getProp("prototype").getObjType()
+        if (!proto) return
+        for (var i = 0; i < node.body.body.length; i++) {
+          var method = node.body.body[i]
+          if (method.computed || !method.commentsBefore) continue
+          interpretComments(method, method.commentsBefore, scope,
+                            method.kind == "constructor" ? node.objType : proto.getProp(method.key.name))
         }
       },
       CallExpression: function(node, scope) {

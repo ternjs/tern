@@ -86,3 +86,15 @@ o.foo = "foo";
 o.getName; //doc: Get the name.
 o.name; //doc: The name
 o.foo; //doc: The string "foo".
+
+class C {
+  // The method
+  method() { return 10 },
+  // The something
+  get something() { return 20 }
+}
+
+var c = new C
+
+c.method //doc: The method
+c.something //doc: The something
