@@ -82,20 +82,21 @@
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
-          var prop = node.properties[i];
-          if (!prop.computed && prop.commentsBefore)
-            interpretComments(prop, prop.commentsBefore, scope,
-                              node.objType.getProp(prop.key.name));
+          var prop = node.properties[i], name = infer.propName(prop)
+          if (name != "<i>" && prop.commentsBefore)
+            interpretComments(prop, prop.commentsBefore, scope, node.objType.getProp(name))
         }
       },
       Class: function(node, scope) {
         var proto = node.objType.getProp("prototype").getObjType()
         if (!proto) return
         for (var i = 0; i < node.body.body.length; i++) {
-          var method = node.body.body[i]
-          if (method.computed || !method.commentsBefore) continue
-          interpretComments(method, method.commentsBefore, scope,
-                            method.kind == "constructor" ? node.objType : proto.getProp(method.key.name))
+          var method = node.body.body[i], name
+          if (!method.commentsBefore) continue
+          if (method.kind == "constructor")
+            interpretComments(method, method.commentsBefore, scope, node.objType)
+          else if ((name = infer.propName(method)) != "<i>")
+            interpretComments(method, method.commentsBefore, scope, proto.getProp(name))
         }
       },
       CallExpression: function(node, scope) {
