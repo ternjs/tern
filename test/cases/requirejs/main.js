@@ -44,3 +44,19 @@ requirejs.config({
   baseUrl: '',
   //+ config, context, map, nodeIdCompat, packages, paths, shim, ...
 });
+
+var c1 = {
+  pa //?+ packages, paths, ...
+}
+requirejs.config(c1);
+
+var c2 = {
+  //?+ baseUrl, config, context, map, nodeIdCompat, packages, paths, shim, ...
+}
+requirejs.config(c2);
+
+var c3 = {
+  baseUrl: '',
+  //?+ config, context, map, nodeIdCompat, packages, paths, shim, ...
+}
+requirejs.config(c3);
