@@ -33,7 +33,7 @@ requirejs(["named"], function(named) {
 });
 
 requirejs.config({
-  pa //+ packages, paths, ...
+  p //+ packages, paths, ...
 });
 
 requirejs.config({
@@ -46,7 +46,7 @@ requirejs.config({
 });
 
 var c1 = {
-  p //+ packages, paths, ...
+  pa //+ packages, paths, ...
 }
 requirejs.config(c1);
 
