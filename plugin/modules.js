@@ -81,7 +81,6 @@
       return this.modules[name] || (this.modules[name] = new infer.AVal)
     },
 
-
     completeModuleName: function(completions, query, word) {
       function fromObj(obj, useVal) {
         for (var name in obj)
@@ -124,11 +123,11 @@
     
     getModType: function(node) {
       var modName = this.isModName(node), imp, prop
-      if (imp = this.isImport(node)) {
+      if (modName == null && (imp = this.isImport(node))) {
         modName = imp.name
         prop = imp.prop
       }
-      if (!modName) return
+      if (modName == null) return
 
       var modType = this.resolveModule(modName, node.sourceFile.name)
       return (prop ? modType.getProp(prop) : modType).getType()

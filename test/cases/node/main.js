@@ -80,3 +80,5 @@ require('./localfile'//loc: 1, 0, localfile.js
 
 require("./dir/" //+ "./dir/index", "./dir/lib"
 require("mod1/d" //+ "mod1/dir1", "mod1/doc"
+
+require("" //+ "fs", "path", "mod1", ...

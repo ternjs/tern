@@ -33,16 +33,17 @@
     return resolved
   })
 
-  function isStaticRequire(_, node) {
+  function isStaticRequire(node) {
     if (node.type != "CallExpression" || node.callee.type != "Identifier" || node.callee.name != "require") return
     var arg = node.arguments[0]
     if (arg && arg.type == "Literal" && typeof arg.value == "string") return arg.value
   }
 
   function isModuleName(node) {
-    if (node.type != "Literal" || typeof node.value != "string") return false
+    if (node.type != "Literal" || typeof node.value != "string") return
 
-    var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, isStaticRequire)
+    var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null,
+                                          function(_, n) { return isStaticRequire(n) != null })
     if (call && call.node.arguments[0] == node) return node.value
   }
 
@@ -51,9 +52,9 @@
     var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "VariableDeclarator"), name
     if (!decl || decl.node.id != node) return
     var init = decl.node.init
-    if (init && (name = isStaticRequire(0, init)))
+    if (init && (name = isStaticRequire(init)) != null)
       return {name: name, prop: null}
-    if (init.type == "MemberExpression" && !init.computed && (name = isStaticRequire(0, init.object)))
+    if (init.type == "MemberExpression" && !init.computed && (name = isStaticRequire(init.object)) != null)
       return {name: name, prop: init.property.name}
   }
 

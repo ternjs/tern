@@ -69,12 +69,12 @@
   }
 
   function isModuleName(node) {
-    if (node.type != "Literal" || typeof node.value != "string") return false
+    if (node.type != "Literal" || typeof node.value != "string") return
 
     var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, function(_, node) {
       return node.type == "ImportDeclaration" || /Export(All|Named)Declaration/.test(node.type)
     })
-    if (!decl || decl.node.source != node) return false
+    if (!decl || decl.node.source != node) return
     return node.value
   }
 
