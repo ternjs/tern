@@ -113,7 +113,7 @@
     completeFileName: function(completions, query, parentFile, word, _dir) {
       var path = parentFile ? resolvePath(dirName(parentFile), word) : baseName(word)
       for (var prop in this.modules) {
-        if (filter(path, prop, query)) {
+        if (prop != parentFile && filter(path, prop, query)) {
           if (/\.js$/.test(prop)) prop = prop.slice(0, prop.length - 3)
           var added = prop.slice(path.length)
           tern.addCompletion(query, completions, word + added, this.modules[prop])
@@ -186,7 +186,9 @@
       fs.readdirSync(dir).forEach(function(file) {
         if (/^\./.test(file)) return
         if (filter(filePart, file, query)) {
-          var value = me.modules[path.relative(pDir, path.resolve(dir, file))]
+          var projectPath = path.relative(pDir, path.resolve(dir, file))
+          if (projectPath == parentFile) return
+          var value = me.modules[projectPath]
           if (/\.js$/.test(file)) file = file.slice(0, file.length - 3)
           tern.addCompletion(query, completions, base + file, value)
         }
