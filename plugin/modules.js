@@ -197,7 +197,7 @@
   }())
 
   function normPath(name) { 
-    return name.replace(/\\/g, "/")
+    return name ? name.replace(/\\/g, "/") : name
   }
   
   function isRelative(path) {
