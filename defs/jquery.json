@@ -286,7 +286,7 @@
         "!doc": "Bind one or two handlers to the matched elements, to be executed when the mouse pointer enters and leaves the elements."
       },
       "html": {
-        "!type": "fn() -> string",
+        "!type": "fn(htmlString?: string|fn(index: number, oldhtml: string) -> string) -> string|jQuery.fn",
         "!url": "http://api.jquery.com/html/",
         "!doc": "Get the HTML contents of the first element in the set of matched elements or set the HTML contents of every matched element."
       },
