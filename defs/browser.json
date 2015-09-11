@@ -2669,22 +2669,22 @@
   },
   "console": {
     "error": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.error",
       "!doc": "Outputs an error message to the Web Console."
     },
     "info": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.info",
       "!doc": "Outputs an informational message to the Web Console."
     },
     "log": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.log",
       "!doc": "Outputs a message to the Web Console."
     },
     "warn": {
-      "!type": "fn(text: string)",
+      "!type": "fn(text: ?)",
       "!url": "https://developer.mozilla.org/en/docs/DOM/console.warn",
       "!doc": "Outputs a warning message to the Web Console."
     },
