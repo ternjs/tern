@@ -187,7 +187,7 @@
         if (/^\./.test(file)) return
         if (filter(filePart, file, query)) {
           var projectPath = path.relative(pDir, path.resolve(dir, file))
-          if (projectPath == parentFile) return
+          if (normPath(projectPath) == normPath(parentFile)) return
           var value = me.modules[projectPath]
           if (/\.js$/.test(file)) file = file.slice(0, file.length - 3)
           tern.addCompletion(query, completions, base + file, value)
@@ -196,6 +196,10 @@
     }
   }())
 
+  function normPath(name) { 
+    return name ? name.replace(/\\/g, "/") : name
+  }
+  
   function isRelative(path) {
     return /^\.\.?\//.test(path)
   }
