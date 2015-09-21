@@ -186,7 +186,7 @@
       fs.readdirSync(dir).forEach(function(file) {
         if (/^\./.test(file)) return
         if (filter(filePart, file, query)) {
-          var projectPath = path.relative(pDir, path.resolve(dir, file))
+          var projectPath = me.server.normalizeFilename(path.relative(pDir, path.resolve(dir, file)))
           if (projectPath == parentFile) return
           var value = me.modules[projectPath]
           if (/\.js$/.test(file)) file = file.slice(0, file.length - 3)
