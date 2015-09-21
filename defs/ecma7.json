@@ -1,0 +1,19 @@
+{
+  "!name": "ecma7",
+  "Array": {
+    "prototype": {
+      "includes": {
+        "!type": "fn(searchElement: ?, fromIndex?: number) -> bool",
+        "!doc": "The includes() method determines whether an array includes a certain element, returning true or false as appropriate.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes"
+      }
+    }
+  },
+  "ArrayBuffer": {
+    "transfer": {
+      "!type": "fn(oldBuffer: +ArrayBuffer, newByteLength?: number) -> +ArrayBuffer",
+      "!doc": "The static ArrayBuffer.transfer() method returns a new ArrayBuffer whose contents are taken from the oldBuffer's data and then is either truncated or zero-extended by newByteLength. If newByteLength is undefined, the byteLength of the oldBuffer is used. This operation leaves oldBuffer in a detached state.",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer/transfer"
+    }
+  }
+}
