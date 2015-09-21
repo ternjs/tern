@@ -11,6 +11,9 @@
     var cx = infer.cx(), locals = cx.definitions.node
     if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name]
 
+    var me = cx.parent.mod.modules, contrib = me.get(name)
+    if(contrib && contrib.getType()) return contrib.getType()
+    
     var resolved = resolveToFile(name, parentFile)
     return resolved && cx.parent.normalizeFilename(resolved)
   }
