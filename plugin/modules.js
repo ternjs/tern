@@ -131,6 +131,16 @@
 
       var modType = this.resolveModule(modName, node.sourceFile.name)
       return (prop ? modType.getProp(prop) : modType).getType()
+    },
+    
+    completeSpecifierName: function(modNode, completions, query, word) {
+      function gather(prop, obj, depth) {
+        if (query.filter !== false && word &&
+            (query.caseInsensitive ? prop.toLowerCase() : prop).indexOf(word) !== 0) return
+        tern.addCompletion(query, completions, prop, obj && obj.props[prop], depth)
+      }
+      var modType = this.getModType(modNode)
+      infer.forAllPropertiesOf(modType.getType(), gather)
     }
   })
 
@@ -245,9 +255,17 @@
     return type
   }
 
-  // Complete previously seen module names when completing in strings passed to require
+  // Complete previously seen :
+  // * module names when completing in strings passed to require
+  // * specifier names when completing in import declaration specifier
   function findCompletions(file, query) {
     var wordEnd = tern.resolvePos(file, query.end)
+    var completions = findCompletionModules(file, query, wordEnd)
+    if (!completions) completions = findCompletionSpecifiers(file, query, wordEnd)
+    return completions;
+  }
+  
+  function findCompletionModules(file, query, wordEnd) {
     var me = infer.cx().parent.mod.modules
     var lit = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "Literal")
     var modName = lit && me.isModName(lit.node)
@@ -281,6 +299,23 @@
         rec.name = string
         return rec
       })
+    }
+  }
+  
+  function findCompletionSpecifiers(file, query, wordEnd) {
+    var spec = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "ImportSpecifier")
+    if (!spec) return
+    var specNode = spec.node, impDecl = infer.parentNode(specNode, file.ast), modNode = impDecl.source
+    if (!modNode) return
+    var me = infer.cx().parent.mod.modules, completions = []
+    var word = specNode.imported.name.slice(0, wordEnd - specNode.imported.start)
+    if (query.caseInsensitive) word = word.toLowerCase()
+    me.completeSpecifierName(modNode, completions, query, word)
+    return {
+      start: tern.outputPos(query, file, specNode.imported.start),
+      end: tern.outputPos(query, file, wordEnd),
+      isSpecifier: true,
+      completions: completions
     }
   }
 
