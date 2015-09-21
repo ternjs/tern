@@ -589,6 +589,9 @@ To turn this plugin off, set `doc_comment: null` in your
 
 The plugin understands the following configuration parameters:
 
+`strong`:: When enabled, types specified in comments take precedence
+over inferred types.
+
 [[plugin_complete_strings]]
 ==== String completion plugin ====
 
