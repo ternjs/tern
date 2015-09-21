@@ -4,7 +4,8 @@
 import foo from "./foo"
 foo //: number
 import {hello as holle //<loc: 3, 16
-       } from "./foo"
+        he //+ hello, heythere
+        } from "./foo"
 holle //: fn() -> bool
 
 import * as blah //<loc: 1, 0

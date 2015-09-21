@@ -120,7 +120,7 @@
         }
       }
     },
-    
+
     getModType: function(node) {
       var modName = this.isModName(node), imp, prop
       if (modName == null && (imp = this.isImport(node))) {
@@ -248,12 +248,40 @@
   // Complete previously seen module names when completing in strings passed to require
   function findCompletions(file, query) {
     var wordEnd = tern.resolvePos(file, query.end)
+    var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope)
+    if (!expr) return null
     var me = infer.cx().parent.mod.modules
-    var lit = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "Literal")
-    var modName = lit && me.isModName(lit.node)
-    if (modName == null) return
 
-    var argNode = lit.node
+    if (me.isModName(expr.node) != null)
+      return findModuleCompletions(me, file, query, expr.node, wordEnd)
+
+    var imp = me.isImport(expr.node)
+    if (imp && imp.name && imp.prop != null)
+      return findImportCompletions(me, file, query, expr.node, imp, wordEnd)
+  }
+
+  function findImportCompletions(me, file, query, node, imp, wordEnd) {
+    var completions = []
+    var word = node.name.slice(0, wordEnd - node.start)
+    if (query.caseInsensitive) word = word.toLowerCase()
+
+    var modType = me.resolveModule(imp.name, node.sourceFile.name).getType()
+    if (!modType) return null
+    infer.forAllPropertiesOf(modType, function(prop, obj, depth) {
+      if (obj == infer.cx().protos.Object) return
+      if (query.filter !== false && word &&
+          (query.caseInsensitive ? prop.toLowerCase() : prop).indexOf(word) !== 0) return
+      tern.addCompletion(query, completions, prop, obj && obj.props[prop], depth)
+    })
+    return {
+      start: tern.outputPos(query, file, node.start),
+      end: tern.outputPos(query, file, wordEnd),
+      completions: completions,
+      isSpecifier: true
+    }
+  }
+
+  function findModuleCompletions(me, file, query, argNode, wordEnd) {
     if (argNode.type != "Literal" || typeof argNode.value != "string" ||
         argNode.start > wordEnd || argNode.end < wordEnd) return
 
