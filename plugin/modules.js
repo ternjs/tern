@@ -218,14 +218,17 @@
   }
 
   function postLoadDef(data) {
-    var cx = infer.cx(), mods = cx.definitions[data["!name"]]["!modules"]
-    var me = cx.parent.mod.modules
+    var cx = infer.cx(), me = cx.parent.mod.modules
+    var mods = cx.definitions[data["!name"]]["!modules"]
     if (mods) for (var name in mods.props) {
       var origin = name.replace(/`/g, ".")
       var mod = me.get(origin)
       mod.origin = origin
       mods.props[name].propagate(mod)
     }
+    var known = cx.definitions[data["!name"]]["!known_modules"]
+    if (known) for (var name in known.props)
+      me.knownModules[name.replace(/`/g, ".")] = known.props[name]
   }
 
   function findTypeAt(_file, _pos, expr, type) {
