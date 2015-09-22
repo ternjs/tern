@@ -9,7 +9,7 @@
 
   function resolve(name, parentFile) {
     var cx = infer.cx(), locals = cx.definitions.node
-    if (locals[name] && /^[a-z_]*$/.test(name)) return locals[name]
+    if (locals && locals[name] && /^[a-z_]*$/.test(name)) return locals[name]
 
     var resolved = resolveToFile(name, parentFile)
     return resolved && cx.parent.normalizeFilename(resolved)
