@@ -9,7 +9,11 @@
 
   tern.registerPlugin("node", function(server) {
     server.loadPlugin("node_resolve")
-    server.mod.modules.completables.push(function() { return server.cx.definitions.node })
+    server.on("postReset", function() {
+      var mods = server.mod.modules, locals = server.cx.definitions.node
+      for (var name in locals) if (/^[a-z_]*$/.test(name))
+        mods.knownModules[name] = locals[name]
+    })
     server.addDefs(defs)
   })
 

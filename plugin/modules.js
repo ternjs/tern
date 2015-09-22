@@ -12,10 +12,10 @@
     this.options = options || {}
     this.modules = Object.create(null)
     this.nonRelative = Object.create(null)
+    this.knownModules = Object.create(null)
     this.resolvers = []
     this.modNameTests = []
     this.importTests = []
-    this.completables = []
   }
 
   Modules.prototype = signal.mixin({
@@ -43,6 +43,7 @@
     resolveModule: function(name, parentFile) {
       var over = this.maybeOverride(name)
       if (over) return over
+      if (name in this.knownModules) return this.knownModules[name]
       if (this.options.dontLoad == true ||
           this.options.dontLoad && new RegExp(this.options.dontLoad).test(name) ||
           this.options.load && !new RegExp(this.options.load).test(name))
@@ -88,8 +89,7 @@
             tern.addCompletion(query, completions, name, useVal && obj[name])
       }
 
-      for (var i = 0; i < this.completables.length; i++)
-        fromObj(this.completables[i](this.server), true)
+      fromObj(this.knownModules, true)
       if (this.options.modules) fromObj(this.options.modules, false)
 
       var pathsSeen = Object.create(null)
@@ -212,8 +212,8 @@
       var mod = mods[name]
       var id = mod.origin || name
       var prop = node.defProp(id.replace(/\./g, "`"))
-      mod.propagate(prop)
       prop.origin = mod.origin
+      mod.propagate(prop)
     }
   }
 
