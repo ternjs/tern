@@ -54,7 +54,7 @@
     var init = decl.node.init
     if (init && (name = isStaticRequire(init)) != null)
       return {name: name, prop: null}
-    if (init.type == "MemberExpression" && !init.computed && (name = isStaticRequire(init.object)) != null)
+    if (init && init.type == "MemberExpression" && !init.computed && (name = isStaticRequire(init.object)) != null)
       return {name: name, prop: init.property.name}
   }
 
