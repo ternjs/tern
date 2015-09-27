@@ -14,7 +14,7 @@ software, under an MIT license.
 There are currently plugins available for [Emacs][emacs] (and Emacs
 [company-mode][cmode]), [Vim][vim], [Sublime Text][st], [Eclipse (and general Java API)][ec],
 [Light Table][lt], [Atom][atom] and [gedit][gedit], and built-in support in
-[Brackets][brackets] and [Edge Code][edge_code].
+[Brackets][brackets], [Edge Code][edge_code], and [CodeLite](http://codelite.org/).
 
 For further documentation, see the [project page][1] and the
 [manual][3].
