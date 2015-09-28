@@ -287,6 +287,12 @@ in its set of analyzed files.
 Does not take any parameters. Returns an object with a `files`
 property holding an array of strings (the file names).
 
+[[req_reset]]`reset`:: Reset the server's state, throwing away and
+then re-building the current type graph.
+
+`forgetFiles` (bool, optional);; When given (defaults to false) also
+clears the list of loaded files.
+
 [[loc_spec]] When specifying a location, which is needed for most of
 the query types, the required `file` field may hold either a filename,
 or a string in the form `"#N"`, where `N` should be an integer
