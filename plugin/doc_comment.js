@@ -59,7 +59,8 @@
 
     walk.simple(ast, {
       VariableDeclaration: function(node, scope) {
-        if (node.commentsBefore)
+        var decl = node.declarations[0].id
+        if (node.commentsBefore && decl.type == "Identifier")
           interpretComments(node, node.commentsBefore, scope,
                             scope.getProp(node.declarations[0].id.name));
       },
