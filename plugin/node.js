@@ -2178,6 +2178,61 @@
           "!url": "https://nodejs.org/api/util.html#util_util_iserror_object",
           "!doc": "Returns true if the given \"object\" is an Error. false otherwise."
         },
+        isBoolean: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isboolean_object",
+          "!doc": "Returns true if the given \"object\" is a Boolean. false otherwise."
+        },
+        isNull: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isnull_object",
+          "!doc": "Returns true if the given \"object\" is strictly null. false otherwise."
+        },
+        isNullOrUndefined: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isnullorundefined_object",
+          "!doc": "Returns true if the given \"object\" is null or undefined. false otherwise."
+        },
+        isNumber: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isnumber_object",
+          "!doc": "Returns true if the given \"object\" is a Number. false otherwise."
+        },
+        isString: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isstring_object",
+          "!doc": "Returns true if the given \"object\" is a String. false otherwise."
+        },
+        isSymbol: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_issymbol_object",
+          "!doc": "Returns true if the given \"object\" is a Symbol. false otherwise."
+        },
+        isUndefined: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isundefined_object",
+          "!doc": "Returns true if the given \"object\" is undefined. false otherwise."
+        },
+        isObject: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isobject_object",
+          "!doc": "Returns true if the given \"object\" is strictly an Object and not a Function. false otherwise."
+        },
+        isFunction: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isfunction_object",
+          "!doc": "Returns true if the given \"object\" is a Function. false otherwise."
+        },
+        isPrimitive: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isprimitive_object",
+          "!doc": "Returns true if the given \"object\" is a primitive type. false otherwise."
+        },
+        isBuffer: {
+          "!type": "fn(object: ?) -> bool",
+          "!url": "https://nodejs.org/api/util.html#util_util_isbuffer_object",
+          "!doc": "Returns true if the given \"object\" is a Buffer. false otherwise."
+        },
         inherits: {
           "!type": "fn(constructor: ?, superConstructor: ?)",
           "!url": "https://nodejs.org/api/util.html#util_util_inherits_constructor_superconstructor",
