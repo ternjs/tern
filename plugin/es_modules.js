@@ -7,6 +7,8 @@
 })(function(infer, tern, walk) {
   "use strict"
 
+  var WG_IMPORT_DEFAULT_FALLBACK = 80
+
   function connectModule(file, out) {
     var modules = infer.cx().parent.mod.modules
     var outObj = null
@@ -28,9 +30,11 @@
           var aval = file.scope.getProp(spec.local.name)
           if (spec.type == "ImportNamespaceSpecifier") {
             input.propagate(aval)
+          } else if (spec.type == "ImportDefaultSpecifier") {
+            input.getProp("default").propagate(aval)
+            input.propagate(aval, WG_IMPORT_DEFAULT_FALLBACK)
           } else {
-            var propName = spec.type == "ImportDefaultSpecifier" ? "default" : spec.imported.name
-            input.getProp(propName).propagate(aval)
+            input.getProp(spec.imported.name).propagate(aval)
           }
         }
       },
