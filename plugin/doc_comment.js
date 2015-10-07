@@ -212,10 +212,18 @@
     return {labels: labels, types: types, end: pos, madeUp: madeUp};
   }
 
+  function parseTypeAtom(scope, str, pos) {
+    var result = parseTypeInner(scope, str, pos)
+    if (!result) return null
+    if (str.slice(result.end, result.end + 2) == "[]")
+      return {madeUp: result.madeUp, end: result.end + 2, type: new infer.Arr(result.type)}
+    else return result
+  }
+
   function parseType(scope, str, pos) {
     var type, union = false, madeUp = false;
     for (;;) {
-      var inner = parseTypeInner(scope, str, pos);
+      var inner = parseTypeAtom(scope, str, pos);
       if (!inner) return null;
       madeUp = madeUp || inner.madeUp;
       if (union) inner.type.propagate(union);
