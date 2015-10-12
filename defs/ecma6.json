@@ -89,6 +89,7 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/name"
       },
       "prototype": {
+        "<i>": "number",
         "buffer": {
           "!type": "+ArrayBuffer",
           "!doc": "The buffer accessor property represents the ArrayBuffer referenced by a TypedArray at construction time.",
