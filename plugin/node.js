@@ -1595,22 +1595,22 @@
           "!doc": "Synchronous version of fs.readFile. Returns the contents of the filename."
         },
         writeFile: {
-          "!type": "fn(filename: string, data: +Buffer, encoding?: string, callback?: fn())",
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_writefile_filename_data_options_callback",
           "!doc": "Asynchronously writes data to a file, replacing the file if it already exists. data can be a string or a buffer."
         },
         writeFileSync: {
-          "!type": "fn(filename: string, data: +Buffer, encoding?: string)",
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_writefilesync_filename_data_options",
           "!doc": "The synchronous version of fs.writeFile."
         },
         appendFile: {
-          "!type": "fn(filename: string, data: ?, encoding?: string, callback?: fn())",
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfile_filename_data_options_callback",
           "!doc": "Asynchronously append data to a file, creating the file if it not yet exists. data can be a string or a buffer."
         },
         appendFileSync: {
-          "!type": "fn(filename: string, data: ?, encoding?: string)",
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfilesync_filename_data_options",
           "!doc": "The synchronous version of fs.appendFile."
         },
