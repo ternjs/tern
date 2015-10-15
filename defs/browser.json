@@ -108,22 +108,22 @@
         "!doc": "A collection of all attribute nodes registered to the specified node. It is a NamedNodeMap,not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers."
       },
       "nextSibling": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nextSibling",
         "!doc": "Returns the node immediately following the specified one in its parent's childNodes list, or null if the specified node is the last node in that list."
       },
       "previousSibling": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.previousSibling",
         "!doc": "Returns the node immediately preceding the specified one in its parent's childNodes list, null if the specified node is the first in that list."
       },
       "lastChild": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.lastChild",
         "!doc": "Returns the last child of a node."
       },
       "firstChild": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.firstChild",
         "!doc": "Returns the node's first child in the tree, or null if the node is childless. If the node is a Document, it returns the first node in the list of its direct children."
       },
@@ -133,7 +133,7 @@
         "!doc": "Returns a collection of child nodes of the given element."
       },
       "parentNode": {
-        "!type": "+Element",
+        "!type": "+Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.parentNode",
         "!doc": "Returns the parent of the specified node in the DOM tree."
       },
@@ -163,17 +163,17 @@
         "!doc": "Inserts the specified node before a reference element as a child of the current node."
       },
       "replaceChild": {
-        "!type": "fn(newElt: +Element, oldElt: +Element) -> +Element",
+        "!type": "fn(newChild: +Node, oldChild: +Node) -> +Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.replaceChild",
         "!doc": "Replaces one child node of the specified element with another."
       },
       "removeChild": {
-        "!type": "fn(oldElt: +Element) -> +Element",
+        "!type": "fn(oldNode: +Node) -> +Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.removeChild",
         "!doc": "Removes a child node from the DOM. Returns removed node."
       },
       "appendChild": {
-        "!type": "fn(newElt: +Element) -> +Element",
+        "!type": "fn(newNode: +Node) -> +Node",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.appendChild",
         "!doc": "Adds a node to the end of the list of children of a specified parent node. If the node already exists it is removed from current parent node, then added to new parent node."
       },
