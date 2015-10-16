@@ -277,6 +277,8 @@
     var exportedType = expr.node.required;
     type.origin = exportedType.origin;
     type.originNode = exportedType.originNode;
+    if (exportedType.doc) type.doc = exportedType.doc
+    if (exportedType.url) type.url = exportedType.url
     return type;
   }
 
