@@ -264,19 +264,26 @@
   });
 
   function findTypeAt(_file, _pos, expr, type) {
-    if (!expr || expr.node.type != "Literal" ||
-        typeof expr.node.value != "string" || !expr.node.required)
-      return type;
+    if (!expr) return type;
+    var isStringLiteral = expr.node.type === "Literal" &&
+       typeof expr.node.value === "string";
+    var isRequireArg = !!expr.node.required;
 
-    // The `type` is a value shared for all string literals.
-    // We must create a copy before modifying `origin` and `originNode`.
-    // Otherwise all string literals would point to the last jump location
-    type = Object.create(type);
+    if (isStringLiteral && isRequireArg) {
+      // The `type` is a value shared for all string literals.
+      // We must create a copy before modifying `origin` and `originNode`.
+      // Otherwise all string literals would point to the last jump location
+      type = Object.create(type);
 
-    // Provide a custom origin location pointing to the require()d file
-    var exportedType = expr.node.required;
-    type.origin = exportedType.origin;
-    type.originNode = exportedType.originNode;
+      // Provide a custom origin location pointing to the require()d file
+      var exportedType = expr.node.required;
+      type.origin = exportedType.origin;
+      type.originNode = exportedType.originNode;
+      exportedType = exportedType.getType();
+      if (exportedType && exportedType.doc) type.doc = exportedType.doc;
+      if (exportedType && exportedType.url) type.url = exportedType.url;      
+    }
+    
     return type;
   }
 
