@@ -12,9 +12,11 @@
     return resolved && infer.cx().parent.normalizeFilename(resolved)
   }
 
+  function findDeclaredDeps() {}
+
   var resolveToFile
   if (require) (function() {
-    var module_ = require("module"), path = require("path")
+    var module_ = require("module"), path = require("path"), fs = require("fs")
 
     resolveToFile = function(name, parentFile) {
       var projectDir = infer.cx().parent.projectDir
@@ -33,6 +35,30 @@
         return null
       }
     }
+
+    function findPackageFile(dir) {
+      for (;;) {
+        try {
+          return JSON.parse(fs.readFileSync(path.resolve(dir, "package.json")))
+        } catch(e) {}
+        var shorter = path.dirname(dir)
+        if (shorter == dir) return null
+        dir = shorter
+      }
+    }
+
+    findDeclaredDeps = function(path, knownModules) {
+      var packageFile = findPackageFile(path)
+      if (!packageFile) return null
+
+      function add(obj) {
+        for (var name in obj) if (!(name in knownModules)) knownModules[name] = null
+      }
+      add(packageFile.dependencies)
+      add(packageFile.devDependencies)
+      add(packageFile.peerDependencies)
+    }
+
   })(); else (function() {
     function resolvePath(base, path) {
       if (path[0] == "/") return path;
@@ -51,5 +77,6 @@
   tern.registerPlugin("node_resolve", function(server) {
     server.loadPlugin("commonjs")
     server.mod.modules.resolvers.push(resolve)
+    findDeclaredDeps(server.projectDir, server.mod.modules.knownModules)
   })
 })

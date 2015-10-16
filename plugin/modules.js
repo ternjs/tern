@@ -43,7 +43,8 @@
     resolveModule: function(name, parentFile) {
       var over = this.maybeOverride(name)
       if (over) return over
-      if (name in this.knownModules) return this.knownModules[name]
+      var known = this.knownModules[name]
+      if (known) return known
       if (this.options.dontLoad == true ||
           this.options.dontLoad && new RegExp(this.options.dontLoad).test(name) ||
           this.options.load && !new RegExp(this.options.load).test(name))
