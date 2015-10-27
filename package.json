@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "acorn": "^2.5.2",
+    "enhanced-resolve": "^0.9.1",
     "glob": "3",
     "minimatch": "0.2",
     "typescript": "=1.0.1"

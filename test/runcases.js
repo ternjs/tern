@@ -9,6 +9,7 @@ require("../plugin/es_modules.js");
 require("../plugin/doc_comment.js");
 require("../plugin/angular.js");
 require("../plugin/complete_strings.js");
+require("../plugin/webpack.js");
 var util = require("./util");
 
 var defData = {
