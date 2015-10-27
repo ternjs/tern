@@ -1139,7 +1139,7 @@ thus require that (as well as http://npmjs.org[npm]) to be installed.
 === Emacs ===
 
 The Emacs mode is part of the main tern
-https://github.com/marijnh/tern[repository]. It can be installed as
+https://github.com/ternjs/tern[repository]. It can be installed as
 follows:
 
 . Make sure you are using Emacs 24 or later. The Tern mode requires
@@ -1207,14 +1207,14 @@ Calling the command `tern-ac-complete`, one can invoke auto-complete manually.
 === Vim ===
 
 The Vim plugin is maintained in a
-https://github.com/marijnh/tern_for_vim[separate repository]. Please
+https://github.com/ternjs/tern_for_vim[separate repository]. Please
 see its README for details.
 
 [[sublime_text]]
 === Sublime Text ===
 
 There are two implementations of Sublime Text modules for Tern. One
-written by me, at <https://github.com/marijnh/tern_for_sublime>. This
+written by me, at <https://github.com/ternjs/tern_for_sublime>. This
 one uses the node.js-based server. The other is written by Sergey
 Chikuyonok, and can be found at
 <https://github.com/emmetio/sublime-tern>. It uses a Python V8 bridge

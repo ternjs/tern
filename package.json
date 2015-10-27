@@ -8,7 +8,7 @@
   "bin": "./bin/tern",
   "repository": {
     "type": "git",
-    "url": "git://github.com/marijnh/tern.git"
+    "url": "git://github.com/ternjs/tern.git"
   },
   "scripts": {
     "test": "sh -c './bin/test'"
@@ -20,7 +20,7 @@
     "typescript": "=1.0.1"
   },
   "devDependencies": {
-    "codemirror": "git://github.com/marijnh/CodeMirror.git"
+    "codemirror": "git://github.com/codemirror/CodeMirror.git"
   },
   "blint": {
     "allowedGlobals": ["tern", "acorn", "define", "clearTimeout", "setTimeout", "__dirname", "global", "process"]
