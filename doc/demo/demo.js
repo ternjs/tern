@@ -179,6 +179,8 @@ function initProject(name, c) {
       var place = document.getElementById("place")
       place.textContent = ""
 
+      if (project) project.server.destroy()
+
       project = new Project(name, place, {
         defs: defs,
         plugins: plugins
