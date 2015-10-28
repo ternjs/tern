@@ -20,7 +20,7 @@ For further documentation, see the [project page][1] and the
 [manual][3]. To report issues, use the
 [issue tracker](https://github.com/ternjs/tern/issues). For questions
 and documentation, see the
-[discussion forum](http://discuss.ternjs.net).
+[discussion forum](https://discuss.ternjs.net).
 
 [1]: http://ternjs.net
 [2]: http://www.indiegogo.com/projects/tern-intelligent-javascript-editing
