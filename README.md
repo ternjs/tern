@@ -17,7 +17,10 @@ There are currently plugins available for [Emacs][emacs] (and Emacs
 [Brackets][brackets], [Edge Code][edge_code], and [CodeLite](http://codelite.org/).
 
 For further documentation, see the [project page][1] and the
-[manual][3].
+[manual][3]. To report issues, use the
+[issue tracker](https://github.com/ternjs/tern/issues). For questions
+and documentation, see the
+[discussion forum](http://discuss.ternjs.net).
 
 [1]: http://ternjs.net
 [2]: http://www.indiegogo.com/projects/tern-intelligent-javascript-editing
