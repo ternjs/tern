@@ -3,7 +3,6 @@ var project
 function Project(name, place, config, docs) {
   this.name = name
   this.docs = Object.create(null)
-  this.curDoc = null
   this.tabs = place.appendChild(document.createElement("ul"))
   this.tabs.className = "tabs"
   var self = this
@@ -26,6 +25,7 @@ function Project(name, place, config, docs) {
     var data = this.registerDoc(name, new CodeMirror.Doc(docs[name], "javascript"))
     if (!firstDoc) firstDoc = data
   }
+  this.curDoc = firstDoc
   this.setSelectedTab(firstDoc)
 
   var keyMap = {
