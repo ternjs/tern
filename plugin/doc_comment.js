@@ -371,8 +371,19 @@
 
     for (var i = 0; i < comments.length; ++i) {
       var comment = comments[i];
-      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this)\s+(.*)/g, m;
+      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)\s+(.*)/g, m;
       while (m = decl.exec(comment)) {
+        if (m[1] == "class" || m[1] == "constructor") {
+          // @class/@constructor attributes define the 'this' type, but unlike
+          // @this attribute, these two need to infer it from the function name.
+          var fn = getFun(node);
+          if( fn && (parsed = parseType(scope, fn.name, 0))) {
+            self = parsed;
+            foundOne = true;
+            continue;
+          }
+        }
+
         if (m[1] == "this" && (parsed = parseType(scope, m[2], 0))) {
           self = parsed;
           foundOne = true;
@@ -427,7 +438,7 @@
 
   function isFunExpr(node) { return node.type == "FunctionExpression" || node.type == "ArrowFunctionExpression" }
 
-  function applyType(type, self, args, ret, node, aval) {
+  function getFun(node) {
     var fn;
     if (node.type == "VariableDeclaration") {
       var decl = node.declarations[0];
@@ -441,6 +452,11 @@
     } else { // An object property
       if (isFunExpr(node.value)) fn = node.value.scope.fnType;
     }
+    return fn;
+  }
+
+  function applyType(type, self, args, ret, node, aval) {
+    var fn = getFun(node);
 
     if (fn && (args || ret || self)) {
       if (args) for (var i = 0; i < fn.argNames.length; ++i) {
