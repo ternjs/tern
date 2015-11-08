@@ -22,6 +22,16 @@ var abc = function() {
   this; //: Date
 };
 
+/** @class */
+var abcCls = function() {
+  this; //: fn()
+};
+
+/** @constructor */
+var abcCtor = function() {
+  this; //: fn()
+};
+
 /**
  * This is also a function
  * @returns {string}
