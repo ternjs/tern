@@ -22,14 +22,19 @@ var abc = function() {
   this; //: Date
 };
 
+/** @this Abc */
+var Abc = function() {
+  this; //: Abc
+};
+
 /** @class */
-var abcCls = function() {
-  this; //: fn()
+var AbcCls = function() {
+  this; //: AbcCls
 };
 
 /** @constructor */
-var abcCtor = function() {
-  this; //: fn()
+var AbcCtor = function() {
+  this; //: AbcCtor
 };
 
 /**
