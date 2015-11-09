@@ -1598,12 +1598,13 @@ doesn&#8217;t exist.
 </p>
 </dd>
 <dt>
-<a id="infer.Obj.defProp"></a><code>obj.defProp(prop: string) → AVal</code>
+<a id="infer.Obj.defProp"></a><code>obj.defProp(prop: string, originNode?: AST) → AVal</code>
 </dt>
 <dd>
 <p>
 Looks up the
-given property, or defines it if it did not yet exist.
+given property, or defines it if it did not yet exist (in which case
+it will be associated with the given AST node).
 </p>
 </dd>
 </dl>

@@ -963,8 +963,9 @@ it if you have to iterate over the properties.
 the AVal associated with the given property, or returns `null` if it
 doesn't exist.
 
-[[infer.Obj.defProp]]`obj.defProp(prop: string) → AVal`:: Looks up the
-given property, or defines it if it did not yet exist.
+[[infer.Obj.defProp]]`obj.defProp(prop: string, originNode?: AST) → AVal`:: Looks up the
+given property, or defines it if it did not yet exist (in which case
+it will be associated with the given AST node).
 
 [[infer_aval]]
 === Abstract values ===
