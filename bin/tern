@@ -144,9 +144,28 @@ if (projectDir) {
   projectDir = process.cwd();
   var config = defaultConfig;
 }
-var server = startServer(projectDir, config);
 
-function startServer(dir, config) {
+var httpServer = require("http").createServer(function(req, resp) {
+  clearTimeout(shutdown);
+  shutdown = setTimeout(doShutdown, maxIdleTime);
+
+  var target = url.parse(req.url, true);
+  if (target.pathname == "/ping") return respondSimple(resp, 200, "pong");
+  if (target.pathname != "/") return respondSimple(resp, 404, "No service at " + target.pathname);
+
+  if (req.method == "POST") {
+    var body = "";
+    req.on("data", function (data) { body += data; });
+    req.on("end", function() { respond(resp, body); });
+  } else if (req.method == "GET") {
+    if (target.query.doc) respond(resp, target.query.doc);
+    else respondSimple(resp, 400, "Missing query document");
+  }
+});
+
+var server = startServer(projectDir, config, httpServer);
+
+function startServer(dir, config, httpServer) {
   var defs = findDefs(dir, config);
   var plugins = loadPlugins(dir, config);
   var server = new tern.Server({
@@ -169,7 +188,8 @@ function startServer(dir, config) {
     projectDir: dir,
     ecmaVersion: config.ecmaVersion,
     dependencyBudget: config.dependencyBudget,
-    stripCRs: stripCRs
+    stripCRs: stripCRs,
+    parent: httpServer
   });
 
   if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
@@ -191,24 +211,6 @@ var shutdown = setTimeout(doShutdown, maxIdleTime);
 process.stdin.on("end", function() { process.exit(); });
 process.stdin.resume();
 
-var httpServer = require("http").createServer(function(req, resp) {
-  clearTimeout(shutdown);
-  shutdown = setTimeout(doShutdown, maxIdleTime);
-
-  var target = url.parse(req.url, true);
-  if (target.pathname == "/ping") return respondSimple(resp, 200, "pong");
-  if (target.pathname != "/") return respondSimple(resp, 404, "No service at " + target.pathname);
-
-  if (req.method == "POST") {
-    var body = "";
-    req.on("data", function (data) { body += data; });
-    req.on("end", function() { respond(resp, body); });
-  } else if (req.method == "GET") {
-    if (target.query.doc) respond(resp, target.query.doc);
-    else respondSimple(resp, 400, "Missing query document");
-  }
-});
-server.httpServer = httpServer;
 httpServer.listen(port, host, function() {
   var port = httpServer.address().port;
   if (!noPortFile) {
