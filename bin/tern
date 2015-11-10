@@ -208,6 +208,7 @@ var httpServer = require("http").createServer(function(req, resp) {
     else respondSimple(resp, 400, "Missing query document");
   }
 });
+server.httpServer = httpServer;
 httpServer.listen(port, host, function() {
   var port = httpServer.address().port;
   if (!noPortFile) {
