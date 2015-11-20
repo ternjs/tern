@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; tern.el --- Tern-powered JavaScript integration
+;;; tern.el --- Tern-powered JavaScript integration -*- lexical-binding: t -*-
 
 ;; Author: Marijn Haverbeke
 ;; URL: http://ternjs.net/

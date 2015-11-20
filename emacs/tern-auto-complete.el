@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; tern-auto-complete.el --- Tern Completion by auto-complete.el
+;;; tern-auto-complete.el --- Tern Completion by auto-complete.el -*- lexical-binding: t -*-
 
 ;; Author:  <m.sakurai at kiwanami.net>
 ;; Version: 0.0.1
