@@ -189,7 +189,7 @@ function startServer(dir, config, httpServer) {
     ecmaVersion: config.ecmaVersion,
     dependencyBudget: config.dependencyBudget,
     stripCRs: stripCRs,
-    parent: httpServer
+    parent: {httpServer: httpServer}
   });
 
   if (config.loadEagerly) config.loadEagerly.forEach(function(pat) {
