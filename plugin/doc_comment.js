@@ -371,8 +371,13 @@
 
     for (var i = 0; i < comments.length; ++i) {
       var comment = comments[i];
-      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this)\s+(.*)/g, m;
+      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)\s+(.*)/g, m;
       while (m = decl.exec(comment)) {
+        if (m[1] == "class" || m[1] == "constructor") {
+          self = foundOne = true;
+          continue;
+        }
+
         if (m[1] == "this" && (parsed = parseType(scope, m[2], 0))) {
           self = parsed;
           foundOne = true;
@@ -452,6 +457,10 @@
       if (ret) {
         if (fn.retval == infer.ANull) fn.retval = new infer.AVal;
         propagateWithWeight(ret, fn.retval);
+      }
+      if (self === true) {
+        var proto = fn.getProp("prototype").getObjType();
+        self = proto && {type: infer.getInstance(proto, fn)};
       }
       if (self) propagateWithWeight(self, fn.self);
     } else if (type) {
