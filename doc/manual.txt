@@ -408,7 +408,7 @@ a set of <<typedef,type definitions>> to the server. If `atFront` is
 true, they will be added before all other existing definitions.
 Otherwise, they are added at the back.
 
-[[tern.Server.deleteDefsByName]] `deleteDefsByName(name: string)`:: Delete
+[[tern.Server.deleteDefs]] `deleteDefs(name: string)`:: Delete
 a set of <<typedef,type definitions>> from the server, by providing the name, 
 taken from `defs[!name]` property from the definitions. If that property is not 
 available in the current type definitions, it can't be removed.
