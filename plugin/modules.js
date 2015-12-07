@@ -132,7 +132,7 @@
 
       var type = this.resolveModule(modName, node.sourceFile.name)
       if (prop) {
-        let obj = type.getObjType()
+        var obj = type.getObjType()
         type = obj && obj.hasProp(prop) || type.getProp(prop)
       }
       return type
