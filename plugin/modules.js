@@ -130,8 +130,12 @@
       }
       if (modName == null) return
 
-      var modType = this.resolveModule(modName, node.sourceFile.name)
-      return (prop ? modType.getProp(prop) : modType).getType()
+      var type = this.resolveModule(modName, node.sourceFile.name)
+      if (prop) {
+        let obj = type.getObjType()
+        type = obj && obj.hasProp(prop) || type.getProp(prop)
+      }
+      return type
     }
   })
 
@@ -241,11 +245,14 @@
     // The `type` is a value shared for all string literals.
     // We must create a copy before modifying `origin` and `originNode`.
     // Otherwise all string literals would point to the last jump location
+    var inner = modType.getType(false)
     type = Object.create(type)
-    type.origin = modType.origin
-    type.originNode = modType.originNode
+    type.origin = modType.origin || inner.origin
+    type.originNode = modType.originNode || inner.originNode
     if (modType.doc) type.doc = modType.doc
+    else if (inner.doc) type.doc = inner.doc
     if (modType.url) type.url = modType.url
+    else if (inner.url) type.url = inner.url
     return type
   }
 

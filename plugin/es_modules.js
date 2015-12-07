@@ -19,7 +19,9 @@
         outObj.originNode = file.ast
         out.addType(outObj)
       }
-      type.propagate(outObj.defProp(prop, originNode))
+      var prop = outObj.defProp(prop, originNode)
+      prop.origin = file.name
+      type.propagate(prop)
     }
 
     walk.simple(file.ast, {
