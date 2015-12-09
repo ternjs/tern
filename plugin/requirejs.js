@@ -12,7 +12,7 @@
     var parts = path.split("/");
     for (var i = 0; i < parts.length; ++i) {
       if (parts[i] == "." || !parts[i]) parts.splice(i--, 1);
-      else if (i && parts[i] == "..") parts.splice(i-- - 1, 2);
+      else if (i && parts[i] == "..") { parts.splice(i - 1, 2); i -= 2; }
     }
     return parts.join("/");
   }
