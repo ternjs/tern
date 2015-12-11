@@ -51,7 +51,7 @@ var defaultConfig = {
   ecmaVersion: 6,
   dependencyBudget: tern.defaultOptions.dependencyBudget
 };
-var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+var homeDir = process.env.HOME || process.env.USERPROFILE;
 if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config")))
   defaultConfig = readProjectFile(path.resolve(homeDir, ".tern-config"));
 
