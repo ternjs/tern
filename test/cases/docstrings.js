@@ -92,7 +92,7 @@ o.bar //doc: A string property
 
 class C {
   // The method
-  method() { return 10 },
+  method() { return 10 }
   // The something
   get something() { return 20 }
 }

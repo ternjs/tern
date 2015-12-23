@@ -25,3 +25,11 @@ function another(arg) {
   arg; // 23, 17
   local; //loc: 24, 6
 }
+
+class foo {
+  bar //<loc: 30,2
+  () {}
+}
+
+var fooObj = new foo();
+fooObj.bar; //loc: 30, 2

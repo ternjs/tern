@@ -18,3 +18,28 @@ obj.z = "hi";
 
 obj.x;
 obj.z; //refs: 17,4 20,4
+
+class foo {
+
+  methodA //<refs: 24,2 41,2 44,2
+  (){}
+  
+  methodB //<refs: 27,2 42,2
+  () {} 
+}
+
+class bar extends foo {
+
+  methodB //<refs: 33,2 45,2
+  () {}
+
+}
+
+var a = new foo();
+var b = new bar();
+
+a.methodA; //refs: 24,2 41,2 44,2
+a.methodB; //refs: 27,2 42,2
+
+b.methodA; //refs: 24,2 41,2 44,2
+b.methodB; //refs: 33,2 45,2
