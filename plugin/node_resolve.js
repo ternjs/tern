@@ -27,7 +27,7 @@
 
       var parentModule = {
         id: fullParent,
-        paths: module_._nodeModulePaths(parentDir)
+        paths: module_._nodeModulePaths(parentDir).concat(module_.globalPaths)
       }
       try {
         return module_._resolveFilename(name, parentModule)
