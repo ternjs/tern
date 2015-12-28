@@ -73,6 +73,8 @@
 
     server.mod.modules.modNameTests.push(isModuleName)
     server.mod.modules.importTests.push(isImport)
+    server.mod.modules.completableTypes.Identifier = true
+    server.mod.modules.completableTypes.Literal = true
 
     server.addDefs(defs)
   })

@@ -84,18 +84,22 @@
     return node.value
   }
 
-  function isImport(node) {
-    if (node.type != "Identifier") return
-    var imp = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "ImportDeclaration")
-    if (!imp) return
-    var specs = imp.node.specifiers
-    for (var i = 0; i < specs.length; i++) {
-      var spec = specs[i]
-      if (spec.local != node) continue
-      var result = {name: imp.node.source.value, prop: null}
-      if (spec.type == "ImportDefaultSpecifier") result.prop = "default"
-      else if (spec.type == "ImportSpecifier") result.prop = spec.imported.name
-      return result
+  function isImport(node, pos) {
+    if (node.type == "Identifier") {
+      var imp = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "ImportDeclaration")
+      if (!imp) return
+      var specs = imp.node.specifiers
+      for (var i = 0; i < specs.length; i++) {
+        var spec = specs[i]
+        if (spec.local != node) continue
+        var result = {name: imp.node.source.value, prop: null}
+        if (spec.type == "ImportDefaultSpecifier") result.prop = "default"
+        else if (spec.type == "ImportSpecifier") result.prop = spec.imported.name
+        return result
+      }
+    } else if (node.type == "ImportDeclaration" &&
+               /^import\s+\{\s*([\w$]+\s*,\s*)*$/.test(node.sourceFile.text.slice(node.start, pos))) {
+      return {name: node.source.value, prop: ""}
     }
   }
 
@@ -104,5 +108,8 @@
     server.mod.modules.on("getExports", connectModule)
     server.mod.modules.modNameTests.push(isModuleName)
     server.mod.modules.importTests.push(isImport)
+    server.mod.modules.completableTypes.Identifier = true
+    server.mod.modules.completableTypes.Literal = true
+    server.mod.modules.completableTypes.ImportDeclaration = true
   })
 })

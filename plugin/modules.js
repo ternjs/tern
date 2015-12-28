@@ -16,6 +16,7 @@
     this.resolvers = []
     this.modNameTests = []
     this.importTests = []
+    this.completableTypes = Object.create(null)
   }
 
   Modules.prototype = signal.mixin({
@@ -69,15 +70,15 @@
       return this.modules[resolved] = new infer.AVal
     },
 
-    findIn: function(array, node) {
+    findIn: function(array, node, pos) {
       for (var i = 0; i < array.length; i++) {
-        var name = array[i](node)
+        var name = array[i](node, pos)
         if (name != null) return name
       }
     },
 
-    isModName: function(node) { return this.findIn(this.modNameTests, node) },
-    isImport: function(node) { return this.findIn(this.importTests, node) },
+    isModName: function(node, pos) { return this.findIn(this.modNameTests, node, pos) },
+    isImport: function(node, pos) { return this.findIn(this.importTests, node, pos) },
 
     get: function(name) {
       return this.modules[name] || (this.modules[name] = new infer.AVal)
@@ -258,22 +259,23 @@
 
   // Complete previously seen module names when completing in strings passed to require
   function findCompletions(file, query) {
-    var wordEnd = tern.resolvePos(file, query.end)
-    var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope)
-    if (!expr) return null
     var me = infer.cx().parent.mod.modules
+    var wordEnd = tern.resolvePos(file, query.end), types = me.completableTypes
+    var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope,
+                                          function(type) { return type in types })
+    if (!expr) return null
 
-    if (me.isModName(expr.node) != null)
+    if (me.isModName(expr.node, wordEnd) != null)
       return findModuleCompletions(me, file, query, expr.node, wordEnd)
 
-    var imp = me.isImport(expr.node)
+    var imp = me.isImport(expr.node, wordEnd)
     if (imp && imp.name && imp.prop != null)
       return findImportCompletions(me, file, query, expr.node, imp, wordEnd)
   }
 
   function findImportCompletions(me, file, query, node, imp, wordEnd) {
     var completions = []
-    var word = node.name.slice(0, wordEnd - node.start)
+    var word = node.name ? node.name.slice(0, wordEnd - node.start) : ""
     if (query.caseInsensitive) word = word.toLowerCase()
 
     var modType = me.resolveModule(imp.name, node.sourceFile.name).getType()
@@ -285,7 +287,7 @@
       tern.addCompletion(query, completions, prop, obj && obj.props[prop], depth)
     })
     return {
-      start: tern.outputPos(query, file, node.start),
+      start: tern.outputPos(query, file, node.name ? node.start : wordEnd),
       end: tern.outputPos(query, file, wordEnd),
       completions: completions,
       isSpecifier: true
