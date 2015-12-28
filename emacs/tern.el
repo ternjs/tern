@@ -125,7 +125,9 @@ list of strings, giving the binary name and arguments.")
 (defvar tern-buffer-is-dirty nil)
 
 (defun tern-project-relative-file ()
-  (substring (buffer-file-name) (length (tern-project-dir))))
+  (if (buffer-file-name)
+      (substring (buffer-file-name) (length (tern-project-dir)))
+    (buffer-name)))
 
 (defun tern-get-partial-file (at)
   (let* (min-indent start-pos end-pos
