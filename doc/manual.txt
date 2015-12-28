@@ -760,7 +760,7 @@ suffixed with `.json`, and searched for first in the project's own
 dir, and then in the `defs/` directory of the Tern distribution.
 
 By default, local files are loaded into the Tern server when queries
-are run on them the editor. `loadEagerly` allows you to force some
+are run on them in the editor. `loadEagerly` allows you to force some
 files to always be loaded, it may be an array of filenames or glob
 patterns (i.e. `foo/bar/*.js`). The `dontLoad` option can be used to
 prevent Tern from loading certain files. It also takes an array of
