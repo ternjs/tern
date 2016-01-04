@@ -1,6 +1,6 @@
 if (typeof exports != "object" || typeof module != "object")
   throw new Error("This plugin works only in a CommonJS environment")
-  
+
 var infer = require("../lib/infer");
 var tern = require("../lib/tern");
 require("./commonjs");
