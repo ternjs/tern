@@ -3,7 +3,8 @@ let f = (a, [b]) => ({a, b})
 f(1, [true]) //:: {a: number, b: bool}
 
 function wrap() {
-  return () => this
+  return () => (this //:: {a: number}
+               )
 }
 wrap.call({a: 10}).call({b: true}) //:: {a: number}
 
