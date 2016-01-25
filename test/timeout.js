@@ -11,10 +11,13 @@ exports.runTests = function(filter) {
   var server = new tern.Server({});
   var file = fs.readFileSync(util.resolve("lib/infer.js"), "utf8");
   try {
-    server.request({timeout: 10, files: [{type: "full", name: "infer.js", text: file}]}, Math.max);
-    util.failure("timeout: failed to time out");
+    server.request({timeout: 10,
+                    files: [{type: "full", name: "infer.js", text: file}],
+                    query: {type: "type", end: 0, file: "infer.js"}}, function(err, result) {
+      if (!err || !(err instanceof infer.TimedOut))
+        util.failure("timeout: failed to time out");
+    })
   } catch(e) {
-    if (!(e instanceof infer.TimedOut))
-      util.failure("timeout: wrong error thrown: " + e.stack);
+    util.failure("timeout: exception thrown: " + e.stack);
   }
 };
