@@ -2436,46 +2436,46 @@
       },
       module: {},
       timers: {
-        setTimeout: {
-          "!type": "fn(callback: fn(), ms: number) -> timers.Timer",
-          "!url": "https://nodejs.org/api/globals.html#globals_settimeout_cb_ms",
-          "!doc": "Run callback cb after at least ms milliseconds. The actual delay depends on external factors like OS timer granularity and system load."
-        },
-        clearTimeout: {
-          "!type": "fn(id: timers.Timer)",
-          "!url": "https://nodejs.org/api/globals.html#globals_cleartimeout_t",
-          "!doc": "Stop a timer that was previously created with setTimeout(). The callback will not execute."
-        },
-        setInterval: {
-          "!type": "fn(callback: fn(), ms: number) -> timers.Timer",
-          "!url": "https://nodejs.org/api/globals.html#globals_setinterval_cb_ms",
-          "!doc": "Run callback cb repeatedly every ms milliseconds. Note that the actual interval may vary, depending on external factors like OS timer granularity and system load. It's never less than ms but it may be longer."
-        },
-        clearInterval: {
-          "!type": "fn(id: timers.Timer)",
-          "!url": "https://nodejs.org/api/globals.html#globals_clearinterval_t",
-          "!doc": "Stop a timer that was previously created with setInterval(). The callback will not execute."
-        },
-        setImmediate: {
-          "!type": "fn(callback: fn()) -> timers.Timer",
-          "!url": "https://nodejs.org/api/timers.html#timers_setimmediate_callback_arg",
-          "!doc": "Schedule the 'immediate' execution of callback after I/O events callbacks."
-        },
         clearImmediate: {
-          "!type": "fn(id: timers.Timer)",
-          "!url": "https://nodejs.org/api/timers.html#timers_clearimmediate_immediateid",
+          "!type": "fn(immediateObject: ?)",
+          "!url": "https://nodejs.org/api/timers.html#timers_clearimmediate_immediateobject",
           "!doc": "Stops an immediate from triggering."
         },
+        clearInterval: {
+          "!type": "fn(intervalObject: timers.Timer)",
+          "!url": "https://nodejs.org/api/timers.html#timers_clearinterval_intervalobject",
+          "!doc": "Stops an interval from triggering."
+        },
+        clearTimeout: {
+          "!type": "fn(timeoutObject: timers.Timer)",
+          "!url": "https://nodejs.org/api/timers.html#timers_cleartimeout_timeoutobject",
+          "!doc": "Prevents a timeout from triggering."
+        },
+        setImmediate: {
+          "!type": "fn(callback: fn(), args?: ?) -> ?",
+          "!url": "https://nodejs.org/api/timers.html#timers_setimmediate_callback_arg",
+          "!doc": "To schedule the \"immediate\" execution of callback after I/O events callbacks and before setTimeout and setInterval. Returns an immediateObject for possible use with clearImmediate(). Optionally you can also pass arguments to the callback."
+        },
+        setInterval: {
+          "!type": "fn(callback: fn(), delay: number, args?: ?) -> timers.Timer",
+          "!url": "https://nodejs.org/api/timers.html#timers_setinterval_callback_delay_arg",
+          "!doc": "To schedule the repeated execution of callback every delay milliseconds. Returns a intervalObject for possible use with clearInterval(). Optionally you can also pass arguments to the callback."
+        },
+        setTimeout: {
+          "!type": "fn(callback: fn(), delay: number, args?: ?) -> timers.Timer",
+          "!url": "https://nodejs.org/api/timers.html#timers_settimeout_callback_delay_arg",
+          "!doc": "To schedule execution of a one-time callback after delay milliseconds. Returns a timeoutObject for possible use with clearTimeout(). Optionally you can also pass arguments to the callback."
+        },
         Timer: {
-          unref: {
-            "!type": "fn()",
-            "!url": "https://nodejs.org/api/timers.html#timers_unref",
-            "!doc": "Create a timer that is active but if it is the only item left in the event loop won't keep the program running."
-          },
           ref: {
-            "!type": "fn()",
+            "!type": "fn() -> timers.Timer",
+            "!url": "https://nodejs.org/api/timers.html#timers_ref",
+            "!doc": "If you had previously unref()d a timer you can call ref() to explicitly request the timer hold the program open. If the timer is already refd calling ref again will have no effect."
+          },
+          unref: {
+            "!type": "fn() -> timers.Timer",
             "!url": "https://nodejs.org/api/timers.html#timers_unref",
-            "!doc": "Explicitly request the timer hold the program open (cancel the effect of 'unref')."
+            "!doc": "The opaque value returned by setTimeout and setInterval also has the method timer.unref() which will allow you to create a timer that is active but if it is the only item left in the event loop, it won't keep the program running. If the timer is already unrefd calling unref again will have no effect."
           }
         }
       }
@@ -2716,10 +2716,12 @@
       "!url": "https://nodejs.org/api/globals.html#globals_dirname",
       "!doc": "The name of the directory that the currently executing script resides in."
     },
-    setTimeout: "timers.setTimeout",
-    clearTimeout: "timers.clearTimeout",
-    setInterval: "timers.setInterval",
+    clearImmediate: "timers.clearImmediate",
     clearInterval: "timers.clearInterval",
+    clearTimeout: "timers.clearTimeout",
+    setImmediate: "timers.setImmediate",
+    setInterval: "timers.setInterval",
+    setTimeout: "timers.setTimeout",
     Buffer: {
       "!type": "fn() -> +Buffer",
       "!url": "https://nodejs.org/api/buffer.html#buffer_class_buffer",
