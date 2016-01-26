@@ -25,9 +25,9 @@ tls.createServer({}, function(stream) {
   stream.authorized; //: bool
 });
 
-require("timers").setInterval; //: fn(callback: fn(), ms: number) -> timers.Timer
-setInterval; //: fn(callback: fn(), ms: number) -> timers.Timer
-setTimeout(function(){}, 10).ref; //: fn()
+require("timers").setInterval; //: fn(callback: fn(), delay: number, args?: ?) -> timers.Timer
+setInterval; //: fn(callback: fn(), delay: number, args?: ?) -> timers.Timer
+setTimeout(function(){}, 10).ref; //: fn() -> timers.Timer
 
 
 require("module");
