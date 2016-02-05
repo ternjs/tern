@@ -246,7 +246,7 @@
     // The `type` is a value shared for all string literals.
     // We must create a copy before modifying `origin` and `originNode`.
     // Otherwise all string literals would point to the last jump location
-    var inner = modType.getType(false)
+    var inner = modType.getType(false) || {}
     type = Object.create(type)
     type.origin = modType.origin || inner.origin
     type.originNode = modType.originNode || inner.originNode
