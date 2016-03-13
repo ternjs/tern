@@ -625,7 +625,7 @@ module loading. It defines types for the built-in modules that node.js
 provides (`"fs"`, `"http"`, etc).
 
 [[plugin_node_resolve]]
-==== Node.js resolve plugin ===
+==== Node.js resolve plugin ====
 
 This plugin defines the node.js module resolution strategy—things like
 defaulting to `index.js` when requiring a directory and searching
