@@ -208,7 +208,10 @@ function doShutdown() {
 
 var shutdown = setTimeout(doShutdown, maxIdleTime);
 
-process.stdin.on("end", function() { process.exit(); });
+process.stdin.on("end", function() {
+  console.log("stdin pipe closed, killing tern");
+  process.exit();
+});
 process.stdin.resume();
 
 httpServer.listen(port, host, function() {
@@ -223,8 +226,14 @@ httpServer.listen(port, host, function() {
       } catch(e) {}
     });
   }
-  process.on("SIGINT", function() { process.exit(); });
-  process.on("SIGTERM", function() { process.exit(); });
+  process.on("SIGINT", function() {
+    console.log("SIGINT trapped, killing tern");
+    process.exit();
+  });
+  process.on("SIGTERM", function() {
+    console.log("SIGTERM trapped, killing tern");
+    process.exit();
+  });
   console.log("Listening on port " + port);
 });
 
