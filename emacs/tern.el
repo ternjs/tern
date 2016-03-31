@@ -53,7 +53,7 @@
   (or tern-project-dir
       (and (not (buffer-file-name)) (setf tern-project-dir ""))
       (let ((project-dir (file-name-directory (buffer-file-name))))
-        (cl-loop for cur = project-dir then (let ((shorter (file-name-directory (substring cur 0 (1- (length cur))))))
+        (cl-loop for cur = project-dir then (let ((shorter (file-name-directory (directory-file-name cur))))
                                               (and (< (length shorter) (length cur)) shorter))
                  while cur do
                  (when (file-exists-p (expand-file-name ".tern-project" cur))
