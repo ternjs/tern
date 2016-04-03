@@ -41,6 +41,7 @@ engine>> to do the actual type inference.
 ** <<sublime_text,Sublime Text>>
 ** <<tern_java,Eclipse>>
 ** <<tern_for_gedit,Gedit>>
+** <<textmate,TextMate>>
 * <<software,Related Software>>
 
 [[server]]
@@ -1243,6 +1244,11 @@ written in Java. It includes Eclipse integration.
 https://github.com/Swatinem/tern_for_gedit[tern_for_gedit] integrates
 Tern with the https://github.com/Swatinem/tern_for_gedit[gedit]
 editor.
+
+[[textmate]]
+=== TextMate ===
+
+https://github.com/fab1an/JavaScript-Tern-Completion.tmbundle[JavaScript Tern Completion.tmbundle] integrates Tern with TextMate.
 
 [[software]]
 == Related Software ==
