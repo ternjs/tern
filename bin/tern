@@ -30,6 +30,7 @@ if (portArg > -1) {
    port = Number(process.argv[portArg + 1]);
    if (isNaN(port)) port = 0;
 }
+var ignoreStdin = process.argv.indexOf("--ignore-stdin") > -1;
 
 function findProjectDir() {
   var dir = process.cwd();
@@ -208,11 +209,13 @@ function doShutdown() {
 
 var shutdown = setTimeout(doShutdown, maxIdleTime);
 
-process.stdin.on("end", function() {
-  console.log("stdin pipe closed, killing tern");
-  process.exit();
-});
-process.stdin.resume();
+if (!ignoreStdin) {
+  process.stdin.on("end", function() {
+    console.log("stdin pipe closed, killing tern");
+    process.exit();
+  });
+  process.stdin.resume();
+}
 
 httpServer.listen(port, host, function() {
   var port = httpServer.address().port;
