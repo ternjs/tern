@@ -811,11 +811,6 @@ interleaved with filenames prefixed with a `+`, which will be loaded
 Pass `--plugin name` or `--plugin name={jsonconfig}` to load
 plugins. Use `--def file` to load <<typedef,JSON definitions>>.
 
-`bin/from_ts`::
-
-Given a typescript `.def.ts` file, will attempt to convert it to a
-Tern-style <<typedef,JSON definition>> file.
-
 [[infer]]
 == Inference engine ==
 
