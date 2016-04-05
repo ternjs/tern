@@ -81,6 +81,9 @@ Pass `null` or `any` to listen on all available hosts.
 five minutes of inactivity. Pass it a this option to disable
 auto-shutdown.
 
+`--ignore-stdin`:: By default, the server will close when its standard
+input stream is closed. Pass this flag to disable that behavior.
+
 `--verbose`:: Will cause the server to spit out information about the
 requests and responses that it handles, and any errors that are
 raised. Useful for debugging.
