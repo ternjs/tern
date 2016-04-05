@@ -118,10 +118,14 @@ function loadPlugins(projectDir, config) {
     if (!val) continue;
     var found = findFile(plugin + ".js", projectDir, path.resolve(distDir, "plugin"));
     if (!found) {
-      found = resolveCwd("tern-" + plugin);
-      if (!found) {
-        process.stderr.write("Failed to find plugin " + plugin + ".\n");
-        continue;
+      try {
+        found = require.resolve("tern-" + plugin);
+      } catch (e) {
+        found = resolveCwd("tern-" + plugin);
+        if (!found) {
+          process.stderr.write("Failed to find plugin " + plugin + ".\n");
+          continue;
+        }
       }
     }
     var mod = require(found);
