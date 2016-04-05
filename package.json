@@ -17,7 +17,8 @@
     "acorn": "^2.7.0",
     "enhanced-resolve": "^0.9.1",
     "glob": "3",
-    "minimatch": "0.2"
+    "minimatch": "0.2",
+    "resolve-cwd": "1.0.0"
   },
   "devDependencies": {
     "codemirror": "git://github.com/codemirror/CodeMirror.git"

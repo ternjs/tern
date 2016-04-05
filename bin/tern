@@ -8,6 +8,7 @@
 var tern = require("../lib/tern");
 var fs = require("fs"), path = require("path"), url = require("url");
 var glob = require("glob"), minimatch = require("minimatch");
+var resolveCwd = require("resolve-cwd");
 
 var projectFileName = ".tern-project", portFileName = ".tern-port";
 var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
@@ -117,9 +118,8 @@ function loadPlugins(projectDir, config) {
     if (!val) continue;
     var found = findFile(plugin + ".js", projectDir, path.resolve(distDir, "plugin"));
     if (!found) {
-      try {
-        found = require.resolve("tern-" + plugin);
-      } catch (e) {
+      found = resolveCwd("tern-" + plugin);
+      if (!found) {
         process.stderr.write("Failed to find plugin " + plugin + ".\n");
         continue;
       }
