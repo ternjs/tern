@@ -663,8 +663,9 @@ JSON data.
 [[plugin_es_modules]]
 ==== ES modules plugin ====
 
-Builds on top of the <<plugin_modules,`modules` plugin>> to support
-ECMAScript 6's `import` and `export` based module inclusion.
+This plugin (`es_modules`) builds on top of the
+<<plugin_modules,`modules` plugin>> to support ECMAScript 6's `import`
+and `export` based module inclusion.
 
 [[plugin_requirejs]]
 ==== RequireJS plugin ====
