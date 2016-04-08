@@ -8,7 +8,7 @@
 var tern = require("../lib/tern");
 var fs = require("fs"), path = require("path"), url = require("url");
 var glob = require("glob"), minimatch = require("minimatch");
-var resolveCwd = require("resolve-cwd");
+var resolveFrom = require("resolve-from");
 
 var projectFileName = ".tern-project", portFileName = ".tern-port";
 var maxIdleTime = 6e4 * 5; // Shut down after five minutes of inactivity
@@ -92,7 +92,8 @@ function findDefs(projectDir, config) {
   for (var i = 0; i < src.length; ++i) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";
-    var found = findFile(file, projectDir, path.resolve(distDir, "defs"));
+    var found = findFile(file, projectDir, path.resolve(distDir, "defs"))
+        || resolveFrom(projectDir, "tern-" + src[i]);
     if (!found) {
       try {
         found = require.resolve("tern-" + src[i]);
@@ -116,16 +117,14 @@ function loadPlugins(projectDir, config) {
   for (var plugin in plugins) {
     var val = plugins[plugin];
     if (!val) continue;
-    var found = findFile(plugin + ".js", projectDir, path.resolve(distDir, "plugin"));
+    var found = findFile(plugin + ".js", projectDir, path.resolve(distDir, "plugin"))
+        || resolveFrom(projectDir, "tern-" + plugin);
     if (!found) {
       try {
         found = require.resolve("tern-" + plugin);
       } catch (e) {
-        found = resolveCwd("tern-" + plugin);
-        if (!found) {
-          process.stderr.write("Failed to find plugin " + plugin + ".\n");
-          continue;
-        }
+        process.stderr.write("Failed to find plugin " + plugin + ".\n");
+        continue;
       }
     }
     var mod = require(found);
