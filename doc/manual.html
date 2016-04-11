@@ -173,6 +173,11 @@ very top are the <a href="#editor">editor plugins</a>. These talk to a
 </li>
 <li>
 <p>
+<a href="#vy">vy</a>
+</p>
+</li>
+<li>
+<p>
 <a href="#sublime_text">Sublime Text</a>
 </p>
 </li>
@@ -983,28 +988,7 @@ nested objects specify properties of object types. Properties prefixed
 with an exclamation point (<code>!</code>) hold special directives, all other
 properties refer to variable or property names.</p>
 <p> Here is an example:</p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>{
-  "!name": "mylibrary",
-  "!define": {
-    "point": {
-      "x": "number",
-      "y": "number"
-    }
-  },
-  "MyConstructor": {
-    "!type": "fn(arg: string)",
-    "staticFunction": "fn() -&gt; bool",
-    "prototype": {
-      "property": "[number]",
-      "clone": "fn() -&gt; +MyConstructor",
-      "getPoint": "fn(i: number) -&gt; point"
-    }
-  },
-  "someOtherGlobal": "string"
-}</pre>
-</div></div>
+<pre data-language="application/x-json" class="cm-s-default"></pre>
 <p> This defines a library that sets two globals, <code>MyConstructor</code> holding
 a constructor function, and <code>someOtherGlobal</code> holding a string. The
 origin of the types, variables, and properties defined by this
@@ -1257,24 +1241,7 @@ even silently load the wrong Tern modules depending on install location.</p>
 <h3> <a id="configuration"></a>Project configuration</h3>
 <p> A <code>.tern-project</code> file is a <a href="http://json.org">JSON</a> file in a format
 like this:</p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>{
-  "libs": [
-    "browser",
-    "jquery"
-  ],
-  "loadEagerly": [
-    "importantfile.js"
-  ],
-  "plugins": {
-    "requirejs": {
-      "baseURL": "./",
-      "paths": {}
-    }
-  }
-}</pre>
-</div></div>
+<pre data-language="application/x-json" class="cm-s-default"></pre>
 <p> The <code>libs</code> property refers to the <a href="#typedef">JSON type descriptions</a>
 that should be loaded into the environment for this project. See the
 <code>defs/</code> directory for examples. The strings given here will be
@@ -1916,21 +1883,14 @@ Clone this repository somewhere. Do <code>npm install</code> to get the
 Make Emacs aware of <code>emacs/tern.el</code>. For example by adding this to
   your <code>.emacs</code> file:
 </p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>(add-to-list 'load-path "/path/to/tern/emacs/")
-(autoload 'tern-mode "tern.el" nil t)</pre>
-</div></div>
+<pre data-language="commonlisp" class="cm-s-default"></pre>
 </li>
 <li>
 <p>
 Optionally set <code>tern-mode</code> to be automatically enabled for your
   JavaScript mode of choice. Here&#8217;s the snippet for <code>js-mode</code>:
 </p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>(add-hook 'js-mode-hook (lambda () (tern-mode t)))</pre>
-</div></div>
+<pre data-language="commonlisp" class="cm-s-default"></pre>
 </li>
 </ol></div>
 <p> The Emacs mode uses the <code>bin/tern</code> server, and project configuration
@@ -1986,19 +1946,16 @@ open the associated URL (if any).
 </dl>
 <h4> <a id="_auto_complete"></a>Auto-Complete</h4>
 <p> If you want to use <code>auto-complete.el</code> for completion, append following codes:</p>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>(eval-after-load 'tern
-   '(progn
-      (require 'tern-auto-complete)
-      (tern-ac-setup)))</pre>
-</div></div>
+<pre data-language="commonlisp" class="cm-s-default"></pre>
 <p> If <code>tern-ac-on-dot</code> is non-nil (default), typing <code>.</code>(dot) invokes auto-complete to select completions.
 Calling the command <code>tern-ac-complete</code>, one can invoke auto-complete manually.</p>
 <h3> <a id="vim"></a>Vim</h3>
 <p> The Vim plugin is maintained in a
 <a href="https://github.com/ternjs/tern_for_vim">separate repository</a>. Please
 see its README for details.</p>
+<h3> <a id="vy"></a>vy</h3>
+<p> The <a href="https://github.com/iogf/vy">vy</a> editor is a vim-like written in python whose
+philosophy is clean code and modularity. The javascript autocompletion plugin is built-in.</p>
 <h3> <a id="sublime_text"></a>Sublime Text</h3>
 <p> There are two implementations of Sublime Text modules for Tern. One
 written by me, at <a href="https://github.com/ternjs/tern_for_sublime">https://github.com/ternjs/tern_for_sublime</a>. This
