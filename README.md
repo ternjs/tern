@@ -14,7 +14,8 @@ software, under an MIT license.
 There are currently plugins available for [Emacs][emacs] (and Emacs
 [company-mode][cmode]), [Vim][vim], [Sublime Text][st], [Eclipse (and general Java API)][ec],
 [Light Table][lt], [Atom][atom], [TextMate][tm] and [gedit][gedit], and built-in support in
-[Brackets][brackets], [Edge Code][edge_code], and [CodeLite](http://codelite.org/).
+[Brackets][brackets], [Edge Code][edge_code], [CodeLite](http://codelite.org/),
+and [vy](https://github.com/iogf/vy).
 
 For further documentation, see the [project page][1] and the
 [manual][3]. To report issues, use the
