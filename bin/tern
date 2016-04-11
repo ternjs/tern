@@ -48,7 +48,7 @@ function findProjectDir() {
 var defaultConfig = {
   libs: [],
   loadEagerly: false,
-  plugins: {},
+  plugins: {doc_comment: true},
   ecmaScript: true,
   ecmaVersion: 6,
   dependencyBudget: tern.defaultOptions.dependencyBudget
@@ -56,6 +56,15 @@ var defaultConfig = {
 var homeDir = process.env.HOME || process.env.USERPROFILE;
 if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config")))
   defaultConfig = readProjectFile(path.resolve(homeDir, ".tern-config"));
+
+function mergeObjects(base, value) {
+  if (!base) return value
+  if (!value) return base
+  var result = {}
+  for (var prop in base) result[prop] = base[prop]
+  for (var prop in value) result[prop] = value[prop]
+  return result
+}
 
 function readJSON(fileName) {
   var file = fs.readFileSync(fileName, "utf8");
@@ -69,8 +78,12 @@ function readJSON(fileName) {
 
 function readProjectFile(fileName) {
   var data = readJSON(fileName);
-  for (var option in defaultConfig) if (!data.hasOwnProperty(option))
-    data[option] = defaultConfig[option];
+  for (var option in defaultConfig) {
+    if (!data.hasOwnProperty(option))
+      data[option] = defaultConfig[option];
+    else if (option == "plugins")
+      data[option] = mergeObjects(defaultConfig[option], data[option])
+  }
   return data;
 }
 
@@ -107,11 +120,6 @@ function findDefs(projectDir, config) {
   return defs;
 }
 
-function defaultPlugins(config) {
-  var result = ["doc_comment"]
-  return result
-}
-
 function loadPlugins(projectDir, config) {
   var plugins = config.plugins, options = {};
   for (var plugin in plugins) {
@@ -132,12 +140,6 @@ function loadPlugins(projectDir, config) {
     options[path.basename(plugin)] = val;
   }
 
-  defaultPlugins(config).forEach(function(name) {
-    if (!plugins.hasOwnProperty(name)) {
-      options[name] = true;
-      require("../plugin/" + name);
-    }
-  });
   return options;
 }
 
