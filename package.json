@@ -14,7 +14,7 @@
     "test": "sh -c './bin/test'"
   },
   "dependencies": {
-    "acorn": "^2.7.0",
+    "acorn": "^3.1.0",
     "enhanced-resolve": "^0.9.1",
     "glob": "3",
     "minimatch": "0.2",
