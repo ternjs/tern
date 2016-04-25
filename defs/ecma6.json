@@ -48,8 +48,8 @@
       "setPrototypeOf": "fn(target: ?, prototype: ?)",
       "isExtensible": "fn(target: ?)",
       "preventExtensions": "fn(target: ?)",
-      "getOwnPropertyDescriptor": "fn(target: ?, property: string)",
-      "defineProperty": "fn(target: ?, property: string, descriptor: ?)",
+      "getOwnPropertyDescriptor": "fn(target: ?, property: string) -> propertyDescriptor",
+      "defineProperty": "fn(target: ?, property: string, descriptor: propertyDescriptor)",
       "has": "fn(target: ?, property: string)",
       "get": "fn(target: ?, property: string)",
       "set": "fn(target: ?, property: string, value: ?)",
@@ -236,6 +236,14 @@
           "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/@@iterator"
         }
       }
+    },
+    "propertyDescriptor": {
+      "enumerable": "bool",
+      "configurable": "bool",
+      "value": "?",
+      "writable": "bool",
+      "get": "fn() -> ?",
+      "set": "fn(value: ?)"
     }
   },
   "Array": {
@@ -702,7 +710,7 @@
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect/construct"
     },
     "defineProperty": {
-      "!type": "fn(target: ?, property: string, attributes: ?) -> bool",
+      "!type": "fn(target: ?, property: string, descriptor: propertyDescriptor) -> bool",
       "!doc": "The static Reflect.defineProperty() method is like Object.defineProperty() but returns a Boolean.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect/defineProperty"
     },

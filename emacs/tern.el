@@ -85,9 +85,10 @@
   (let* ((script-file (or load-file-name
                           (and (boundp 'bytecomp-filename) bytecomp-filename)
                           buffer-file-name))
-         (bin-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file))))
-         (tern-itself (list (if (file-exists-p bin-file) bin-file "tern"))))
-    (if (eq system-type 'windows-nt) (cons "node" tern-itself) tern-itself))
+         (bin-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file)))))
+    (if (file-exists-p bin-file)
+        (if (eq system-type 'windows-nt) (list "node" bin-file) (list bin-file))
+      (list "tern")))
   "The command to be run to start the Tern server. Should be a
 list of strings, giving the binary name and arguments.")
 
