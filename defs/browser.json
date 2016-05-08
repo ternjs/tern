@@ -2929,6 +2929,11 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/Manipulating_the_browser_history",
     "!doc": "The DOM window object provides access to the browser's history through the history object. It exposes useful methods and properties that let you move back and forth through the user's history, as well as -- starting with HTML5 -- manipulate the contents of the history stack."
   },
+  "requestAnimationFrame": {
+    "!type": "fn(callback: fn(timestamp: number)) -> number",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.requestAnimationFrame",
+    "!doc": "The Window.requestAnimationFrame() method tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint. The method takes as an argument a callback to be invoked before the repaint."
+  },
   "screen": {
     "availWidth": {
       "!type": "number",
