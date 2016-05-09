@@ -2934,6 +2934,11 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/window.requestAnimationFrame",
     "!doc": "The Window.requestAnimationFrame() method tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint. The method takes as an argument a callback to be invoked before the repaint."
   },
+  "cancelAnimationFrame": {
+    "!type": "fn(number)n",
+    "!url": "https://developer.mozilla.org/en/docs/DOM/window.cancelAnimationFrame",
+    "!doc": "Cancels a previously scheduled animation frame request."
+  },
   "screen": {
     "availWidth": {
       "!type": "number",
