@@ -521,7 +521,7 @@
         "!doc": "Show or manipulate the queue of functions to be executed on the matched elements."
       },
       "ready": {
-        "!type": "fn(fn: fn()) -> jQuery.fn",
+        "!type": "fn(fn: fn(jQuery.fn)) -> jQuery.fn",
         "!url": "http://api.jquery.com/ready/",
         "!doc": "Specify a function to execute when the DOM is fully loaded."
       },
