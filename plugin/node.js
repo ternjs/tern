@@ -27,27 +27,27 @@
           prototype: {
             addListener: {
               "!type": "fn(event: string, listener: fn())",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_addlistener_event_listener",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_addlistener_eventname_listener",
               "!doc": "Adds a listener to the end of the listeners array for the specified event."
             },
             on: {
               "!type": "fn(event: string, listener: fn())",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_on_event_listener",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_on_eventname_listener",
               "!doc": "Adds a listener to the end of the listeners array for the specified event."
             },
             once: {
               "!type": "fn(event: string, listener: fn())",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_once_event_listener",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_once_eventname_listener",
               "!doc": "Adds a one time listener for the event. This listener is invoked only the next time the event is fired, after which it is removed."
             },
             removeListener: {
               "!type": "fn(event: string, listener: fn())",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_removelistener_event_listener",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_removelistener_eventname_listener",
               "!doc": "Remove a listener from the listener array for the specified event. Caution: changes array indices in the listener array behind the listener."
             },
             removeAllListeners: {
               "!type": "fn(event: string)",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_removealllisteners_event",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_removealllisteners_eventname",
               "!doc": "Removes all listeners, or those of the specified event."
             },
             setMaxListeners: {
@@ -57,16 +57,16 @@
             },
             listeners: {
               "!type": "fn(event: string) -> [fn()]",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_listeners_event",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_listeners_eventname",
               "!doc": "Returns an array of listeners for the specified event."
             },
             emit: {
               "!type": "fn(event: string)",
-              "!url": "https://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2",
+              "!url": "https://nodejs.org/api/events.html#events_emitter_emit_eventname_arg1_arg2",
               "!doc": "Execute each of the listeners in order with the supplied arguments."
             }
           },
-          "!url": "https://nodejs.org/api/events.html#events_class_events_eventemitter",
+          "!url": "https://nodejs.org/api/events.html#events_class_eventemitter",
           "!doc": "To access the EventEmitter class, require('events').EventEmitter."
         }
       },
@@ -2660,47 +2660,47 @@
     console: {
       log: {
         "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_log_data",
+        "!url": "https://nodejs.org/api/console.html#console_console_log_data",
         "!doc": "Prints to stdout with newline. This function can take multiple arguments in a printf()-like way."
       },
       info: {
         "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_info_data",
+        "!url": "https://nodejs.org/api/console.html#console_console_info_data",
         "!doc": "Same as console.log."
       },
       error: {
         "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_error_data",
+        "!url": "https://nodejs.org/api/console.html#console_console_error_data",
         "!doc": "Same as console.log but prints to stderr."
       },
       warn: {
         "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_warn_data",
+        "!url": "https://nodejs.org/api/console.html#console_console_warn_data",
         "!doc": "Same as console.error."
       },
       dir: {
         "!type": "fn(obj: ?)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_dir_obj",
+        "!url": "https://nodejs.org/api/console.html#console_console_dir_obj_options",
         "!doc": "Uses util.inspect on obj and prints resulting string to stdout."
       },
       time: {
         "!type": "fn(label: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_time_label",
+        "!url": "https://nodejs.org/api/console.html#console_console_time_label",
         "!doc": "Mark a time."
       },
       timeEnd: {
         "!type": "fn(label: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_timeend_label",
+        "!url": "https://nodejs.org/api/console.html#console_console_timeend_label",
         "!doc": "Finish timer, record output."
       },
       trace: {
         "!type": "fn(label: string)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_trace_label",
+        "!url": "https://nodejs.org/api/console.html#console_console_trace_message",
         "!doc": "Print a stack trace to stderr of the current position."
       },
       assert: {
         "!type": "fn(expression: bool)",
-        "!url": "https://nodejs.org/api/stdio.html#stdio_console_assert_expression_message",
+        "!url": "https://nodejs.org/api/console.html#console_console_assert_value_message",
         "!doc": "Same as assert.ok() where if the expression evaluates as false throw an AssertionError with message."
       },
       "!url": "https://nodejs.org/api/globals.html#globals_console",
