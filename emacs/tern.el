@@ -517,11 +517,16 @@ list of strings, giving the binary name and arguments.")
 ;; Mode plumbing
 
 (defun tern-after-change (start end prev-length)
-  "Track the dirty area of the buffer."
+  "Track changes to the buffer."
+  ;; Track the dirty area of the buffer.
   (if tern-buffer-is-dirty
       (setf tern-buffer-is-dirty (cons (min start (car tern-buffer-is-dirty))
                                        (max end   (cdr tern-buffer-is-dirty))))
-    (setf tern-buffer-is-dirty (cons start end))))
+    (setf tern-buffer-is-dirty (cons start end)))
+  ;; Set this here in addition to `tern-post-command', since the buffer may have
+  ;; changed before a command completes (e.g. in a `query-replace' session).
+  ;; See issue #786.
+  (setf tern-activity-since-command tern-command-generation))
 
 (defvar tern-idle-time 2.5
   "The time Emacs is allowed to idle before updating Tern's representation of the file.")
