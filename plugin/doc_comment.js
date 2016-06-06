@@ -42,6 +42,12 @@
       },
       CallExpression: function(node) {
         if (isDefinePropertyCall(node)) attachComments(node);
+      },
+      ExportNamedDeclaration: function ExportNamedDeclaration(node) {
+        attachComments(node);
+      },
+      ExportDefaultDeclaration: function ExportDefaultDeclaration(node) {
+        attachComments(node);
       }
     });
   }
@@ -107,6 +113,20 @@
             var prop = type.props[node.arguments[1].value];
             if (prop) interpretComments(node, node.commentsBefore, scope, prop);
           }
+        }
+      },
+      ExportNamedDeclaration: function(node, scope) {
+        if (node.commentsBefore && node.declaration && node.declaration.type === 'FunctionDeclaration') {
+          interpretComments(node.declaration, node.commentsBefore, scope,
+                            scope.getProp(node.declaration.id.name),
+                            node.declaration.scope.fnType);
+        }
+      },
+      ExportDefaultDeclaration: function(node, scope) {
+        if (node.commentsBefore && node.declaration && node.declaration.type === 'FunctionDeclaration') {
+          interpretComments(node.declaration, node.commentsBefore, scope,
+                            scope.getProp(node.declaration.id.name),
+                            node.declaration.scope.fnType);
         }
       }
     }, infer.searchVisitor, scope);
