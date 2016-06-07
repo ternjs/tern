@@ -518,7 +518,6 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-after-change (start end prev-length)
   "Track changes to the buffer."
-  ;; Track the dirty area of the buffer.
   (if tern-buffer-is-dirty
       (setf tern-buffer-is-dirty (cons (min start (car tern-buffer-is-dirty))
                                        (max end   (cdr tern-buffer-is-dirty))))
