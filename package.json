@@ -11,7 +11,7 @@
     "url": "git://github.com/ternjs/tern.git"
   },
   "scripts": {
-    "test": "sh -c './bin/test'"
+    "test": "node ./bin/test"
   },
   "dependencies": {
     "acorn": "^3.1.0",
