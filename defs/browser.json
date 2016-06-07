@@ -2473,6 +2473,56 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest",
         "!doc": "Sets the value of an HTTP request header.You must call setRequestHeader() after open(), but before send()."
       },
+      "onabort": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/onabort",
+        "!doc": "The XMLHttpRequestEventTarget.onabort is the function called when an XMLHttpRequest transaction is aborted, such as when the XMLHttpRequest.abort() function is called."
+      },
+      "onerror": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/onerror",
+        "!doc": "The XMLHttpRequestEventTarget.onerror is the function called when an XMLHttpRequest transaction fails due to an error."
+      },
+      "onload": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/onload",
+        "!doc": "The XMLHttpRequestEventTarget.onload is the function called when an XMLHttpRequest transaction completes successfully."
+      },
+      "onloadstart": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/onloadstart",
+        "!doc": "The XMLHttpRequestEventTarget.onloadstart is the function called when an XMLHttpRequest transaction starts transferring data."
+      },
+      "onloadend": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/onloadend",
+        "!doc": "The XMLHttpRequestEventTarget.onloadend is the function called when an XMLHttpRequest transaction completes transferring data."
+      },
+      "onprogress": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/onprogress",
+        "!doc": "The XMLHttpRequestEventTarget.onprogress is the function called periodically with information when an XMLHttpRequest before success completely."
+      },
+      "ontimeout": {
+        "!type": "fn()",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequestEventTarget/ontimeout",
+        "!doc": "The XMLHttpRequestEventTarget.ontimeout is the function called when the XMLHttpRequest times out."
+      },
+      "addEventListener": {
+        "!type": "fn(type: string, listener: fn(), options?: ?, useCapture?: bool)",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener",
+        "!doc": "The EventTarget.addEventListener() method registers the specified listener on the EventTarget it's called on. The event target may be an Element in a document, the Document itself, a Window, or any other object that supports events (such as XMLHttpRequest)."
+      },
+      "removeEventListener": {
+        "!type": "fn(type: string, listener: fn(), options?: ?, useCapture?: bool)",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener",
+        "!doc": "Removes the event listener previously registered with EventTarget.addEventListener()."
+      },
+      "dispatchEvent": {
+        "!type": "fn(event: ?)",
+        "!url" : "https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent",
+        "!doc": "Dispatches an Event at the specified EventTarget, invoking the affected EventListeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) apply to events dispatched manually with dispatchEvent()."
+      },
       "onreadystatechange": {
         "!type": "fn()",
         "!url": "https://developer.mozilla.org/en/docs/DOM/XMLHttpRequest",
