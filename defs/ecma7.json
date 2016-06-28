@@ -1,0 +1,12 @@
+{
+  "!name": "ecma7",
+  "Array": {
+    "prototype": {
+      "includes": {
+        "!type": "fn(value: ?) -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes",
+        "!doc": "Determines whether an array includes a certain element, returning true or false as appropriate."
+      }
+    }
+  }
+}
