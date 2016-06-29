@@ -11,10 +11,10 @@
     "url": "git://github.com/ternjs/tern.git"
   },
   "scripts": {
-    "test": "sh -c './bin/test'"
+    "test": "node ./bin/test"
   },
   "dependencies": {
-    "acorn": "^3.1.0",
+    "acorn": "^3.2.0",
     "enhanced-resolve": "^0.9.1",
     "glob": "3",
     "minimatch": "0.2",
