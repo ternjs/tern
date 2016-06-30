@@ -167,6 +167,9 @@ by at least to characters.
 `includeKeywords` (optional, default `false`);; Whether to include
 JavaScript keywords when completing something that is not a property.
 
+`inLiteral` (optional, default `true`);; If completions should be
+returned when inside a literal.
+
 +
 The result returned will be an object with `start` and `end`
 properties, which give the start and end <<offsets,offsets>> of the
