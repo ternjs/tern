@@ -1695,7 +1695,7 @@
         },
         join: {
           "!type": "fn() -> string",
-          "!url": "https://nodejs.org/api/path.html#path_path_join_path1_path2",
+          "!url": "https://nodejs.org/api/path.html#path_path_join_path",
           "!doc": "Join all arguments together and normalize the resulting path."
         },
         resolve: {
