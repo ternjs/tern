@@ -15,6 +15,8 @@
 (defvar tern-known-port nil)
 (defvar tern-server nil)
 (defvar tern-explicit-port nil)
+(defvar tern-project-dir nil)
+(defvar tern-last-file-name nil)
 
 (defun tern-message (fmt &rest objects)
   (apply 'message fmt objects))
@@ -49,14 +51,19 @@
         (funcall c nil json)))))
 
 (defun tern-project-dir ()
-  (or (and (not (buffer-file-name)) "")
+  (or (and (equal tern-last-file-name (buffer-file-name)) tern-project-dir)
+      (and (not (buffer-file-name)) (setf tern-project-dir ""))
       (let ((project-dir (file-name-directory (buffer-file-name))))
         (cl-loop for cur = project-dir then (let ((shorter (file-name-directory (directory-file-name cur))))
                                               (and (< (length shorter) (length cur)) shorter))
                  while cur do
                  (when (file-exists-p (expand-file-name ".tern-project" cur))
                    (cl-return (setf project-dir cur))))
-        project-dir)))
+        (setf tern-project-dir project-dir)))
+  ;; Track the file name to detect if it changed, which means the project
+  ;; directory needs to be found again.
+  (setf tern-last-file-name (buffer-file-name))
+  tern-project-dir)
 
 (defun tern-find-server (c &optional ignore-port)
   (cl-block nil
@@ -573,6 +580,8 @@ list of strings, giving the binary name and arguments.")
   (set (make-local-variable 'tern-known-port) nil)
   (set (make-local-variable 'tern-server) "127.0.0.1")
   (set (make-local-variable 'tern-explicit-port) nil)
+  (set (make-local-variable 'tern-project-dir) nil)
+  (set (make-local-variable 'tern-last-file-name) nil)
   (set (make-local-variable 'tern-last-point-pos) nil)
   (set (make-local-variable 'tern-last-completions) nil)
   (set (make-local-variable 'tern-last-argument-hints) nil)
