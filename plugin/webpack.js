@@ -11,7 +11,12 @@ var path = require("path");
 var ResolverFactory = require("enhanced-resolve").ResolverFactory;
 var SyncNodeJsInputFileSystem = require("enhanced-resolve/lib/SyncNodeJsInputFileSystem");
 
-var file = process.cwd() + '/webpack.config.js'
+var file
+if (process.argv[1] && /test$/.test(process.argv[1])) {
+ file = path.resolve(__dirname, '../test/cases/webpack/webpack.config.js')
+} else {
+ file = path.resolve('./webpack.config.js')
+}
 var resolveConfig = fs.existsSync(file) ? require(file).resolve : null
 
 var config = {
