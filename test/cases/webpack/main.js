@@ -1,4 +1,4 @@
-// plugin=webpack
+// plugin=webpack {"configPath": "./webpack.config.js"}
 
 require("foo") //:: {browser: bool}
 
