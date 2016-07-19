@@ -16,6 +16,7 @@
 (defvar tern-server nil)
 (defvar tern-explicit-port nil)
 (defvar tern-project-dir nil)
+(defvar tern-last-file-name nil)
 
 (defun tern-message (fmt &rest objects)
   (apply 'message fmt objects))
@@ -50,7 +51,7 @@
         (funcall c nil json)))))
 
 (defun tern-project-dir ()
-  (or tern-project-dir
+  (or (and (equal tern-last-file-name (buffer-file-name)) tern-project-dir)
       (and (not (buffer-file-name)) (setf tern-project-dir ""))
       (let ((project-dir (file-name-directory (buffer-file-name))))
         (cl-loop for cur = project-dir then (let ((shorter (file-name-directory (directory-file-name cur))))
@@ -58,7 +59,11 @@
                  while cur do
                  (when (file-exists-p (expand-file-name ".tern-project" cur))
                    (cl-return (setf project-dir cur))))
-        (setf tern-project-dir project-dir))))
+        (setf tern-project-dir project-dir)))
+  ;; Track the file name to detect if it changed, which means the project
+  ;; directory needs to be found again.
+  (setf tern-last-file-name (buffer-file-name))
+  tern-project-dir)
 
 (defun tern-find-server (c &optional ignore-port)
   (cl-block nil
@@ -93,7 +98,7 @@
 list of strings, giving the binary name and arguments.")
 
 (defun tern-start-server (c)
-  (let* ((default-directory tern-project-dir)
+  (let* ((default-directory (tern-project-dir))
          (cmd (if (member "--strip-crs" tern-command) tern-command (append tern-command '("--strip-crs"))))
          (proc (apply #'start-process "Tern" nil cmd))
          (all-output ""))
@@ -159,7 +164,7 @@ list of strings, giving the binary name and arguments.")
       (when (and (not (eq buf (current-buffer)))
                  (buffer-local-value 'tern-mode buf)
                  (buffer-local-value 'tern-buffer-is-dirty buf)
-                 (equal tern-project-dir (buffer-local-value 'tern-project-dir buf)))
+                 (equal (tern-project-dir) (with-current-buffer buf (tern-project-dir))))
         (with-current-buffer buf
           (push `((type . "full")
                   (name . ,(tern-project-relative-file))
@@ -215,7 +220,7 @@ list of strings, giving the binary name and arguments.")
          (cond ((not err)
                 (dolist (file files)
                   (when (equal (cdr (assq 'type file)) "full")
-                    (with-current-buffer (find-file-noselect (expand-file-name (cdr (assq 'name file)) tern-project-dir))
+                    (with-current-buffer (find-file-noselect (expand-file-name (cdr (assq 'name file)) (tern-project-dir)))
                       (setf tern-buffer-is-dirty nil))))
                 (funcall f data))
                ((not (eq mode :silent)) (tern-message "Request failed: %s" err)))))
@@ -576,6 +581,7 @@ list of strings, giving the binary name and arguments.")
   (set (make-local-variable 'tern-server) "127.0.0.1")
   (set (make-local-variable 'tern-explicit-port) nil)
   (set (make-local-variable 'tern-project-dir) nil)
+  (set (make-local-variable 'tern-last-file-name) nil)
   (set (make-local-variable 'tern-last-point-pos) nil)
   (set (make-local-variable 'tern-last-completions) nil)
   (set (make-local-variable 'tern-last-argument-hints) nil)
