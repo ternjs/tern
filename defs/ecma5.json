@@ -481,6 +481,11 @@
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/test",
         "!doc": "Executes the search for a match between a regular expression and a specified string. Returns true or false."
       },
+      "toString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/toString",
+        "!doc": "Returns a string representation of the regular expression."
+      },
       "global": {
         "!type": "bool",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp",
