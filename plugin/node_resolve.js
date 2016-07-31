@@ -15,6 +15,7 @@
   function findDeclaredDeps() {}
 
   var resolveToFile
+  var projectPaths = [];
   if (require) (function() {
     var module_ = require("module"), path = require("path"), fs = require("fs")
 
@@ -27,7 +28,9 @@
 
       var parentModule = {
         id: fullParent,
-        paths: module_._nodeModulePaths(parentDir).concat(module_.globalPaths)
+        paths: module_._nodeModulePaths(parentDir)
+                      .concat(projectPaths)
+                      .concat(module_.globalPaths)
       }
       try {
         return module_._resolveFilename(name, parentModule)
@@ -74,7 +77,10 @@
     }
   })()
 
-  tern.registerPlugin("node_resolve", function(server) {
+  tern.registerPlugin("node_resolve", function(server, options) {
+    if (options && options.hasOwnProperty('lookup_paths')) {
+      projectPaths = options.lookup_paths;
+    }
     server.loadPlugin("commonjs")
     server.mod.modules.resolvers.push(resolve)
     findDeclaredDeps(server.projectDir, server.mod.modules.knownModules)
