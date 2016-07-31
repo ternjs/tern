@@ -3,7 +3,7 @@
 ## Submitting bug reports
 
 The preferred way to report bugs is to use the [GitHub issue
-tracker](http://github.com/codemirror/tern/issues). Please put some
+tracker](http://github.com/ternjs/tern/issues). Please put some
 thought and energy into your report, to make it easy for us to help
 you.
 
