@@ -1702,7 +1702,7 @@
     },
     "reject": "Promise_reject",
     "resolve": {
-      "!type": "fn(value: ?) -> +Promise[:t=!0]",
+      "!type": "fn(value: ?) -> !custom:Promise_resolve",
       "!doc": "The Promise.resolve(value) method returns a Promise object that is resolved with the given value. If the value is a thenable (i.e. has a then method), the returned promise will 'follow' that thenable, adopting its eventual state; otherwise the returned promise will be fulfilled with the value.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve"
     },
