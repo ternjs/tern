@@ -51,4 +51,35 @@ var p7 = Promise.resolve().then(function() {
 });
 
 var p8 = Promise.resolve();
-//: Promise
+p8 //: Promise
+
+function myResolve1(arg) {
+  return Promise.resolve(arg);
+}
+
+myResolve1('s') //:: {:t: string}
+
+function myResolve2(arg) {
+  return Promise.resolve(arg);
+}
+
+myResolve2('s') //:: {:t: string|number}
+myResolve2(4) //:: {:t: string|number}
+
+myResolve2('s').then(function(value) {
+  value; //: string|number
+})
+
+function myResolve3(arg7) {
+  return Promise.resolve(arg7);
+}
+
+myResolve3(Promise.resolve(4)).then(function(value) {
+  value; //: number
+});
+
+myResolve3(Promise.resolve(4)) //:: {:t: number}
+
+myResolve3(4).then(function(value) {
+  value; //: number
+});
