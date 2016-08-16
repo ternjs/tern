@@ -98,10 +98,8 @@ var distDir = path.resolve(__dirname, "..");
 
 function findDefs(projectDir, config) {
   var defs = [], src = config.libs.slice();
-  if (config.ecmaScript) {
-    if (src.indexOf("ecma6") == -1 && config.ecmaVersion >= 6) src.unshift("ecma6")
-    if (src.indexOf("ecma5") == -1) src.unshift("ecma5")
-  }   
+  if (config.ecmaScript && src.indexOf("ecmascript") == -1)
+    src.unshift("ecmascript")
   for (var i = 0; i < src.length; ++i) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";

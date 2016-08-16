@@ -31,7 +31,7 @@ function loadDef(name) {
   defs.push(JSON.parse(fs.readFileSync(found, "utf8")));
 }
 
-loadDef("ecma5");
+loadDef("ecmascript");
 
 function loadPlugin(name, val) {
   var found = findFile(name, "plugin", ".js");

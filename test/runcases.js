@@ -19,7 +19,7 @@ var defData = {
 };
 
 function getDefs(text) {
-  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [util.ecma5, util.ecma6];
+  var spec = /\/\/ environment=(\w+)\n/g, m, defs = [util.ecmascript];
   while (m = spec.exec(text)) {
     var data = defData[m[1]];
     if (!data) throw new Error("Unknown environment: " + m[1]);

@@ -8,7 +8,7 @@ function test(name, f) {
     if (!added) { util.addFile(); added = true; }
     util.addTest();
     
-    f(new tern.Server({defs: [util.ecma5], debug: true}));
+    f(new tern.Server({defs: [util.ecmascript], debug: true}));
   });
 }
 

@@ -4,7 +4,7 @@ var fs = require("fs");
 
 var file = fs.readFileSync(util.resolve("test/data/large.js"), "utf8");
 
-var server = new tern.Server({defs: [util.ecma5]});
+var server = new tern.Server({defs: [util.ecmascript]});
 
 var curTest;
 function fail(msg) { throw curTest + ": " + msg; }

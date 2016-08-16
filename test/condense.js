@@ -9,7 +9,7 @@ function jsonFile(name) { return util.resolve(condenseDir + "/" + name.replace(/
 
 function runTest(options) {
   var server = new tern.Server({
-    defs: [util.ecma5, util.browser],
+    defs: [util.ecmascript, util.browser],
     plugins: options.plugins,
     projectDir: util.resolve(condenseDir),
     getFile: function(name) {
@@ -30,7 +30,7 @@ function runTest(options) {
 
     // Test loading the condensed defs.
     var server2 = new tern.Server({
-      defs: [util.ecma5, util.browser, condensed],
+      defs: [util.ecmascript, util.browser, condensed],
       plugins: options.plugins
     });
     server2.flush(function() {

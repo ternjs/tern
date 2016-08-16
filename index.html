@@ -167,7 +167,7 @@ I gave about it at the Curry On conference.</p>
 
 <ul class="release-note">
   <li>Parse input as ES6 (but ignore most ES6 constructs for now)</li>
-  <li>Improved type inference for promises (as defined in the <code>ecma6</code> json file)</li>
+  <li>Improved type inference for promises</li>
   <li>Fix another source of exponential complexity blowup</li>
   <li>Complete module names in the requirejs plugin</li>
   <li>Improved type guessing for overridden properties</li>
@@ -209,8 +209,7 @@ I gave about it at the Curry On conference.</p>
   <li>Add support for union types. The strings for types will now
   often contain <code>|</code> characters separating alternatives.
   Such types are also allowed in JSDoc comments.</li>
-  <li>Add a
-  rough <a href="defs/ecma6.json"><code>ecma6.json</code></a> type
+  <li>Add rough ECMAScript 6 type
   definition, which adds some new variables and properties from ES6.
   (note that this is still a far way off from real ES6 support.)</li>
   <li>Various small bugfixes (<a href="https://github.com/ternjs/tern/compare/0.8.0...0.9.0">full list of patches</a>)</li>

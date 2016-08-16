@@ -533,7 +533,7 @@ defined.
 
 Finally, a function can be annotated with effects that it has. These
 aren't currently documented, but you can search for `!effects` in
-`defs/ecma5.json` to see some examples. Similarly, a function type
+`defs/ecmascript.json` to see some examples. Similarly, a function type
 string's return type may contain the variables `!0` (the first
 argument's type, `!N` for the N-1th), `!this` (the self type of the
 call), and a special property `!ret` (the return type of a function).
