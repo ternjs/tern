@@ -85,6 +85,22 @@ I gave about it at the Curry On conference.</p>
 
 <h2><a id="releases"></a>Release history</h2>
 
+<p class="release">16-08-2016: <a href="https://github.com/ternjs/tern/tree/0.20.0">Version 0.20</a></p>
+
+<ul class="release-note">
+  <li><strong>Breaking:</strong> The <code>ecma5.json</code>
+  and <code>ecma6.json</code> definition files were combined
+  into <code>ecmascript.json</code>. If you are explicitly loading
+  these, for example in a web page, you'll have to update your
+  filenames.</li>
+  <li>Improved the typing of <code>Promise.resolve</code> calls</li>
+  <li>Support webpack config files in the webpack plugin</li>
+  <li>Make the Emacs mode mode robust when files are renamed</li>
+  <li>New option <code>inLiteral</code> in the JSON protocol to turn
+  off completions inside string/regexp literals</li>
+  <li>Define the ECMA7 <code>Array.includes</code> method</li>
+</ul>
+
 <p class="release">11-07-2016: <a href="https://github.com/ternjs/tern/tree/0.19.0">Version 0.19</a></p>
 
 <ul class="release-note">
