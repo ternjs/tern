@@ -293,17 +293,15 @@ list of strings, giving the binary name and arguments.")
     (when (and opening-paren (equal (char-after opening-paren) ?\())
       (if (and tern-last-argument-hints (eq (car tern-last-argument-hints) opening-paren))
           (tern-show-argument-hints)
-        (lexical-let ((generation tern-command-generation))
-          (tern-run-query (lambda (data)
-                            (when (= tern-command-generation (1- generation))
-                              (let ((type (tern-parse-function-type data)))
-                                (when type
-                                  (setf tern-last-argument-hints (cons opening-paren type))
-                                  (tern-show-argument-hints)))))
-                          `((type . "type")
-                            (preferFunction . t))
-                          opening-paren
-                          :silent))))))
+        (tern-run-query (lambda (data)
+                          (let ((type (tern-parse-function-type data)))
+                            (when type
+                              (setf tern-last-argument-hints (cons opening-paren type))
+                              (tern-show-argument-hints))))
+                        `((type . "type")
+                          (preferFunction . t))
+                        opening-paren
+                        :silent)))))
 
 (defun tern-skip-matching-brackets (end-chars)
   (let ((depth 0) (end (+ (point) 500)))
