@@ -2897,6 +2897,11 @@
     "!doc": "This methods lets you get cryptographically random values."
   },
   "navigator": {
+    "": {
+      "!type": "+Geolocation",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation",
+      "!doc": "The Navigator.geolocation read-only property returns a Geolocation object that gives Web content access to the location of the device. This allows a Web site or app to offer customized results based on the user's location."
+    },
     "appName": {
       "!type": "string",
       "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.appName",
@@ -3379,5 +3384,110 @@
     "!type": "fn(width?: number, height?: number) -> +HTMLImageElement",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image",
     "!doc": "Image Element constructor. Accepts two optional parameters: Image([unsigned long width, unsigned long height]). Returns an HTMLImageElement instance just as document.createElement('img') would."
+  },
+  "Geolocation": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation",
+    "!doc": "The Geolocation interface represents an object able to programmatically obtain the position of the device. It gives Web content access to the location of the device. This allows a Web site or app to offer customized results based on the user's location.",
+    "clearWatch": {
+      "!type": "fn(id: number)",
+      "!doc": "The Geolocation.clearWatch() method is used to unregister location/error monitoring handlers previously installed using Geolocation.watchPosition().",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/clearWatch"
+    },
+    "getCurrentPosition": {
+      "!type": "fn(sucess: fn(+Position), error?: fn(+PositionError), options?: +PositionOptions)",
+      "!doc": "The Geolocation.getCurrentPosition() method is used to get the current position of the device.",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition"
+    },
+    "watchPosition": {
+      "!type": "fn(sucess: fn(+Position), error?: fn(+PositionError), options?: +PositionOptions)",
+      "!doc": "The Geolocation.watchPosition() method is used to register a handler function that will be called automatically each time the position of the device changes. You can also, optionally, specify an error handling callback function.",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition"
+    }
+  },
+  "PositionOptions": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions",
+    "!doc": "The PositionOptions interface describes an object containing option properties to pass as a parameter of Geolocation.getCurrentPosition() and Geolocation.watchPosition().",
+    "enableHighAccuracy": {
+      "!type": "bool",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions/enableHighAccuracy",
+      "!doc": "The PositionOptions.enableHighAccuracy property is a Boolean that indicates the application would like to receive the best possible results. If true and if the device is able to provide a more accurate position, it will do so. Note that this can result in slower response times or increased power consumption (with a GPS chip on a mobile device for example). On the other hand, if false (the default value), the device can take the liberty to save resources by responding more quickly and/or using less power."
+    },
+    "timeout": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions/timeout",
+      "!doc": "The PositionOptions.timeout property is a positive long value representing the maximum length of time (in milliseconds) the device is allowed to take in order to return a position. The default value is Infinity, meaning that getCurrentPosition() won't return until the position is available."
+    },
+    "maximumAge": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions/maximumAge",
+      "!doc": "The PositionOptions.maximumAge property is a positive long value indicating the maximum age in milliseconds of a possible cached position that is acceptable to return. If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position. If set to Infinity the device must return a cached position regardless of its age."
+    }
+  },
+  "PositionError": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionError",
+    "!doc": "The PositionError interface represents the reason of an error occurring when using the geolocating device.",
+    "code": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionError/code",
+      "!doc": "The PositionError.code read-only property is an unsigned short representing the error code."
+    },
+    "message": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PositionError/message",
+      "!doc": "The PositionError.message read-only property returns a human-readable DOMString describing the details of the error."
+    }
+  },
+  "Position": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Position",
+    "!doc": "The Position interface represents the position of the concerned device at a given time. The position, represented by a Coordinates object, comprehends the 2D position of the device, on a spheroid representing the Earth, but also its altitude and its speed.",
+    "coords": {
+      "!type": "+Coordinates",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Position/coords",
+      "!doc": "The Position.coords read-only property, a Coordinates object, represents a geographic attitude: it contains the location, that is longitude and latitude on the Earth, the altitude, and the speed of the object concerned, regrouped inside the returned value. It also contains accuracy information about these values."
+    },
+    "timestamp": {
+      "!type": "+DOMTimeStamp",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Position/timestamp",
+      "!doc": "The Position.timestamp read-only property, a DOMTimeStamp object, represents the date and the time of the creation of the Position object it belongs to. The precision is to the millisecond."
+    }
+  },
+  "Coordinates": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates",
+    "!doc": "The Coordinates interface represents the position and altitude of the device on Earth, as well as the accuracy with which these properties are calculated.",
+    "latitude": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/latitude",
+      "!doc": "The Coordinates.latitude read-only property is a double representing the latitude of the position in decimal degrees."
+    },
+    "longitude": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/longitude",
+      "!doc": "The Coordinates.longitude read-only property is a double representing the longitude of the position in decimal degrees."
+    },
+    "altitude": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/altitude",
+      "!doc": "The Coordinates.altitude read-only property is a double representing the altitude of the position in meters, relative to sea level. This value is null if the implementation cannot provide this data."
+    },
+    "accuracy": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/accuracy",
+      "!doc": "The Coordinates.accuracy read-only property is a strictly positive double representing the accuracy, with a 95% confidence level, of the Coordinates.latitude and Coordinates.longitude properties expressed in meters."
+    },
+    "altitudeAccuracy": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/altitudeAccuracy",
+      "!doc": "The Coordinates.altitudeAccuracy read-only property is a strictly positive double representing the accuracy, with a 95% confidence level, of the altitude expressed in meters. This value is null if the implementation doesn't support measuring altitude."
+    },
+    "heading": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/heading",
+      "!doc": "The Coordinates.heading read-only property is a double representing the direction in which the device is traveling. This value, specified in degrees, indicates how far off from heading due north the device is. 0 degrees represents true true north, and the direction is determined clockwise (which means that east is 90 degrees and west is 270 degrees). If Coordinates.speed is 0, heading is NaN. If the device is not able to provide heading information, this value is null."
+    },
+    "speed": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/speed",
+      "!doc": "The Coordinates.speed read-only property is a double representing the velocity of the device in meters per second. This value is null if the implementation is not able to measure it."
+    }
   }
 }
