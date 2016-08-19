@@ -10,12 +10,12 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/clearWatch"
       },
       "getCurrentPosition": {
-        "!type": "fn(sucess: fn(+Position), error?: fn(+PositionError), options?: +PositionOptions)",
+        "!type": "fn(sucess: fn(Position), error?: fn(PositionError), options?: PositionOptions)",
         "!doc": "The Geolocation.getCurrentPosition() method is used to get the current position of the device.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition"
       },
       "watchPosition": {
-        "!type": "fn(sucess: fn(+Position), error?: fn(+PositionError), options?: +PositionOptions)",
+        "!type": "fn(sucess: fn(Position), error?: fn(PositionError), options?: PositionOptions)",
         "!doc": "The Geolocation.watchPosition() method is used to register a handler function that will be called automatically each time the position of the device changes. You can also, optionally, specify an error handling callback function.",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition"
       }
@@ -57,7 +57,7 @@
       "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Position",
       "!doc": "The Position interface represents the position of the concerned device at a given time. The position, represented by a Coordinates object, comprehends the 2D position of the device, on a spheroid representing the Earth, but also its altitude and its speed.",
       "coords": {
-        "!type": "+Coordinates",
+        "!type": "Coordinates",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Position/coords",
         "!doc": "The Position.coords read-only property, a Coordinates object, represents a geographic attitude: it contains the location, that is longitude and latitude on the Earth, the altitude, and the speed of the object concerned, regrouped inside the returned value. It also contains accuracy information about these values."
       },
