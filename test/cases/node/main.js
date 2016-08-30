@@ -2,7 +2,7 @@
 
 var fs = require("fs"), crypto = require("crypto"), tls = require("tls");
 
-fs.readFileSync; //: fn(filename: string, encoding: string) -> Buffer
+fs.createReadStream; //: fn(path: string|Buffer, options?: ?) -> fs.ReadStream
 
 fs.stat("foobar", function(err, stats) {
   err; //: Error
