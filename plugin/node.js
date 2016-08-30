@@ -2134,7 +2134,7 @@
           "!doc": "A synchronous output function. Will block the process and output string immediately to stderr."
         },
         error: {
-          "!type": "fn(msg: string)",
+          "!type": "fn(msg: string, ...string: string)",
           "!url": "https://nodejs.org/api/util.html#util_util_error",
           "!doc": "Same as util.debug() except this will output all arguments immediately to stderr."
         },
