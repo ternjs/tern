@@ -1314,65 +1314,15 @@
       fs: {
         "!url": "https://nodejs.org/api/fs.html",
         "!doc": "File I/O is provided by simple wrappers around standard POSIX functions. To use this module do require('fs').\nAll the methods have asynchronous and synchronous forms.",
-        rename: {
-          "!type": "fn(oldPath: string, newPath: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_rename_oldpath_newpath_callback",
-          "!doc": "Asynchronous rename(2). No arguments other than a possible exception are given to the completion callback."
+        appendFile: {
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfile_filename_data_options_callback",
+          "!doc": "Asynchronously append data to a file, creating the file if it not yet exists. data can be a string or a buffer."
         },
-        renameSync: {
-          "!type": "fn(oldPath: string, newPath: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_renamesync_oldpath_newpath",
-          "!doc": "Synchronous rename(2)."
-        },
-        ftruncate: {
-          "!type": "fn(fd: number, len: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncate_fd_len_callback",
-          "!doc": "Asynchronous ftruncate(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        ftruncateSync: {
-          "!type": "fn(fd: number, len: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncatesync_fd_len",
-          "!doc": "Synchronous ftruncate(2)."
-        },
-        truncate: {
-          "!type": "fn(path: string, len: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncate_path_len_callback",
-          "!doc": "Asynchronous truncate(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        truncateSync: {
-          "!type": "fn(path: string, len: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncatesync_path_len",
-          "!doc": "Synchronous truncate(2)."
-        },
-        chown: {
-          "!type": "fn(path: string, uid: number, gid: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_chown_path_uid_gid_callback",
-          "!doc": "Asynchronous chown(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        chownSync: {
-          "!type": "fn(path: string, uid: number, gid: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_chownsync_path_uid_gid",
-          "!doc": "Synchronous chown(2)."
-        },
-        fchown: {
-          "!type": "fn(fd: number, uid: number, gid: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchown_fd_uid_gid_callback",
-          "!doc": "Asynchronous fchown(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        fchownSync: {
-          "!type": "fn(fd: number, uid: number, gid: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchownsync_fd_uid_gid",
-          "!doc": "Synchronous fchown(2)."
-        },
-        lchown: {
-          "!type": "fn(path: string, uid: number, gid: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchown_path_uid_gid_callback",
-          "!doc": "Asynchronous lchown(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        lchownSync: {
-          "!type": "fn(path: string, uid: number, gid: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchownsync_path_uid_gid",
-          "!doc": "Synchronous lchown(2)."
+        appendFileSync: {
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfilesync_filename_data_options",
+          "!doc": "The synchronous version of fs.appendFile."
         },
         chmod: {
           "!type": "fn(path: string, mode: string, callback?: fn())",
@@ -1384,135 +1334,15 @@
           "!url": "https://nodejs.org/api/fs.html#fs_fs_chmodsync_path_mode",
           "!doc": "Synchronous chmod(2)."
         },
-        fchmod: {
-          "!type": "fn(fd: number, mode: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmod_fd_mode_callback",
-          "!doc": "Asynchronous fchmod(2). No arguments other than a possible exception are given to the completion callback."
+        chown: {
+          "!type": "fn(path: string, uid: number, gid: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_chown_path_uid_gid_callback",
+          "!doc": "Asynchronous chown(2). No arguments other than a possible exception are given to the completion callback."
         },
-        fchmodSync: {
-          "!type": "fn(fd: number, mode: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmodsync_fd_mode",
-          "!doc": "Synchronous fchmod(2)."
-        },
-        lchmod: {
-          "!type": "fn(path: string, mode: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmod_path_mode_callback",
-          "!doc": "Asynchronous lchmod(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        lchmodSync: {
-          "!type": "fn(path: string, mode: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmodsync_path_mode",
-          "!doc": "Synchronous lchmod(2)."
-        },
-        stat: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_stat_path_callback",
-          "!doc": "Asynchronous stat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object."
-        },
-        lstat: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstat_path_callback",
-          "!doc": "Asynchronous lstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. lstat() is identical to stat(), except that if path is a symbolic link, then the link itself is stat-ed, not the file that it refers to."
-        },
-        fstat: {
-          "!type": "fn(fd: number, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstat_fd_callback",
-          "!doc": "Asynchronous fstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. fstat() is identical to stat(), except that the file to be stat-ed is specified by the file descriptor fd."
-        },
-        statSync: {
-          "!type": "fn(path: string) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_statsync_path",
-          "!doc": "Synchronous stat(2). Returns an instance of fs.Stats."
-        },
-        lstatSync: {
-          "!type": "fn(path: string) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstatsync_path",
-          "!doc": "Synchronous lstat(2). Returns an instance of fs.Stats."
-        },
-        fstatSync: {
-          "!type": "fn(fd: number) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstatsync_fd",
-          "!doc": "Synchronous fstat(2). Returns an instance of fs.Stats."
-        },
-        link: {
-          "!type": "fn(srcpath: string, dstpath: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_link_srcpath_dstpath_callback",
-          "!doc": "Asynchronous link(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        linkSync: {
-          "!type": "fn(srcpath: string, dstpath: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_linksync_srcpath_dstpath",
-          "!doc": "Synchronous link(2)."
-        },
-        symlink: {
-          "!type": "fn(srcpath: string, dstpath: string, type?: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlink_srcpath_dstpath_type_callback",
-          "!doc": "Asynchronous symlink(2). No arguments other than a possible exception are given to the completion callback. type argument can be either 'dir', 'file', or 'junction' (default is 'file'). It is only used on Windows (ignored on other platforms). Note that Windows junction points require the destination path to be absolute. When using 'junction', the destination argument will automatically be normalized to absolute path."
-        },
-        symlinkSync: {
-          "!type": "fn(srcpath: string, dstpath: string, type?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlinksync_srcpath_dstpath_type",
-          "!doc": "Synchronous symlink(2)."
-        },
-        readlink: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, linkString: string))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlink_path_callback",
-          "!doc": "Asynchronous readlink(2). The callback gets two arguments (err, linkString)."
-        },
-        readlinkSync: {
-          "!type": "fn(path: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlinksync_path",
-          "!doc": "Synchronous readlink(2). Returns the symbolic link's string value."
-        },
-        realpath: {
-          "!type": "fn(path: string, cache: bool, callback: fn(err: +Error, resolvedPath: string))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpath_path_cache_callback",
-          "!doc": "Asynchronous realpath(2). The callback gets two arguments (err, resolvedPath). May use process.cwd to resolve relative paths. cache is an object literal of mapped paths that can be used to force a specific path resolution or avoid additional fs.stat calls for known real paths."
-        },
-        realpathSync: {
-          "!type": "fn(path: string, cache?: bool) -> string",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpathsync_path_cache",
-          "!doc": "Synchronous realpath(2). Returns the resolved path."
-        },
-        unlink: {
-          "!type": "fn(path: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback",
-          "!doc": "Asynchronous unlink(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        unlinkSync: {
-          "!type": "fn(path: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlinksync_path",
-          "!doc": "Synchronous unlink(2)."
-        },
-        rmdir: {
-          "!type": "fn(path: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdir_path_callback",
-          "!doc": "Asynchronous rmdir(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        rmdirSync: {
-          "!type": "fn(path: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdirsync_path",
-          "!doc": "Synchronous rmdir(2)."
-        },
-        mkdir: {
-          "!type": "fn(path: string, mode?: ?, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdir_path_mode_callback",
-          "!doc": "Asynchronous mkdir(2). No arguments other than a possible exception are given to the completion callback. mode defaults to 0777."
-        },
-        mkdirSync: {
-          "!type": "fn(path: string, mode?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdirsync_path_mode",
-          "!doc": "Synchronous mkdir(2)."
-        },
-        readdir: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, files: [string]))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdir_path_callback",
-          "!doc": "Asynchronous readdir(3). Reads the contents of a directory. The callback gets two arguments (err, files) where files is an array of the names of the files in the directory excluding '.' and '..'."
-        },
-        readdirSync: {
-          "!type": "fn(path: string) -> [string]",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdirsync_path",
-          "!doc": "Synchronous readdir(3). Returns an array of filenames excluding '.' and '..'."
+        chownSync: {
+          "!type": "fn(path: string, uid: number, gid: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_chownsync_path_uid_gid",
+          "!doc": "Synchronous chown(2)."
         },
         close: {
           "!type": "fn(fd: number, callback?: fn())",
@@ -1524,110 +1354,15 @@
           "!url": "https://nodejs.org/api/fs.html#fs_fs_closesync_fd",
           "!doc": "Synchronous close(2)."
         },
-        open: {
-          "!type": "fn(path: string, flags: string, mode?: string, callback?: fn(err: +Error, fd: number))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_open_path_flags_mode_callback",
-          "!doc": "Asynchronous file open."
+        createReadStream: {
+          "!type": "fn(path: string, options?: ?) -> +stream.Readable",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options",
+          "!doc": "Returns a new ReadStream object."
         },
-        openSync: {
-          "!type": "fn(path: string, flags: string, mode?: string) -> number",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_opensync_path_flags_mode",
-          "!doc": "Synchronous open(2)."
-        },
-        utimes: {
-          "!type": "fn(path: string, atime: number, mtime: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimes_path_atime_mtime_callback",
-          "!doc": "Change file timestamps of the file referenced by the supplied path."
-        },
-        utimesSync: {
-          "!type": "fn(path: string, atime: number, mtime: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimessync_path_atime_mtime",
-          "!doc": "Change file timestamps of the file referenced by the supplied path."
-        },
-        futimes: {
-          "!type": "fn(fd: number, atime: number, mtime: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimes_fd_atime_mtime_callback",
-          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
-        },
-        futimesSync: {
-          "!type": "fn(fd: number, atime: number, mtime: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimessync_fd_atime_mtime",
-          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
-        },
-        fsync: {
-          "!type": "fn(fd: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fsync_fd_callback",
-          "!doc": "Asynchronous fsync(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        fsyncSync: {
-          "!type": "fn(fd: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fsyncsync_fd",
-          "!doc": "Synchronous fsync(2)."
-        },
-        write: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, written: number, buffer: +Buffer))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback",
-          "!doc": "Write buffer to the file specified by fd."
-        },
-        writeSync: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_writesync_fd_buffer_offset_length_position",
-          "!doc": "Synchronous version of fs.write(). Returns the number of bytes written."
-        },
-        read: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, bytesRead: number, buffer: +Buffer))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_read_fd_buffer_offset_length_position_callback",
-          "!doc": "Read data from the file specified by fd."
-        },
-        readSync: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readsync_fd_buffer_offset_length_position",
-          "!doc": "Synchronous version of fs.read. Returns the number of bytesRead."
-        },
-        readFile: {
-          "!type": "fn(filename: string, callback: fn(err: +Error, data: +Buffer))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfile_filename_options_callback",
-          "!doc": "Asynchronously reads the entire contents of a file."
-        },
-        readFileSync: {
-          "!type": "fn(filename: string, encoding: string) -> +Buffer",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options",
-          "!doc": "Synchronous version of fs.readFile. Returns the contents of the filename."
-        },
-        writeFile: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefile_filename_data_options_callback",
-          "!doc": "Asynchronously writes data to a file, replacing the file if it already exists. data can be a string or a buffer."
-        },
-        writeFileSync: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefilesync_filename_data_options",
-          "!doc": "The synchronous version of fs.writeFile."
-        },
-        appendFile: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfile_filename_data_options_callback",
-          "!doc": "Asynchronously append data to a file, creating the file if it not yet exists. data can be a string or a buffer."
-        },
-        appendFileSync: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfilesync_filename_data_options",
-          "!doc": "The synchronous version of fs.appendFile."
-        },
-        watchFile: {
-          "!type": "fn(filename: string, options: ?, listener: fn(current: +fs.Stats, prev: +fs.Stats))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_watchfile_filename_options_listener",
-          "!doc": "Watch for changes on filename. The callback listener will be called each time the file is accessed."
-        },
-        unwatchFile: {
-          "!type": "fn(filename: string, listener?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_unwatchfile_filename_listener",
-          "!doc": "Stop watching for changes on filename. If listener is specified, only that particular listener is removed. Otherwise, all listeners are removed and you have effectively stopped watching filename."
-        },
-        watch: {
-          "!type": "fn(filename: string, options?: ?, listener?: fn(event: string, filename: string)) -> +fs.FSWatcher",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener",
-          "!doc": "Watch for changes on filename, where filename is either a file or a directory. The returned object is a fs.FSWatcher."
+        createWriteStream: {
+          "!type": "fn(path: string, options?: ?) -> +stream.Writable",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options",
+          "!doc": "Returns a new WriteStream object."
         },
         exists: {
           "!type": "fn(path: string, callback?: fn(exists: bool))",
@@ -1639,8 +1374,293 @@
           "!url": "https://nodejs.org/api/fs.html#fs_fs_existssync_path",
           "!doc": "Synchronous version of fs.exists."
         },
+        fchmod: {
+          "!type": "fn(fd: number, mode: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmod_fd_mode_callback",
+          "!doc": "Asynchronous fchmod(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        fchmodSync: {
+          "!type": "fn(fd: number, mode: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmodsync_fd_mode",
+          "!doc": "Synchronous fchmod(2)."
+        },
+        fchown: {
+          "!type": "fn(fd: number, uid: number, gid: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchown_fd_uid_gid_callback",
+          "!doc": "Asynchronous fchown(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        fchownSync: {
+          "!type": "fn(fd: number, uid: number, gid: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchownsync_fd_uid_gid",
+          "!doc": "Synchronous fchown(2)."
+        },
+        fstat: {
+          "!type": "fn(fd: number, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstat_fd_callback",
+          "!doc": "Asynchronous fstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. fstat() is identical to stat(), except that the file to be stat-ed is specified by the file descriptor fd."
+        },
+        fstatSync: {
+          "!type": "fn(fd: number) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstatsync_fd",
+          "!doc": "Synchronous fstat(2). Returns an instance of fs.Stats."
+        },
+        fsync: {
+          "!type": "fn(fd: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fsync_fd_callback",
+          "!doc": "Asynchronous fsync(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        fsyncSync: {
+          "!type": "fn(fd: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fsyncsync_fd",
+          "!doc": "Synchronous fsync(2)."
+        },
+        ftruncate: {
+          "!type": "fn(fd: number, len: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncate_fd_len_callback",
+          "!doc": "Asynchronous ftruncate(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        ftruncateSync: {
+          "!type": "fn(fd: number, len: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncatesync_fd_len",
+          "!doc": "Synchronous ftruncate(2)."
+        },
+        futimes: {
+          "!type": "fn(fd: number, atime: number, mtime: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimes_fd_atime_mtime_callback",
+          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
+        },
+        futimesSync: {
+          "!type": "fn(fd: number, atime: number, mtime: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimessync_fd_atime_mtime",
+          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
+        },
+        lchmod: {
+          "!type": "fn(path: string, mode: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmod_path_mode_callback",
+          "!doc": "Asynchronous lchmod(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        lchmodSync: {
+          "!type": "fn(path: string, mode: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmodsync_path_mode",
+          "!doc": "Synchronous lchmod(2)."
+        },
+        lchown: {
+          "!type": "fn(path: string, uid: number, gid: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchown_path_uid_gid_callback",
+          "!doc": "Asynchronous lchown(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        lchownSync: {
+          "!type": "fn(path: string, uid: number, gid: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchownsync_path_uid_gid",
+          "!doc": "Synchronous lchown(2)."
+        },
+        link: {
+          "!type": "fn(srcpath: string, dstpath: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_link_srcpath_dstpath_callback",
+          "!doc": "Asynchronous link(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        linkSync: {
+          "!type": "fn(srcpath: string, dstpath: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_linksync_srcpath_dstpath",
+          "!doc": "Synchronous link(2)."
+        },
+        lstat: {
+          "!type": "fn(path: string, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstat_path_callback",
+          "!doc": "Asynchronous lstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. lstat() is identical to stat(), except that if path is a symbolic link, then the link itself is stat-ed, not the file that it refers to."
+        },
+        lstatSync: {
+          "!type": "fn(path: string) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstatsync_path",
+          "!doc": "Synchronous lstat(2). Returns an instance of fs.Stats."
+        },
+        mkdir: {
+          "!type": "fn(path: string, mode?: ?, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdir_path_mode_callback",
+          "!doc": "Asynchronous mkdir(2). No arguments other than a possible exception are given to the completion callback. mode defaults to 0777."
+        },
+        mkdirSync: {
+          "!type": "fn(path: string, mode?: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdirsync_path_mode",
+          "!doc": "Synchronous mkdir(2)."
+        },
+        open: {
+          "!type": "fn(path: string, flags: string, mode?: string, callback?: fn(err: +Error, fd: number))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_open_path_flags_mode_callback",
+          "!doc": "Asynchronous file open."
+        },
+        openSync: {
+          "!type": "fn(path: string, flags: string, mode?: string) -> number",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_opensync_path_flags_mode",
+          "!doc": "Synchronous open(2)."
+        },
+        read: {
+          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, bytesRead: number, buffer: +Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_read_fd_buffer_offset_length_position_callback",
+          "!doc": "Read data from the file specified by fd."
+        },
+        readdir: {
+          "!type": "fn(path: string, callback?: fn(err: +Error, files: [string]))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdir_path_callback",
+          "!doc": "Asynchronous readdir(3). Reads the contents of a directory. The callback gets two arguments (err, files) where files is an array of the names of the files in the directory excluding '.' and '..'."
+        },
+        readdirSync: {
+          "!type": "fn(path: string) -> [string]",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdirsync_path",
+          "!doc": "Synchronous readdir(3). Returns an array of filenames excluding '.' and '..'."
+        },
+        readFile: {
+          "!type": "fn(filename: string, callback: fn(err: +Error, data: +Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfile_filename_options_callback",
+          "!doc": "Asynchronously reads the entire contents of a file."
+        },
+        readFileSync: {
+          "!type": "fn(filename: string, encoding: string) -> +Buffer",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options",
+          "!doc": "Synchronous version of fs.readFile. Returns the contents of the filename."
+        },
+        readlink: {
+          "!type": "fn(path: string, callback?: fn(err: +Error, linkString: string))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlink_path_callback",
+          "!doc": "Asynchronous readlink(2). The callback gets two arguments (err, linkString)."
+        },
+        readlinkSync: {
+          "!type": "fn(path: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlinksync_path",
+          "!doc": "Synchronous readlink(2). Returns the symbolic link's string value."
+        },
+        readSync: {
+          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readsync_fd_buffer_offset_length_position",
+          "!doc": "Synchronous version of fs.read. Returns the number of bytesRead."
+        },
+        realpath: {
+          "!type": "fn(path: string, cache: bool, callback: fn(err: +Error, resolvedPath: string))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpath_path_cache_callback",
+          "!doc": "Asynchronous realpath(2). The callback gets two arguments (err, resolvedPath). May use process.cwd to resolve relative paths. cache is an object literal of mapped paths that can be used to force a specific path resolution or avoid additional fs.stat calls for known real paths."
+        },
+        realpathSync: {
+          "!type": "fn(path: string, cache?: bool) -> string",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpathsync_path_cache",
+          "!doc": "Synchronous realpath(2). Returns the resolved path."
+        },
+        rename: {
+          "!type": "fn(oldPath: string, newPath: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_rename_oldpath_newpath_callback",
+          "!doc": "Asynchronous rename(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        renameSync: {
+          "!type": "fn(oldPath: string, newPath: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_renamesync_oldpath_newpath",
+          "!doc": "Synchronous rename(2)."
+        },
+        rmdir: {
+          "!type": "fn(path: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdir_path_callback",
+          "!doc": "Asynchronous rmdir(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        rmdirSync: {
+          "!type": "fn(path: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdirsync_path",
+          "!doc": "Synchronous rmdir(2)."
+        },
+        stat: {
+          "!type": "fn(path: string, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_stat_path_callback",
+          "!doc": "Asynchronous stat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object."
+        },
+        statSync: {
+          "!type": "fn(path: string) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_statsync_path",
+          "!doc": "Synchronous stat(2). Returns an instance of fs.Stats."
+        },
+        symlink: {
+          "!type": "fn(srcpath: string, dstpath: string, type?: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlink_srcpath_dstpath_type_callback",
+          "!doc": "Asynchronous symlink(2). No arguments other than a possible exception are given to the completion callback. type argument can be either 'dir', 'file', or 'junction' (default is 'file'). It is only used on Windows (ignored on other platforms). Note that Windows junction points require the destination path to be absolute. When using 'junction', the destination argument will automatically be normalized to absolute path."
+        },
+        symlinkSync: {
+          "!type": "fn(srcpath: string, dstpath: string, type?: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlinksync_srcpath_dstpath_type",
+          "!doc": "Synchronous symlink(2)."
+        },
+        truncate: {
+          "!type": "fn(path: string, len: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncate_path_len_callback",
+          "!doc": "Asynchronous truncate(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        truncateSync: {
+          "!type": "fn(path: string, len: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncatesync_path_len",
+          "!doc": "Synchronous truncate(2)."
+        },
+        unlink: {
+          "!type": "fn(path: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback",
+          "!doc": "Asynchronous unlink(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        unlinkSync: {
+          "!type": "fn(path: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlinksync_path",
+          "!doc": "Synchronous unlink(2)."
+        },
+        unwatchFile: {
+          "!type": "fn(filename: string, listener?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_unwatchfile_filename_listener",
+          "!doc": "Stop watching for changes on filename. If listener is specified, only that particular listener is removed. Otherwise, all listeners are removed and you have effectively stopped watching filename."
+        },
+        utimes: {
+          "!type": "fn(path: string, atime: number, mtime: number, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimes_path_atime_mtime_callback",
+          "!doc": "Change file timestamps of the file referenced by the supplied path."
+        },
+        utimesSync: {
+          "!type": "fn(path: string, atime: number, mtime: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimessync_path_atime_mtime",
+          "!doc": "Change file timestamps of the file referenced by the supplied path."
+        },
+        watch: {
+          "!type": "fn(filename: string, options?: ?, listener?: fn(event: string, filename: string)) -> +fs.FSWatcher",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener",
+          "!doc": "Watch for changes on filename, where filename is either a file or a directory. The returned object is a fs.FSWatcher."
+        },
+        watchFile: {
+          "!type": "fn(filename: string, options: ?, listener: fn(current: +fs.Stats, prev: +fs.Stats))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_watchfile_filename_options_listener",
+          "!doc": "Watch for changes on filename. The callback listener will be called each time the file is accessed."
+        },
+        write: {
+          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, written: number, buffer: +Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback",
+          "!doc": "Write buffer to the file specified by fd."
+        },
+        writeFile: {
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefile_filename_data_options_callback",
+          "!doc": "Asynchronously writes data to a file, replacing the file if it already exists. data can be a string or a buffer."
+        },
+        writeFileSync: {
+          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefilesync_filename_data_options",
+          "!doc": "The synchronous version of fs.writeFile."
+        },
+        writeSync: {
+          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_writesync_fd_buffer_offset_length_position",
+          "!doc": "Synchronous version of fs.write(). Returns the number of bytes written."
+        },
+        FSWatcher: {
+          "!type": "fn()",
+          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_fswatcher",
+          "!doc": "Objects returned from fs.watch() are of this type.",
+          prototype: {
+            close: "fn()"
+          }
+        },
         Stats: {
           "!type": "fn()",
+          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_stats",
+          "!doc": "Objects returned from fs.stat(), fs.lstat() and fs.fstat() and their synchronous counterparts are of this type.",
           prototype: {
             isFile: "fn() -> bool",
             isDirectory: "fn() -> bool",
@@ -1662,27 +1682,7 @@
             atime: "+Date",
             mtime: "+Date",
             ctime: "+Date"
-          },
-          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_stats",
-          "!doc": "Objects returned from fs.stat(), fs.lstat() and fs.fstat() and their synchronous counterparts are of this type."
-        },
-        createReadStream: {
-          "!type": "fn(path: string, options?: ?) -> +stream.Readable",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options",
-          "!doc": "Returns a new ReadStream object."
-        },
-        createWriteStream: {
-          "!type": "fn(path: string, options?: ?) -> +stream.Writable",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options",
-          "!doc": "Returns a new WriteStream object."
-        },
-        FSWatcher: {
-          "!type": "fn()",
-          prototype: {
-            close: "fn()"
-          },
-          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_fswatcher",
-          "!doc": "Objects returned from fs.watch() are of this type."
+          }
         }
       },
       path: {
@@ -2726,31 +2726,6 @@
       "!type": "fn() -> +Buffer",
       "!url": "https://nodejs.org/api/buffer.html#buffer_class_buffer",
       "!doc": "The Buffer class is a global type for dealing with binary data directly. It can be constructed in a variety of ways.",
-      byteLength: {
-        "!type": "fn(string: string, encoding?: string) -> number",
-        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_bytelength_string_encoding",
-        "!doc": "Returns the actual byte length of a string. This is not the same as String.prototype.length since that returns the number of characters in a string."
-      },
-      compare: {
-        "!type": "fn(buf1: +Buffer, buf2: +Buffer) -> number",
-        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_compare_buf1_buf2",
-        "!doc": "Compares buf1 to buf2 typically for the purpose of sorting arrays of Buffers. This is equivalent is calling buf1.compare(buf2)."
-      },
-      concat: {
-        "!type": "fn(list: ?, totalLength?: number) -> +Buffer",
-        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_concat_list_totallength",
-        "!doc": "Returns a new Buffer which is the result of concatenating all the Buffers in the list together."
-      },
-      isBuffer: {
-        "!type": "fn(obj: ?) -> bool",
-        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_isbuffer_obj",
-        "!doc": "Returns 'true' if obj is a Buffer."
-      },
-      isEncoding: {
-        "!type": "fn(encoding: string) -> bool",
-        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_isencoding_encoding",
-        "!doc": "Returns true if the encoding is a valid encoding argument, or false otherwise."
-      },
       prototype: {
         "!proto": "Uint8Array.prototype",
         length: {
@@ -3003,6 +2978,31 @@
           "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuintle_value_offset_bytelength_noassert",
           "!doc": "Writes value to the Buffer at the specified offset and byteLength. Supports up to 48 bits of accuracy. For example:"
         }
+      },
+      byteLength: {
+        "!type": "fn(string: string, encoding?: string) -> number",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_bytelength_string_encoding",
+        "!doc": "Returns the actual byte length of a string. This is not the same as String.prototype.length since that returns the number of characters in a string."
+      },
+      compare: {
+        "!type": "fn(buf1: +Buffer, buf2: +Buffer) -> number",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_compare_buf1_buf2",
+        "!doc": "Compares buf1 to buf2 typically for the purpose of sorting arrays of Buffers. This is equivalent is calling buf1.compare(buf2)."
+      },
+      concat: {
+        "!type": "fn(list: ?, totalLength?: number) -> +Buffer",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_concat_list_totallength",
+        "!doc": "Returns a new Buffer which is the result of concatenating all the Buffers in the list together."
+      },
+      isBuffer: {
+        "!type": "fn(obj: ?) -> bool",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_isbuffer_obj",
+        "!doc": "Returns 'true' if obj is a Buffer."
+      },
+      isEncoding: {
+        "!type": "fn(encoding: string) -> bool",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_isencoding_encoding",
+        "!doc": "Returns true if the encoding is a valid encoding argument, or false otherwise."
       }
     }
   };
