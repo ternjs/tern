@@ -64,7 +64,7 @@
       var known = this.modules[resolved]
       if (known) return known
 
-      if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
+      if (/\.jsx?$|(?:^\/)[^\.]+$/.test(resolved))
         this.server.addFile(resolved, null, parentFile)
       if (!relative) this.nonRelative[name] = resolved
       return this.modules[resolved] = new infer.AVal
@@ -116,7 +116,7 @@
       var path = parentFile ? resolvePath(dirName(parentFile), word) : baseName(word)
       for (var prop in this.modules) {
         if (prop != parentFile && filter(path, prop, query)) {
-          if (/\.js$/.test(prop)) prop = prop.slice(0, prop.length - 3)
+          if (/\.jsx?$/.test(prop)) prop = prop.slice(0, prop.length - 3)
           var added = prop.slice(path.length)
           tern.addCompletion(query, completions, word + added, this.modules[prop])
         }
@@ -171,6 +171,7 @@
     var server = infer.cx().parent
     if (server.findFile(path)) return path
     if (server.findFile(path + ".js")) return path + ".js"
+    if (server.findFile(path + ".jsx")) return path + ".jsx"
   }
 
   // Under node, replace completeFileName with a version that actually
@@ -195,7 +196,7 @@
           var projectPath = me.server.normalizeFilename(path.relative(pDir, path.resolve(dir, file)))
           if (projectPath == parentFile) return
           var value = me.modules[projectPath]
-          if (/\.js$/.test(file)) file = file.slice(0, file.length - 3)
+          if (/\.jsx?$/.test(file)) file = file.slice(0, file.length - 3)
           tern.addCompletion(query, completions, base + file, value)
         }
       })
