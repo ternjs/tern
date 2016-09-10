@@ -2268,7 +2268,7 @@
           "!doc": "Output with timestamp on stdout."
         },
         inspect: {
-          "!type": "fn(object: ?, options: ?) -> string",
+          "!type": "fn(object: ?, options: {showHidden: bool, depth: number, colors: bool, customInspect: bool, showProxy: bool, maxArrayLength: number, breakLength: number}) -> string",
           "!url": "https://nodejs.org/api/util.html#util_util_inspect_object_options",
           "!doc": "Return a string representation of object, which is useful for debugging."
         },
