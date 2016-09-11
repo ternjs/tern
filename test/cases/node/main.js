@@ -1,6 +1,9 @@
 // plugin=node
 
-var fs = require("fs"), crypto = require("crypto"), tls = require("tls");
+var fs = require("fs"), crypto = require("crypto"), tls = require("tls"), util = require("util");
+
+util.error; //: fn(msg: string, ...string: string)
+util.inspect; //: fn(object: ?, options: {colors: bool, customInspect: bool, depth: number, maxArrayLength: number, showHidden: bool, showProxy: bool, ...}) -> string
 
 fs.createReadStream; //: fn(path: string|Buffer, options?: ?) -> fs.ReadStream
 

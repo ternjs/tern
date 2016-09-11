@@ -2248,7 +2248,7 @@
           "!doc": "A synchronous output function. Will block the process and output string immediately to stderr."
         },
         error: {
-          "!type": "fn(msg: string)",
+          "!type": "fn(msg: string, ...string: string)",
           "!url": "https://nodejs.org/api/util.html#util_util_error",
           "!doc": "Same as util.debug() except this will output all arguments immediately to stderr."
         },
@@ -2268,7 +2268,7 @@
           "!doc": "Output with timestamp on stdout."
         },
         inspect: {
-          "!type": "fn(object: ?, options: ?) -> string",
+          "!type": "fn(object: ?, options: {showHidden: bool, depth: number, colors: bool, customInspect: bool, showProxy: bool, maxArrayLength: number, breakLength: number}) -> string",
           "!url": "https://nodejs.org/api/util.html#util_util_inspect_object_options",
           "!doc": "Return a string representation of object, which is useful for debugging."
         },
