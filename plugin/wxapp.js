@@ -283,61 +283,6 @@
         "!url": "https://mp.weixin.qq.com/debug/wxadoc/dev/api/api-pay.html#wxrequestpaymentobject",
         "!doc": "发起微信支付。"
       }
-    },
-    console: {
-      log: {
-        "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_log_data",
-        "!doc": "Prints to stdout with newline. This function can take multiple arguments in a printf()-like way."
-      },
-      info: {
-        "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_info_data",
-        "!doc": "Same as console.log."
-      },
-      error: {
-        "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_error_data",
-        "!doc": "Same as console.log but prints to stderr."
-      },
-      warn: {
-        "!type": "fn(text: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_warn_data",
-        "!doc": "Same as console.error."
-      },
-      dir: {
-        "!type": "fn(obj: ?)",
-        "!url": "https://nodejs.org/api/console.html#console_console_dir_obj_options",
-        "!doc": "Uses util.inspect on obj and prints resulting string to stdout."
-      },
-      time: {
-        "!type": "fn(label: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_time_label",
-        "!doc": "Mark a time."
-      },
-      timeEnd: {
-        "!type": "fn(label: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_timeend_label",
-        "!doc": "Finish timer, record output."
-      },
-      trace: {
-        "!type": "fn(label: string)",
-        "!url": "https://nodejs.org/api/console.html#console_console_trace_message",
-        "!doc": "Print a stack trace to stderr of the current position."
-      },
-      assert: {
-        "!type": "fn(expression: bool)",
-        "!url": "https://nodejs.org/api/console.html#console_console_assert_value_message",
-        "!doc": "Same as assert.ok() where if the expression evaluates as false throw an AssertionError with message."
-      },
-      "!url": "https://nodejs.org/api/globals.html#globals_console",
-      "!doc": "Used to print to stdout and stderr."
-    },
-    clearImmediate: "timers.clearImmediate",
-    clearInterval: "timers.clearInterval",
-    clearTimeout: "timers.clearTimeout",
-    setImmediate: "timers.setImmediate",
-    setInterval: "timers.setInterval",
-    setTimeout: "timers.setTimeout",
+    }
   };
 });
