@@ -1313,334 +1313,406 @@
       },
       fs: {
         "!url": "https://nodejs.org/api/fs.html",
-        "!doc": "File I/O is provided by simple wrappers around standard POSIX functions. To use this module do require('fs').\nAll the methods have asynchronous and synchronous forms.",
-        rename: {
-          "!type": "fn(oldPath: string, newPath: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_rename_oldpath_newpath_callback",
-          "!doc": "Asynchronous rename(2). No arguments other than a possible exception are given to the completion callback."
+        "!doc": "File I/O is provided by simple wrappers around standard POSIX functions. To use this module do require('fs'). All the methods have asynchronous and synchronous forms.",
+        access: {
+          "!type": "fn(path: string|+Buffer, mode?: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_access_path_mode_callback",
+          "!doc": "Tests a user's permissions for the file or directory specified by path. The mode argument is an optional integer that specifies the accessibility checks to be performed. The following constants define the possible values of mode. It is possible to create a mask consisting of the bitwise OR of two or more values."
         },
-        renameSync: {
-          "!type": "fn(oldPath: string, newPath: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_renamesync_oldpath_newpath",
-          "!doc": "Synchronous rename(2)."
+        accessSync: {
+          "!type": "fn(path: string|+Buffer, mode?: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_accesssync_path_mode",
+          "!doc": "Synchronous version of fs.access(). This throws if any accessibility checks fail, and does nothing otherwise."
         },
-        ftruncate: {
-          "!type": "fn(fd: number, len: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncate_fd_len_callback",
-          "!doc": "Asynchronous ftruncate(2). No arguments other than a possible exception are given to the completion callback."
+        appendFile: {
+          "!type": "fn(file: string|+Buffer|number, data: string|+Buffer, options?: ?, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfile_file_data_options_callback",
+          "!doc": "Asynchronously append data to a file, creating the file if it does not yet exist. data can be a string or a buffer."
         },
-        ftruncateSync: {
-          "!type": "fn(fd: number, len: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncatesync_fd_len",
-          "!doc": "Synchronous ftruncate(2)."
-        },
-        truncate: {
-          "!type": "fn(path: string, len: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncate_path_len_callback",
-          "!doc": "Asynchronous truncate(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        truncateSync: {
-          "!type": "fn(path: string, len: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncatesync_path_len",
-          "!doc": "Synchronous truncate(2)."
-        },
-        chown: {
-          "!type": "fn(path: string, uid: number, gid: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_chown_path_uid_gid_callback",
-          "!doc": "Asynchronous chown(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        chownSync: {
-          "!type": "fn(path: string, uid: number, gid: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_chownsync_path_uid_gid",
-          "!doc": "Synchronous chown(2)."
-        },
-        fchown: {
-          "!type": "fn(fd: number, uid: number, gid: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchown_fd_uid_gid_callback",
-          "!doc": "Asynchronous fchown(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        fchownSync: {
-          "!type": "fn(fd: number, uid: number, gid: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchownsync_fd_uid_gid",
-          "!doc": "Synchronous fchown(2)."
-        },
-        lchown: {
-          "!type": "fn(path: string, uid: number, gid: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchown_path_uid_gid_callback",
-          "!doc": "Asynchronous lchown(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        lchownSync: {
-          "!type": "fn(path: string, uid: number, gid: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchownsync_path_uid_gid",
-          "!doc": "Synchronous lchown(2)."
+        appendFileSync: {
+          "!type": "fn(file: string|+Buffer|number, data: string|+Buffer, options?: ?)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfilesync_file_data_options",
+          "!doc": "The synchronous version of fs.appendFile(). Returns undefined."
         },
         chmod: {
-          "!type": "fn(path: string, mode: string, callback?: fn())",
+          "!type": "fn(path: string|+Buffer, mode: number, callback: fn(err: +Error))",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_chmod_path_mode_callback",
           "!doc": "Asynchronous chmod(2). No arguments other than a possible exception are given to the completion callback."
         },
         chmodSync: {
-          "!type": "fn(path: string, mode: string)",
+          "!type": "fn(path: string|+Buffer, mode: number)",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_chmodsync_path_mode",
-          "!doc": "Synchronous chmod(2)."
+          "!doc": "Synchronous chmod(2). Returns undefined."
         },
-        fchmod: {
-          "!type": "fn(fd: number, mode: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmod_fd_mode_callback",
-          "!doc": "Asynchronous fchmod(2). No arguments other than a possible exception are given to the completion callback."
+        chown: {
+          "!type": "fn(path: string|+Buffer, uid: number, gid: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_chown_path_uid_gid_callback",
+          "!doc": "Asynchronous chown(2). No arguments other than a possible exception are given to the completion callback."
         },
-        fchmodSync: {
-          "!type": "fn(fd: number, mode: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmodsync_fd_mode",
-          "!doc": "Synchronous fchmod(2)."
-        },
-        lchmod: {
-          "!type": "fn(path: string, mode: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmod_path_mode_callback",
-          "!doc": "Asynchronous lchmod(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        lchmodSync: {
-          "!type": "fn(path: string, mode: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmodsync_path_mode",
-          "!doc": "Synchronous lchmod(2)."
-        },
-        stat: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_stat_path_callback",
-          "!doc": "Asynchronous stat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object."
-        },
-        lstat: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstat_path_callback",
-          "!doc": "Asynchronous lstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. lstat() is identical to stat(), except that if path is a symbolic link, then the link itself is stat-ed, not the file that it refers to."
-        },
-        fstat: {
-          "!type": "fn(fd: number, callback?: fn(err: +Error, stats: +fs.Stats) -> ?) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstat_fd_callback",
-          "!doc": "Asynchronous fstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. fstat() is identical to stat(), except that the file to be stat-ed is specified by the file descriptor fd."
-        },
-        statSync: {
-          "!type": "fn(path: string) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_statsync_path",
-          "!doc": "Synchronous stat(2). Returns an instance of fs.Stats."
-        },
-        lstatSync: {
-          "!type": "fn(path: string) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstatsync_path",
-          "!doc": "Synchronous lstat(2). Returns an instance of fs.Stats."
-        },
-        fstatSync: {
-          "!type": "fn(fd: number) -> +fs.Stats",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstatsync_fd",
-          "!doc": "Synchronous fstat(2). Returns an instance of fs.Stats."
-        },
-        link: {
-          "!type": "fn(srcpath: string, dstpath: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_link_srcpath_dstpath_callback",
-          "!doc": "Asynchronous link(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        linkSync: {
-          "!type": "fn(srcpath: string, dstpath: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_linksync_srcpath_dstpath",
-          "!doc": "Synchronous link(2)."
-        },
-        symlink: {
-          "!type": "fn(srcpath: string, dstpath: string, type?: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlink_srcpath_dstpath_type_callback",
-          "!doc": "Asynchronous symlink(2). No arguments other than a possible exception are given to the completion callback. type argument can be either 'dir', 'file', or 'junction' (default is 'file'). It is only used on Windows (ignored on other platforms). Note that Windows junction points require the destination path to be absolute. When using 'junction', the destination argument will automatically be normalized to absolute path."
-        },
-        symlinkSync: {
-          "!type": "fn(srcpath: string, dstpath: string, type?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlinksync_srcpath_dstpath_type",
-          "!doc": "Synchronous symlink(2)."
-        },
-        readlink: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, linkString: string))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlink_path_callback",
-          "!doc": "Asynchronous readlink(2). The callback gets two arguments (err, linkString)."
-        },
-        readlinkSync: {
-          "!type": "fn(path: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlinksync_path",
-          "!doc": "Synchronous readlink(2). Returns the symbolic link's string value."
-        },
-        realpath: {
-          "!type": "fn(path: string, cache: bool, callback: fn(err: +Error, resolvedPath: string))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpath_path_cache_callback",
-          "!doc": "Asynchronous realpath(2). The callback gets two arguments (err, resolvedPath). May use process.cwd to resolve relative paths. cache is an object literal of mapped paths that can be used to force a specific path resolution or avoid additional fs.stat calls for known real paths."
-        },
-        realpathSync: {
-          "!type": "fn(path: string, cache?: bool) -> string",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpathsync_path_cache",
-          "!doc": "Synchronous realpath(2). Returns the resolved path."
-        },
-        unlink: {
-          "!type": "fn(path: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback",
-          "!doc": "Asynchronous unlink(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        unlinkSync: {
-          "!type": "fn(path: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlinksync_path",
-          "!doc": "Synchronous unlink(2)."
-        },
-        rmdir: {
-          "!type": "fn(path: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdir_path_callback",
-          "!doc": "Asynchronous rmdir(2). No arguments other than a possible exception are given to the completion callback."
-        },
-        rmdirSync: {
-          "!type": "fn(path: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdirsync_path",
-          "!doc": "Synchronous rmdir(2)."
-        },
-        mkdir: {
-          "!type": "fn(path: string, mode?: ?, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdir_path_mode_callback",
-          "!doc": "Asynchronous mkdir(2). No arguments other than a possible exception are given to the completion callback. mode defaults to 0777."
-        },
-        mkdirSync: {
-          "!type": "fn(path: string, mode?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdirsync_path_mode",
-          "!doc": "Synchronous mkdir(2)."
-        },
-        readdir: {
-          "!type": "fn(path: string, callback?: fn(err: +Error, files: [string]))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdir_path_callback",
-          "!doc": "Asynchronous readdir(3). Reads the contents of a directory. The callback gets two arguments (err, files) where files is an array of the names of the files in the directory excluding '.' and '..'."
-        },
-        readdirSync: {
-          "!type": "fn(path: string) -> [string]",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdirsync_path",
-          "!doc": "Synchronous readdir(3). Returns an array of filenames excluding '.' and '..'."
+        chownSync: {
+          "!type": "fn(path: string|+Buffer, uid: number, gid: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_chownsync_path_uid_gid",
+          "!doc": "Synchronous chown(2). Returns undefined."
         },
         close: {
-          "!type": "fn(fd: number, callback?: fn())",
+          "!type": "fn(fd: number, callback: fn(err: +Error))",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_close_fd_callback",
           "!doc": "Asynchronous close(2). No arguments other than a possible exception are given to the completion callback."
         },
         closeSync: {
           "!type": "fn(fd: number)",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_closesync_fd",
-          "!doc": "Synchronous close(2)."
+          "!doc": "Synchronous close(2). Returns undefined."
         },
-        open: {
-          "!type": "fn(path: string, flags: string, mode?: string, callback?: fn(err: +Error, fd: number))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_open_path_flags_mode_callback",
-          "!doc": "Asynchronous file open."
+        createReadStream: {
+          "!type": "fn(path: string|+Buffer, options?: ?) -> +fs.ReadStream",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options",
+          "!doc": "Returns a new ReadStream object. (See Readable Stream)."
         },
-        openSync: {
-          "!type": "fn(path: string, flags: string, mode?: string) -> number",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_opensync_path_flags_mode",
-          "!doc": "Synchronous open(2)."
+        createWriteStream: {
+          "!type": "fn(path: string|+Buffer, options?: ?) -> +fs.WriteStream",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options",
+          "!doc": "Returns a new WriteStream object. (See Writable Stream)."
         },
-        utimes: {
-          "!type": "fn(path: string, atime: number, mtime: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimes_path_atime_mtime_callback",
-          "!doc": "Change file timestamps of the file referenced by the supplied path."
+        exists: {
+          "!type": "fn(path: string|+Buffer, callback: fn(exists: bool))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_exists_path_callback",
+          "!doc": "Test whether or not the given path exists by checking with the file system. Then call the callback argument with either true or false. Example:"
         },
-        utimesSync: {
-          "!type": "fn(path: string, atime: number, mtime: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimessync_path_atime_mtime",
-          "!doc": "Change file timestamps of the file referenced by the supplied path."
+        existsSync: {
+          "!type": "fn(path: string|+Buffer) -> bool",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_existssync_path",
+          "!doc": "Stability: 0 - Deprecated: Use fs.statSync() or fs.accessSync() instead."
         },
-        futimes: {
-          "!type": "fn(fd: number, atime: number, mtime: number, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimes_fd_atime_mtime_callback",
-          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
+        fchmod: {
+          "!type": "fn(fd: number, mode: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmod_fd_mode_callback",
+          "!doc": "Asynchronous fchmod(2). No arguments other than a possible exception are given to the completion callback."
         },
-        futimesSync: {
-          "!type": "fn(fd: number, atime: number, mtime: number)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimessync_fd_atime_mtime",
-          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
+        fchmodSync: {
+          "!type": "fn(fd: number, mode: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchmodsync_fd_mode",
+          "!doc": "Synchronous fchmod(2). Returns undefined."
+        },
+        fchown: {
+          "!type": "fn(fd: number, uid: number, gid: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchown_fd_uid_gid_callback",
+          "!doc": "Asynchronous fchown(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        fchownSync: {
+          "!type": "fn(fd: number, uid: number, gid: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fchownsync_fd_uid_gid",
+          "!doc": "Synchronous fchown(2). Returns undefined."
+        },
+        fdatasync: {
+          "!type": "fn(fd: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fdatasync_fd_callback",
+          "!doc": "Asynchronous fdatasync(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        fdatasyncSync: {
+          "!type": "fn(fd: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fdatasyncsync_fd",
+          "!doc": "Synchronous fdatasync(2). Returns undefined."
+        },
+        fstat: {
+          "!type": "fn(fd: number, callback: fn(err: +Error, stats: +fs.Stats))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstat_fd_callback",
+          "!doc": "Asynchronous fstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. fstat() is identical to stat(), except that the file to be stat-ed is specified by the file descriptor fd."
+        },
+        fstatSync: {
+          "!type": "fn(fd: number) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_fstatsync_fd",
+          "!doc": "Synchronous fstat(2). Returns an instance of fs.Stats."
         },
         fsync: {
-          "!type": "fn(fd: number, callback?: fn())",
+          "!type": "fn(fd: number, callback: fn(err: +Error))",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_fsync_fd_callback",
           "!doc": "Asynchronous fsync(2). No arguments other than a possible exception are given to the completion callback."
         },
         fsyncSync: {
           "!type": "fn(fd: number)",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_fsyncsync_fd",
-          "!doc": "Synchronous fsync(2)."
+          "!doc": "Synchronous fsync(2). Returns undefined."
         },
-        write: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, written: number, buffer: +Buffer))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback",
-          "!doc": "Write buffer to the file specified by fd."
+        ftruncate: {
+          "!type": "fn(fd: number, len: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncate_fd_len_callback",
+          "!doc": "Asynchronous ftruncate(2). No arguments other than a possible exception are given to the completion callback."
         },
-        writeSync: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_writesync_fd_buffer_offset_length_position",
-          "!doc": "Synchronous version of fs.write(). Returns the number of bytes written."
+        ftruncateSync: {
+          "!type": "fn(fd: number, len: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_ftruncatesync_fd_len",
+          "!doc": "Synchronous ftruncate(2). Returns undefined."
+        },
+        futimes: {
+          "!type": "fn(fd: number, atime: number, mtime: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimes_fd_atime_mtime_callback",
+          "!doc": "Change the file timestamps of a file referenced by the supplied file descriptor."
+        },
+        futimesSync: {
+          "!type": "fn(fd: number, atime: number, mtime: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_futimessync_fd_atime_mtime",
+          "!doc": "Synchronous version of fs.futimes(). Returns undefined."
+        },
+        lchmod: {
+          "!type": "fn(path: string|+Buffer, mode: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmod_path_mode_callback",
+          "!doc": "Asynchronous lchmod(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        lchmodSync: {
+          "!type": "fn(path: string|+Buffer, mode: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchmodsync_path_mode",
+          "!doc": "Synchronous lchmod(2). Returns undefined."
+        },
+        lchown: {
+          "!type": "fn(path: string|+Buffer, uid: number, gid: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchown_path_uid_gid_callback",
+          "!doc": "Asynchronous lchown(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        lchownSync: {
+          "!type": "fn(path: string|+Buffer, uid: number, gid: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lchownsync_path_uid_gid",
+          "!doc": "Synchronous lchown(2). Returns undefined."
+        },
+        link: {
+          "!type": "fn(srcpath: string|+Buffer, dstpath: string|+Buffer, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_link_srcpath_dstpath_callback",
+          "!doc": "Asynchronous link(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        linkSync: {
+          "!type": "fn(srcpath: string|+Buffer, dstpath: string|+Buffer)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_linksync_srcpath_dstpath",
+          "!doc": "Synchronous link(2). Returns undefined."
+        },
+        lstat: {
+          "!type": "fn(path: string|+Buffer, callback: fn(err: +Error, stats: +fs.Stats))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstat_path_callback",
+          "!doc": "Asynchronous lstat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. lstat() is identical to stat(), except that if path is a symbolic link, then the link itself is stat-ed, not the file that it refers to."
+        },
+        lstatSync: {
+          "!type": "fn(path: string|+Buffer) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_lstatsync_path",
+          "!doc": "Synchronous lstat(2). Returns an instance of fs.Stats."
+        },
+        mkdir: {
+          "!type": "fn(path: string|+Buffer, mode?: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdir_path_mode_callback",
+          "!doc": "Asynchronous mkdir(2). No arguments other than a possible exception are given to the completion callback. mode defaults to 0o777."
+        },
+        mkdirSync: {
+          "!type": "fn(path: string|+Buffer, mode?: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdirsync_path_mode",
+          "!doc": "Synchronous mkdir(2). Returns undefined."
+        },
+        mkdtemp: {
+          "!type": "fn(prefix: string, options?: ?, callback: fn(err: +Error, folder: string))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdtemp_prefix_options_callback",
+          "!doc": "Creates a unique temporary directory."
+        },
+        mkdtempSync: {
+          "!type": "fn(prefix: string, options?: ?) -> string",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_mkdtempsync_prefix_options",
+          "!doc": "The synchronous version of fs.mkdtemp(). Returns the created folder path."
+        },
+        open: {
+          "!type": "fn(path: string|+Buffer, flags: string|number, mode?: number, callback: fn(err: +Error, fd: number))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_open_path_flags_mode_callback",
+          "!doc": "Asynchronous file open. See open(2). flags can be:"
+        },
+        openSync: {
+          "!type": "fn(path: string|+Buffer, flags: string|number, mode?: number) -> number",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_opensync_path_flags_mode",
+          "!doc": "Synchronous version of fs.open(). Returns an integer representing the file descriptor."
         },
         read: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number, callback?: fn(err: +Error, bytesRead: number, buffer: +Buffer))",
+          "!type": "fn(fd: number, buffer: string|+Buffer, offset: number, length: number, position: number, callback: fn(err: +Error, bytesRead: number, buffer: +Buffer))",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_read_fd_buffer_offset_length_position_callback",
           "!doc": "Read data from the file specified by fd."
         },
-        readSync: {
-          "!type": "fn(fd: number, buffer: +Buffer, offset: number, length: number, position: number) -> number",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readsync_fd_buffer_offset_length_position",
-          "!doc": "Synchronous version of fs.read. Returns the number of bytesRead."
+        readdir: {
+          "!type": "fn(path: string|+Buffer, options?: ?, callback: fn(err: +Error, files: [string|+Buffer]))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdir_path_options_callback",
+          "!doc": "Asynchronous readdir(3). Reads the contents of a directory. The callback gets two arguments (err, files) where files is an array of the names of the files in the directory excluding '.' and '..'."
+        },
+        readdirSync: {
+          "!type": "fn(path: string|+Buffer, options?: ?) -> [string|+Buffer]",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readdirsync_path_options",
+          "!doc": "Synchronous readdir(3). Returns an array of filenames excluding '.' and '..'."
         },
         readFile: {
-          "!type": "fn(filename: string, callback: fn(err: +Error, data: +Buffer))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfile_filename_options_callback",
-          "!doc": "Asynchronously reads the entire contents of a file."
+          "!type": "fn(file: string|+Buffer|number, options?: ?, callback: fn(err: +Error, data: string|+Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfile_file_options_callback",
+          "!doc": "Asynchronously reads the entire contents of a file. Example:"
         },
         readFileSync: {
-          "!type": "fn(filename: string, encoding: string) -> +Buffer",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options",
-          "!doc": "Synchronous version of fs.readFile. Returns the contents of the filename."
+          "!type": "fn(file: string|+Buffer|number, options?: ?) -> string|+Buffer",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readfilesync_file_options",
+          "!doc": "Synchronous version of fs.readFile. Returns the contents of the file."
         },
-        writeFile: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefile_filename_data_options_callback",
-          "!doc": "Asynchronously writes data to a file, replacing the file if it already exists. data can be a string or a buffer."
+        readlink: {
+          "!type": "fn(path: string|+Buffer, options?: ?, callback: fn(err: +Error, linkString: string|+Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlink_path_options_callback",
+          "!doc": "Asynchronous readlink(2). The callback gets two arguments (err, linkString)."
         },
-        writeFileSync: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefilesync_filename_data_options",
-          "!doc": "The synchronous version of fs.writeFile."
+        readlinkSync: {
+          "!type": "fn(path: string|+Buffer, options?: ?) -> string|+Buffer",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readlinksync_path_options",
+          "!doc": "Synchronous readlink(2). Returns the symbolic link's string value."
         },
-        appendFile: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string, callback?: fn())",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfile_filename_data_options_callback",
-          "!doc": "Asynchronously append data to a file, creating the file if it not yet exists. data can be a string or a buffer."
+        readSync: {
+          "!type": "fn(fd: number, buffer: string|+Buffer, offset: number, length: number, position: number) -> number",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_readsync_fd_buffer_offset_length_position",
+          "!doc": "Synchronous version of fs.read(). Returns the number of bytesRead."
         },
-        appendFileSync: {
-          "!type": "fn(filename: string, data: string|+Buffer, encoding?: string)",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_appendfilesync_filename_data_options",
-          "!doc": "The synchronous version of fs.appendFile."
+        realpath: {
+          "!type": "fn(path: string|+Buffer, options?: ?, callback: fn(err: +Error, resolvedPath: string|+Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpath_path_options_callback",
+          "!doc": "Asynchronous realpath(3). The callback gets two arguments (err, resolvedPath). May use process.cwd to resolve relative paths."
         },
-        watchFile: {
-          "!type": "fn(filename: string, options: ?, listener: fn(current: +fs.Stats, prev: +fs.Stats))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_watchfile_filename_options_listener",
-          "!doc": "Watch for changes on filename. The callback listener will be called each time the file is accessed."
+        realpathSync: {
+          "!type": "fn(path: string|+Buffer, options?: ?) -> string|+Buffer",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_realpathsync_path_options",
+          "!doc": "Synchronous realpath(3). Returns the resolved path."
+        },
+        rename: {
+          "!type": "fn(oldPath: string|+Buffer, newPath: string|+Buffer, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_rename_oldpath_newpath_callback",
+          "!doc": "Asynchronous rename(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        renameSync: {
+          "!type": "fn(oldPath: string|+Buffer, newPath: string|+Buffer)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_renamesync_oldpath_newpath",
+          "!doc": "Synchronous rename(2). Returns undefined."
+        },
+        rmdir: {
+          "!type": "fn(path: string|+Buffer, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdir_path_callback",
+          "!doc": "Asynchronous rmdir(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        rmdirSync: {
+          "!type": "fn(path: string|+Buffer)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_rmdirsync_path",
+          "!doc": "Synchronous rmdir(2). Returns undefined."
+        },
+        stat: {
+          "!type": "fn(path: string|+Buffer, callback: fn(err: +Error, stats: +fs.Stats))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_stat_path_callback",
+          "!doc": "Asynchronous stat(2). The callback gets two arguments (err, stats) where stats is a fs.Stats object. See the fs.Stats section for more information."
+        },
+        statSync: {
+          "!type": "fn(path: string|+Buffer) -> +fs.Stats",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_statsync_path",
+          "!doc": "Synchronous stat(2). Returns an instance of fs.Stats."
+        },
+        symlink: {
+          "!type": "fn(target: string|+Buffer, path: string|+Buffer, type?: string, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlink_target_path_type_callback",
+          "!doc": "Asynchronous symlink(2). No arguments other than a possible exception are given to the completion callback. The type argument can be set to 'dir', 'file', or 'junction' (default is 'file') and is only available on Windows (ignored on other platforms). Note that Windows junction points require the destination path to be absolute. When using 'junction', the target argument will automatically be normalized to absolute path."
+        },
+        symlinkSync: {
+          "!type": "fn(target: string|+Buffer, path: string|+Buffer, type?: string)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_symlinksync_target_path_type",
+          "!doc": "Synchronous symlink(2). Returns undefined."
+        },
+        truncate: {
+          "!type": "fn(path: string|+Buffer, len: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncate_path_len_callback",
+          "!doc": "Asynchronous truncate(2). No arguments other than a possible exception are given to the completion callback. A file descriptor can also be passed as the first argument. In this case, fs.ftruncate() is called."
+        },
+        truncateSync: {
+          "!type": "fn(path: string|+Buffer, len: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_truncatesync_path_len",
+          "!doc": "Synchronous truncate(2). Returns undefined. A file descriptor can also be passed as the first argument. In this case, fs.ftruncateSync() is called."
+        },
+        unlink: {
+          "!type": "fn(path: string|+Buffer, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlink_path_callback",
+          "!doc": "Asynchronous unlink(2). No arguments other than a possible exception are given to the completion callback."
+        },
+        unlinkSync: {
+          "!type": "fn(path: string|+Buffer)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_unlinksync_path",
+          "!doc": "Synchronous unlink(2). Returns undefined."
         },
         unwatchFile: {
-          "!type": "fn(filename: string, listener?: fn())",
+          "!type": "fn(filename: string|+Buffer, listener?: fn(curr: +fs.Stats, prev: +fs.Stats))",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_unwatchfile_filename_listener",
           "!doc": "Stop watching for changes on filename. If listener is specified, only that particular listener is removed. Otherwise, all listeners are removed and you have effectively stopped watching filename."
         },
+        utimes: {
+          "!type": "fn(path: string|+Buffer, atime: number, mtime: number, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimes_path_atime_mtime_callback",
+          "!doc": "Change file timestamps of the file referenced by the supplied path."
+        },
+        utimesSync: {
+          "!type": "fn(path: string|+Buffer, atime: number, mtime: number)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_utimessync_path_atime_mtime",
+          "!doc": "Synchronous version of fs.utimes(). Returns undefined."
+        },
         watch: {
-          "!type": "fn(filename: string, options?: ?, listener?: fn(event: string, filename: string)) -> +fs.FSWatcher",
+          "!type": "fn(filename: string|+Buffer, options?: ?, listener?: fn(eventType: string, filename?: string)) -> +fs.FSWatcher",
           "!url": "https://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener",
           "!doc": "Watch for changes on filename, where filename is either a file or a directory. The returned object is a fs.FSWatcher."
         },
-        exists: {
-          "!type": "fn(path: string, callback?: fn(exists: bool))",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_exists_path_callback",
-          "!doc": "Test whether or not the given path exists by checking with the file system. Then call the callback argument with either true or false."
+        watchFile: {
+          "!type": "fn(filename: string|+Buffer, options?: ?, listener: fn(curr: +fs.Stats, prev: +fs.Stats))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_watchfile_filename_options_listener",
+          "!doc": "Watch for changes on filename. The callback listener will be called each time the file is accessed."
         },
-        existsSync: {
-          "!type": "fn(path: string) -> bool",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_existssync_path",
-          "!doc": "Synchronous version of fs.exists."
+        write: {
+          "!type": "fn(fd: number, data: string|+Buffer, position?: number, encoding?: string, callback: fn(err: +Error, bytesRead: number, buffer: +Buffer))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_write_fd_data_position_encoding_callback",
+          "!doc": "Write data to the file specified by fd. If data is not a Buffer instance then the value will be coerced to a string."
+        },
+        writeFile: {
+          "!type": "fn(file: string|+Buffer|number, data: string|+Buffer, options?: ?, callback: fn(err: +Error))",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback",
+          "!doc": "Asynchronously writes data to a file, replacing the file if it already exists. data can be a string or a buffer."
+        },
+        writeFileSync: {
+          "!type": "fn(file: string|+Buffer|number, data: string|+Buffer, options?: ?)",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_writefilesync_file_data_options",
+          "!doc": "The synchronous version of fs.writeFile(). Returns undefined."
+        },
+        writeSync: {
+          "!type": "fn(fd: number, data: string|+Buffer, position?: number, encoding?: string) -> number",
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_writesync_fd_data_position_encoding",
+          "!doc": "Synchronous versions of fs.write(). Returns the number of bytes written."
+        },
+        FSWatcher: {
+          "!type": "fn()",
+          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_fswatcher",
+          "!doc": "Objects returned from fs.watch() are of this type.",
+          prototype: {
+            close: {
+              "!type": "fn()",
+              "!url": "https://nodejs.org/api/fs.html#fs_watcher_close",
+              "!doc": "Stop watching for changes on the given fs.FSWatcher."
+            }
+          }
+        },
+        ReadStream: {
+          "!type": "fn()",
+          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_readstream",
+          "!doc": "ReadStream is a Readable Stream.",
+          prototype: {
+            bytesRead: {
+              "!type": "number",
+              "!url": "https://nodejs.org/api/fs.html#fs_readstream_bytesread",
+              "!doc": "The number of bytes read so far."
+            },
+            path: {
+              "!type": "string",
+              "!url": "https://nodejs.org/api/fs.html#fs_readstream_path",
+              "!doc": "The path to the file the stream is reading from as specified in the first argument to fs.createReadStream(). If path is passed as a string, then readStream.path will be a string. If path is passed as a Buffer, then readStream.path will be a Buffer."
+            },
+            "!proto": "stream.Readable"
+          }
         },
         Stats: {
           "!type": "fn()",
+          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_stats",
+          "!doc": "Objects returned from fs.stat(), fs.lstat() and fs.fstat() and their synchronous counterparts are of this type.",
           prototype: {
             isFile: "fn() -> bool",
             isDirectory: "fn() -> bool",
@@ -1661,28 +1733,70 @@
             blocks: "number",
             atime: "+Date",
             mtime: "+Date",
-            ctime: "+Date"
-          },
-          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_stats",
-          "!doc": "Objects returned from fs.stat(), fs.lstat() and fs.fstat() and their synchronous counterparts are of this type."
+            ctime: "+Date",
+            birthtime: "+Date"
+          }
         },
-        createReadStream: {
-          "!type": "fn(path: string, options?: ?) -> +stream.Readable",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options",
-          "!doc": "Returns a new ReadStream object."
-        },
-        createWriteStream: {
-          "!type": "fn(path: string, options?: ?) -> +stream.Writable",
-          "!url": "https://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options",
-          "!doc": "Returns a new WriteStream object."
-        },
-        FSWatcher: {
+        WriteStream: {
           "!type": "fn()",
+          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_writestream",
+          "!doc": "WriteStream is a Writable Stream.",
           prototype: {
-            close: "fn()"
-          },
-          "!url": "https://nodejs.org/api/fs.html#fs_class_fs_fswatcher",
-          "!doc": "Objects returned from fs.watch() are of this type."
+            bytesWritten: {
+              "!type": "number",
+              "!url": "https://nodejs.org/api/fs.html#fs_writestream_byteswritten",
+              "!doc": "The number of bytes written so far. Does not include data that is still queued for writing."
+            },
+            path: {
+              "!type": "string",
+              "!url": "https://nodejs.org/api/fs.html#fs_writestream_path",
+              "!doc": "The path to the file the stream is writing to as specified in the first argument to fs.createWriteStream(). If path is passed as a string, then writeStream.path will be a string. If path is passed as a Buffer, then writeStream.path will be a Buffer."
+            },
+            "!proto": "stream.Writable"
+          }
+        },
+        constants: {
+          "!url": "https://nodejs.org/api/fs.html#fs_fs_constants",
+          "!doc": "Returns an object containing commonly used constants for file system operations. The specific constants currently defined are described in FS Constants.",
+          F_OK: "number",
+          R_OK: "number",
+          W_OK: "number",
+          X_OK: "number",
+          O_RDONLY: "number",
+          O_WRONLY: "number",
+          O_RDWR: "number",
+          O_CREAT: "number",
+          O_EXCL: "number",
+          O_NOCTTY: "number",
+          O_TRUNC: "number",
+          O_APPEND: "number",
+          O_DIRECTORY: "number",
+          O_NOATIME: "number",
+          O_NOFOLLOW: "number",
+          O_SYNC: "number",
+          O_SYMLINK: "number",
+          O_DIRECT: "number",
+          O_NONBLOCK: "number",
+          S_IFMT: "number",
+          S_IFREG: "number",
+          S_IFDIR: "number",
+          S_IFCHR: "number",
+          S_IFBLK: "number",
+          S_IFIFO: "number",
+          S_IFLNK: "number",
+          S_IFSOCK: "number",
+          S_IRWXU: "number",
+          S_IRUSR: "number",
+          S_IWUSR: "number",
+          S_IXUSR: "number",
+          S_IRWXG: "number",
+          S_IRGRP: "number",
+          S_IWGRP: "number",
+          S_IXGRP: "number",
+          S_IRWXO: "number",
+          S_IROTH: "number",
+          S_IWOTH: "number",
+          S_IXOTH: "number"
         }
       },
       path: {
@@ -2134,7 +2248,7 @@
           "!doc": "A synchronous output function. Will block the process and output string immediately to stderr."
         },
         error: {
-          "!type": "fn(msg: string)",
+          "!type": "fn(msg: string, ...string: string)",
           "!url": "https://nodejs.org/api/util.html#util_util_error",
           "!doc": "Same as util.debug() except this will output all arguments immediately to stderr."
         },
@@ -2154,7 +2268,7 @@
           "!doc": "Output with timestamp on stdout."
         },
         inspect: {
-          "!type": "fn(object: ?, options: ?) -> string",
+          "!type": "fn(object: ?, options: {showHidden: bool, depth: number, colors: bool, customInspect: bool, showProxy: bool, maxArrayLength: number, breakLength: number}) -> string",
           "!url": "https://nodejs.org/api/util.html#util_util_inspect_object_options",
           "!doc": "Return a string representation of object, which is useful for debugging."
         },
@@ -2431,7 +2545,12 @@
         INSPECT_MAX_BYTES: {
           "!type": "number",
           "!url": "https://nodejs.org/api/buffer.html#buffer_buffer_inspect_max_bytes",
-          "!doc": "Returns the maximum number of bytes that will be returned when buffer.inspect() is called. This can be overridden by user modules. See util.inspect() for more details on buffer.inspect() behavior."
+          "!doc": "Returns the maximum number of bytes that will be returned when buf.inspect() is called. This can be overridden by user modules. See util.inspect() for more details on buf.inspect() behavior."
+        },
+        kMaxLength: {
+          "!type": "number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buffer_kmaxlength",
+          "!doc": "On 32-bit architectures, this value is (2^30)-1 (~1GB). On 64-bit architectures, this value is (2^31)-1 (~2GB)."
         }
       },
       module: {},
@@ -2723,286 +2842,331 @@
     setInterval: "timers.setInterval",
     setTimeout: "timers.setTimeout",
     Buffer: {
-      "!type": "fn() -> +Buffer",
+      "!type": "fn(sizeOrSource: number|[number]|+ArrayBuffer|+Buffer|string, byteOffsetOrEncoding?: number|string, length?: number) -> +Buffer",
       "!url": "https://nodejs.org/api/buffer.html#buffer_class_buffer",
       "!doc": "The Buffer class is a global type for dealing with binary data directly. It can be constructed in a variety of ways.",
+      prototype: {
+        length: {
+          "!type": "number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_length",
+          "!doc": "Returns the amount of memory allocated for buf in bytes. Note that this does not necessarily reflect the amount of \"usable\" data within buf."
+        },
+        compare: {
+          "!type": "fn(target: +Buffer, targetStart?: number, targetEnd?: number, sourceStart?: number, sourceEnd?: number) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_compare_target_targetstart_targetend_sourcestart_sourceend",
+          "!doc": "Compares buf with target and returns a number indicating whether buf comes before, after, or is the same as target in sort order. Comparison is based on the actual sequence of bytes in each Buffer."
+        },
+        copy: {
+          "!type": "fn(target: +Buffer, targetStart?: number, sourceStart?: number, sourceEnd?: number) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_copy_target_targetstart_sourcestart_sourceend",
+          "!doc": "Copies data from a region of buf to a region in target even if the target memory region overlaps with buf."
+        },
+        entries: {
+          "!type": "fn() -> +iter[:t=[number, number]]",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_entries",
+          "!doc": "Creates and returns an iterator of [index, byte] pairs from the contents of buf."
+        },
+        equals: {
+          "!type": "fn(otherBuffer: +Buffer) -> bool",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_equals_otherbuffer",
+          "!doc": "Returns true if both buf and otherBuffer have exactly the same bytes, false otherwise."
+        },
+        fill: {
+          "!type": "fn(value: string|+Buffer|number, offset?: number, end?: number, encoding?: string) -> +Buffer",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_fill_value_offset_end_encoding",
+          "!doc": "Fills buf with the specified value. If the offset and end are not given, the entire buf will be filled. This is meant to be a small simplification to allow the creation and filling of a Buffer to be done on a single line."
+        },
+        indexOf: {
+          "!type": "fn(value: string|+Buffer|number, byteOffset?: number, encoding?: string) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_indexof_value_byteoffset_encoding",
+          "!doc": "If value is:"
+        },
+        includes: {
+          "!type": "fn(value: string|+Buffer|number, byteOffset?: number, encoding?: string) -> bool",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_includes_value_byteoffset_encoding",
+          "!doc": "Equivalent to buf.indexOf() !== -1."
+        },
+        keys: {
+          "!type": "fn() -> +iter[:t=number]",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_keys",
+          "!doc": "Creates and returns an iterator of buf keys (indices)."
+        },
+        lastIndexOf: {
+          "!type": "fn(value: string|+Buffer|number, byteOffset?: number, encoding?: string) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_lastindexof_value_byteoffset_encoding",
+          "!doc": "Identical to buf.indexOf(), except buf is searched from back to front instead of front to back."
+        },
+        readDoubleBE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readdoublebe_offset_noassert",
+          "!doc": "Reads a 64-bit double from buf at the specified offset with specified endian format (readDoubleBE() returns big endian, readDoubleLE() returns little endian)."
+        },
+        readDoubleLE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readdoublele_offset_noassert",
+          "!doc": "Reads a 64-bit double from buf at the specified offset with specified endian format (readDoubleBE() returns big endian, readDoubleLE() returns little endian)."
+        },
+        readFloatBE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readfloatbe_offset_noassert",
+          "!doc": "Reads a 32-bit float from buf at the specified offset with specified endian format (readFloatBE() returns big endian, readFloatLE() returns little endian)."
+        },
+        readFloatLE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readfloatle_offset_noassert",
+          "!doc": "Reads a 32-bit float from buf at the specified offset with specified endian format (readFloatBE() returns big endian, readFloatLE() returns little endian)."
+        },
+        readInt8: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint8_offset_noassert",
+          "!doc": "Reads a signed 8-bit integer from buf at the specified offset."
+        },
+        readInt16BE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint16be_offset_noassert",
+          "!doc": "Reads a signed 16-bit integer from buf at the specified offset with the specified endian format (readInt16BE() returns big endian, readInt16LE() returns little endian)."
+        },
+        readInt16LE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint16le_offset_noassert",
+          "!doc": "Reads a signed 16-bit integer from buf at the specified offset with the specified endian format (readInt16BE() returns big endian, readInt16LE() returns little endian)."
+        },
+        readInt32BE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint32be_offset_noassert",
+          "!doc": "Reads a signed 32-bit integer from buf at the specified offset with the specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
+        },
+        readInt32LE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint32le_offset_noassert",
+          "!doc": "Reads a signed 32-bit integer from buf at the specified offset with the specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
+        },
+        readIntBE: {
+          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readintbe_offset_bytelength_noassert",
+          "!doc": "Reads byteLength number of bytes from buf at the specified offset and interprets the result as a two's complement signed value. Supports up to 48 bits of accuracy."
+        },
+        readIntLE: {
+          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readintle_offset_bytelength_noassert",
+          "!doc": "Reads byteLength number of bytes from buf at the specified offset and interprets the result as a two's complement signed value. Supports up to 48 bits of accuracy."
+        },
+        readUInt8: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint8_offset_noassert",
+          "!doc": "Reads an unsigned 8-bit integer from buf at the specified offset."
+        },
+        readUInt16BE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint16be_offset_noassert",
+          "!doc": "Reads an unsigned 16-bit integer from buf at the specified offset with specified endian format (readUInt16BE() returns big endian, readUInt16LE() returns little endian)."
+        },
+        readUInt16LE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint16le_offset_noassert",
+          "!doc": "Reads an unsigned 16-bit integer from buf at the specified offset with specified endian format (readUInt16BE() returns big endian, readUInt16LE() returns little endian)."
+        },
+        readUInt32BE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint32be_offset_noassert",
+          "!doc": "Reads an unsigned 32-bit integer from buf at the specified offset with specified endian format (readUInt32BE() returns big endian, readUInt32LE() returns little endian)."
+        },
+        readUInt32LE: {
+          "!type": "fn(offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint32le_offset_noassert",
+          "!doc": "Reads an unsigned 32-bit integer from buf at the specified offset with specified endian format (readUInt32BE() returns big endian, readUInt32LE() returns little endian)."
+        },
+        readUIntBE: {
+          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuintbe_offset_bytelength_noassert",
+          "!doc": "Reads byteLength number of bytes from buf at the specified offset and interprets the result as an unsigned integer. Supports up to 48 bits of accuracy."
+        },
+        readUIntLE: {
+          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuintle_offset_bytelength_noassert",
+          "!doc": "Reads byteLength number of bytes from buf at the specified offset and interprets the result as an unsigned integer. Supports up to 48 bits of accuracy."
+        },
+        slice: {
+          "!type": "fn(start?: number, end?: number) -> +Buffer",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_slice_start_end",
+          "!doc": "Returns a new Buffer that references the same memory as the original, but offset and cropped by the start and end indices."
+        },
+        swap16: {
+          "!type": "fn() -> +Buffer",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_swap16",
+          "!doc": "Interprets buf as an array of unsigned 16-bit integers and swaps the byte-order in-place. Throws a RangeError if buf.length is not a multiple of 2."
+        },
+        swap32: {
+          "!type": "fn() -> +Buffer",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_swap32",
+          "!doc": "Interprets buf as an array of unsigned 32-bit integers and swaps the byte-order in-place. Throws a RangeError if buf.length is not a multiple of 4."
+        },
+        swap64: {
+          "!type": "fn() -> +Buffer",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_swap64",
+          "!doc": "Interprets buf as an array of 64-bit numbers and swaps the byte-order in-place. Throws a RangeError if buf.length is not a multiple of 8."
+        },
+        toString: {
+          "!type": "fn(encoding?: string, start?: number, end?: number) -> string",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_tostring_encoding_start_end",
+          "!doc": "Decodes buf to a string according to the specified character encoding in encoding. start and end may be passed to decode only a subset of buf."
+        },
+        toJSON: {
+          "!type": "fn()",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_tojson",
+          "!doc": "Returns a JSON representation of buf. JSON.stringify() implicitly calls this function when stringifying a Buffer instance."
+        },
+        values: {
+          "!type": "fn() -> +iter[:t=number]",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_values",
+          "!doc": "Creates and returns an iterator for buf values (bytes). This function is called automatically when a Buffer is used in a for..of statement."
+        },
+        write: {
+          "!type": "fn(string: string, offset?: number, length?: number, encoding?: string) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_write_string_offset_length_encoding",
+          "!doc": "Writes string to buf at offset according to the character encoding in encoding. The length parameter is the number of bytes to write. If buf did not contain enough space to fit the entire string, only a partial amount of string will be written. However, partially encoded characters will not be written."
+        },
+        writeDoubleBE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writedoublebe_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeDoubleBE() writes big endian, writeDoubleLE() writes little endian). value should be a valid 64-bit double. Behavior is undefined when value is anything other than a 64-bit double."
+        },
+        writeDoubleLE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writedoublele_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeDoubleBE() writes big endian, writeDoubleLE() writes little endian). value should be a valid 64-bit double. Behavior is undefined when value is anything other than a 64-bit double."
+        },
+        writeFloatBE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writefloatbe_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeFloatBE() writes big endian, writeFloatLE() writes little endian). value should be a valid 32-bit float. Behavior is undefined when value is anything other than a 32-bit float."
+        },
+        writeFloatLE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writefloatle_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeFloatBE() writes big endian, writeFloatLE() writes little endian). value should be a valid 32-bit float. Behavior is undefined when value is anything other than a 32-bit float."
+        },
+        writeInt8: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint8_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset. value should be a valid signed 8-bit integer. Behavior is undefined when value is anything other than a signed 8-bit integer."
+        },
+        writeInt16BE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint16be_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeInt16BE() writes big endian, writeInt16LE() writes little endian). value should be a valid signed 16-bit integer. Behavior is undefined when value is anything other than a signed 16-bit integer."
+        },
+        writeInt16LE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint16le_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeInt16BE() writes big endian, writeInt16LE() writes little endian). value should be a valid signed 16-bit integer. Behavior is undefined when value is anything other than a signed 16-bit integer."
+        },
+        writeInt32BE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint32be_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeInt32BE() writes big endian, writeInt32LE() writes little endian). value should be a valid signed 32-bit integer. Behavior is undefined when value is anything other than a signed 32-bit integer."
+        },
+        writeInt32LE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint32le_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeInt32BE() writes big endian, writeInt32LE() writes little endian). value should be a valid signed 32-bit integer. Behavior is undefined when value is anything other than a signed 32-bit integer."
+        },
+        writeIntBE: {
+          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeintbe_value_offset_bytelength_noassert",
+          "!doc": "Writes byteLength bytes of value to buf at the specified offset. Supports up to 48 bits of accuracy. Behavior is undefined when value is anything other than a signed integer."
+        },
+        writeIntLE: {
+          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeintle_value_offset_bytelength_noassert",
+          "!doc": "Writes byteLength bytes of value to buf at the specified offset. Supports up to 48 bits of accuracy. Behavior is undefined when value is anything other than a signed integer."
+        },
+        writeUInt8: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint8_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset. value should be a valid unsigned 8-bit integer. Behavior is undefined when value is anything other than an unsigned 8-bit integer."
+        },
+        writeUInt16BE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint16be_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeUInt16BE() writes big endian, writeUInt16LE() writes little endian). value should be a valid unsigned 16-bit integer. Behavior is undefined when value is anything other than an unsigned 16-bit integer."
+        },
+        writeUInt16LE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint16le_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeUInt16BE() writes big endian, writeUInt16LE() writes little endian). value should be a valid unsigned 16-bit integer. Behavior is undefined when value is anything other than an unsigned 16-bit integer."
+        },
+        writeUInt32BE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint32be_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeUInt32BE() writes big endian, writeUInt32LE() writes little endian). value should be a valid unsigned 32-bit integer. Behavior is undefined when value is anything other than an unsigned 32-bit integer."
+        },
+        writeUInt32LE: {
+          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint32le_value_offset_noassert",
+          "!doc": "Writes value to buf at the specified offset with specified endian format (writeUInt32BE() writes big endian, writeUInt32LE() writes little endian). value should be a valid unsigned 32-bit integer. Behavior is undefined when value is anything other than an unsigned 32-bit integer."
+        },
+        writeUIntBE: {
+          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuintbe_value_offset_bytelength_noassert",
+          "!doc": "Writes byteLength bytes of value to buf at the specified offset. Supports up to 48 bits of accuracy. Behavior is undefined when value is anything other than an unsigned integer."
+        },
+        writeUIntLE: {
+          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
+          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuintle_value_offset_bytelength_noassert",
+          "!doc": "Writes byteLength bytes of value to buf at the specified offset. Supports up to 48 bits of accuracy. Behavior is undefined when value is anything other than an unsigned integer."
+        },
+        "!proto": "Uint8Array.prototype"
+      },
+      alloc: {
+        "!type": "fn(size: number, fill?: string|+Buffer|number, encoding?: string)",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_alloc_size_fill_encoding",
+        "!doc": "Allocates a new Buffer of size bytes. If fill is undefined, the Buffer will be zero-filled."
+      },
+      allocUnsafe: {
+        "!type": "fn(size: number)",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_allocunsafe_size",
+        "!doc": "Allocates a new non-zero-filled Buffer of size bytes. The size must be less than or equal to the value of buffer.kMaxLength. Otherwise, a RangeError is thrown. A zero-length Buffer will be created if size <= 0."
+      },
+      allocUnsafeSlow: {
+        "!type": "fn(size: number)",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_allocunsafeslow_size",
+        "!doc": "Allocates a new non-zero-filled and non-pooled Buffer of size bytes. The size must be less than or equal to the value of buffer.kMaxLength. Otherwise, a RangeError is thrown. A zero-length Buffer will be created if size <= 0."
+      },
       byteLength: {
-        "!type": "fn(string: string, encoding?: string) -> number",
+        "!type": "fn(string: ?, encoding?: string) -> number",
         "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_bytelength_string_encoding",
         "!doc": "Returns the actual byte length of a string. This is not the same as String.prototype.length since that returns the number of characters in a string."
       },
       compare: {
         "!type": "fn(buf1: +Buffer, buf2: +Buffer) -> number",
         "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_compare_buf1_buf2",
-        "!doc": "Compares buf1 to buf2 typically for the purpose of sorting arrays of Buffers. This is equivalent is calling buf1.compare(buf2)."
+        "!doc": "Compares buf1 to buf2 typically for the purpose of sorting arrays of Buffer instances. This is equivalent to calling buf1.compare(buf2)."
       },
       concat: {
         "!type": "fn(list: ?, totalLength?: number) -> +Buffer",
         "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_concat_list_totallength",
-        "!doc": "Returns a new Buffer which is the result of concatenating all the Buffers in the list together."
+        "!doc": "Returns a new Buffer which is the result of concatenating all the Buffer instances in the list together."
+      },
+      from: {
+        "!type": "fn(source: [number]|+ArrayBuffer|+Buffer|string, byteOffsetOrEncoding?: number|string, length?: number) -> +Buffer",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_from_string_encoding",
+        "!doc": "Creates a new Buffer from existing array, ArrayBuffer, Buffer, or string."
       },
       isBuffer: {
         "!type": "fn(obj: ?) -> bool",
         "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_isbuffer_obj",
-        "!doc": "Returns 'true' if obj is a Buffer."
+        "!doc": "Returns true if obj is a Buffer, false otherwise."
       },
       isEncoding: {
         "!type": "fn(encoding: string) -> bool",
         "!url": "https://nodejs.org/api/buffer.html#buffer_class_method_buffer_isencoding_encoding",
-        "!doc": "Returns true if the encoding is a valid encoding argument, or false otherwise."
+        "!doc": "Returns true if encoding contains a supported character encoding, or false otherwise."
       },
-      prototype: {
-        "!proto": "Uint8Array.prototype",
-        length: {
-          "!type": "number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_length",
-          "!doc": "Returns the amount of memory allocated for the Buffer in number of bytes. Note that this does not necessarily reflect the amount of usable data within the Buffer. For instance, in the example below, a Buffer with 1234 bytes is allocated, but only 11 ASCII bytes are written."
-        },
-        compare: {
-          "!type": "fn(otherBuffer: +Buffer) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_compare_otherbuffer",
-          "!doc": "Compares two Buffer instances and returns a number indicating whether buf comes before, after, or is the same as the otherBuffer in sort order. Comparison is based on the actual sequence of bytes in each Buffer."
-        },
-        copy: {
-          "!type": "fn(targetBuffer: +Buffer, targetStart?: number, sourceStart?: number, sourceEnd?: number) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_copy_targetbuffer_targetstart_sourcestart_sourceend",
-          "!doc": "Copies data from a region of this Buffer to a region in the target Buffer even if the target memory region overlaps with the source. If undefined, the targetStart and sourceStart parameters default to 0 while sourceEnd defaults to buffer.length."
-        },
-        entries: {
-          "!type": "fn()",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_entries",
-          "!doc": "Creates and returns an iterator of [index, byte] pairs from the Buffer contents."
-        },
-        equals: {
-          "!type": "fn(otherBuffer: +Buffer) -> bool",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_equals_otherbuffer",
-          "!doc": "Returns a boolean indicating whether this and otherBuffer have exactly the same bytes."
-        },
-        fill: {
-          "!type": "fn(value: ?, offset?: number, end?: number)",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_fill_value_offset_end",
-          "!doc": "Fills the Buffer with the specified value. If the offset (defaults to 0) and end (defaults to buffer.length) are not given it will fill the entire Buffer. The method returns a reference to the Buffer so calls can be chained."
-        },
-        indexOf: {
-          "!type": "fn(value: ?, byteOffset?: number, encoding?: string) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_indexof_value_byteoffset_encoding",
-          "!doc": "Operates similar to Array#indexOf() in that it returns either the starting index position of value in Buffer or -1 if the Buffer does not contain value. The value can be a String, Buffer or Number. Strings are by default interpreted as UTF8. Buffers will use the entire Buffer (to compare a partial Buffer use Buffer#slice()). Numbers can range from 0 to 255."
-        },
-        includes: {
-          "!type": "fn(value: ?, byteOffset?: number, encoding?: string)",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_includes_value_byteoffset_encoding",
-          "!doc": "Operates similar to Array#includes(). The value can be a String, Buffer or Number. Strings are interpreted as UTF8 unless overridden with the encoding argument. Buffers will use the entire Buffer (to compare a partial Buffer use Buffer#slice()). Numbers can range from 0 to 255."
-        },
-        keys: {
-          "!type": "fn()",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_keys",
-          "!doc": "Creates and returns an iterator of Buffer keys (indices)."
-        },
-        readDoubleBE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readdoublebe_offset_noassert",
-          "!doc": "Reads a 64-bit double from the Buffer at the specified offset with specified endian format (readDoubleBE() returns big endian, readDoubleLE() returns little endian)."
-        },
-        readDoubleLE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readdoublele_offset_noassert",
-          "!doc": "Reads a 64-bit double from the Buffer at the specified offset with specified endian format (readDoubleBE() returns big endian, readDoubleLE() returns little endian)."
-        },
-        readFloatBE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readfloatbe_offset_noassert",
-          "!doc": "Reads a 32-bit float from the Buffer at the specified offset with specified endian format (readFloatBE() returns big endian, readFloatLE() returns little endian)."
-        },
-        readFloatLE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readfloatle_offset_noassert",
-          "!doc": "Reads a 32-bit float from the Buffer at the specified offset with specified endian format (readFloatBE() returns big endian, readFloatLE() returns little endian)."
-        },
-        readInt8: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint8_offset_noassert",
-          "!doc": "Reads a signed 8-bit integer from the Buffer at the specified offset."
-        },
-        readInt16BE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint16be_offset_noassert",
-          "!doc": "Reads a signed 16-bit integer from the Buffer at the specified offset with the specified endian format (readInt16BE() returns big endian, readInt16LE() returns little endian)."
-        },
-        readInt16LE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint16le_offset_noassert",
-          "!doc": "Reads a signed 16-bit integer from the Buffer at the specified offset with the specified endian format (readInt16BE() returns big endian, readInt16LE() returns little endian)."
-        },
-        readInt32BE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint32be_offset_noassert",
-          "!doc": "Reads a signed 32-bit integer from the Buffer at the specified offset with the specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
-        },
-        readInt32LE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readint32le_offset_noassert",
-          "!doc": "Reads a signed 32-bit integer from the Buffer at the specified offset with the specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
-        },
-        readIntBE: {
-          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readintbe_offset_bytelength_noassert",
-          "!doc": "Reads byteLength number of bytes from the Buffer at the specified offset and interprets the result as a two's complement signed value. Supports up to 48 bits of accuracy. For example:"
-        },
-        readIntLE: {
-          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readintle_offset_bytelength_noassert",
-          "!doc": "Reads byteLength number of bytes from the Buffer at the specified offset and interprets the result as a two's complement signed value. Supports up to 48 bits of accuracy. For example:"
-        },
-        readUInt8: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint8_offset_noassert",
-          "!doc": "Reads an unsigned 8-bit integer from the Buffer at the specified offset."
-        },
-        readUInt16BE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint16be_offset_noassert",
-          "!doc": "Reads an unsigned 16-bit integer from the Buffer at the specified offset with specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
-        },
-        readUInt16LE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint16le_offset_noassert",
-          "!doc": "Reads an unsigned 16-bit integer from the Buffer at the specified offset with specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
-        },
-        readUInt32BE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint32be_offset_noassert",
-          "!doc": "Reads an unsigned 32-bit integer from the Buffer at the specified offset with specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
-        },
-        readUInt32LE: {
-          "!type": "fn(offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuint32le_offset_noassert",
-          "!doc": "Reads an unsigned 32-bit integer from the Buffer at the specified offset with specified endian format (readInt32BE() returns big endian, readInt32LE() returns little endian)."
-        },
-        readUIntBE: {
-          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuintbe_offset_bytelength_noassert",
-          "!doc": "Reads byteLength number of bytes from the Buffer at the specified offset and interprets the result as an unsigned integer. Supports up to 48 bits of accuracy. For example:"
-        },
-        readUIntLE: {
-          "!type": "fn(offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_readuintle_offset_bytelength_noassert",
-          "!doc": "Reads byteLength number of bytes from the Buffer at the specified offset and interprets the result as an unsigned integer. Supports up to 48 bits of accuracy. For example:"
-        },
-        slice: {
-          "!type": "fn(start: number, end?: number)",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_slice_start_end",
-          "!doc": "Returns a new Buffer that references the same memory as the original, but offset and cropped by the start (defaults to 0) and end (defaults to buffer.length) indexes."
-        },
-        toString: {
-          "!type": "fn(encoding?: string, start?: number, end?: number) -> string",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_tostring_encoding_start_end",
-          "!doc": "Decodes and returns a string from the Buffer data using the specified character set encoding."
-        },
-        toJSON: {
-          "!type": "fn()",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_tojson",
-          "!doc": "Returns a JSON representation of the Buffer instance. JSON.stringify implicitly calls this function when stringifying a Buffer instance."
-        },
-        values: {
-          "!type": "fn()",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_values",
-          "!doc": "Creates and returns an iterator for Buffer values (bytes). This function is called automatically when the Buffer is used in a for..of statement."
-        },
-        write: {
-          "!type": "fn(string: string, offset?: number, length?: number, encoding?: string) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_write_string_offset_length_encoding",
-          "!doc": "Writes string to the Buffer at offset using the given encoding. The length parameter is the number of bytes to write. If the Buffer did not contain enough space to fit the entire string, only a partial amount of the string will be written however, the will not write only partially encoded characters."
-        },
-        writeDoubleBE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writedoublebe_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeDoubleBE() writes big endian, writeDoubleLE() writes little endian). The value argument must be a valid 64-bit double."
-        },
-        writeDoubleLE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writedoublele_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeDoubleBE() writes big endian, writeDoubleLE() writes little endian). The value argument must be a valid 64-bit double."
-        },
-        writeFloatBE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writefloatbe_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeFloatBE() writes big endian, writeFloatLE() writes little endian). Behavior is unspecified if value is anything other than a 32-bit float."
-        },
-        writeFloatLE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writefloatle_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeFloatBE() writes big endian, writeFloatLE() writes little endian). Behavior is unspecified if value is anything other than a 32-bit float."
-        },
-        writeInt8: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint8_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset. The value must be a valid signed 8-bit integer."
-        },
-        writeInt16BE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint16be_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeInt16BE() writes big endian, writeInt16LE() writes little endian). The value must be a valid signed 16-bit integer."
-        },
-        writeInt16LE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint16le_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeInt16BE() writes big endian, writeInt16LE() writes little endian). The value must be a valid signed 16-bit integer."
-        },
-        writeInt32BE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint32be_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeInt32BE() writes big endian, writeInt32LE() writes little endian). The value must be a valid signed 32-bit integer."
-        },
-        writeInt32LE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeint32le_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeInt32BE() writes big endian, writeInt32LE() writes little endian). The value must be a valid signed 32-bit integer."
-        },
-        writeIntBE: {
-          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeintbe_value_offset_bytelength_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset and byteLength. Supports up to 48 bits of accuracy. For example:"
-        },
-        writeIntLE: {
-          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeintle_value_offset_bytelength_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset and byteLength. Supports up to 48 bits of accuracy. For example:"
-        },
-        writeUInt8: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint8_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset. The value must be a valid unsigned 8-bit integer."
-        },
-        writeUInt16BE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint16be_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeUInt16BE() writes big endian, writeUInt16LE() writes little endian). The value must be a valid unsigned 16-bit integer."
-        },
-        writeUInt16LE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint16le_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeUInt16BE() writes big endian, writeUInt16LE() writes little endian). The value must be a valid unsigned 16-bit integer."
-        },
-        writeUInt32BE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint32be_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeUInt32BE() writes big endian, writeUInt32LE() writes little endian). The value must be a valid unsigned 32-bit integer."
-        },
-        writeUInt32LE: {
-          "!type": "fn(value: number, offset: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuint32le_value_offset_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset with specified endian format (writeUInt32BE() writes big endian, writeUInt32LE() writes little endian). The value must be a valid unsigned 32-bit integer."
-        },
-        writeUIntBE: {
-          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuintbe_value_offset_bytelength_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset and byteLength. Supports up to 48 bits of accuracy. For example:"
-        },
-        writeUIntLE: {
-          "!type": "fn(value: number, offset: number, byteLength: number, noAssert?: bool) -> number",
-          "!url": "https://nodejs.org/api/buffer.html#buffer_buf_writeuintle_value_offset_bytelength_noassert",
-          "!doc": "Writes value to the Buffer at the specified offset and byteLength. Supports up to 48 bits of accuracy. For example:"
-        }
+      poolSize: {
+        "!type": "number",
+        "!url": "https://nodejs.org/api/buffer.html#buffer_class_property_buffer_poolsize",
+        "!doc": "This is the number of bytes used to determine the size of pre-allocated, internal Buffer instances used for pooling. This value may be modified."
       }
     }
   };
