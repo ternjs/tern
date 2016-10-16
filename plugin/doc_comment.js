@@ -413,10 +413,43 @@
         case "type":
           type = parsed; break;
         case "param": case "arg": case "argument":
-            var name = m[2].slice(parsed.end).match(/^\s*(\[?)\s*([^\]\s=]+)\s*(?:=[^\]]+\s*)?(\]?).*/);
+            // Possible jsdoc param name situations:
+            // employee
+            // [employee]
+            // [employee=John Doe]
+            // employee.name
+            // employees[].name
+            var name = m[2].slice(parsed.end).match(/^\s*(\[?)\s*([^\[\]\s=]+(\[\][^\[\]\s=]+)?)\s*(?:=[^\]]+\s*)?(\]?).*/);
             if (!name) continue;
-            var argname = name[2] + (parsed.isOptional || (name[1] === '[' && name[3] === ']') ? "?" : "");
-          (args || (args = Object.create(null)))[argname] = parsed;
+            var argname = name[2] + (parsed.isOptional || (name[1] === '[' && name[4] === ']') ? "?" : "");
+
+            // Check to see if the jsdoc is indicating a property of a previously documented parameter
+            var isObjProp = false;
+            var parts = argname.split('.');
+            if (args && parts.length == 2) {
+              var objname = parts[0];
+              argname = parts[1];
+
+              // Go through each of the previously found parameter to find the
+              // object or array for which this new parameter should be a part
+              // of
+              var key, value;
+              for (key in args) {
+                value = args[key];
+
+                if (key === objname && value.type instanceof infer.Obj) {
+                  isObjProp = true;
+                  parsed.type.propagate(value.type.defProp(argname));
+                }
+                else if (key + '[]' === objname && value.type instanceof infer.Arr) {
+                  isObjProp = true;
+                  parsed.type.propagate(value.type.getProp("<i>").getType().defProp(argname));
+                }
+              }
+            }
+            if (!isObjProp) {
+              (args || (args = Object.create(null)))[argname] = parsed;
+            }
           break;
         }
       }
