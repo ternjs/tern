@@ -140,3 +140,30 @@ unionFunction; //: fn(a: string) -> [Foo|number]
 function ui() {}
 
 ui(); //: string
+
+/**
+ * @param {string} [somebody=John Doe] - Somebody's name.
+ */
+function sayHello(somebody) {
+  somebody; //: string
+}
+
+/**
+ * Testing jsdoc with properties for an object
+ * @param {Object} employee - The employee who is responsible for the project.
+ * @param {string} employee.name - The name of the employee.
+ * @param {string} employee.department - The employee's department.
+ */
+function paramProperties(employee) {
+  employee; //:: {department: string, name: string}
+}
+
+/**
+ * Testing jsdoc with properties for objects in an array
+ * @param {Object[]} employees - The employees who are responsible for the project.
+ * @param {string} employees[].name - The name of an employee.
+ * @param {string} employees[].department - The employee's department.
+ */
+function arrayParamProperties(employees) {
+  employees; //:: [{department: string, name: string}]
+}
