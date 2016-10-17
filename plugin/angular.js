@@ -335,12 +335,12 @@
         },
         controller: {
           "!type": "fn()",
-          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-require-",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-controller-",
           "!doc": "Controller constructor function. The controller is instantiated before the pre-linking phase and it is shared with other directives (see require attribute). This allows the directives to communicate with each other and augment each other's behavior."
         },
         require: {
           "!type": "string",
-          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-controller-",
+          "!url": "https://docs.angularjs.org/api/ng/service/$compile#-require-",
           "!doc": "Require another directive and inject its controller as the fourth argument to the linking function. The require takes a string name (or array of strings) of the directive(s) to pass in. If an array is used, the injected argument will be an array in corresponding order. If no such directive can be found, or if the directive does not have a controller, then an error is raised."
         },
         controllerAs: {
