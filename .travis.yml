@@ -5,6 +5,7 @@ language: node_js
 node_js:
   - 7
   - 6
+  - '0.10'
 
 cache:
   directories:
