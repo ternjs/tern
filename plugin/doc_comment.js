@@ -43,12 +43,9 @@
       CallExpression: function(node) {
         if (isDefinePropertyCall(node)) attachComments(node);
       },
-      ExportNamedDeclaration: function ExportNamedDeclaration(node) {
-        attachComments(node);
-      },
-      ExportDefaultDeclaration: function ExportDefaultDeclaration(node) {
-        attachComments(node);
-      }
+      ExportNamedDeclaration: attachComments,
+      ExportDefaultDeclaration: attachComments,
+      ClassDeclaration: attachComments
     });
   }
 
