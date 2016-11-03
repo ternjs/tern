@@ -492,7 +492,7 @@
     } else if (node.type == "AssignmentExpression") {
       if (isFunExpr(node.right))
         fn = node.right.scope.fnType;
-    } else if (node.type == "CallExpression") {
+    } else if (node.type == "CallExpression" || node.type === "ClassDeclaration") {
     } else { // An object property
       if (isFunExpr(node.value)) fn = node.value.scope.fnType;
     }
