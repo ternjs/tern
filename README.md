@@ -15,7 +15,7 @@ There are currently plugins available for [Emacs][emacs] (and Emacs
 [company-mode][cmode]), [Vim][vim], [Sublime Text][st], [Eclipse (and general Java API)][ec],
 [Light Table][lt], [Atom][atom], [TextMate][tm] and [gedit][gedit], and built-in support in
 [Brackets][brackets], [Edge Code][edge_code], [CodeLite](http://codelite.org/),
-and [vy](https://github.com/iogf/vy).
+[vy](https://github.com/iogf/vy), and [SourceLair][sourcelair].
 
 For further documentation, see the [project page][1] and the
 [manual][3]. To report issues, use the
@@ -38,3 +38,4 @@ and documentation, see the
 [edge_code]: http://html.adobe.com/edge/code
 [cmode]: https://github.com/proofit404/company-tern
 [tm]: https://github.com/fab1an/JavaScript-Tern-Completion.tmbundle
+[sourcelair]: https://www.sourcelair.com
