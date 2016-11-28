@@ -38,6 +38,7 @@ engine>> to do the actual type inference.
 * <<editor,Editor plugins>>
 ** <<emacs,Emacs>>
 ** <<vim,Vim>>
+** <<vy,vy>>
 ** <<sublime_text,Sublime Text>>
 ** <<tern_java,Eclipse>>
 ** <<tern_for_gedit,Gedit>>
@@ -1219,6 +1220,12 @@ The Vim plugin is maintained in a
 https://github.com/ternjs/tern_for_vim[separate repository]. Please
 see its README for details.
 
+[[vy]]
+=== vy ===
+
+The https://github.com/iogf/vy[vy] editor is a vim-like written in python whose
+philosophy is clean code and modularity. The javascript autocompletion plugin is built-in.
+
 [[sublime_text]]
 === Sublime Text ===
 
@@ -1275,3 +1282,5 @@ the http://ace.c9.io/[ACE] editor.
 
 https://github.com/angelozerr/tern.orion[tern.orion] integrates Tern in
 the http://www.eclipse.org/orion/[Orion] editor.
+
+
