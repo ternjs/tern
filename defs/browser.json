@@ -445,6 +445,11 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/element.hasAttributeNS",
         "!doc": "hasAttributeNS returns a boolean value indicating whether the current element has the specified attribute."
       },
+      "matches": {
+        "!type": "fn(selectorString: string) -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Element/matches",
+        "!doc": "The Element.matches() method returns true if the element would be selected by the specified selector string; otherwise, returns false."
+      },
       "focus": {
         "!type": "fn()",
         "!url": "https://developer.mozilla.org/en/docs/DOM/element.focus",
