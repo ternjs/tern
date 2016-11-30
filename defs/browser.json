@@ -450,6 +450,31 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Element/matches",
         "!doc": "The Element.matches() method returns true if the element would be selected by the specified selector string; otherwise, returns false."
       },
+      "append": {
+        "!type": "fn(...nodes: [string|Node])",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/append",
+        "!doc": "This is an experimental technology\n\nThe Element.append method inserts a set of Node objects or DOMString objects after the last child of the ParentNode. DOMString objects are inserted as equivalent Text nodes."
+      },
+      "prepend": {
+        "!type": "fn(...nodes: [string|Node])",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend",
+        "!doc": "This is an experimental technology.\n\nThe Element.prepend method inserts a set of Node objects or DOMString objects before the first child of the ParentNode. DOMString objects are inserted as equivalent Text nodes."
+      },
+      "before": {
+        "!type": "fn(...nodes: [string|Node])",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/before",
+        "!doc": "This is an experimental technology.\n\nThe Element.before method inserts a set of Node or DOMString objects in the children list of this ChildNode's parent, just before this ChildNode. DOMString objects are inserted as equivalent Text nodes."
+      },
+      "after": {
+        "!type": "fn(...nodes: [string|Node])",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/after",
+        "!doc": "This is an experimental technology.\n\nThe Element.after() method inserts a set of Node or DOMString objects in the children list of this ChildNode's parent, just after this ChildNode. DOMString objects are inserted as equivalent Text nodes."
+      },
+      "closest": {
+        "!type": "fn(selectors?: string)",
+        "!url": "https://developer.mozilla.org/en/docs/Web/API/Element/closest",
+        "!doc": "This is an experimental technology.\n\nThe Element.closest() method returns the closest ancestor of the current element (or the current element itself) which matches the selectors given in parameter. If there isn't such an ancestor, it returns null."
+      },
       "focus": {
         "!type": "fn()",
         "!url": "https://developer.mozilla.org/en/docs/DOM/element.focus",
