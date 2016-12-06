@@ -105,6 +105,16 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Coordinates/speed",
         "!doc": "The Coordinates.speed read-only property is a double representing the velocity of the device in meters per second. This value is null if the implementation is not able to measure it."
       }
+    },
+    "MutationObserverInit": {
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit",
+      "childList": "bool",
+      "attributes": "bool",
+      "characterData": "bool",
+      "subtree": "bool",
+      "attributeOldValue": "bool",
+      "characterDataOldValue": "bool",
+      "attributeFilter": "[string]"
     }
   },
   "location": {
@@ -3521,5 +3531,42 @@
     "!type": "fn(width?: number, height?: number) -> +HTMLImageElement",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image",
     "!doc": "Image Element constructor. Accepts two optional parameters: Image([unsigned long width, unsigned long height]). Returns an HTMLImageElement instance just as document.createElement('img') would."
+  },
+  "MutationObserver": {
+    "!type": "fn(callback: fn([+MutationRecord]))",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver",
+    "!doc": "MutationObserver provides developers a way to react to changes in a DOM.",
+    "prototype": {
+      "observe": {
+        "!type": "fn(target: Node, options: MutationObserverInit)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#observe()",
+        "!doc": "Registers the MutationObserver instance to receive notifications of DOM mutations on the specified node."
+      },
+      "disconnect": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#disconnect()",
+        "!doc": "Stops the MutationObserver instance from receiving notifications of DOM mutations."
+      },
+      "takeRecords": {
+        "!type": "fn() -> [+MutationRecord]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#takeRecords()",
+        "!doc": "mpties the MutationObserver instance's record queue and returns what was in there."
+      }
+    }
+  },
+  "MutationRecord": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord",
+    "!doc": "A MutationRecord represents an individual DOM mutation.",
+    "prototype": {
+      "type": "string",
+      "target": "Node",
+      "addedNodes": "NodeList",
+      "removedNodes": "NodeList",
+      "previousSibling": "Node",
+      "nextSibling": "Node",
+      "attributeName": "string",
+      "attributeNamespace": "string",
+      "oldValue": "string"
+    }
   }
 }
