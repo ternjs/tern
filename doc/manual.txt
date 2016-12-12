@@ -670,6 +670,37 @@ This plugin (`es_modules`) builds on top of the
 <<plugin_modules,`modules` plugin>> to support ECMAScript 6's `import`
 and `export` based module inclusion.
 
+[[plugin_webpack]]
+==== Webpack plugin ====
+
+This plugin (`"webpack"`) make use of `enhance-resolve` module from
+webpack https://webpack.github.io/, so it can understand the `resolve`
+field of `webpack.config.js` for file resolving.
+<<plugin_commonjs,`commonjs` plugin>> and
+<<plugin_es_modules,`es_modules` plugin>> plugin are loaded in the
+meanwhile for correct file reoslve, this also means you can still
+have `commonjs` and/or `es_modules` in your `.tern-project` file,
+but not necessary.
+
+You can use `configPath` option for resolve the config file of webpack
+like:
+
+[source,application/x-json]
+----
+{
+  "libs": [
+  ],
+  "plugins": {
+    "webpack": {
+      "configPath": "./lib/webpack.prod.js",
+    }
+  }
+}
+----
+
+`configPath` should be a file path relative to `.tern-project`, you
+can omit it if they're in the same folder.
+
 [[plugin_requirejs]]
 ==== RequireJS plugin ====
 
