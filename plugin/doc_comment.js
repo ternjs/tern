@@ -264,6 +264,7 @@
 
   function parseTypeInner(scope, str, pos) {
     pos = skipSpace(str, pos);
+    if (/[?!]/.test(str.charAt(pos))) pos++
     var type, madeUp = false;
 
     if (str.indexOf("function(", pos) == pos) {

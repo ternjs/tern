@@ -142,7 +142,7 @@ function ui() {}
 ui(); //: string
 
 /**
- * @param {string} [somebody=John Doe] - Somebody's name.
+ * @param {?string} [somebody=John Doe] - Somebody's name.
  */
 function sayHello(somebody) {
   somebody; //: string
@@ -150,7 +150,7 @@ function sayHello(somebody) {
 
 /**
  * Testing jsdoc with properties for an object
- * @param {Object} employee - The employee who is responsible for the project.
+ * @param {!Object} employee - The employee who is responsible for the project.
  * @param {string} employee.name - The name of the employee.
  * @param {string} employee.department - The employee's department.
  */
