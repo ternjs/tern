@@ -22,6 +22,7 @@ engine>> to do the actual type inference.
 *** <<plugin_node_resolve,node-style module resolution>>
 *** <<plugin_modules,Module-loading infrastructure>>
 *** <<plugin_es_modules,ES6 module support>>
+*** <<plugin_webpack,webpack resolve support>>
 *** <<plugin_requirejs,RequireJS>>
 *** <<plugin_angular,Angular.js>>
 *** <<plugin_third_party,Third-party plugins>>
