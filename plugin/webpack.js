@@ -20,7 +20,11 @@ function getResolver(configPath) {
     mainFields: ["browser", "web", "browserify", "main"],
     fileSystem: new SyncNodeJsInputFileSystem()
   }
-  var resolveConfig = fs.existsSync(configPath) ? require(configPath).resolve : null
+  var webpackConfig = fs.existsSync(configPath) ? require(configPath) : null
+  if (typeof webpackConfig === 'function') {
+    webpackConfig = webpackConfig();
+  }
+  var requireConfig = webpackConfig && webpackConfig.resolve;
   if (resolveConfig) {
     Object.keys(resolveConfig).forEach(function (key) {
       if (key === 'packageMains') {
