@@ -22,9 +22,9 @@ function getResolver(configPath) {
   }
   var webpackConfig = fs.existsSync(configPath) ? require(configPath) : null
   if (typeof webpackConfig === 'function') {
-    webpackConfig = webpackConfig();
+    webpackConfig = webpackConfig()
   }
-  var requireConfig = webpackConfig && webpackConfig.resolve;
+  var resolveConfig = webpackConfig && webpackConfig.resolve
   if (resolveConfig) {
     Object.keys(resolveConfig).forEach(function (key) {
       if (key === 'packageMains') {
