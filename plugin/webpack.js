@@ -31,6 +31,8 @@ function getResolver(configPath) {
         config.mainFields = resolveConfig[key]
       } else if (key === 'root') {
         config.modules.unshift(resolveConfig[key])
+      } else if (key === 'modules') {
+        config.modules = config.modules.concat(resolveConfig[key])
       } else {
         config[key] = resolveConfig[key]
       }
