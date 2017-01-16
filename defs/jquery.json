@@ -720,12 +720,6 @@
         "!url": "http://api.jquery.com/wrapInner/",
         "!doc": "Wrap an HTML structure around the content of each element in the set of matched elements."
       },
-
-      "slice": {
-        "!type": "fn(start: number, end: number) -> jQuery.fn",
-        "!url": "http://api.jquery.com/slice/",
-        "!doc": "Reduce the set of matched elements to a subset specified by a range of indices."
-      },
       "push": {
         "!type": "Array.prototype.push",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/push",

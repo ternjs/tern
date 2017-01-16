@@ -245,14 +245,6 @@
           "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/@@iterator"
         }
       }
-    },
-    "propertyDescriptor": {
-      "enumerable": "bool",
-      "configurable": "bool",
-      "value": "?",
-      "writable": "bool",
-      "get": "fn() -> ?",
-      "set": "fn(value: ?)"
     }
   },
   "Infinity": {
