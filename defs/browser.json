@@ -2267,33 +2267,47 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/Worker",
     "!doc": "Workers are background tasks that can be easily created and can send messages back to their creators. Creating a worker is as simple as calling the Worker() constructor, specifying a script to be run in the worker thread."
   },
-  "localStorage": {
+  "Storage": {
+    "length": {
+      "!type": "number",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/length",
+      "!doc": "The length read-only property of the Storage interface returns an integer representing the number of data items stored in the Storage object."
+    },
     "setItem": {
       "!type": "fn(name: string, value: string)",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage",
-      "!doc": "Store an item in storage."
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/setItem",
+      "!doc": "The setItem() method of the Storage interface, when passed a key name and value, will add that key to the storage, or update that key's value if it already exists."
     },
     "getItem": {
       "!type": "fn(name: string) -> string",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage",
-      "!doc": "Retrieve an item from storage."
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/getItem",
+      "!doc": "The getItem() method of the Storage interface, when passed a key name, will return that key's value."
     },
-    "!url": "https://developer.mozilla.org/en/docs/DOM/Storage",
-    "!doc": "The DOM Storage mechanism is a means through which string key/value pairs can be securely stored and later retrieved for use."
+    "key": {
+      "!type": "fn(index: number) -> string",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/key",
+      "!doc": "The key() method of the Storage interface, when passed a number n, returns the name of the nth key in the storage. The order of keys is user-agent defined, so you should not rely on it."
+    },
+    "removeItem": {
+      "!type": "fn(key: string)",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem",
+      "!doc": "The removeItem() method of the Storage interface, when passed a key name, will remove that key from the storage."
+    },
+    "clear": {
+      "!type": "fn()",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/clear",
+      "!doc": "The clear() method of the Storage interface, when invoked, will empty all keys out of the storage"
+    }
+  },
+  "localStorage": {
+    "!type": "Storage",
+    "!url": "https://developer.mozilla.org/en/docs/Web/API/Window/localStorage",
+    "!doc": "The localStorage property allows you to access a local Storage object. localStorage is similar to sessionStorage. The only difference is that, while data stored in localStorage has no expiration time, data stored in sessionStorage gets cleared when the browsing session ends—that is, when the browser is closed.\n\nIt should be noted that data stored in either localStorage or sessionStorage is specific to the protocol of the page."
   },
   "sessionStorage": {
-    "setItem": {
-      "!type": "fn(name: string, value: string)",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage",
-      "!doc": "Store an item in storage."
-    },
-    "getItem": {
-      "!type": "fn(name: string) -> string",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/Storage",
-      "!doc": "Retrieve an item from storage."
-    },
-    "!url": "https://developer.mozilla.org/en/docs/DOM/Storage",
-    "!doc": "This is a global object (sessionStorage) that maintains a storage area that's available for the duration of the page session. A page session lasts for as long as the browser is open and survives over page reloads and restores. Opening a page in a new tab or window will cause a new session to be initiated."
+    "!type": "Storage",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage",
+    "!doc": "The sessionStorage property allows you to access a session Storage object for the current origin. sessionStorage is similar to Window.localStorage, the only difference is while data stored in localStorage has no expiration set, data stored in sessionStorage gets cleared when the page session ends. A page session lasts for as long as the browser is open and survives over page reloads and restores. Opening a page in a new tab or window will cause a new session to be initiated, which differs from how session cookies work.\n\nIt should be noted that data stored in either sessionStorage or localStorage is specific to the protocol of the page."
   },
   "FileList": {
     "!type": "fn()",
