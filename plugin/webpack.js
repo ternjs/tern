@@ -6,6 +6,10 @@ var tern = require("../lib/tern");
 require("./commonjs");
 require("./es_modules");
 
+function isArray(v) {
+  return Object.prototype.toString.call(v) == "[object Array]";
+};
+
 var fs = require('fs');
 var path = require("path");
 var ResolverFactory = require("enhanced-resolve").ResolverFactory;
@@ -30,7 +34,19 @@ function getResolver(modules, configPath) {
       if (key === 'packageMains') {
         config.mainFields = resolveConfig[key]
       } else if (key === 'root') {
-        config.modules.unshift(resolveConfig[key])
+        var roots = resolveConfig[key]
+        if (isArray(roots)) {
+          config.modules = roots.concat(config.modules)
+        } else {
+          config.modules.unshift(roots)
+        }
+      } else if (key === 'fallback') {
+        var fallback = resolveConfig[key]
+        if (isArray(fallback)) {
+          config.modules = config.modules.concat(fallback)
+        } else {
+          config.modules.push(fallback)
+        }
       } else if (key === 'modules') {
         config.modules = config.modules.concat(resolveConfig[key])
       } else {
