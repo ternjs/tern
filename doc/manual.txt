@@ -679,7 +679,7 @@ webpack https://webpack.github.io/, so it can understand the `resolve`
 field of `webpack.config.js` for file resolving.
 <<plugin_commonjs,`commonjs` plugin>> and
 <<plugin_es_modules,`es_modules` plugin>> plugin are loaded in the
-meanwhile for correct file reoslve, this also means you can still
+meanwhile for correct file resolve, this also means you can still
 have `commonjs` and/or `es_modules` in your `.tern-project` file,
 but not necessary.
 
