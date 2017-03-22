@@ -201,6 +201,7 @@ function startServer(dir, config, httpServer) {
       server.addFile(file);
     });
   });
+  server.flush(function(){});
   return server;
 }
 
