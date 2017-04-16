@@ -479,6 +479,7 @@
   function propagateWithWeight(type, target) {
     var weight = infer.cx().parent.mod.docComment.weight;
     type.type.propagate(target, weight || (type.madeUp ? WG_MADEUP : undefined));
+     type.type.fromComment = true; // mark the type is coming from the comment
   }
 
   function isFunExpr(node) { return node.type == "FunctionExpression" || node.type == "ArrowFunctionExpression" }
