@@ -88,6 +88,21 @@
               "!type": "fn(chunk: string|+Buffer, encoding?: string, callback?: fn()) -> bool",
               "!url": "https://nodejs.org/api/stream.html#stream_writable_write_chunk_encoding_callback_1",
               "!doc": "Writes chunk to the stream. Returns true if the data has been flushed to the underlying resource. Returns false to indicate that the buffer is full, and the data will be sent out in the future. The 'drain' event will indicate when the buffer is empty again."
+            },            
+            cork: {
+              "!type": "fn()",
+              "!url": "https://nodejs.org/api/stream.html#stream_writable_cork",
+              "!doc": "Forces buffering of all writes. Buffered data will be flushed either at .uncork() or at .end() call."
+            },
+            uncork: {
+              "!type": "fn()",
+              "!url": "https://nodejs.org/api/stream.html#stream_writable_uncork",
+              "!doc": "Flush all data, buffered since .cork() call."
+            },
+            setDefaultEncoding: {
+              "!type": "fn(encoding: string) -> bool",
+              "!url": "https://nodejs.org/api/stream.html#stream_writable_setdefaultencoding_encoding",
+              "!doc": "Sets the default encoding for a writable stream. Returns true if the encoding is valid and is set. Otherwise returns false."
             },
             cork: {
               "!type": "fn()",
