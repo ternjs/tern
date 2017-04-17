@@ -342,6 +342,9 @@
           if (str.charAt(pos++) != ">") return null;
           val.type.propagate(type.defProp("<i>"));
         }
+      } else if(/^function$/i.test(word)) {
+        // TODO : support for args parameter types + return types + "this"
+        type = new infer.Fn(null, infer.ANull, [], [], infer.ANull);
       } else {
         while (str.charCodeAt(pos) == 46 ||
                acorn.isIdentifierChar(str.charCodeAt(pos))) ++pos;
