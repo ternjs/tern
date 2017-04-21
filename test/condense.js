@@ -66,6 +66,7 @@ exports.runTests = function(filter) {
   test("ref_in_type");
   test("double_ref");
   test("proto");
+  test({load: ["proto_methods"], plugins: {jquery: true}});
   test("generic");
   test("array");
   test("function_prop");
