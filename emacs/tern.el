@@ -13,6 +13,7 @@
 (require 'url-http)
 
 (defvar tern-docs-popup-buffer "*tern:docs*")
+(defvar tern-type-popup-buffer "*tern:type*")
 (defvar tern-known-port nil)
 (defvar tern-server nil)
 (defvar tern-explicit-port nil)
@@ -507,7 +508,12 @@ list of strings, giving the binary name and arguments.")
 
 (defun tern-get-type ()
   (interactive)
-  (tern-run-query (lambda (data) (tern-message (or (cdr (assq 'type data)) "Not found")))
+  (tern-run-query (lambda (data)
+                    (let ((type (cdr (assq 'type data))))
+                      (cond (type
+                             (tern-popup-buffer tern-type-popup-buffer type))
+                            (t
+                             (tern-message "Not found")))))
                   "type"
                   (point)))
 
