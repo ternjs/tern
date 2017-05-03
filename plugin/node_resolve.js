@@ -25,11 +25,6 @@
       if (/^\.\.?\//.test(name))
         name = path.resolve(projectDir, parentDir, name)
 
-      if (options.remap) {
-        for (var pattern in options.remap) {
-          name = name.replace(new RegExp(pattern), options.remap[pattern])
-        }
-      }
       var parentModule = {
         id: fullParent,
         paths: module_._nodeModulePaths(parentDir).concat(module_.globalPaths)
