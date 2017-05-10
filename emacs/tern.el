@@ -225,7 +225,7 @@ list of strings, giving the binary name and arguments.")
     (push `(end . ,(1- pos)) (cdr (assq 'query doc)))
     (tern-run-request
      (lambda (err data)
-       (when (< tern-activity-since-command generation)
+       (when (= tern-activity-since-command (1- generation))
          (cond ((not err)
                 (dolist (file files)
                   (when (equal (cdr (assq 'type file)) "full")
