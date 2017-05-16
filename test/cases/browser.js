@@ -1,8 +1,9 @@
 // environment=browser
 
 window.document.body; //: Element
+var anyElt = document.createElement("any"); //: Element
 
-var newElt = document.createElement("div"); //: Element
+var newElt = document.createElement("div"); //: HTMLDivElement
 
 newElt.style.border; //: string
 

@@ -1233,7 +1233,7 @@
         "!doc": "Returns a Boolean value indicating whether the document or any element inside the document has focus. This method can be used to determine whether the active element in a document has focus."
       },
       "createElement": {
-        "!type": "fn(tagName: string) -> +Element",
+        "!type": "fn(tagName: string) -> !custom:Browser_createElement",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createElement",
         "!doc": "Creates the specified element."
       },
@@ -1485,8 +1485,17 @@
     "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDataListElement"
   },
   "HTMLDivElement": {
-    "!type": "Element",
-    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement"
+    "!type": "fn()",
+    "prototype": {
+      "!proto": "Element.prototype",
+      "align": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement",
+        "!doc": "numerated property indicating alignment of the element's contents with respect to the surrounding context. The possible values are 'left', 'right', 'justify', and 'center'."
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement",
+    "!doc": "The HTMLDivElement interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating div elements."
   },
   "HTMLDListElement": {
     "!type": "Element",
