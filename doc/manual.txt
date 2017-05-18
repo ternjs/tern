@@ -702,6 +702,23 @@ like:
 `configPath` should be a file path relative to `.tern-project`, you
 can omit it if they're in the same folder.
 
+You cal also pass the `"module"` and `"alias"` keys directly instead
+of passing the "configPath"
+
+[source,application/x-json]
+----
+{
+  "libs": [
+  ],
+  "plugins": {
+    "webpack": {
+      "alias": { "lib": "./src/lib" },
+      "modules": ["node_modules", "src"]
+    }
+  }
+}
+----
+
 [[plugin_requirejs]]
 ==== RequireJS plugin ====
 
