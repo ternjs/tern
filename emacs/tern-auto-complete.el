@@ -120,7 +120,7 @@ Remember to add ac-source-tern-completion to ac-sources."
       (define-key tern-mode-keymap "." 'tern-ac-dot-complete)
     (define-key tern-mode-keymap "." nil)))
 
-(defvar tern-ac-js-major-modes '(js2-mode js2-jsx-mode js-mode javascript-mode))
+(defvar tern-ac-js-major-modes '(rjsx-mode js2-mode js2-jsx-mode js-mode js-jsx-mode javascript-mode))
 
 (defadvice auto-complete (around add-tern-ac-candidates first activate)
   "Load tern-js canditates before ac-start."
