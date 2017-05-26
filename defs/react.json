@@ -1,0 +1,133 @@
+{
+  "!name": "react",
+  "!define": {
+    "Component": {
+      "!type": "fn()",
+      "!url": "https://facebook.github.io/react/docs/react-api.html",
+      "defaultProps": {
+        "!type": "object",
+        "!doc": "defaultProps can be defined as a property on the component class itself, to set the default props for the class.",
+        "!url": "https://facebook.github.io/react/docs/react-component.html#defaultprops"
+      },
+      "displayName": {
+        "!type": "string",
+        "!doc": "The displayName string is used in debugging messages.",
+        "!url": "https://facebook.github.io/react/docs/react-component.html#displayname"
+      },
+      "propTypes": {
+        "!type": "PropTypes",
+        "!doc": "To run typechecking on the props for a component, you can assign the special propTypes property.",
+        "!url": "https://facebook.github.io/react/docs/typechecking-with-proptypes.html"
+      },
+      "prototype": {
+        "props": "object",
+        "state": "object",
+        "setState": {
+          "!type": "fn(updater: object, callback?: fn())",
+          "!doc": "setState() enqueues changes to the component state and tells React that this component and its children need to be re-rendered with the updated state.",
+          "!url": "https://facebook.github.io/react/docs/react-component.html#setstate"
+        },
+        "forceUpdate": {
+          "!type": "fn(callback: fn())",
+          "!doc": "By default, when your component's state or props change, your component will re-render. If your render() method depends on some other data, you can tell React that the component needs re-rendering by calling forceUpdate().",
+          "!url": "https://facebook.github.io/react/docs/react-component.html#forceupdate"
+        }
+      }
+    },
+    "PropTypes": {
+      "!doc": "Runtime type checking for React props and similar objects.",
+      "!url": "https://github.com/facebook/prop-types/",
+      "array": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "bool": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "func": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "number": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "object": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "string": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "symbol": {
+        "!type": "PropType",
+        "!doc": "You can declare that a prop is a specific JS primitive."
+      },
+      "node": {
+        "!type": "PropType",
+        "!doc": "Anything that can be rendered: numbers, strings, elements or an array (or fragment) containing these types."
+      },
+      "element": {
+        "!type": "PropType",
+        "!doc": "A React element."
+      },
+      "instanceOf": {
+        "!type": "fn(class: fn()) -> PropType",
+        "!doc": "You can also declare that a prop is an instance of a class. This uses JS's instanceof operator."
+      },
+      "oneOf": {
+        "!type": "fn([?]) -> PropType",
+        "!doc": "You can ensure that your prop is limited to specific values by treating it as an enum."
+      },
+      "oneOfType": {
+        "!type": "fn([PropType]) -> PropType",
+        "!doc": "An object that could be one of many types"
+      },
+      "arrayOf": {
+        "!type": "fn(propType: PropType) -> PropType",
+        "!doc": "An array of a certain type"
+      },
+      "objectOf": {
+        "!type": "fn(propType: PropType) -> PropType",
+        "!doc": "An object with property values of a certain type"
+      },
+      "shape": {
+        "!type": "fn(propTypes: PropTypes) -> PropType",
+        "!doc": "An object taking on a particular shape"
+      },
+      "any": {
+        "!type": "PropType",
+        "!doc": "A value of any data type"
+      }
+    },
+    "PropType": {
+      "isRequired": {
+        "!doc": "You can chain any of the above with `isRequired` to make sure a warning is shown if the prop isn't provided"
+      }
+    }
+  },
+  "PropTypes": "PropTypes",
+  "React": {
+    "Component": "Component",
+    "PureComponent": "Component"
+  },
+  "ReactDOM": {
+    "render": {
+      "!type": "fn(element: PropTypes.element, container: Element, callback?: fn()) -> !0",
+      "!doc": "Render a React element into the DOM in the supplied container and return a reference to the component (or returns null for stateless components).",
+      "!url": "https://facebook.github.io/react/docs/react-dom.html#render"
+    },
+    "unmountComponentAtNode": {
+      "!type": "fn(container: Element) -> bool",
+      "!doc": "Remove a mounted React component from the DOM and clean up its event handlers and state.",
+      "!url": "https://facebook.github.io/react/docs/react-dom.html#unmountcomponentatnode"
+    },
+    "findDOMNode": {
+      "!type": "fn(component: PropTypes.element) -> Element",
+      "!doc": "If this component has been mounted into the DOM, this returns the corresponding native browser DOM element.",
+      "!url": "https://facebook.github.io/react/docs/react-dom.html#finddomnode"
+    }
+  }
+}
