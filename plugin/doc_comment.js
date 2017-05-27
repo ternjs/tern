@@ -37,6 +37,7 @@
       FunctionDeclaration: attachComments,
       MethodDefinition: attachComments,
       Property: attachComments,
+      ClassDeclaration: attachComments,
       AssignmentExpression: function(node) {
         if (node.operator == "=") attachComments(node);
       },
