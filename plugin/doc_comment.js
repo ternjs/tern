@@ -389,7 +389,7 @@
 
     for (var i = 0; i < comments.length; ++i) {
       var comment = comments[i];
-      var decl = /(?:\n|$|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)\s+(.*)/g, m;
+      var decl = /(?:\n|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)\s+(.*)/g, m;
       while (m = decl.exec(comment)) {
         if (m[1] == "class" || m[1] == "constructor") {
           self = foundOne = true;
