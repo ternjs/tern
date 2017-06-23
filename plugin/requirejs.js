@@ -143,12 +143,12 @@
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
-        node.required = interf(path.join(base, node.value), data);
+        node.required = interf(path.join(base, node.value));
         deps.push(node.required);
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
         if (elt.type == "Literal" && typeof elt.value == "string") {
-          elt.required = interf(path.join(base, elt.value), data);
+          elt.required = interf(path.join(base, elt.value));
           deps.push(elt.required);
         }
       }
@@ -156,7 +156,7 @@
                /FunctionExpression/.test(argNodes[0].type) &&
                argNodes[0].params.length) {
       // Simplified CommonJS call
-      deps.push(interf("require", data), interf("exports", data), interf("module", data));
+      deps.push(interf("require"), interf("exports"), interf("module"));
       fn = args[0];
     }
 
