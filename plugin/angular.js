@@ -258,7 +258,7 @@
     var mods = infer.cx().parent.mod.angular.modules;
     for (var path in state.types) {
       var m;
-      if (m = path.match(/^!ng\.([^\.]+)\._inject_([^\.]+)^/)) {
+      if (m = path.match(/^!ng\.([^\.]+)\._inject_([^\.]+)$/)) {
         var mod = mods[m[1].replace(/`/g, ".")];
         var field = mod.injector.fields[m[2]];
         var data = state.types[path];
