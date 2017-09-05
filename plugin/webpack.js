@@ -76,7 +76,7 @@ tern.registerPlugin("webpack", function(server, options) {
   var resolver = getResolver(modules, configPath)
   server.loadPlugin("commonjs")
   server.loadPlugin("es_modules")
-  server.mod.modules.resolvers.push(function (name, parentFile) {
+  server.mod.modules.resolvers.unshift(function (name, parentFile) {
     var resolved = resolveToFile(resolver, name, parentFile)
     return resolved && infer.cx().parent.normalizeFilename(resolved)
   })
