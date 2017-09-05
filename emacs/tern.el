@@ -99,12 +99,17 @@
   (let* ((script-file (or load-file-name
                           (and (boundp 'bytecomp-filename) bytecomp-filename)
                           buffer-file-name))
-         (bin-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file)))))
-    (if (file-exists-p bin-file)
+         (bin-file (and script-file (expand-file-name "../bin/tern" (file-name-directory (file-truename script-file))))))
+    (unless (or (and bin-file (file-executable-p bin-file))
+		(not (executable-find "npm")))
+      (setq bin-file (or (executable-find "tern")
+			 (expand-file-name "tern/bin/tern"
+					   (file-name-directory (shell-command-to-string "npm -g ls --parseable tern"))))))
+    (if (and bin-file (file-executable-p bin-file))
         (if (eq system-type 'windows-nt) (list "node" bin-file) (list bin-file))
       (list "tern")))
-  "The command to be run to start the Tern server. Should be a
-list of strings, giving the binary name and arguments.")
+  "The command to be run to start the Tern server.
+Should be a list of strings, giving the binary name and arguments.")
 
 (defun tern-start-server (c)
   (let* ((default-directory (tern-project-dir))
