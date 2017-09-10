@@ -57,15 +57,6 @@ var homeDir = process.env.HOME || process.env.USERPROFILE;
 if (homeDir && fs.existsSync(path.resolve(homeDir, ".tern-config")))
   defaultConfig = readProjectFile(path.resolve(homeDir, ".tern-config"));
 
-function mergeObjects(base, value) {
-  if (!base) return value
-  if (!value) return base
-  var result = {}
-  for (var prop in base) result[prop] = base[prop]
-  for (var prop in value) result[prop] = value[prop]
-  return result
-}
-
 function readJSON(fileName) {
   var file = fs.readFileSync(fileName, "utf8");
   try {
@@ -82,7 +73,9 @@ function readProjectFile(fileName) {
     if (!data.hasOwnProperty(option))
       data[option] = defaultConfig[option];
     else if (option == "plugins")
-      data[option] = mergeObjects(defaultConfig[option], data[option])
+      for (let name in defaultConfig.plugins)
+        if (!Object.prototype.hasOwnProperty.call(data.plugins, name))
+          data.plugins[name] = defaultConfig.plugins[name]
   }
   return data;
 }
