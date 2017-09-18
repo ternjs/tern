@@ -82,8 +82,6 @@
                    (funcall c (tern-known-port) nil))))
     (if tern-explicit-port
         (funcall c tern-explicit-port nil)
-      (unless (buffer-file-name)
-        (cl-return (funcall c nil "Buffer is not associated with a file")))
       (let ((deactivate-mark nil)
             (port-file (expand-file-name ".tern-port" (tern-project-dir))))
         (when (file-exists-p port-file)
