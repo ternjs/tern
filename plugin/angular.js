@@ -913,6 +913,7 @@
       },
       extend: {
         "!type": "fn(dst: ?, src: ?) -> !0",
+        "!effects": ["copy !1 !0"],
         "!url": "http://docs.angularjs.org/api/angular.extend",
         "!doc": "Extends the destination object dst by copying all of the properties from the src object(s) to dst."
       },

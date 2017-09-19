@@ -50,3 +50,10 @@ angular.module('docsScopeProblemExample', [])
     t //+ template, templateNamespace, templateUrl, ...
   };
 });
+
+// Create a new object and extend it with angular.extend
+var extendObject = { aNumber: 2 };
+angular.extend(extendObject, { aString: 'baz' });
+
+extendObject.aNumber; //: number
+extendObject.aString; //: string
