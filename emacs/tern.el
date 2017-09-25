@@ -28,7 +28,8 @@
          (deactivate-mark nil) ; Prevents json-encode from interfering with shift-selection-mode
          (url-request-data (encode-coding-string (json-encode doc) 'utf-8))
          (url-show-status nil)
-         (url (url-parse-make-urlobj "http" nil nil tern-server port "/" nil nil nil)))
+         (url (url-parse-make-urlobj "http" nil nil tern-server port "/" nil nil nil))
+         (url-current-object url))
     (url-http url #'tern-req-finished (list c))))
 
 (defun tern-req-finished (c)
