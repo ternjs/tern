@@ -3,6 +3,8 @@ var p = new Promise(function(accept, reject) {
   accept({x: 20});
 });
 
+p.; //+ then, catch, finally
+
 p.then(function(value) {
   value; //:: {x: number}
 }).then(function(value) {

@@ -21,6 +21,11 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then",
         "!type": "fn(onFulfilled: fn(value: ?), onRejected: fn(reason: ?)) -> !custom:Promise_then",
         "!effects": ["call !0 !this.:t"]
+      },
+      "finally": {
+        "!doc": "The finally() method returns a Promise. When the promise is settled, whether fulfilled or rejected, the specified callback function is executed. ",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally",
+        "!type": "fn(onFinally: fn()) -> !custom:Promise_then"
       }
     },
     "Promise_reject": {
