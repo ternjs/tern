@@ -684,10 +684,40 @@
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/slice",
         "!doc": "Extracts a section of a string and returns a new string."
       },
+      "padStart": {
+        "!type": "fn(targetLength: number, padString?: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart",
+        "!doc": "Pads the current string with another string (repeated, if needed) so that the resulting string reaches the given length."
+      },
+      "padEnd": {
+        "!type": "fn(targetLength: number, padString?: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padEnd",
+        "!doc": "pads the current string with a given string (repeated, if needed) so that the resulting string reaches a given length."
+      },
       "trim": {
         "!type": "fn() -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/Trim",
         "!doc": "Removes whitespace from both ends of the string."
+      },
+      "trimStart": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimStart",
+        "!doc": "Removes whitespace from the beginning of a string. "
+      },
+      "trimLeft": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimStart",
+        "!doc": "Removes whitespace from the beginning of a string. "
+      },
+      "trimEnd": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd",
+        "!doc": "Removes whitespace from the end of a string."
+      },
+      "trimRight": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd",
+        "!doc": "Removes whitespace from the end of a string."
       },
       "toUpperCase": {
         "!type": "fn() -> string",
