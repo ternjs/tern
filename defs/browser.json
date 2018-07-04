@@ -3582,5 +3582,226 @@
       "attributeNamespace": "string",
       "oldValue": "string"
     }
+  },
+  "Headers": {
+    "!type": "fn(init?: object)",
+    "!doc": "Represents response/request headers, allowing you to query them and take different actions depending on the results.",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers",
+    "prototype": {
+      "append": {
+        "!type": "fn(name: string, value: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers/append",
+        "!doc": "Appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist."
+      },
+      "delete": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers/delete",
+        "!doc": "Deletes a header from a Headers object."
+      },
+      "get": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers/get",
+        "!doc": "Returns the first value of a given header from within a Headers object."
+      },
+      "getAll": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers/getAll",
+        "!doc": "Returns an array of all the values of a header within a Headers object with a given name."
+      },
+      "has": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers/has",
+        "!doc": "Returns a boolean stating whether a Headers object contains a certain header."
+      },
+      "set": {
+        "!type": "fn(name: string, value: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Headers/set",
+        "!doc": "Sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist."
+      }
+    }
+  },
+  "Request": {
+    "!type": "fn(input: string, init?: object)",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request",
+    "!doc": "The Request interface of the Fetch API represents a resource request.",
+    "prototype": {
+      "bodyUsed": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/bodyUsed",
+        "!doc": "Stores a Boolean that declares whether the body has been used in a response yet."
+      },
+      "cache": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/cache",
+        "!doc": "Contains the cache mode of the request (e.g., default, reload, no-cache)."
+      },
+      "context": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/context",
+        "!doc": "Contains the context of the request (e.g., audio, image, iframe, etc.)"
+      },
+      "credentials": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials",
+        "!doc": "Contains the credentials of the request (e.g., omit, same-origin)."
+      },
+      "headers": {
+        "!type": "+Headers",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/headers",
+        "!doc": "Contains the associated Headers object of the request."
+      },
+      "integrity": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/integrity",
+        "!doc": "Contains the subresource integrity value of the request."
+      },
+      "method": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/method",
+        "!doc": "Contains the request's method (GET, POST, etc.)"
+      },
+      "mode": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/mode",
+        "!doc": "Contains the mode of the request (e.g., cors, no-cors, same-origin)."
+      },
+      "redirect": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/redirect",
+        "!doc": "Contains the mode for how redirects are handled."
+      },
+      "referrer": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/referrer",
+        "!doc": "Contains the referrer of the request (e.g., client)."
+      },
+      "referrerPolicy": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/referrerPolicy",
+        "!doc": "Returns the referrer policy, which governs what referrer information, sent in the Referer header, should be included with the request."
+      },
+      "url": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/url",
+        "!doc": "Contains the URL of the request."
+      },
+      "clone": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Request/clone",
+        "!doc": "Creates a copy of the current Request object."
+      },
+      "arrayBuffer": {
+        "!type": "fn() -> +Promise[:t=+ArrayBuffer]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/arrayBuffer",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with an ArrayBuffer."
+      },
+      "blob": {
+        "!type": "fn() -> +Promise[:t=+Blob]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/blob",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a Blob."
+      },
+      "formData": {
+        "!type": "fn() -> +Promise[:t=+FormData]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/formData",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a FormData object."
+      },
+      "json": {
+        "!type": "fn() -> +Promise[:t=object]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/json",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a JSON object."
+      },
+      "text": {
+        "!type": "fn() -> +Promise[:t=string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/text",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a USVString (text)."
+      }
+    }
+  },
+  "Response": {
+    "!type": "fn(body: object, init?: object)",
+    "!doc": "Represents the response to a request.",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response",
+    "prototype": {
+      "type": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/type",
+        "!doc": "Contains the type of the response (e.g., basic, cors)."
+      },
+      "url": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/url",
+        "!doc": "Contains the URL of the response."
+      },
+      "status": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/status",
+        "!doc": "Contains the status code of the response (e.g., 200 for a success)."
+      },
+      "ok": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/ok",
+        "!doc": "Contains a boolean stating whether the response was successful (status in the range 200-299) or not."
+      },
+      "statusText": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/statusText",
+        "!doc": "Contains the status message corresponding to the status code (e.g., OK for 200)."
+      },
+      "headers": {
+        "!type": "+Headers",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/headers",
+        "!doc": "Contains the Headers object associated with the response."
+      },
+      "bodyUsed": {
+        "!type": "bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/bodyUsed",
+        "!doc": "Stores a Boolean that declares whether the body has been used in a response yet."
+      },
+      "clone": {
+        "!type": "fn() -> +Response",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/clone",
+        "!doc": "Creates a clone of a Response object."
+      },
+      "error": {
+        "!type": "fn() -> +Response",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/error",
+        "!doc": "Returns a new Response object associated with a network error."
+      },
+      "redirect": {
+        "!type": "fn(url: string, status?: number) -> +Response",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect",
+        "!doc": "Creates a new response with a different URL."
+      },
+      "arrayBuffer": {
+        "!type": "fn() -> +Promise[:t=+ArrayBuffer]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/arrayBuffer",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with an ArrayBuffer."
+      },
+      "blob": {
+        "!type": "fn() -> +Promise[:t=+Blob]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/blob",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a Blob."
+      },
+      "formData": {
+        "!type": "fn() -> +Promise[:t=+FormData]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/formData",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a FormData object."
+      },
+      "json": {
+        "!type": "fn() -> +Promise[:t=object]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/json",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a JSON object."
+      },
+      "text": {
+        "!type": "fn() -> +Promise[:t=string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/text",
+        "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a USVString (text)."
+      }
+    }
+  },
+  "fetch": {
+    "!type": "fn(url: string|+Request, init?: object) -> +Promise[:t=+Response]",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API",
+    "!doc": "The fetch() method of the WindowOrWorkerGlobalScope mixin starts the process of fetching a resource from the network."
   }
 }
