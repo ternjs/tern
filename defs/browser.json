@@ -3706,7 +3706,7 @@
         "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a FormData object."
       },
       "json": {
-        "!type": "fn() -> +Promise[:t=object]",
+        "!type": "fn() -> +Promise[:t=?]",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/json",
         "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a JSON object."
       },
@@ -3788,7 +3788,7 @@
         "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a FormData object."
       },
       "json": {
-        "!type": "fn() -> +Promise[:t=object]",
+        "!type": "fn() -> +Promise[:t=?]",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Body/json",
         "!doc": "Takes a Response stream and reads it to completion. It returns a promise that resolves with a JSON object."
       },
