@@ -936,12 +936,12 @@
       "multiline": {
         "!type": "bool",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/multiline",
-        "!doc": "Reflects whether or not to search in strings across multiple lines.\n"
+        "!doc": "Reflects whether or not to search in strings across multiple lines."
       },
       "source": {
         "!type": "string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp/source",
-        "!doc": "A read-only property that contains the text of the pattern, excluding the forward slashes.\n"
+        "!doc": "A read-only property that contains the text of the pattern, excluding the forward slashes."
       },
       "lastIndex": {
         "!type": "number",
@@ -1008,7 +1008,7 @@
       "toLocaleDateString": {
         "!type": "fn() -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toLocaleDateString",
-        "!doc": "Converts a date to a string, returning the \"date\" portion using the operating system's locale's conventions.\n"
+        "!doc": "Converts a date to a string, returning the \"date\" portion using the operating system's locale's conventions."
       },
       "toLocaleTimeString": {
         "!type": "fn() -> string",
@@ -1038,7 +1038,7 @@
       "getUTCMonth": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCMonth",
-        "!doc": "Returns the month of the specified date according to universal time.\n"
+        "!doc": "Returns the month of the specified date according to universal time."
       },
       "getDate": {
         "!type": "fn() -> number",
@@ -1048,7 +1048,7 @@
       "getUTCDate": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCDate",
-        "!doc": "Returns the day (date) of the month in the specified date according to universal time.\n"
+        "!doc": "Returns the day (date) of the month in the specified date according to universal time."
       },
       "getDay": {
         "!type": "fn() -> number",
@@ -1058,7 +1058,7 @@
       "getUTCDay": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCDay",
-        "!doc": "Returns the day of the week in the specified date according to universal time.\n"
+        "!doc": "Returns the day of the week in the specified date according to universal time."
       },
       "getHours": {
         "!type": "fn() -> number",
@@ -1068,7 +1068,7 @@
       "getUTCHours": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCHours",
-        "!doc": "Returns the hours in the specified date according to universal time.\n"
+        "!doc": "Returns the hours in the specified date according to universal time."
       },
       "getMinutes": {
         "!type": "fn() -> number",
@@ -1088,7 +1088,7 @@
       "getUTCSeconds": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCSeconds",
-        "!doc": "Returns the seconds in the specified date according to universal time.\n"
+        "!doc": "Returns the seconds in the specified date according to universal time."
       },
       "getMilliseconds": {
         "!type": "fn() -> number",
@@ -1098,7 +1098,7 @@
       "getUTCMilliseconds": {
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCMilliseconds",
-        "!doc": "Returns the milliseconds in the specified date according to universal time.\n"
+        "!doc": "Returns the milliseconds in the specified date according to universal time."
       },
       "getTimezoneOffset": {
         "!type": "fn() -> number",
@@ -1108,17 +1108,17 @@
       "setTime": {
         "!type": "fn(date: +Date) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setTime",
-        "!doc": "Sets the Date object to the time represented by a number of milliseconds since January 1, 1970, 00:00:00 UTC.\n"
+        "!doc": "Sets the Date object to the time represented by a number of milliseconds since January 1, 1970, 00:00:00 UTC."
       },
       "setFullYear": {
         "!type": "fn(year: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setFullYear",
-        "!doc": "Sets the full year for a specified date according to local time.\n"
+        "!doc": "Sets the full year for a specified date according to local time."
       },
       "setUTCFullYear": {
         "!type": "fn(year: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCFullYear",
-        "!doc": "Sets the full year for a specified date according to universal time.\n"
+        "!doc": "Sets the full year for a specified date according to universal time."
       },
       "setMonth": {
         "!type": "fn(month: number) -> number",
@@ -1128,7 +1128,7 @@
       "setUTCMonth": {
         "!type": "fn(month: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCMonth",
-        "!doc": "Sets the month for a specified date according to universal time.\n"
+        "!doc": "Sets the month for a specified date according to universal time."
       },
       "setDate": {
         "!type": "fn(day: number) -> number",
@@ -1138,7 +1138,7 @@
       "setUTCDate": {
         "!type": "fn(day: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCDate",
-        "!doc": "Sets the day of the month for a specified date according to universal time.\n"
+        "!doc": "Sets the day of the month for a specified date according to universal time."
       },
       "setHours": {
         "!type": "fn(hour: number) -> number",
@@ -1148,7 +1148,7 @@
       "setUTCHours": {
         "!type": "fn(hour: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCHours",
-        "!doc": "Sets the hour for a specified date according to universal time.\n"
+        "!doc": "Sets the hour for a specified date according to universal time."
       },
       "setMinutes": {
         "!type": "fn(min: number) -> number",
@@ -1158,7 +1158,7 @@
       "setUTCMinutes": {
         "!type": "fn(min: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCMinutes",
-        "!doc": "Sets the minutes for a specified date according to universal time.\n"
+        "!doc": "Sets the minutes for a specified date according to universal time."
       },
       "setSeconds": {
         "!type": "fn(sec: number) -> number",
@@ -1168,17 +1168,17 @@
       "setUTCSeconds": {
         "!type": "fn(sec: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCSeconds",
-        "!doc": "Sets the seconds for a specified date according to universal time.\n"
+        "!doc": "Sets the seconds for a specified date according to universal time."
       },
       "setMilliseconds": {
         "!type": "fn(ms: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setMilliseconds",
-        "!doc": "Sets the milliseconds for a specified date according to local time.\n"
+        "!doc": "Sets the milliseconds for a specified date according to local time."
       },
       "setUTCMilliseconds": {
         "!type": "fn(ms: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCMilliseconds",
-        "!doc": "Sets the milliseconds for a specified date according to universal time.\n"
+        "!doc": "Sets the milliseconds for a specified date according to universal time."
       },
       "toJSON": {
         "!type": "fn() -> string",
