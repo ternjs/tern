@@ -616,9 +616,9 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/@@iterator"
       },
       "includes": {
-        "!type": "fn(value: ?) -> bool",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes",
-        "!doc": "Determines whether an array includes a certain element, returning true or false as appropriate."
+        "!type": "fn(value: ?, fromIndex?: number) -> bool",
+        "!doc": "Determines whether an array includes a certain element, returning true or false as appropriate.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes"
       }
     },
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array",
