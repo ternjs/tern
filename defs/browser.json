@@ -2755,7 +2755,7 @@
     "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData",
     "prototype": {
       "append": {
-        "!type": "fn(name: string, value: ?, filename: string)",
+        "!type": "fn(name: string, value: string|+Blob, filename?: string)",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/append",
         "!doc": "Appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist."
       },
@@ -2764,25 +2764,40 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/delete",
         "!doc": "Deletes a key/value pair from a FormData object."
       },
+      "entries": {
+        "!type": "fn() -> +iter[:t=[number, string|+Blob]]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/entries",
+        "!doc": "Returns an iterator allowing to go through all key/value pairs contained in this object."
+      },
       "get": {
-        "!type": "fn(name: string)",
+        "!type": "fn(name: string) -> string|+Blob",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/get",
         "!doc": "Returns the first value associated with a given key from within a FormData object."
       },
       "getAll": {
-        "!type": "fn(name: string)",
+        "!type": "fn(name: string) -> [string|+Blob]",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/getAll",
         "!doc": "Returns an array of all the values associated with a given key from within a FormData."
       },
       "has": {
-        "!type": "fn(name: string)",
+        "!type": "fn(name: string) -> bool",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/has",
         "!doc": "Returns a boolean stating whether a FormData object contains a certain key/value pair."
       },
       "set": {
-        "!type": "fn(name: string, value: ?, filename: string)",
+        "!type": "fn(name: string, value: string|+Blob, filename?: string)",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/set",
         "!doc": "Sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist."
+      },
+      "keys": {
+        "!type": "fn() -> +iter[:t=number]",
+        "!doc": "Returns an iterator allowing to go through all keys of the key/value pairs contained in this object.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/keys"
+      },
+      "values": {
+        "!type": "fn() -> +iter[:t=string|blob]",
+        "!doc": "Returns an iterator allowing to go through all values of the key/value pairs contained in this object.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData/values"
       }
     }
   },
