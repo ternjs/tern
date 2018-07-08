@@ -704,21 +704,13 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimStart",
         "!doc": "Removes whitespace from the beginning of a string. "
       },
-      "trimLeft": {
-        "!type": "fn() -> string",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimStart",
-        "!doc": "Removes whitespace from the beginning of a string. "
-      },
+      "trimLeft": "String.prototype.trimStart",
       "trimEnd": {
         "!type": "fn() -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd",
         "!doc": "Removes whitespace from the end of a string."
       },
-      "trimRight": {
-        "!type": "fn() -> string",
-        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd",
-        "!doc": "Removes whitespace from the end of a string."
-      },
+      "trimRight": "String.prototype.trimEnd",
       "toUpperCase": {
         "!type": "fn() -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/toUpperCase",
