@@ -2328,44 +2328,44 @@
     "!doc": "An object of this type is returned by the files property of the HTML input element; this lets you access the list of files selected with the <input type=\"file\"> element. It's also used for a list of files dropped into web content when using the drag and drop API."
   },
   "File": {
-    "!type": "fn()",
+    "!type": "fn(bits: []|string|ArrayBuffer|Blob, name: string, options?: ?)",
     "prototype": {
       "!proto": "Blob.prototype",
-      "fileName": {
-        "!type": "string",
-        "!url": "https://developer.mozilla.org/en/docs/DOM/File.fileName",
-        "!doc": "Returns the name of the file. For security reasons the path is excluded from this property."
-      },
-      "fileSize": {
+      "lastModified": {
         "!type": "number",
-        "!url": "https://developer.mozilla.org/en/docs/DOM/File.fileSize",
-        "!doc": "Returns the size of a file in bytes."
-      },
-      "lastModifiedDate": {
-        "!type": "?",
-        "!url": "https://developer.mozilla.org/en/docs/DOM/File.lastModifiedDate",
-        "!doc": "Returns the last modified date of the file. Files without a known last modified date use the current date instead."
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified",
+        "!doc": "Returns the last modified time of the file, in millisecond since the UNIX epoch (January 1st, 1970 at Midnight)."
       },
       "name": {
         "!type": "string",
         "!url": "https://developer.mozilla.org/en/docs/DOM/File.name",
         "!doc": "Returns the name of the file. For security reasons, the path is excluded from this property."
+      },
+      "size": {
+        "!type": "number",
+        "!url": "https://developer.mozilla.org/en/docs/DOM/File.fileSize",
+        "!doc": "Returns the size of a file in bytes."
+      },
+      "type": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/File/type",
+        "!doc": "Returns the MIME type of the file."
       }
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/File",
     "!doc": "The File object provides information about -- and access to the contents of -- files. These are generally retrieved from a FileList object returned as a result of a user selecting files using the input element, or from a drag and drop operation's DataTransfer object."
   },
   "Blob": {
-    "!type": "fn(parts: [?], properties?: ?)",
+    "!type": "fn(parts: [?], options?: ?)",
     "prototype": {
       "size": {
         "!type": "number",
-        "!url": "https://developer.mozilla.org/en/docs/DOM/Blob",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Blob/size",
         "!doc": "The size, in bytes, of the data contained in the Blob object. Read only."
       },
       "type": {
         "!type": "string",
-        "!url": "https://developer.mozilla.org/en/docs/DOM/Blob",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Blob/type",
         "!doc": "An ASCII-encoded string, in all lower case, indicating the MIME type of the data contained in the Blob. If the type is unknown, this string is empty. Read only."
       },
       "slice": {
