@@ -2458,6 +2458,69 @@
     "!doc": "The FileReader object lets web applications asynchronously read the contents of files (or raw data buffers) stored on the user's computer, using File or Blob objects to specify the file or data to read. File objects may be obtained from a FileList object returned as a result of a user selecting files using the <input> element, from a drag and drop operation's DataTransfer object, or from the mozGetAsFile() API on an HTMLCanvasElement."
   },
   "URL": {
+    "!type": "fn(url: string, base?: string)",
+    "prototype": {
+      "hash": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/hash",
+        "!doc": "Is a DOMString containing a '#' followed by the fragment identifier of the URL."
+      },
+      "host": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/host",
+        "!doc": "Is a DOMString containing the domain (that is the hostname) followed by (if a port was specified) a ':' and the port of the URL."
+      },
+      "hostname": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/hostname",
+        "!doc": "Is a DOMString containing the domain of the URL."
+      },
+      "href": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/href",
+        "!doc": "Is a DOMString containing the whole URL."
+      },
+      "origin": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/origin",
+        "!doc": "Returns a DOMString containing the origin of the URL, that is its scheme, its domain and its port."
+      },
+      "password": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/password",
+        "!doc": "Is a DOMString containing the password specified before the domain name."
+      },
+      "pathname": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/pathname",
+        "!doc": "Is a DOMString containing an initial '/' followed by the path of the URL."
+      },
+      "port": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/port",
+        "!doc": "Is a DOMString containing the port number of the URL."
+      },
+      "protocol": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/protocol",
+        "!doc": "Is a DOMString containing the protocol scheme of the URL, including the final ':'."
+      },
+      "search": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/search",
+        "!doc": "Is a DOMString containing a '?' followed by the parameters of the URL."
+      },
+      "searchParams": {
+        "!type": "+URLSearchParams",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/searchParams",
+        "!doc": "Returns a URLSearchParams object allowing to access the GET query arguments contained in the URL."
+      },
+      "username": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL/username",
+        "!doc": "Is a DOMString containing the username specified before the domain name."
+      }
+    },
     "createObjectURL": {
       "!type": "fn(blob: +Blob) -> string",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL",
@@ -2465,10 +2528,74 @@
 
     },
     "revokeObjectURL": {
-      "!type": "fn(string)",
+      "!type": "fn(objectURL: string)",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL.revokeObjectURL",
       "!doc": "The URL.revokeObjectURL() static method releases an existing object URL which was previously created by calling window.URL.createObjectURL()."
-    }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URL",
+    "!doc": "The URL interface represents an object providing static methods used for creating object URLs."
+  },
+  "URLSearchParams": {
+    "!type": "fn(init?: string)",
+    "prototype": {
+      "append": {
+        "!type": "fn(name: string, value: ?)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/append",
+        "!doc": "Appends a specified key/value pair as a new search parameter."
+      },
+      "delete": {
+        "!type": "fn(name: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/delete",
+        "!doc": "Deletes the given search parameter, and its associated value, from the list of all search parameters."
+      },
+      "entries": {
+        "!type": "fn() -> +iter[:t=[string]]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/entries",
+        "!doc": "Returns an iterator allowing to go through all key/value pairs contained in this object."
+      },
+      "get": {
+        "!type": "fn(name: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/get",
+        "!doc": "Returns the first value associated to the given search parameter."
+      },
+      "getAll": {
+        "!type": "fn(name: string) -> [string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/getAll",
+        "!doc": "Returns all the values associated with a given search parameter."
+      },
+      "has": {
+        "!type": "fn(name: string) -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/has",
+        "!doc": "Returns a Boolean indicating if such a search parameter exists."
+      },
+      "keys": {
+        "!type": "fn() -> +iter[:t=string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/keys",
+        "!doc": "Returns an iterator allowing to go through all keys of the key/value pairs contained in this object."
+      },
+      "set": {
+        "!type": "fn(name: string, value: ?)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/set",
+        "!doc": "Sets the value associated to a given search parameter to the given value. If there were several values, delete the others."
+      },
+      "sort": {
+        "!type": "fn()",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/sort",
+        "!doc": "Sorts all key/value pairs, if any, by their keys."
+      },
+      "toString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString",
+        "!doc": "Returns a string containing a query string suitable for use in a URL."
+      },
+      "values": {
+        "!type": "fn() -> +iter[:t=?]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/values",
+        "!doc": "Returns an iterator allowing to go through all values of the key/value pairs contained in this object."
+      }
+    },
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams",
+    "!doc": "The URLSearchParams interface defines utility methods to work with the query string of a URL."
   },
   "Range": {
     "!type": "fn()",
