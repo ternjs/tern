@@ -115,6 +115,47 @@
       "attributeOldValue": "bool",
       "characterDataOldValue": "bool",
       "attributeFilter": "[string]"
+    },
+    "Permissions": {
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Permissions",
+      "query": {
+        "!type": "fn(descriptor: PermissionDescriptor) -> +Promise[:t=PermissionStatus]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Permissions/query",
+        "!doc": "Returns the user permission status for a given API."
+      },
+      "revoke": {
+        "!type": "fn(descriptor: PermissionDescriptor) -> +Promise[:t=PermissionStatus]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Permissions/revoke",
+        "!doc": "Revokes the permission currently set on a given API."
+      }
+    },
+    "PermissionDescriptor": {
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Permissions/query",
+      "name": {
+        "!type": "string",
+        "!doc": "The name of the API whose permissions you want to query. Valid values are 'geolocation', 'midi', 'notifications', 'push', 'persistent-storage', 'camera' and 'microphone'."
+      },
+      "userVisibleOnly": {
+        "!type": "bool",
+        "!doc": "Indicates whether you want to show a notification for every message or be able to send silent push notifications. The default is false."
+      },
+      "sysex": {
+        "!type": "bool",
+        "!doc": "Indicates whether you need and/or receive system exclusive messages. The default is false."
+      }
+    },
+    "PermissionStatus": {
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus",
+      "state": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus/state",
+        "!doc": "Returns the state of a requested permission; one of 'granted', 'denied', or 'prompt'."
+      },
+      "onchange": {
+        "!type": "?",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/PermissionStatus/onchange",
+        "!doc": "An event called whenever PermissionStatus.status changes."
+      }
     }
   },
   "location": {
@@ -3228,18 +3269,43 @@
     },
     "language": {
       "!type": "string",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.language",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage/language",
       "!doc": "Returns a string representing the language version of the browser."
+    },
+    "languages": {
+      "!type": "[string]",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage/languages",
+      "!doc": "Returns a string representing the language version of the browser."
+    },
+    "onLine": {
+      "!type": "bool",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine",
+      "!doc": "Returns a Boolean indicating whether the browser is working online."
+    },
+    "oscpu": {
+      "!type": "string",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator/oscpu",
+      "!doc": "Returns a string that represents the current operating system."
+    },
+    "permissions": {
+      "!type": "Permissions",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator/permissions",
+      "!doc": "Returns a Permissions object that can be used to query and update permission status of APIs covered by the Permissions API."
     },
     "platform": {
       "!type": "string",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.platform",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/platform",
       "!doc": "Returns a string representing the platform of the browser."
     },
     "plugins": {
       "!type": "[?]",
       "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.plugins",
       "!doc": "Returns a PluginArray object, listing the plugins installed in the application."
+    },
+    "sendBeacon": {
+      "!type": "fn(url: string, data?: ?)",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon",
+      "!doc": "Used to asynchronously transfer a small amount of data using HTTP from the User Agent to a web server."
     },
     "userAgent": {
       "!type": "string",
@@ -3251,10 +3317,20 @@
       "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.vendor",
       "!doc": "Returns the name of the browser vendor for the current browser."
     },
-    "javaEnabled": {
+    "vibrate": {
+      "!type": "fn(pattern: number|[number])",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate",
+      "!doc": "Causes vibration on devices with support for it. Does nothing if vibration support isn't available."
+    },
+    "cookieEnabled": {
       "!type": "bool",
-      "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator.javaEnabled",
-      "!doc": "This method indicates whether the current browser is Java-enabled or not."
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator/cookieEnabled",
+      "!doc": "Returns false if setting a cookie will be ignored and true otherwise."
+    },
+    "javaEnabled": {
+      "!type": "fn() -> bool",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/NavigatorPlugins/javaEnabled",
+      "!doc": "Returns a Boolean flag indicating whether the host browser is Java-enabled or not."
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/window.navigator",
     "!doc": "Returns a reference to the navigator object, which can be queried for information about the application running the script."
