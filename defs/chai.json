@@ -3,7 +3,7 @@
   "chai": {
     "should": {
       "Language": {
-        "!doc": "Language Chains\n\n\n\nThe following are provided as chainable getters to\nimprove the readability of your assertions. They\ndo not provide an testing capability unless they\nhave been overwritten by a plugin.Chains\n\n",
+        "!doc": "Language Chains\n\n\n\nThe following are provided as chainable getters to\nimprove the readability of your assertions. They\ndo not provide an testing capability unless they\nhave been overwritten by a plugin.Chains",
         "!url": "http://chaijs.com/api/bdd/#Language",
         "!type": "fn() -> bool"
       },
@@ -175,7 +175,7 @@
         "!type": "fn(expression: mixed, message: string) -> bool"
       },
       "fail": {
-        "!doc": ".fail(actual, expected, [message], [operator])\n\n  * @param { Mixed } actual\n  * @param { Mixed } expected\n  * @param { String } message\n  * @param { String } operator\n\nThrow a failure. Node.js assert module-compatible.\n\n",
+        "!doc": ".fail(actual, expected, [message], [operator])\n\n  * @param { Mixed } actual\n  * @param { Mixed } expected\n  * @param { String } message\n  * @param { String } operator\n\nThrow a failure. Node.js assert module-compatible.",
         "!url": "http://chaijs.com/api/assert/#fail",
         "!type": "fn(actual: mixed, expected: mixed, message: [string], operator: [string]) -> bool"
       },
@@ -335,7 +335,7 @@
         "!type": "fn(haystack: array, needle: mixed, message: [string]) -> bool"
       },
       "notInclude": {
-        "!doc": ".notInclude(haystack, needle, [message])\n\n  * @param { Array | String } haystack\n  * @param { Mixed } needle\n  * @param { String } message\n\nAsserts that haystack does not include needle. Works\nfor strings and arrays.\ni\n    assert.notInclude('foobar', 'baz', 'string not include substring');\n    assert.notInclude([ 1, 2, 3 ], 4, 'array not include contain value');\n\n",
+        "!doc": ".notInclude(haystack, needle, [message])\n\n  * @param { Array | String } haystack\n  * @param { Mixed } needle\n  * @param { String } message\n\nAsserts that haystack does not include needle. Works\nfor strings and arrays.\ni\n    assert.notInclude('foobar', 'baz', 'string not include substring');\n    assert.notInclude([ 1, 2, 3 ], 4, 'array not include contain value');",
         "!url": "http://chaijs.com/api/assert/#notInclude",
         "!type": "fn(haystack: array, needle: mixed, message: [string]) -> bool"
       },
@@ -427,7 +427,7 @@
     },
     "expect": {
       "Language": {
-        "!doc": "Language Chains\n\n\n\nThe following are provided as chainable getters to\nimprove the readability of your assertions. They\ndo not provide an testing capability unless they\nhave been overwritten by a plugin.Chains\n\n",
+        "!doc": "Language Chains\n\n\n\nThe following are provided as chainable getters to\nimprove the readability of your assertions. They\ndo not provide an testing capability unless they\nhave been overwritten by a plugin.Chains",
         "!url": "http://chaijs.com/api/bdd/#Language",
         "!type": "fn() -> bool"
       },
