@@ -482,7 +482,7 @@ properties refer to variable or property names.
 
 Here is an example:
 
-[source,application/x-json]
+[source,application/json]
 ----
 {
   "!name": "mylibrary",
@@ -686,7 +686,7 @@ but not necessary.
 You can use `configPath` option for resolve the config file of webpack
 like:
 
-[source,application/x-json]
+[source,application/json]
 ----
 {
   "libs": [
@@ -774,7 +774,7 @@ http://blog.nodejs.org/2013/02/07/peer-dependencies[peer dependency].
 A `.tern-project` file is a http://json.org[JSON] file in a format
 like this:
 
-[source,application/x-json]
+[source,application/json]
 ----
 {
   "libs": [
