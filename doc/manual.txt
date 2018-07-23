@@ -513,12 +513,13 @@ document will be `"mylibrary"`, as set by the `!name` property.
 The value of a variable or property can be either a string or an
 object. Strings can be one of the built-in types (`"number"`,
 `"string"`, `"bool"`), a function type (`"fn(arg1: type1, arg2: type2)
--> rettype"`, where `-> rettype` is optional), or an array type
-(`"[type]"`). Strings can also name types, either by describing the
-path to the type in the global scope (`"Date.prototype"`) or by
-referring to one of the local definitions in the `!define` property of
-the document. Finally, a type can be prefixed with a `+` to indicate
-an instance of a constructor (`+Date`).
+-> rettype"`, where `-> rettype` is optional), an object type 
+(`{attr1: type, attr2: type}`), or an array type (`"[type]"`). Strings
+can also name types, either by describing the path to the type in the
+global scope (`"Date.prototype"`) or by referring to one of the local
+definitions in the `!define` property of the document. Finally, a type
+can be prefixed with a `+` to indicate an instance of a constructor 
+(`+Date`).
 
 Objects describe types by enumerating their properties. By default,
 their type will simply be an instance of `Object`, but a `!type`
