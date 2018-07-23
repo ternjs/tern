@@ -1023,12 +1023,13 @@ document will be <code>"mylibrary"</code>, as set by the <code>!name</code> prop
 <p> The value of a variable or property can be either a string or an
 object. Strings can be one of the built-in types (<code>"number"</code>,
 <code>"string"</code>, <code>"bool"</code>), a function type (<code>"fn(arg1: type1, arg2: type2)
--&gt; rettype"</code>, where <code>-&gt; rettype</code> is optional), or an array type
-(<code>"[type]"</code>). Strings can also name types, either by describing the
-path to the type in the global scope (<code>"Date.prototype"</code>) or by
-referring to one of the local definitions in the <code>!define</code> property of
-the document. Finally, a type can be prefixed with a <code>+</code> to indicate
-an instance of a constructor (<code>+Date</code>).</p>
+-&gt; rettype"</code>, where <code>-&gt; rettype</code> is optional), an object type
+(<code>{attr1: type, attr2: type}</code>), or an array type (<code>"[type]"</code>). Strings
+can also name types, either by describing the path to the type in the
+global scope (<code>"Date.prototype"</code>) or by referring to one of the local
+definitions in the <code>!define</code> property of the document. Finally, a type
+can be prefixed with a <code>+</code> to indicate an instance of a constructor
+(<code>+Date</code>).</p>
 <p> Objects describe types by enumerating their properties. By default,
 their type will simply be an instance of <code>Object</code>, but a <code>!type</code>
 property can be used to make the type a function or array type, as the
