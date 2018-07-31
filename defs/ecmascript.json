@@ -55,6 +55,24 @@
       "return": "fn(value?: ?) -> iter_result",
       "throw": "fn(exception: +Error)"
     },
+    "async_iter_prototype": {
+      ":Symbol.asyncIterator": "fn() -> !this"
+    },
+    "async_iter": {
+      "!proto": "async_iter_prototype",
+      "next": {
+        "!type": "fn() -> +Promise[:t=+iter_result[value=!this.:t]]",
+        "!doc": "Return the next item in the sequence.",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators"
+      },
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators"
+    },
+    "async_generator_prototype": {
+      "!proto": "async_iter_prototype",
+      "next": "fn(value?: ?) -> +Promise[:t=iter_result]",
+      "return": "fn(value?: ?) -> +Promise[:t=iter_result]",
+      "throw": "fn(exception: +Error)"
+    },
     "Proxy_handler": {
       "!doc": "The proxy's handler object is a placeholder object which contains traps for proxies.",
       "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler",
@@ -1887,6 +1905,7 @@
     "hasInstance": ":Symbol.hasInstance",
     "isConcatSpreadable": ":Symbol.isConcatSpreadable",
     "iterator": ":Symbol.iterator",
+    "asyncIterator": ":Symbol.asyncIterator",
     "match": ":Symbol.match",
     "replace": ":Symbol.replace",
     "search": ":Symbol.search",
