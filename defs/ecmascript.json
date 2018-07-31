@@ -1887,7 +1887,6 @@
     "hasInstance": ":Symbol.hasInstance",
     "isConcatSpreadable": ":Symbol.isConcatSpreadable",
     "iterator": ":Symbol.iterator",
-    "keyFor": ":Symbol.keyFor",
     "match": ":Symbol.match",
     "replace": ":Symbol.replace",
     "search": ":Symbol.search",
