@@ -50,7 +50,7 @@ var defaultConfig = {
   loadEagerly: false,
   plugins: {doc_comment: true},
   ecmaScript: true,
-  ecmaVersion: 8,
+  ecmaVersion: 9,
   dependencyBudget: tern.defaultOptions.dependencyBudget
 };
 var homeDir = process.env.HOME || process.env.USERPROFILE;
