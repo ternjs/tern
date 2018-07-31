@@ -14,7 +14,7 @@
     "test": "node ./bin/test"
   },
   "dependencies": {
-    "acorn": "^4.0.9",
+    "acorn": "^5.4.0",
     "enhanced-resolve": "^2.2.2",
     "glob": "^7.1.1",
     "minimatch": "^3.0.3",
