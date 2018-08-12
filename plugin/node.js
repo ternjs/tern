@@ -1752,7 +1752,7 @@
               "!url": "https://nodejs.org/api/fs.html#fs_writestream_path",
               "!doc": "The path to the file the stream is writing to as specified in the first argument to fs.createWriteStream(). If path is passed as a string, then writeStream.path will be a string. If path is passed as a Buffer, then writeStream.path will be a Buffer."
             },
-            "!proto": "stream.Writable"
+            "!proto": "stream.Writable.prototype"
           }
         },
         constants: {
