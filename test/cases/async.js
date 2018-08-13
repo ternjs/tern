@@ -38,5 +38,3 @@ async function cParse () {
     arr; //: ArrayBuffer
   });
 }
-
-
