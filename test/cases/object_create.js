@@ -31,3 +31,15 @@ empty.prop1 = "hi";
 
 empty.hasOwnProperty; //: ?
 empty.prop1; //: string
+
+function create() {
+    // Implementation
+}
+  
+module.exports = {
+  create //loc: 35,9
+};
+  
+module.exports = {
+  create: create //loc: 35,9
+};
