@@ -86,7 +86,9 @@
       },
       ObjectExpression: function(node, scope) {
         for (var i = 0; i < node.properties.length; ++i) {
-          var prop = node.properties[i], name = infer.propName(prop)
+          var prop = node.properties[i];
+          if (prop.type == 'SpreadElement') { continue; }
+          var name = infer.propName(prop)
           if (name != "<i>" && prop.commentsBefore)
             interpretComments(prop, prop.commentsBefore, scope, node.objType.getProp(name))
         }
