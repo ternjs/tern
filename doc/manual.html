@@ -1846,9 +1846,19 @@ scope at that point. Returns <code>null</code> if unsuccessful.
 </dt>
 <dd>
 <p>
-Similar to <a href="#infer.findExpressionAround"><code>findExpressionAround</code></a>,
+Similar to <a href="#infer.findExpressionAt"><code>findExpressionAt</code></a>,
 except that it will return the innermost expression node that spans
 the given range, rather than only exact matches.
+</p>
+</dd>
+<dt>
+<a id="infer.findClosestExpression"></a><code>infer.findClosestExpression(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}</code>
+</dt>
+<dd>
+<p>
+Similar to <a href="#infer.findExpressionAround"><code>findExpressionAround</code></a>,
+except that it use the same AST walker as
+<a href="#infer.findExpressionAt"><code>findExpressionAt</code></a>.
 </p>
 </dd>
 <dt>

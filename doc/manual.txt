@@ -1129,9 +1129,15 @@ object if successful, where `node` is AST node, and `state` is the
 scope at that point. Returns `null` if unsuccessful.
 
 [[infer.findExpressionAround]]`infer.findExpressionAround(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}`::
-Similar to <<infer.findExpressionAround,`findExpressionAround`>>,
+Similar to <<infer.findExpressionAt,`findExpressionAt`>>,
 except that it will return the innermost expression node that spans
 the given range, rather than only exact matches.
+
+[[infer.findClosestExpression]]`infer.findClosestExpression(ast: AST, start: number?, end: number, scope?: Scope) → {node, state}`::
+Similar to <<infer.findExpressionAround,`findExpressionAround`>>,
+except that it use the same AST walker as 
+<<infer.findExpressionAt,`findExpressionAt`>>.
+  
 
 [[infer.expressionType]]`infer.expressionType(expr: {node, state}) → AVal`::
 Determine an expression for the given node and scope (as returned by
