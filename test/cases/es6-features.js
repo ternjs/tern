@@ -28,3 +28,16 @@ let [a, b] = [1, 2];
 let x = ([a], {b}) => a + b
 
 let [e1,,e3] = ["5", false, 6]
+
+const obj = {
+  hi: 'hello'
+};
+
+const newObj = {
+  hi,
+  ...o //+
+}
+const {
+  hi,
+  ...o  //+
+} = obj  //+ obj
