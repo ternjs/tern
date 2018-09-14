@@ -2,7 +2,7 @@ var fs = require("fs"), path = require("path");
 var infer = require("../lib/infer");
 var tern = require("../lib/tern");
 var acorn = require("acorn");
-var walk = require("acorn/dist/walk");
+var walk = require("acorn-walk");
 require("../plugin/requirejs.js");
 require("../plugin/node.js");
 require("../plugin/es_modules.js");
