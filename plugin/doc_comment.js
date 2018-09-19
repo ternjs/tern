@@ -24,9 +24,9 @@
       fullDocs: options && options.fullDocs
     };
 
-    server.on("postParse", postParse)
-    server.on("postInfer", postInfer)
-    server.on("postLoadDef", postLoadDef)
+    server.on("postParse", postParse);
+    server.on("postInfer", postInfer);
+    server.on("postLoadDef", postLoadDef);
   });
 
   function postParse(ast, text) {
@@ -62,7 +62,7 @@
 
     walk.simple(ast, {
       VariableDeclaration: function(node, scope) {
-        var decl = node.declarations[0].id
+        var decl = node.declarations[0].id;
         if (node.commentsBefore && decl.type == "Identifier")
           interpretComments(node, node.commentsBefore, scope,
                             scope.getProp(node.declarations[0].id.name));
@@ -88,21 +88,21 @@
         for (var i = 0; i < node.properties.length; ++i) {
           var prop = node.properties[i];
           if (prop.type == 'SpreadElement') { continue; }
-          var name = infer.propName(prop)
+          var name = infer.propName(prop);
           if (name != "<i>" && prop.commentsBefore)
-            interpretComments(prop, prop.commentsBefore, scope, node.objType.getProp(name))
+            interpretComments(prop, prop.commentsBefore, scope, node.objType.getProp(name));
         }
       },
       Class: function(node, scope) {
-        var proto = node.objType.getProp("prototype").getObjType()
-        if (!proto) return
+        var proto = node.objType.getProp("prototype").getObjType();
+        if (!proto) return;
         for (var i = 0; i < node.body.body.length; i++) {
-          var method = node.body.body[i], name
-          if (!method.commentsBefore) continue
+          var method = node.body.body[i], name;
+          if (!method.commentsBefore) continue;
           if (method.kind == "constructor")
-            interpretComments(method, method.commentsBefore, scope, node.objType)
+            interpretComments(method, method.commentsBefore, scope, node.objType);
           else if ((name = infer.propName(method)) != "<i>")
-            interpretComments(method, method.commentsBefore, scope, proto.getProp(name))
+            interpretComments(method, method.commentsBefore, scope, proto.getProp(name));
         }
       },
       CallExpression: function(node, scope) {
@@ -150,7 +150,7 @@
         } else {
           var same = 0;
           while (same < head.length && head.charCodeAt(same) == lineHead.charCodeAt(same)) ++same;
-          if (same < head.length) head = head.slice(0, same)
+          if (same < head.length) head = head.slice(0, same);
         }
       }
     }
@@ -232,11 +232,11 @@
   }
 
   function parseTypeAtom(scope, str, pos) {
-    var result = parseTypeInner(scope, str, pos)
-    if (!result) return null
+    var result = parseTypeInner(scope, str, pos);
+    if (!result) return null;
     if (str.slice(result.end, result.end + 2) == "[]")
-      return {madeUp: result.madeUp, end: result.end + 2, type: new infer.Arr(result.type)}
-    else return result
+      return {madeUp: result.madeUp, end: result.end + 2, type: new infer.Arr(result.type)};
+    else return result;
   }
 
   function parseType(scope, str, pos) {
@@ -266,7 +266,7 @@
 
   function parseTypeInner(scope, str, pos) {
     pos = skipSpace(str, pos);
-    if (/[?!]/.test(str.charAt(pos))) pos++
+    if (/[?!]/.test(str.charAt(pos))) pos++;
     var type, madeUp = false;
 
     if (str.indexOf("function(", pos) == pos) {
@@ -455,7 +455,7 @@
     }
 
     if (foundOne) applyType(type, self, args, ret, node, aval);
-  };
+  }
 
   function jsdocParseTypedefs(text, scope) {
     var cx = infer.cx();
@@ -465,12 +465,12 @@
       var parsed = parseTypeOuter(scope, m[1]);
       var name = parsed && m[1].slice(parsed.end).match(/^\s*(\S+)/);
       if (name && parsed.type instanceof infer.Obj) {
-        var rest = text.slice(m.index + m[0].length)
+        var rest = text.slice(m.index + m[0].length);
         while (m = /\s+@prop(?:erty)?\s+(.*)/.exec(rest)) {
-          var propType = parseTypeOuter(scope, m[1]), propName
+          var propType = parseTypeOuter(scope, m[1]), propName;
           if (propType && (propName = m[1].slice(propType.end).match(/^\s*(\S+)/)))
-            propType.type.propagate(parsed.type.defProp(propName[1]))
-          rest = rest.slice(m[0].length)
+            propType.type.propagate(parsed.type.defProp(propName[1]));
+          rest = rest.slice(m[0].length);
         }
         cx.parent.mod.jsdocTypedefs[name[1]] = parsed.type;
       }
@@ -518,5 +518,5 @@
     } else if (type) {
       propagateWithWeight(type, aval);
     }
-  };
+  }
 });

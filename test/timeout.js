@@ -16,7 +16,7 @@ exports.runTests = function(filter) {
                     query: {type: "type", end: 0, file: "infer.js"}}, function(err, result) {
       if (!err || !(err instanceof infer.TimedOut))
         util.failure("timeout: failed to time out");
-    })
+    });
   } catch(e) {
     util.failure("timeout: exception thrown: " + e.stack);
   }

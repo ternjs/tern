@@ -38,8 +38,8 @@ function getPlugins(text) {
       else
         delete plugins[m[1]];
     } else {
-      plugins[m[1]] = {}
-      if (m[1] == "node") plugins.modules = {modules: nodeModules}
+      plugins[m[1]] = {};
+      if (m[1] == "node") plugins.modules = {modules: nodeModules};
     }
   }
   return plugins;

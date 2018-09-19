@@ -5,17 +5,17 @@
     return define(["../lib/tern", "./node_resolve"], mod);
   mod(tern, tern);
 })(function(tern) {
-  "use strict"
+  "use strict";
 
   tern.registerPlugin("node", function(server) {
-    server.loadPlugin("node_resolve")
+    server.loadPlugin("node_resolve");
     server.on("postReset", function() {
-      var mods = server.mod.modules, locals = server.cx.definitions.node
+      var mods = server.mod.modules, locals = server.cx.definitions.node;
       for (var name in locals) if (/^[a-z_]*$/.test(name))
-        mods.knownModules[name] = locals[name]
-    })
-    server.addDefs(defs)
-  })
+        mods.knownModules[name] = locals[name];
+    });
+    server.addDefs(defs);
+  });
 
   var defs = {
     "!name": "node",

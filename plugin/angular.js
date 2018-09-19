@@ -280,12 +280,12 @@
     initServer(server);
 
     server.on("reset", function() { initServer(server); });
-    server.on("postParse", postParse)
-    server.on("postLoadDef", postLoadDef)
-    server.on("preCondenseReach", preCondenseReach)
-    server.on("postCondenseReach", postCondenseReach)
+    server.on("postParse", postParse);
+    server.on("postLoadDef", postLoadDef);
+    server.on("preCondenseReach", preCondenseReach);
+    server.on("postCondenseReach", postCondenseReach);
 
-    server.addDefs(defs, true)
+    server.addDefs(defs, true);
   });
 
   var defs = {

@@ -1,83 +1,83 @@
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require("./modules"))
+    return mod(require("../lib/infer"), require("../lib/tern"), require("./modules"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./modules"], mod)
-  mod(tern, tern)
+    return define(["../lib/infer", "../lib/tern", "./modules"], mod);
+  mod(tern, tern);
 })(function(infer, tern) {
-  "use strict"
+  "use strict";
 
-  var WG_DEFAULT_EXPORT = 95
+  var WG_DEFAULT_EXPORT = 95;
 
   function initScope(scope) {
-    var defs = infer.cx().definitions.commonjs
-    defs.require.propagate(scope.defProp("require"))
-    var module = new infer.Obj(defs.Module.getProp("prototype").getType())
-    module.propagate(scope.defProp("module"))
-    var exports = new infer.Obj(true)
-    module.origin = exports.origin = scope.origin
-    module.originNode = exports.originNode = scope.originNode
-    exports.propagate(scope.defProp("exports"))
-    var moduleExports = scope.exports = module.defProp("exports")
-    exports.propagate(moduleExports, WG_DEFAULT_EXPORT)
+    var defs = infer.cx().definitions.commonjs;
+    defs.require.propagate(scope.defProp("require"));
+    var module = new infer.Obj(defs.Module.getProp("prototype").getType());
+    module.propagate(scope.defProp("module"));
+    var exports = new infer.Obj(true);
+    module.origin = exports.origin = scope.origin;
+    module.originNode = exports.originNode = scope.originNode;
+    exports.propagate(scope.defProp("exports"));
+    var moduleExports = scope.exports = module.defProp("exports");
+    exports.propagate(moduleExports, WG_DEFAULT_EXPORT);
   }
 
   infer.registerFunction("require", function(_self, _args, argNodes) {
     if (!argNodes || !argNodes.length || argNodes[0].type != "Literal" || typeof argNodes[0].value != "string")
-      return infer.ANull
-    var cx = infer.cx(), server = cx.parent
-    var currentFile = argNodes[0].sourceFile.name
+      return infer.ANull;
+    var cx = infer.cx(), server = cx.parent;
+    var currentFile = argNodes[0].sourceFile.name;
 
-    var name = argNodes[0].value
-    var resolved = server.mod.modules.resolveModule(name, currentFile)
-    return resolved
-  })
+    var name = argNodes[0].value;
+    var resolved = server.mod.modules.resolveModule(name, currentFile);
+    return resolved;
+  });
 
   function isStaticRequire(node) {
-    if (node.type != "CallExpression" || node.callee.type != "Identifier" || node.callee.name != "require") return
-    var arg = node.arguments[0]
-    if (arg && arg.type == "Literal" && typeof arg.value == "string") return arg.value
+    if (node.type != "CallExpression" || node.callee.type != "Identifier" || node.callee.name != "require") return;
+    var arg = node.arguments[0];
+    if (arg && arg.type == "Literal" && typeof arg.value == "string") return arg.value;
   }
 
   function isModuleName(node) {
-    if (node.type != "Literal" || typeof node.value != "string") return
+    if (node.type != "Literal" || typeof node.value != "string") return;
 
     var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null,
-                                          function(_, n) { return isStaticRequire(n) != null })
-    if (call && call.node.arguments[0] == node) return node.value
+                                          function(_, n) { return isStaticRequire(n) != null });
+    if (call && call.node.arguments[0] == node) return node.value;
   }
 
   function isImport(node) {
-    if (node.type != "Identifier") return
-    var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "VariableDeclarator"), name
-    if (!decl || decl.node.id != node) return
-    var init = decl.node.init
+    if (node.type != "Identifier") return;
+    var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "VariableDeclarator"), name;
+    if (!decl || decl.node.id != node) return;
+    var init = decl.node.init;
     if (init && (name = isStaticRequire(init)) != null)
-      return {name: name, prop: null}
+      return {name: name, prop: null};
     if (init && init.type == "MemberExpression" && !init.computed && (name = isStaticRequire(init.object)) != null)
-      return {name: name, prop: init.property.name}
+      return {name: name, prop: init.property.name};
   }
 
   function hasProps(obj) {
-    if (obj) for (var _prop in obj) return true
+    if (obj) for (var _prop in obj) return true;
   }
 
   tern.registerPlugin("commonjs", function(server) {
-    server.loadPlugin("modules")
-    server.mod.modules.on("wrapScope", initScope)
+    server.loadPlugin("modules");
+    server.mod.modules.on("wrapScope", initScope);
     server.mod.modules.on("getExports", function(file, mod) {
-      var exports = file.scope.exports
+      var exports = file.scope.exports;
       if (exports.types.length > 1 || hasProps(exports.getObjType()))
-        exports.propagate(mod)
-    })
+        exports.propagate(mod);
+    });
 
-    server.mod.modules.modNameTests.push(isModuleName)
-    server.mod.modules.importTests.push(isImport)
-    server.mod.modules.completableTypes.Identifier = true
-    server.mod.modules.completableTypes.Literal = true
+    server.mod.modules.modNameTests.push(isModuleName);
+    server.mod.modules.importTests.push(isImport);
+    server.mod.modules.completableTypes.Identifier = true;
+    server.mod.modules.completableTypes.Literal = true;
 
-    server.addDefs(defs)
-  })
+    server.addDefs(defs);
+  });
 
   var defs = {
     "!name": "commonjs",
@@ -149,5 +149,5 @@
       "!url": "https://nodejs.org/api/globals.html#globals_module",
       "!doc": "A reference to the current module. In particular module.exports is the same as the exports object. module isn't actually a global but rather local to each module."
     }
-  }
-})
+  };
+});

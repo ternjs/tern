@@ -19,8 +19,8 @@
     server.on("reset", function() {
       server.mod.completeStrings.seen = Object.create(null);
     });
-    server.on("postParse", postParse)
-    server.on("completion", complete)
+    server.on("postParse", postParse);
+    server.on("completion", complete);
   });
 
   function postParse(ast) {

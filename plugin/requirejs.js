@@ -169,22 +169,22 @@
       fn.propagate(new infer.IsCallee(infer.ANull, deps, null, out || infer.ANull));
       if (out) out.originNode = fn.originNode;
     } else if (out) {
-      args[0].propagate(out)
+      args[0].propagate(out);
     }
 
     return infer.ANull;
   }
 
   infer.registerFunction("requirejs_define", function(_self, args, argNodes) {
-    if (!args.length) return infer.ANull
+    if (!args.length) return infer.ANull;
 
-    var server = infer.cx().parent, data = server.mod.requireJS
-    return runModule(server, args, argNodes, getModule(data.currentFile, data))
+    var server = infer.cx().parent, data = server.mod.requireJS;
+    return runModule(server, args, argNodes, getModule(data.currentFile, data));
   });
 
   infer.registerFunction("requirejs_require", function(_self, args, argNodes) {
-    if (!args.length) return infer.ANull
-    return runModule(infer.cx().parent, args, argNodes)
+    if (!args.length) return infer.ANull;
+    return runModule(infer.cx().parent, args, argNodes);
   });
 
   // Parse simple ObjectExpression AST nodes to their corresponding JavaScript objects.
@@ -255,12 +255,12 @@
       this.mod.requireJS.require = null;
     });
 
-    server.on("preCondenseReach", preCondenseReach)
-    server.on("postLoadDef", postLoadDef)
-    server.on("typeAt", findTypeAt)
-    server.on("completion", findCompletions)
+    server.on("preCondenseReach", preCondenseReach);
+    server.on("postLoadDef", postLoadDef);
+    server.on("typeAt", findTypeAt);
+    server.on("completion", findCompletions);
 
-    server.addDefs(defs)
+    server.addDefs(defs);
   });
 
   function findTypeAt(_file, _pos, expr, type) {
@@ -277,8 +277,8 @@
     var exportedType = expr.node.required;
     type.origin = exportedType.origin;
     type.originNode = exportedType.originNode;
-    if (exportedType.doc) type.doc = exportedType.doc
-    if (exportedType.url) type.url = exportedType.url
+    if (exportedType.doc) type.doc = exportedType.doc;
+    if (exportedType.url) type.url = exportedType.url;
     return type;
   }
 
