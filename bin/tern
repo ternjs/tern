@@ -68,14 +68,14 @@ function readJSON(fileName) {
 }
 
 function readProjectFile(fileName) {
-  var data = readJSON(fileName);
+  var data = readJSON(fileName), name;
   for (var option in defaultConfig) {
     if (!data.hasOwnProperty(option))
       data[option] = defaultConfig[option];
     else if (option == "plugins")
-      for (let name in defaultConfig.plugins)
+      for (name in defaultConfig.plugins)
         if (!Object.prototype.hasOwnProperty.call(data.plugins, name))
-          data.plugins[name] = defaultConfig.plugins[name]
+          data.plugins[name] = defaultConfig.plugins[name];
   }
   return data;
 }
@@ -92,7 +92,7 @@ var distDir = path.resolve(__dirname, "..");
 function findDefs(projectDir, config) {
   var defs = [], src = config.libs.slice();
   if (config.ecmaScript && src.indexOf("ecmascript") == -1)
-    src.unshift("ecmascript")
+    src.unshift("ecmascript");
   for (var i = 0; i < src.length; ++i) {
     var file = src[i];
     if (!/\.json$/.test(file)) file = file + ".json";
@@ -173,10 +173,10 @@ function startServer(dir, config, httpServer) {
         fs.readFile(path.resolve(dir, name), "utf8", c);
     },
     normalizeFilename: function(name) {
-      var pt = path.resolve(dir, name)
+      var pt = path.resolve(dir, name);
       try { pt = fs.realPathSync(path.resolve(dir, name), true) }
       catch(e) {}
-      return path.relative(dir, pt)
+      return path.relative(dir, pt);
     },
     async: true,
     defs: defs,
