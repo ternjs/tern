@@ -19,3 +19,16 @@ import * as reexp from "./reexp"
 reexp //:: {a: number, b: bool}
 
 import "./b" //+ "./blah"
+
+import C from "./class"
+
+(new C()). //+ methodA
+
+import f from "./func"
+
+f //: fn() -> bool
+
+import o from "./obj"
+
+o.propA //: number
+o.propB //: string
