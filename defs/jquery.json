@@ -1173,11 +1173,6 @@
       "!url": "http://api.jquery.com/jquery.isXMLDoc/",
       "!doc": "Check to see if a DOM node is within an XML document (or is an XML document)."
     },
-    "isFunction": {
-      "!type": "fn(obj: ?) -> bool",
-      "!url": "http://api.jquery.com/jquery.isFunction/",
-      "!doc": ""
-    },
     "makeArray": {
       "!type": "fn(obj: ?) -> [!0.<i>]",
       "!url": "http://api.jquery.com/jquery.makeArray/",
