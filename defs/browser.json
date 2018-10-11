@@ -410,6 +410,11 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/EventTarget.dispatchEvent",
         "!doc": "Dispatches an event into the event system. The event is subject to the same capturing and bubbling behavior as directly dispatched events."
       },
+      "innerText": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Node/innerText",
+        "!doc": "Gets or sets the text content of a node and its descendants."
+      },
       "ELEMENT_NODE": "number",
       "ATTRIBUTE_NODE": "number",
       "TEXT_NODE": "number",
