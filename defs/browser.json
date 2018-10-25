@@ -1991,6 +1991,57 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/element.getClientRects",
     "!doc": "Returns a collection of rectangles that indicate the bounding rectangles for each box in a client."
   },
+  "DataTransfer": {
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer",
+    "!doc": "This object is available from the dataTransfer property of all drag events. It cannot be created separately.",
+    "prototype": {
+      "dropEffect": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/dropEffect",
+        "!doc": "The actual effect that will be used, and should always be one of the possible values of effectAllowed."
+      },
+      "effectAllowed": {
+        "!type": "string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/effectAllowed",
+        "!doc": "Specifies the effects that are allowed for this drag."
+      },
+      "files": {
+        "!type": "+FileList",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/files",
+        "!doc": "Contains a list of all the local files available on the data transfer."
+      },
+      "items": {
+        "!type": "[?]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/items",
+        "!doc": "The read-only DataTransfer property items property is a list of the data transfer items in a drag operation."
+      },
+      "types": {
+        "!type": "[string]",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/types",
+        "!doc": "Holds a list of the format types of the data that is stored for the first item, in the same order the data was added. An empty list will be returned if no data was added."
+      },
+      "clearData": {
+        "!type": "fn(type?: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/clearData",
+        "!doc": "Remove the data associated with a given type."
+      },
+      "getData": {
+        "!type": "fn(type: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/getData",
+        "!doc": "Retrieves the data for a given type, or an empty string if data for that type does not exist or the data transfer contains no data."
+      },
+      "setData": {
+        "!type": "fn(type: string, data: string)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData",
+        "!doc": "Set the data for a given type."
+      },
+      "setDragImage": {
+        "!type": "fn(image: +Element)",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setDragImage",
+        "!doc": "Set the image to be used for dragging if a custom one is desired."
+      }
+    }
+  },
   "Event": {
     "!type": "fn()",
     "prototype": {
@@ -2119,58 +2170,8 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/event.cancelBubble",
         "!doc": "bool is the boolean value of true or false."
       },
-      "dataTransfer": {
-        "dropEffect": {
-          "!type": "string",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer",
-          "!doc": "The actual effect that will be used, and should always be one of the possible values of effectAllowed."
-        },
-        "effectAllowed": {
-          "!type": "string",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations",
-          "!doc": "Specifies the effects that are allowed for this drag."
-        },
-        "files": {
-          "!type": "+FileList",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer",
-          "!doc": "Contains a list of all the local files available on the data transfer."
-        },
-        "types": {
-          "!type": "[string]",
-          "!url": "https://developer.mozilla.org/en-US/docs/DragDrop/DataTransfer",
-          "!doc": "Holds a list of the format types of the data that is stored for the first item, in the same order the data was added. An empty list will be returned if no data was added."
-        },
-        "addElement": {
-          "!type": "fn(element: +Element)",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer",
-          "!doc": "Set the drag source."
-        },
-        "clearData": {
-          "!type": "fn(type?: string)",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations",
-          "!doc": "Remove the data associated with a given type."
-        },
-        "getData": {
-          "!type": "fn(type: string) -> string",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations",
-          "!doc": "Retrieves the data for a given type, or an empty string if data for that type does not exist or the data transfer contains no data."
-        },
-        "setData": {
-          "!type": "fn(type: string, data: string)",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations",
-          "!doc": "Set the data for a given type."
-        },
-        "setDragImage": {
-          "!type": "fn(image: +Element)",
-          "!url": "https://developer.mozilla.org/en/docs/DragDrop/Drag_Operations",
-          "!doc": "Set the image to be used for dragging if a custom one is desired."
-        },
-        "!url": "https://developer.mozilla.org/en/docs/DragDrop/DataTransfer",
-        "!doc": "This object is available from the dataTransfer property of all drag events. It cannot be created separately."
-      }
-    },
-    "!url": "https://developer.mozilla.org/en-US/docs/DOM/event",
-    "!doc": "The DOM Event interface is accessible from within the handler function, via the event object passed as the first argument."
+      "dataTransfer": "+DataTransfer"
+    }
   },
   "TouchEvent": {
     "!type": "fn()",
@@ -2348,7 +2349,7 @@
   "localStorage": {
     "!type": "Storage",
     "!url": "https://developer.mozilla.org/en/docs/Web/API/Window/localStorage",
-    "!doc": "The localStorage property allows you to access a local Storage object. localStorage is similar to sessionStorage. The only difference is that, while data stored in localStorage has no expiration time, data stored in sessionStorage gets cleared when the browsing session ends—that is, when the browser is closed.\n\nIt should be noted that data stored in either localStorage or sessionStorage is specific to the protocol of the page."
+    "!doc": "The localStorage property allows you to access a local Storage object. localStorage is similar to sessionStorage. The only difference is that, while data stored in localStorage has no expiration time, data stored in sessionStorage gets cleared when the browsing session endsï¿½that is, when the browser is closed.\n\nIt should be noted that data stored in either localStorage or sessionStorage is specific to the protocol of the page."
   },
   "sessionStorage": {
     "!type": "Storage",
@@ -4037,5 +4038,29 @@
     "!type": "fn(url: string|+Request, init?: object) -> +Promise[:t=+Response]",
     "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API",
     "!doc": "The fetch() method of the WindowOrWorkerGlobalScope mixin starts the process of fetching a resource from the network."
+  },
+  "Clipboard": {
+    "!doc": "The Clipboard interface implements the Clipboard API, providing both read and write access to the contents of the system clipboard.",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Clipboard",
+    "read": {
+      "!type": "fn() -> +Promise[:t=+DataTransfer]",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read",
+      "!doc": "The read() method of the Clipboard interface requests a copy of the clipboard's contents"
+    },
+    "readText": {
+      "!type": "fn() -> +Promise[:t=string]",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/readText",
+      "!doc": "Requests text from the system clipboard; returns a Promise which is resolved with a DOMString containing the clipboard's text once it's available."
+    },
+    "write": {
+      "!type": "fn(data: +DataTransfer) -> +Promise[]",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write",
+      "!doc": "The Clipboard method write() writes arbitrary data, such as images, to the clipboard. This can be used to implement cut and copy functionality."
+    },
+    "writeText": {
+      "!type": "fn(newClipText: string) -> +Promise[:t=string]",
+      "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText",
+      "!doc": "The Clipboard interface's writeText() property writes the specified text string to the system clipboard."
+    }
   }
 }
