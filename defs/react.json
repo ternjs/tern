@@ -2,10 +2,10 @@
   "!name": "react",
   "!define": {
     "Component": {
-      "!type": "fn()",
-      "!url": "https://facebook.github.io/react/docs/react-api.html",
+      "!doc": "Components let you split the UI into independent, reusable pieces, and think about each piece in isolation.",
+      "!url": "https://reactjs.org/docs/components-and-props.html",
       "defaultProps": {
-        "!type": "object",
+        "!type": "?",
         "!doc": "defaultProps can be defined as a property on the component class itself, to set the default props for the class.",
         "!url": "https://facebook.github.io/react/docs/react-component.html#defaultprops"
       },
@@ -20,10 +20,10 @@
         "!url": "https://facebook.github.io/react/docs/typechecking-with-proptypes.html"
       },
       "prototype": {
-        "props": "object",
-        "state": "object",
+        "props": "?",
+        "state": "?",
         "setState": {
-          "!type": "fn(updater: object, callback?: fn())",
+          "!type": "fn(updater: ?, callback?: fn())",
           "!doc": "setState() enqueues changes to the component state and tells React that this component and its children need to be re-rendered with the updated state.",
           "!url": "https://facebook.github.io/react/docs/react-component.html#setstate"
         },
@@ -33,6 +33,15 @@
           "!url": "https://facebook.github.io/react/docs/react-component.html#forceupdate"
         }
       }
+    },
+    "ReactElement": {
+      "!doc": "Elements are the smallest building blocks of React apps.",
+      "!url": "https://reactjs.org/docs/rendering-elements.html"
+    },
+    "ref": {
+      "!doc": "Refs provide a way to access DOM nodes or React elements created in the render method.",
+      "!url": "https://reactjs.org/docs/refs-and-the-dom.html",
+      "current": "node"
     },
     "PropTypes": {
       "!doc": "Runtime type checking for React props and similar objects.",
@@ -110,14 +119,100 @@
   },
   "PropTypes": "PropTypes",
   "React": {
-    "Component": "Component",
-    "PureComponent": "Component"
+    "!doc": "React is the entry point to the React library.",
+    "!url": "https://reactjs.org/docs/react-api.html",
+    "Component": {
+      "!type": "fn() -> Component",
+      "!doc": "React.Component is the base class for React components when they are defined using ES6 classes",
+      "!url": "https://reactjs.org/docs/react-api.html#reactcomponent",
+      "prototype": "Component"
+    },
+    "PureComponent": {
+      "!type": "fn() -> Component",
+      "!doc": "React.PureComponent is similar to React.Component. The difference between them is that React.Component doesn’t implement shouldComponentUpdate(), but React.PureComponent implements it with a shallow prop and state comparison.",
+      "!url": "https://reactjs.org/docs/react-api.html#reactpurecomponent",
+      "prototype": "Component"
+    },
+    "memo": {
+      "!type": "Component",
+      "!doc": "React.memo is a higher order component. It’s similar to React.PureComponent but for function components instead of classes.",
+      "!url": "https://reactjs.org/docs/react-api.html#reactmemo"
+    },
+    "createElement": {
+      "!type": "fn(element: ReactElement, props: [?], children: [?]) -> ReactElement",
+      "!doc": "Create and return a new React element of the given type.",
+      "!url": "https://reactjs.org/docs/react-api.html#createelement"
+    },
+    "cloneElement": {
+      "!type": "fn(element: ReactElement, props: [?], children: [?]) -> ReactElement",
+      "!doc": "Clone and return a new React element using element as the starting point.",
+      "!url": "https://reactjs.org/docs/react-api.html#cloneelement"
+    },
+    "createFactory": {
+      "!type": "fn(type: string|Component|React.Fragment) -> fn() -> ReactElement",
+      "!doc": "",
+      "!url": "https://reactjs.org/docs/react-api.html#createfactory"
+    },
+    "isValidElement": {
+      "!type": "fn(object: ?) -> bool",
+      "!doc": "Verifies the object is a React element. Returns true or false.",
+      "!url": "https://reactjs.org/docs/react-api.html#isvalidelement"
+    },
+    "Children": {
+      "map": {
+        "!type": "fn(children: ?, fn()) -> [?]",
+        "!doc": "Invokes a function on every immediate child contained within children with this set to thisArg.",
+        "!url": "https://reactjs.org/docs/react-api.html#reactchildrenmap"
+      },
+      "forEach": {
+        "!type": "fn(children: ?, fn())",
+        "!doc": "Like React.Children.map() but does not return an array.",
+        "!url": "https://reactjs.org/docs/react-api.html#reactchildrenforeach"
+      },
+      "count": {
+        "!type": "fn(?) -> number",
+        "!doc": "Returns the total number of components in children, equal to the number of times that a callback passed to map or forEach would be invoked.",
+        "!url": "https://reactjs.org/docs/react-api.html#reactchildrencount"
+      },
+      "only": {
+        "!type": "fn(?) -> Component",
+        "!doc": "Verifies that children has only one child (a React element) and returns it. Otherwise this method throws an error.",
+        "!url": "https://reactjs.org/docs/react-api.html#reactchildrenonly"
+      },
+      "toArray": {
+        "!type": "fn(?) -> [Component]",
+        "!doc": "Returns the children opaque data structure as a flat array with keys assigned to each child.",
+        "!url": "https://reactjs.org/docs/react-api.html#reactchildrentoarray"
+      }
+    },
+    "Fragment": {
+      "!type": "Component",
+      "!doc": "The React.Fragment component lets you return multiple elements in a render() method without creating an additional DOM element",
+      "!url": "https://reactjs.org/docs/react-api.html#reactfragment" 
+    },
+    "createRef": {
+      "!type": "fn() -> ref",
+      "!doc": "Refs are created using React.createRef() and attached to React elements via the ref attribute.",
+      "!url": "https://reactjs.org/docs/refs-and-the-dom.html#creating-refs"
+    },
+    "forwardRef": {
+      "!type": "fn(render: fn()) -> Component",
+      "!doc": "Ref forwarding is a technique for automatically passing a ref through a component to one of its children.",
+      "!url": "https://reactjs.org/docs/forwarding-refs.html"
+    }
   },
   "ReactDOM": {
+    "!doc": "The react-dom package provides DOM-specific methods that can be used at the top level of your app and as an escape hatch to get outside of the React model if you need to.",
+    "!url": "https://reactjs.org/docs/react-dom.html",
     "render": {
-      "!type": "fn(element: PropTypes.element, container: Element, callback?: fn()) -> !0",
+      "!type": "fn(element: ReactElement, container: Element, callback?: fn()) -> !0",
       "!doc": "Render a React element into the DOM in the supplied container and return a reference to the component (or returns null for stateless components).",
       "!url": "https://facebook.github.io/react/docs/react-dom.html#render"
+    },
+    "hydrate": {
+      "!type": "fn(element: ReactElement, container: Element, callback?: fn()) -> !0",
+      "!doc": "Same as render(), but is used to hydrate a container whose HTML contents were rendered by ReactDOMServer.",
+      "!url": "https://reactjs.org/docs/react-dom.html#hydrate"
     },
     "unmountComponentAtNode": {
       "!type": "fn(container: Element) -> bool",
@@ -125,9 +220,14 @@
       "!url": "https://facebook.github.io/react/docs/react-dom.html#unmountcomponentatnode"
     },
     "findDOMNode": {
-      "!type": "fn(component: PropTypes.element) -> Element",
+      "!type": "fn(component: ReactElement) -> Element",
       "!doc": "If this component has been mounted into the DOM, this returns the corresponding native browser DOM element.",
       "!url": "https://facebook.github.io/react/docs/react-dom.html#finddomnode"
+    },
+    "createPortal": {
+      "!type": "fn(component: ReactElement, container: Element) -> ReactElement",
+      "!doc": "Creates a portal. Portals provide a way to render children into a DOM node that exists outside the hierarchy of the DOM component.",
+      "!url": "https://reactjs.org/docs/portals.html"
     }
   }
 }
