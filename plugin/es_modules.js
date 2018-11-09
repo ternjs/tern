@@ -59,7 +59,7 @@
               if (cur.id.type == "Identifier")
                 exp(cur.id.name, file.scope.getProp(cur.id.name), cur.id);
             }
-          } else {
+          } else if (decl.id){
             exp(decl.id.name, file.scope.getProp(decl.id.name), decl.id);
           }
         }
