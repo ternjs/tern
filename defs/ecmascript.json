@@ -1396,7 +1396,7 @@
     "exp": {
       "!type": "fn(number) -> number",
       "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/exp",
-      "!doc": "Returns Ex, where x is the argument, and E is Euler's constant, the base of the natural logarithms."
+      "!doc": "Returns E^x, where x is the argument, and E is Euler's constant, the base of the natural logarithms."
     },
     "log": {
       "!type": "fn(number) -> number",
