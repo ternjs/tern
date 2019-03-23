@@ -390,12 +390,14 @@
 
     for (var i = 0; i < comments.length; ++i) {
       var comment = comments[i];
-      var decl = /(?:\n|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)\s+(.*)/g, m;
+      var decl = /(?:\n|\*)\s*@(type|param|arg(?:ument)?|returns?|this|class|constructor)(?:\s*?\n|\s+(.*))/g, m;
       while (m = decl.exec(comment)) {
         if (m[1] == "class" || m[1] == "constructor") {
           self = foundOne = true;
           continue;
         }
+
+        if (m[2] === undefined) continue; // to avoid tags that require a type argument.
 
         if (m[1] == "this" && (parsed = parseType(scope, m[2], 0))) {
           self = parsed;
