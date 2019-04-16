@@ -3394,6 +3394,11 @@
     "!url": "https://developer.mozilla.org/en/docs/DOM/window.onabort",
     "!doc": "An event handler for abort events sent to the window."
   },
+  "open": {
+    "!type": "fn(url: string, name: string, specs: string, replace: bool) -> <top>",
+    "!url": "https://www.w3schools.com/jsref/met_win_open.asp",
+    "!doc": "opens a new browser window, or a new tab, depending on your browser settings"
+  },    
   "getSelection": {
     "!type": "fn() -> +Selection",
     "!url": "https://developer.mozilla.org/en/docs/DOM/window.getSelection",
