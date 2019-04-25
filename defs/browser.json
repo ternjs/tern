@@ -194,6 +194,7 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.textContent",
         "!doc": "Gets or sets the text content of a node and its descendants."
       },
+      "style":  "Element.prototype.style",
       "baseURI": {
         "!type": "string",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.baseURI",
