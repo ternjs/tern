@@ -5,7 +5,7 @@
 // Starts a Tern server and wraps it in an HTTP wrapper
 // so that editor plug-ins can talk to it.
 
-var boostrapServer = require('../lib/bootstrap');
+var bootstrapServer = require('../lib/bootstrap');
 var fs = require("fs"), path = require("path"), url = require("url");
 
 var portFileName = ".tern-port";
@@ -57,7 +57,7 @@ var serverConfig = {
     parent: { httpServer: httpServer }
   }
 };
-var server = boostrapServer(serverConfig);
+var server = bootstrapServer(serverConfig);
 
 function doShutdown() {
   if (persistent) return;
