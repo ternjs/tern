@@ -3631,7 +3631,7 @@
   },
   "open": {
     "!type": "fn(url: string, name: string, specs: string, replace: bool) -> <top>",
-    "!url": "https://www.w3schools.com/jsref/met_win_open.asp",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/open",
     "!doc": "opens a new browser window, or a new tab, depending on your browser settings"
   },    
   "getSelection": {
