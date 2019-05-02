@@ -1010,6 +1010,11 @@
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toDateString",
         "!doc": "Returns the date portion of a Date object in human readable form in American English."
       },
+      "toGMTString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toGMTString",
+        "!doc": "Returns a string representing the Date based on the GMT (UT) time zone."
+      },
       "toTimeString": {
         "!type": "fn() -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toTimeString",
@@ -1020,10 +1025,35 @@
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toLocaleDateString",
         "!doc": "Converts a date to a string, returning the \"date\" portion using the operating system's locale's conventions."
       },
+      "toLocaleFormat": {
+        "!type": "fn(formatString: string) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleFormat",
+        "!doc": "Converts a date to a string, using a format string."
+      },
+      "toLocaleString": {
+        "!type": "fn(locales?: string, options?: ?) -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString",
+        "!doc": "Returns a string with a locality sensitive representation of this date."
+      },
       "toLocaleTimeString": {
         "!type": "fn() -> string",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/toLocaleTimeString",
         "!doc": "Converts a date to a string, returning the \"time\" portion using the current locale's conventions."
+      },
+      "toSource": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toSource",
+        "!doc": "A string representing the source code of the given Date object."
+      },
+      "toString": {
+        "!type": "fn() -> string",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toString",
+        "!doc": "A string representing the given date."
+      },
+      "valueOf": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/valueOf",
+        "!doc": "Returns the primitive value of a Date object."
       },
       "getTime": {
         "!type": "fn() -> number",
@@ -1069,6 +1099,11 @@
         "!type": "fn() -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/getUTCDay",
         "!doc": "Returns the day of the week in the specified date according to universal time."
+      },
+      "getUTCFullYear": {
+        "!type": "fn() -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getUTCFullYear",
+        "!doc": "The getUTCFullYear() method returns the year in the specified date according to universal time."
       },
       "getHours": {
         "!type": "fn() -> number",
@@ -1129,6 +1164,11 @@
         "!type": "fn(year: number) -> number",
         "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/setUTCFullYear",
         "!doc": "Sets the full year for a specified date according to universal time."
+      },
+      "setYear": {
+        "!type": "fn(yearValue: number) -> number",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/setYear",
+        "!doc": "Sets the year (usually 2-3 digits) for a specified date according to local time."
       },
       "setMonth": {
         "!type": "fn(month: number) -> number",
