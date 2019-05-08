@@ -194,7 +194,6 @@
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.textContent",
         "!doc": "Gets or sets the text content of a node and its descendants."
       },
-      "style":  "Element.prototype.style",
       "baseURI": {
         "!type": "string",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.baseURI",
@@ -251,7 +250,7 @@
         "!doc": "Returns a collection of child nodes of the given element."
       },
       "parentNode": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.parentNode",
         "!doc": "Returns the parent of the specified node in the DOM tree."
       },
