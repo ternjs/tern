@@ -266,22 +266,22 @@
         "!doc": "A collection of all attribute nodes registered to the specified node. It is a NamedNodeMap,not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers."
       },
       "nextSibling": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.nextSibling",
         "!doc": "Returns the node immediately following the specified one in its parent's childNodes list, or null if the specified node is the last node in that list."
       },
       "previousSibling": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.previousSibling",
         "!doc": "Returns the node immediately preceding the specified one in its parent's childNodes list, null if the specified node is the first in that list."
       },
       "lastChild": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.lastChild",
         "!doc": "Returns the last child of a node."
       },
       "firstChild": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.firstChild",
         "!doc": "Returns the node's first child in the tree, or null if the node is childless. If the node is a Document, it returns the first node in the list of its direct children."
       },
@@ -321,17 +321,17 @@
         "!doc": "Inserts the specified node before a reference element as a child of the current node."
       },
       "replaceChild": {
-        "!type": "fn(newChild: +Node, oldChild: +Node) -> +Node",
+        "!type": "fn(newChild: +Element, oldChild: +Element) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.replaceChild",
         "!doc": "Replaces one child node of the specified element with another."
       },
       "removeChild": {
-        "!type": "fn(oldNode: +Node) -> +Node",
+        "!type": "fn(oldNode: +Element) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.removeChild",
         "!doc": "Removes a child node from the DOM. Returns removed node."
       },
       "appendChild": {
-        "!type": "fn(newNode: +Node) -> +Node",
+        "!type": "fn(newNode: +Element) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.appendChild",
         "!doc": "Adds a node to the end of the list of children of a specified parent node. If the node already exists it is removed from current parent node, then added to new parent node."
       },
@@ -386,22 +386,22 @@
         "!doc": "Allows the removal of event listeners from the event target."
       },
       "isSameNode": {
-        "!type": "fn(other: +Node) -> bool",
+        "!type": "fn(other: +Element) -> bool",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.isSameNode",
         "!doc": "Tests whether two nodes are the same, that is they reference the same object."
       },
       "isEqualNode": {
-        "!type": "fn(other: +Node) -> bool",
+        "!type": "fn(other: +Element) -> bool",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.isEqualNode",
         "!doc": "Tests whether two nodes are equal."
       },
       "compareDocumentPosition": {
-        "!type": "fn(other: +Node) -> number",
+        "!type": "fn(other: +Element) -> number",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.compareDocumentPosition",
         "!doc": "Compares the position of the current node against another node in any other document."
       },
       "contains": {
-        "!type": "fn(other: +Node) -> bool",
+        "!type": "fn(other: +Element) -> bool",
         "!url": "https://developer.mozilla.org/en/docs/DOM/Node.contains",
         "!doc": "Indicates whether a node is a descendent of a given node."
       },
@@ -1226,7 +1226,7 @@
       "implementation": {
         "hasFeature": "fn(feature: string, version: number) -> bool",
         "createDocumentType": {
-          "!type": "fn(qualifiedName: string, publicId: string, systemId: string) -> +Node",
+          "!type": "fn(qualifiedName: string, publicId: string, systemId: string) -> +Element",
           "!url": "https://developer.mozilla.org/en/docs/DOM/DOMImplementation.createDocumentType",
           "!doc": "Returns a DocumentType object which can either be used with DOMImplementation.createDocument upon document creation or they can be put into the document via Node.insertBefore() or Node.replaceChild(): http://www.w3.org/TR/DOM-Level-3-Cor...l#ID-B63ED1A31 (less ideal due to features not likely being as accessible: http://www.w3.org/TR/DOM-Level-3-Cor...createDocument ). In any case, entity declarations and notations will not be available: http://www.w3.org/TR/DOM-Level-3-Cor...-createDocType   "
         },
@@ -1236,7 +1236,7 @@
           "!doc": "This method (available from document.implementation) creates a new HTML document."
         },
         "createDocument": {
-          "!type": "fn(namespaceURI: string, qualifiedName: string, type: +Node) -> +Document",
+          "!type": "fn(namespaceURI: string, qualifiedName: string, type: +Element) -> +Document",
           "!url": "https://developer.mozilla.org/en-US/docs/DOM/DOMImplementation.createHTMLDocument",
           "!doc": "This method creates a new HTML document."
         },
@@ -1244,7 +1244,7 @@
         "!doc": "Returns a DOMImplementation object associated with the current document."
       },
       "doctype": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.doctype",
         "!doc": "Returns the Document Type Declaration (DTD) associated with current document. The returned object implements the DocumentType interface. Use DOMImplementation.createDocumentType() to create a DocumentType."
       },
@@ -1299,17 +1299,17 @@
         "!doc": "Creates a new Text node."
       },
       "createComment": {
-        "!type": "fn(content: string) -> +Node",
+        "!type": "fn(content: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createComment",
         "!doc": "Creates a new comment node, and returns it."
       },
       "createCDATASection": {
-        "!type": "fn(content: string) -> +Node",
+        "!type": "fn(content: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createCDATASection",
         "!doc": "Creates a new CDATA section node, and returns it. "
       },
       "createProcessingInstruction": {
-        "!type": "fn(content: string) -> +Node",
+        "!type": "fn(content: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createProcessingInstruction",
         "!doc": "Creates a new processing instruction node, and returns it."
       },
@@ -1324,7 +1324,7 @@
         "!doc": "This type represents a DOM element's attribute as an object. In most DOM methods, you will probably directly retrieve the attribute as a string (e.g., Element.getAttribute(), but certain functions (e.g., Element.getAttributeNode()) or means of iterating give Attr types."
       },
       "importNode": {
-        "!type": "fn(node: +Node, deep: bool) -> +Element",
+        "!type": "fn(node: +Element, deep: bool) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.importNode",
         "!doc": "Creates a copy of a node from an external document that can be inserted into the current document."
       },
@@ -1404,12 +1404,12 @@
         "!doc": "The DOM getSelection() method is available on the Window and Document interfaces."
       },
       "adoptNode": {
-        "!type": "fn(node: +Node) -> +Element",
+        "!type": "fn(node: +Element) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.adoptNode",
         "!doc": "Adopts a node from an external document. The node and its subtree is removed from the document it's in (if any), and its ownerDocument is changed to the current document. The node can then be inserted into the current document."
       },
       "createTreeWalker": {
-        "!type": "fn(root: +Node, mask: number) -> ?",
+        "!type": "fn(root: +Element, mask: number) -> ?",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createTreeWalker",
         "!doc": "Returns a new TreeWalker object."
       },
@@ -1419,7 +1419,7 @@
         "!doc": "This method compiles an XPathExpression which can then be used for (repeated) evaluations."
       },
       "createNSResolver": {
-        "!type": "fn(node: +Node)",
+        "!type": "fn(node: +Element)",
         "!url": "https://developer.mozilla.org/en/docs/DOM/document.createNSResolver",
         "!doc": "Creates an XPathNSResolver which resolves namespaces with respect to the definitions in scope for a specified node."
       },
@@ -1459,7 +1459,7 @@
         "!doc": "Returns a list of stylesheet objects for stylesheets explicitly linked into or embedded in a document."
       },
       "currentScript": {
-        "!type": "+Node",
+        "!type": "+Element",
         "!url": "https://developer.mozilla.org/en-US/docs/Web/API/document.currentScript",
         "!doc": "Returns the <script> element whose script is currently being processed."
       },
@@ -1822,41 +1822,41 @@
         "!doc": "The number of items in the map."
       },
       "getNamedItem": {
-        "!type": "fn(name: string) -> +Node",
+        "!type": "fn(name: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Gets a node by name."
       },
       "setNamedItem": {
-        "!type": "fn(node: +Node) -> +Node",
+        "!type": "fn(node: +Element) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Adds (or replaces) a node by its nodeName."
       },
       "removeNamedItem": {
-        "!type": "fn(name: string) -> +Node",
+        "!type": "fn(name: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Removes a node (or if an attribute, may reveal a default if present)."
       },
       "item": {
-        "!type": "fn(i: number) -> +Node",
+        "!type": "fn(i: number) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Returns the item at the given index (or null if the index is higher or equal to the number of nodes)."
       },
       "getNamedItemNS": {
-        "!type": "fn(ns: string, name: string) -> +Node",
+        "!type": "fn(ns: string, name: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Gets a node by namespace and localName."
       },
       "setNamedItemNS": {
-        "!type": "fn(node: +Node) -> +Node",
+        "!type": "fn(node: +Element) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Adds (or replaces) a node by its localName and namespaceURI."
       },
       "removeNamedItemNS": {
-        "!type": "fn(ns: string, name: string) -> +Node",
+        "!type": "fn(ns: string, name: string) -> +Element",
         "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
         "!doc": "Removes a node (or if an attribute, may reveal a default if present)."
       },
-      "<i>": "+Node"
+      "<i>": "+Element"
     },
     "!url": "https://developer.mozilla.org/en/docs/DOM/NamedNodeMap",
     "!doc": "A collection of nodes returned by Element.attributes (also potentially for DocumentType.entities, DocumentType.notations). NamedNodeMaps are not in any particular order (unlike NodeList), although they may be accessed by an index as in an array (they may also be accessed with the item() method). A NamedNodeMap object are live and will thus be auto-updated if changes are made to their contents internally or elsewhere."
