@@ -94,6 +94,7 @@
         }
       },
       Class: function(node, scope) {
+        if (!node.objType) return;
         var proto = node.objType.getProp("prototype").getObjType();
         if (!proto) return;
         for (var i = 0; i < node.body.body.length; i++) {
