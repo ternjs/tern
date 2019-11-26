@@ -438,7 +438,7 @@ analysis data and starts a fresh run.
 
 [[event_preParse]] `"preParse" (text, options)`:: Will be run right
 before a file is parsed, and passed the given text and options. If a
-handler returns a new text value, the origin text will be overriden.
+handler returns a new text value, the origin text will be overridden.
 This is useful for instance when a plugin is able to extract
 JavaScript content from an HTML file.
 
@@ -585,7 +585,7 @@ cause the server to try and resolve the file on which the query
 operates (from its `file` property) and pass that (a `{name, text,
 scope, ast}` object) as a third argument to the `run` function. You
 will probably need to use the <<infer,inference module's API>> to
-do someting useful in this function.
+do something useful in this function.
 
 [[plugin_doc_comment]]
 ==== Doc comments plugin ====
@@ -1062,7 +1062,7 @@ will have, when possible, an `originNode` property pointing to an AST
 node.
 
 [[type_is_aval]] As a memory-consuming hack, <<infer_types,types>>
-also expose the interface of abstact values, so that in cases where an
+also expose the interface of abstract values, so that in cases where an
 AVal is expected, but the precise type is known, the type object can
 simply be used.
 
@@ -1076,7 +1076,7 @@ in the types, or there simply are no types.
 
 Constraints are things that can receive values. They use the same
 `addType` method to receive them, which causes all AVals to also be
-useable as constraints. The inference engine defines a number of
+usable as constraints. The inference engine defines a number of
 additional constraints to propagate values in more indirect ways. See
 the http://marijnhaverbeke.nl/blog/tern.html[blog post] on the
 inference algorithm for some examples.

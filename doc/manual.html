@@ -927,7 +927,7 @@ After analyzing a file.
 <p>
 Will be run right
 before a file is parsed, and passed the given text and options. If a
-handler returns a new text value, the origin text will be overriden.
+handler returns a new text value, the origin text will be overridden.
 This is useful for instance when a plugin is able to extract
 JavaScript content from an HTML file.
 </p>
@@ -1101,7 +1101,7 @@ cause the server to try and resolve the file on which the query
 operates (from its <code>file</code> property) and pass that (a <code>{name, text,
 scope, ast}</code> object) as a third argument to the <code>run</code> function. You
 will probably need to use the <a href="#infer">inference module&#8217;s API</a> to
-do someting useful in this function.
+do something useful in this function.
 </p>
 </dd>
 </dl>
@@ -1747,7 +1747,7 @@ interested in other kinds of types.
 will have, when possible, an <code>originNode</code> property pointing to an AST
 node.</p>
 <p> <a id="type_is_aval"></a> As a memory-consuming hack, <a href="#infer_types">types</a>
-also expose the interface of abstact values, so that in cases where an
+also expose the interface of abstract values, so that in cases where an
 AVal is expected, but the precise type is known, the type object can
 simply be used.</p>
 <p> <a id="infer.ANull"></a>The <code>infer.ANull</code> value is a special AVal-like object
@@ -1757,7 +1757,7 @@ in the types, or there simply are no types.</p>
 <h3> <a id="infer_constraint"></a>Constraints</h3>
 <p> Constraints are things that can receive values. They use the same
 <code>addType</code> method to receive them, which causes all AVals to also be
-useable as constraints. The inference engine defines a number of
+usable as constraints. The inference engine defines a number of
 additional constraints to propagate values in more indirect ways. See
 the <a href="http://marijnhaverbeke.nl/blog/tern.html">blog post</a> on the
 inference algorithm for some examples.</p>
