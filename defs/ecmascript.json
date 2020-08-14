@@ -2010,5 +2010,47 @@
         "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet/has"
       }
     }
+  },
+  "TextDecoder": {
+    "!type": "fn(encoding?: string, options?: object)",
+    "!doc": "The TextDecoder interface represents a decoder for a specific text encoding, such as UTF-8, ISO-8859-2, KOI8-R, GBK, etc. A decoder takes a stream of bytes as input and emits a stream of code points.",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder/TextDecoder",
+    "prototype": {
+      "decode": {
+        "!type": "fn(buffer?: +ArrayBuffer|+TypedArray|+DataView, options?: object) -> string",
+        "!doc": "The decode() method returns the buffer decoded with the ecoding property."
+      },
+      "encoding": {
+        "!type": "string",
+        "!doc": "A read-only string describing the method the TextDecoder will use."
+      },
+      "fatal": {
+        "!type": "bool",
+        "!doc": "A read-only boolean indicating whether the error mode is fatal."
+      },
+      "ignoreBOM": {
+        "!type": "bool",
+        "!doc": "A read-only boolean indicating whether the byte order marker is ignored."
+      }
+    }
+  },
+  "TextEncoder": {
+    "!type": "fn()",
+    "!doc": "TextEncoder takes a stream of code points as input and emits a stream of UTF-8 bytes.",
+    "!url": "https://developer.mozilla.org/en-US/docs/Web/API/TextEncoder/TextEncoder",
+    "prototype": {
+      "encode": {
+        "!type": "fn(text?: string) -> +Uint8Array",
+        "!doc": "The encode() method returns the given text encoded into an Uint8Array."
+      },
+      "encoding": {
+        "!type": "string",
+        "!doc": "A read-only string describing the method the TextEncoder will use. The only available encoding is utf-8."
+      },
+      "encodeInto": {
+        "!type": "fn(text: string, dest: +Uint8Array) -> object",
+        "!doc": "The encodeInto() encodes the text into the dest and returns an object indicating the progress of the encoding."
+      }
+    }
   }
 }
