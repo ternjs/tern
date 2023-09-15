@@ -19,9 +19,7 @@ There are currently plugins available for [Emacs][emacs] (and Emacs
 
 For further documentation, see the [project page][1] and the
 [manual][3]. To report issues, use the
-[issue tracker](https://github.com/ternjs/tern/issues). For questions
-and documentation, see the
-[discussion forum](https://discuss.ternjs.net).
+[issue tracker](https://github.com/ternjs/tern/issues).
 
 [1]: http://ternjs.net
 [2]: http://www.indiegogo.com/projects/tern-intelligent-javascript-editing
