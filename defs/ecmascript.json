@@ -914,7 +914,12 @@
   "Boolean": {
     "!type": "fn(value: ?) -> bool",
     "prototype": {
-      "!stdProto": "Boolean"
+      "!stdProto": "Boolean",
+      "valueOf": {
+        "!type": "fn() -> bool",
+        "!url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean/valueOf",
+        "!doc": "Returns the primitive value of a Boolean object."
+      }
     },
     "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Boolean",
     "!doc": "The Boolean object is an object wrapper for a boolean value."
