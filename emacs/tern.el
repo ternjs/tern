@@ -12,6 +12,8 @@
 (require 'url)
 (require 'url-http)
 
+(defvar tern-docs-popup-buffer "*tern:docs*")
+(defvar tern-type-popup-buffer "*tern:type*")
 (defvar tern-known-port nil)
 (defvar tern-server nil)
 (defvar tern-explicit-port nil)
@@ -21,6 +23,17 @@
 
 (defun tern-message (fmt &rest objects)
   (apply 'message fmt objects))
+
+(defun tern-popup-buffer (buffer-name text)
+  (pop-to-buffer
+   (with-current-buffer (get-buffer-create buffer-name)
+     (view-mode -1)
+     (setq buffer-read-only nil)
+     (erase-buffer)
+     (insert text)
+     (goto-char (point-min))
+     (view-mode +1)
+     (current-buffer))))
 
 (defun tern-req (port doc c)
   (let* ((url-mime-charset-string nil) ; Suppress huge, useless header
@@ -500,7 +513,12 @@ Examples:
 
 (defun tern-get-type ()
   (interactive)
-  (tern-run-query (lambda (data) (tern-message (or (cdr (assq 'type data)) "Not found")))
+  (tern-run-query (lambda (data)
+                    (let ((type (cdr (assq 'type data))))
+                      (cond (type
+                             (tern-popup-buffer tern-type-popup-buffer type))
+                            (t
+                             (tern-message "Not found")))))
                   "type"
                   (point)))
 
@@ -509,20 +527,20 @@ Examples:
 (defvar tern-last-docs-url nil)
 (defun tern-get-docs ()
   (interactive)
-  (if (and tern-last-docs-url (eq last-command 'tern-get-docs))
-      (progn
-        (browse-url tern-last-docs-url)
-        (setf tern-last-docs-url nil))
-    (tern-run-query (lambda (data)
-                      (let ((url (cdr (assq 'url data))) (doc (cdr (assq 'doc data))))
+  (tern-run-query (lambda (data)
+                    (let ((url (cdr (assq 'url data))) (doc (cdr (assq 'doc data))))
+                      (if (and tern-last-docs-url (equal url tern-last-docs-url))
+                          (progn
+                            (setf tern-last-docs-url nil)
+                            (browse-url url))
                         (cond (doc
                                (setf tern-last-docs-url url)
-                               (tern-message doc))
+                               (tern-popup-buffer tern-docs-popup-buffer doc))
                               (url
                                (browse-url url))
-                              (t (tern-message "Not found")))))
-                    "documentation"
-                    (point))))
+                              (t (tern-message "Not found"))))))
+                    `((type . "documentation") (docFormat . "full"))
+                    (point)))
 
 ;; Connection management
 
