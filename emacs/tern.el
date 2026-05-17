@@ -417,16 +417,53 @@ Examples:
     (run-with-timer tern-flash-timeout nil 'delete-overlay overlay)))
 
 (defun tern-do-highlight (data)
-  (cl-loop for ref across (cdr (assq 'refs data)) do
-           (let ((file (cdr (assq 'file ref))))
-             (when (string= buffer-file-name (expand-file-name file (tern-project-dir)))
-               (let ((start (1+ (cdr (assq 'start ref))))
-                     (end (1+ (cdr (assq 'end ref)))))
-                 (tern-flash-region start end))))))
+  (cl-loop for ref in (apply 'append (cdr (tern-do-get-refs data))) do
+           (apply 'tern-flash-region ref)))
 
 (defun tern-highlight-refs ()
   (interactive)
   (tern-run-query #'tern-do-highlight "refs" (point)))
+
+(defun tern-do-goto-next (data)
+  "Get refs from DATA and go to next ref"
+  (cl-destructuring-bind (file current-ref prev-refs next-refs) (tern-do-get-refs data)
+    (cl-destructuring-bind (start end) (if next-refs
+                                           (car next-refs)
+                                         (car (last prev-refs)))
+      (tern-go-to-position file start)
+      (tern-flash-region start end))))
+
+(defun tern-do-goto-prev (data)
+  "Get refs from DATA and go to previous ref"
+  (cl-destructuring-bind (file current-ref prev-refs next-refs) (tern-do-get-refs data)
+    (cl-destructuring-bind (start end) (if prev-refs
+                                           (car prev-refs)
+                                         (car (last next-refs)))
+      (tern-go-to-position file start)
+      (tern-flash-region start end))))
+
+(defun tern-do-get-refs (data)
+  "Parse DATA and return a list with (file current-ref prev-refs next-refs)"
+  (cl-loop for ref across (cdr (assq 'refs data))
+           for start = (1+ (cdr (assq 'start ref)))
+           for end = (1+ (cdr (assq 'end ref)))
+           for file = (expand-file-name (cdr (assq 'file ref)) (tern-project-dir))
+           if (string= buffer-file-name file)
+           if (< end (point)) collect (list start end) into prev-refs
+           else if (> start (point)) collect (list start end) into next-refs
+           else collect (list start end) into current-ref
+           finally return (list file
+                                current-ref
+                                (cl-sort prev-refs '> :key 'car)
+                                (cl-sort next-refs '< :key 'car))))
+
+(defun tern-goto-next-ref ()
+  (interactive)
+  (tern-run-query #'tern-do-goto-next "refs" (point)))
+
+(defun tern-goto-prev-ref ()
+  (interactive)
+  (tern-run-query #'tern-do-goto-prev "refs" (point)))
 
 ;; Jump-to-definition
 
@@ -581,6 +618,8 @@ Examples:
 (define-key tern-mode-keymap [(control ?c) (control ?r)] 'tern-rename-variable)
 (define-key tern-mode-keymap [(control ?c) (control ?c)] 'tern-get-type)
 (define-key tern-mode-keymap [(control ?c) (control ?d)] 'tern-get-docs)
+(define-key tern-mode-keymap [(meta ?n)] 'tern-goto-next-ref)
+(define-key tern-mode-keymap [(meta ?p)] 'tern-goto-prev-ref)
 
 ;;;###autoload
 (define-minor-mode tern-mode
